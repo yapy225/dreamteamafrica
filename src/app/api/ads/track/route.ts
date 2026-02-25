@@ -9,17 +9,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid params" }, { status: 400 });
     }
 
-    if (type === "impression") {
-      await prisma.adCampaign.update({
-        where: { id: campaignId },
-        data: { impressions: { increment: 1 } },
-      });
-    } else {
-      await prisma.adCampaign.update({
-        where: { id: campaignId },
-        data: { clicks: { increment: 1 } },
-      });
+    const campaign = await prisma.adCampaign.findUnique({
+      where: { id: campaignId },
+      select: { id: true },
+    });
+
+    if (!campaign) {
+      return NextResponse.json({ error: "Campaign not found" }, { status: 404 });
     }
+
+    await prisma.adCampaign.update({
+      where: { id: campaignId },
+      data: type === "impression"
+        ? { impressions: { increment: 1 } }
+        : { clicks: { increment: 1 } },
+    });
 
     return NextResponse.json({ tracked: true });
   } catch (error) {

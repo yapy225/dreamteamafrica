@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Calendar, MapPin, Users, Clock } from "lucide-react";
 import { prisma } from "@/lib/db";
@@ -72,10 +73,20 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       {/* Hero banner */}
       <div className="relative mb-10 overflow-hidden rounded-[var(--radius-card)] bg-dta-dark">
-        <div className="absolute inset-0 bg-gradient-to-br from-dta-dark via-dta-char to-dta-dark" />
-        <div className="absolute inset-0 opacity-10">
-          <div className="h-full w-full bg-[radial-gradient(ellipse_at_bottom_left,_var(--color-dta-accent)_0%,_transparent_60%)]" />
-        </div>
+        {event.coverImage ? (
+          <Image
+            src={event.coverImage}
+            alt={event.title}
+            fill
+            className="object-cover opacity-40"
+            priority
+          />
+        ) : (
+          <div className="absolute inset-0 opacity-10">
+            <div className="h-full w-full bg-[radial-gradient(ellipse_at_bottom_left,_var(--color-dta-accent)_0%,_transparent_60%)]" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-dta-dark/90 via-dta-dark/60 to-dta-dark/40" />
         <div className="relative px-8 py-16 sm:px-12 sm:py-20">
           <div className="flex items-start gap-6">
             <div className="hidden flex-shrink-0 rounded-[var(--radius-button)] bg-white/10 px-5 py-4 text-center sm:block">

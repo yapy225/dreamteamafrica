@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Calendar, MapPin } from "lucide-react";
 import { prisma } from "@/lib/db";
@@ -43,8 +44,19 @@ export default async function EvenementsPage() {
             href={`/evenements/${event.slug}`}
             className="group rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1"
           >
-            {/* Color bar */}
-            <div className="h-2 rounded-t-[var(--radius-card)] bg-gradient-to-r from-dta-accent to-dta-accent-light" />
+            {/* Cover image or color bar */}
+            {event.coverImage ? (
+              <div className="relative h-48 w-full overflow-hidden rounded-t-[var(--radius-card)]">
+                <Image
+                  src={event.coverImage}
+                  alt={event.title}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+            ) : (
+              <div className="h-2 rounded-t-[var(--radius-card)] bg-gradient-to-r from-dta-accent to-dta-accent-light" />
+            )}
 
             <div className="p-6">
               <div className="flex items-start justify-between gap-4">

@@ -21,11 +21,17 @@ export default async function EvenementsPage() {
       {/* Header */}
       <div className="mb-12 text-center">
         <h1 className="font-serif text-4xl font-bold text-dta-dark sm:text-5xl">
-          Événements culturels
+          Saison Culturelle Africaine
         </h1>
+        <h2 className="mt-2 font-serif text-2xl text-dta-accent">
+          Paris 2026
+        </h2>
+        <span className="mt-4 inline-block rounded-[var(--radius-full)] bg-dta-accent/10 px-4 py-1.5 text-sm font-medium text-dta-accent">
+          7 événements · Avril — Décembre 2026
+        </span>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-dta-char/70">
-          Saison 2026 — 8 rendez-vous exceptionnels célébrant la culture
-          africaine à Paris, de mars à novembre.
+          7 rendez-vous exceptionnels célébrant la richesse culturelle
+          africaine à Paris. Réservez vos places.
         </p>
       </div>
 

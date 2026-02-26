@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const footerSections = [
   {
@@ -35,9 +36,13 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" className="inline-block">
-              <span className="font-serif text-2xl font-bold text-dta-accent">
-                Dream Team Africa
-              </span>
+              <Image
+                src="/logo-dta.png"
+                alt="Dream Team Africa"
+                width={56}
+                height={56}
+                className="h-14 w-auto"
+              />
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-dta-char/70">
               La plateforme de référence pour la promotion de la culture

@@ -6,7 +6,7 @@ const features = [
     icon: Calendar,
     title: "Événements culturels",
     description:
-      "8 événements exclusifs de mars à novembre 2026. Musique, mode, gastronomie et art africain au cœur de Paris.",
+      "7 événements exclusifs d'avril à décembre 2026. Cinéma, musique, danse, gastronomie et artisanat africain.",
     href: "/evenements",
     cta: "Voir le programme",
   },
@@ -37,10 +37,13 @@ const features = [
 ];
 
 const upcomingEvents = [
-  { month: "MAR", day: "15", title: "Africa Fashion Week Paris", venue: "Le Carreau du Temple" },
-  { month: "AVR", day: "20", title: "Salon de la Gastronomie Africaine", venue: "Parc des Expositions" },
-  { month: "MAI", day: "18", title: "Nuit de la Musique Afro", venue: "La Cigale" },
-  { month: "JUN", day: "22", title: "Festival des Arts Visuels d'Afrique", venue: "Palais de Tokyo" },
+  { month: "AVR", day: "3", title: "Festival International du Cinéma Africain", venue: "Cinéma Kosmos, Fontenay-sous-Bois" },
+  { month: "MAI", day: "1", title: "Foire D'Afrique Paris", venue: "Espace Mas, Paris" },
+  { month: "JUN", day: "13", title: "Évasion Paris", venue: "La Seine, Paris" },
+  { month: "JUN", day: "27", title: "Festival de l'Autre Culture", venue: "Parc des Épivans, Fontenay-sous-Bois" },
+  { month: "OCT", day: "31", title: "Juste Une Danse", venue: "Espace Mas, Paris" },
+  { month: "NOV", day: "11", title: "Festival du Conte Africain", venue: "Espace Mas, Paris" },
+  { month: "DÉC", day: "11", title: "Salon Made In Africa", venue: "Espace Mas, Paris" },
 ];
 
 export default function Home() {
@@ -131,7 +134,7 @@ export default function Home() {
                 Prochains événements
               </h2>
               <p className="mt-3 text-dta-char/70">
-                Saison culturelle 2026 — Mars à Novembre
+                Saison culturelle 2026 — Avril à Décembre
               </p>
             </div>
             <Link
@@ -142,7 +145,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {upcomingEvents.map((event) => (
               <div
                 key={event.title}

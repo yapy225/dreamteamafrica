@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { Menu, X, User, ShoppingBag } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
@@ -24,10 +25,15 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <span className="font-serif text-2xl font-bold text-dta-accent">
-              DTA
-            </span>
-            <span className="hidden font-serif text-lg font-medium text-dta-dark sm:block">
+            <Image
+              src="/logo-dta.png"
+              alt="Dream Team Africa"
+              width={40}
+              height={40}
+              className="h-10 w-10"
+              priority
+            />
+            <span className="hidden font-serif text-lg font-bold text-dta-dark sm:block">
               Dream Team Africa
             </span>
           </Link>

@@ -30,7 +30,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const article = await prisma.article.findUnique({ where: { slug } });
   if (!article) return { title: "Article introuvable" };
-  return { title: article.title, description: article.excerpt };
+  return {
+    title: article.title,
+    description: article.excerpt,
+    openGraph: {
+      title: article.title,
+      description: article.excerpt,
+      type: "article",
+      publishedTime: article.publishedAt.toISOString(),
+      ...(article.coverImage && { images: [{ url: article.coverImage, width: 1200, height: 630, alt: article.title }] }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.excerpt,
+      ...(article.coverImage && { images: [article.coverImage] }),
+    },
+  };
 }
 
 export default async function ArticleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -70,8 +86,35 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
 
   const paragraphs = article.content.split("\n\n").filter(Boolean);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: article.title,
+    description: article.excerpt,
+    ...(article.coverImage && { image: article.coverImage }),
+    datePublished: article.publishedAt.toISOString(),
+    author: {
+      "@type": "Person",
+      name: article.author.name,
+      ...(article.author.country && { nationality: article.author.country }),
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Dream Team Africa",
+      logo: {
+        "@type": "ImageObject",
+        url: `${process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com"}/logo-dta.png`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com"}/journal/${slug}`,
+    },
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* ── A. Sticky Nav ── */}
       <nav className="sticky top-0 z-40 border-b border-dta-sand/50 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">

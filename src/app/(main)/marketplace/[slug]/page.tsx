@@ -15,7 +15,24 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const product = await prisma.product.findUnique({ where: { slug } });
   if (!product) return { title: "Produit introuvable" };
-  return { title: product.name, description: product.description.slice(0, 160) };
+  const description = product.description.slice(0, 160);
+  const image = product.images[0];
+  return {
+    title: product.name,
+    description,
+    openGraph: {
+      title: product.name,
+      description,
+      type: "website",
+      ...(image && { images: [{ url: image, width: 800, height: 800, alt: product.name }] }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description,
+      ...(image && { images: [image] }),
+    },
+  };
 }
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -50,8 +67,24 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     .toUpperCase()
     .slice(0, 2);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    ...(product.images[0] && { image: product.images[0] }),
+    brand: { "@type": "Brand", name: product.artisan.name || "Dream Team Africa" },
+    offers: {
+      "@type": "Offer",
+      price: product.price,
+      priceCurrency: "EUR",
+      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    },
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* ── A. Sticky Nav ── */}
       <nav className="sticky top-0 z-40 border-b border-dta-sand/50 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">

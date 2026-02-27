@@ -6,6 +6,18 @@ import { Calendar, ShoppingBag, Newspaper, Megaphone, MapPin, ArrowRight } from 
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Accueil — Culture africaine à Paris",
+  description:
+    "Événements culturels, marketplace artisanale, journal L'Afropéen et L'Officiel d'Afrique. La plateforme de référence pour la culture africaine à Paris.",
+  openGraph: {
+    title: "Dream Team Africa — Culture africaine à Paris",
+    description:
+      "Événements exclusifs, marketplace artisanale et journal de la diaspora. La culture africaine rayonne à Paris.",
+    type: "website",
+  },
+};
+
 const features = [
   {
     icon: Calendar,

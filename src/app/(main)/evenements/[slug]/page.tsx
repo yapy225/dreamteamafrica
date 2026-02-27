@@ -13,9 +13,22 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const event = await prisma.event.findUnique({ where: { slug } });
   if (!event) return { title: "Événement introuvable" };
+  const description = event.description.slice(0, 160);
   return {
     title: event.title,
-    description: event.description.slice(0, 160),
+    description,
+    openGraph: {
+      title: event.title,
+      description,
+      type: "website",
+      ...(event.coverImage && { images: [{ url: event.coverImage, width: 1200, height: 630, alt: event.title }] }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: event.title,
+      description,
+      ...(event.coverImage && { images: [event.coverImage] }),
+    },
   };
 }
 
@@ -73,8 +86,32 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   const endDate = event.endDate ? new Date(event.endDate) : null;
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue + " " + event.address)}`;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.title,
+    description: event.description,
+    startDate: event.date.toISOString(),
+    ...(event.endDate && { endDate: event.endDate.toISOString() }),
+    location: {
+      "@type": "Place",
+      name: event.venue,
+      address: { "@type": "PostalAddress", streetAddress: event.address },
+    },
+    ...(event.coverImage && { image: event.coverImage }),
+    offers: {
+      "@type": "AggregateOffer",
+      lowPrice: Math.min(event.priceEarly, event.priceStd, event.priceVip),
+      highPrice: Math.max(event.priceEarly, event.priceStd, event.priceVip),
+      priceCurrency: "EUR",
+      availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+    },
+    organizer: { "@type": "Organization", name: "Dream Team Africa" },
+  };
+
   return (
     <div>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* A — Navigation Bar */}
       <div className="sticky top-0 z-30 border-b border-dta-sand/50 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">

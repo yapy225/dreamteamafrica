@@ -46,12 +46,21 @@ export const metadata: Metadata = {
     description:
       "Événements exclusifs, marketplace artisanale et journal de la diaspora. La culture africaine rayonne à Paris.",
     url: siteUrl,
+    images: [
+      {
+        url: `${siteUrl}/logo-dta.png`,
+        width: 800,
+        height: 800,
+        alt: "Dream Team Africa",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Dream Team Africa",
     description:
       "Événements, marketplace artisanale et journal de la diaspora africaine à Paris.",
+    images: [`${siteUrl}/logo-dta.png`],
   },
   robots: {
     index: true,

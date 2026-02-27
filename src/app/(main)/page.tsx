@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { Calendar, ShoppingBag, Newspaper, Megaphone, MapPin, ArrowRight } from "lucide-react";
@@ -199,7 +200,11 @@ export default async function Home() {
                   href={`/evenements/${featuredEvent.slug}`}
                   className="group lg:col-span-3 rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1 overflow-hidden"
                 >
-                  <div className="aspect-[16/10] bg-gradient-to-br from-dta-accent/20 to-dta-sand" />
+                  <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-dta-accent/20 to-dta-sand">
+                    {featuredEvent.coverImage && (
+                      <Image src={featuredEvent.coverImage} alt={featuredEvent.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" sizes="(max-width: 1024px) 100vw, 60vw" />
+                    )}
+                  </div>
                   <div className="p-6">
                     <div className="mb-3 flex items-center gap-3">
                       <span className="rounded-[var(--radius-full)] bg-dta-accent/10 px-3 py-1 text-xs font-semibold text-dta-accent">
@@ -341,7 +346,11 @@ export default async function Home() {
                   href={`/marketplace/${product.slug}`}
                   className="group rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1"
                 >
-                  <div className="aspect-square rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-sand to-dta-beige" />
+                  <div className="relative aspect-square overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-sand to-dta-beige">
+                    {product.images[0] && (
+                      <Image src={product.images[0]} alt={product.name} fill className="object-cover transition-transform duration-300 group-hover:scale-105" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" />
+                    )}
+                  </div>
                   <div className="p-5">
                     <h3 className="font-serif text-base font-semibold text-dta-dark transition-colors group-hover:text-dta-accent">
                       {product.name}
@@ -406,7 +415,11 @@ export default async function Home() {
                   href={`/journal/${featuredArticle.slug}`}
                   className="group lg:col-span-3 rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1 overflow-hidden"
                 >
-                  <div className="aspect-[16/10] bg-gradient-to-br from-dta-accent/20 to-dta-sand" />
+                  <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-dta-accent/20 to-dta-sand">
+                    {featuredArticle.coverImage && (
+                      <Image src={featuredArticle.coverImage} alt={featuredArticle.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" sizes="(max-width: 1024px) 100vw, 60vw" />
+                    )}
+                  </div>
                   <div className="p-6">
                     <div className="mb-3 flex items-center gap-2">
                       <span
@@ -439,7 +452,11 @@ export default async function Home() {
                     href={`/journal/${article.slug}`}
                     className="group flex gap-4 rounded-[var(--radius-card)] bg-white p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)]"
                   >
-                    <div className="h-24 w-24 flex-shrink-0 rounded-lg bg-gradient-to-br from-dta-accent/15 to-dta-sand" />
+                    <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-dta-accent/15 to-dta-sand">
+                      {article.coverImage && (
+                        <Image src={article.coverImage} alt={article.title} fill className="object-cover" sizes="96px" />
+                      )}
+                    </div>
                     <div className="min-w-0 flex-1">
                       <span
                         className={`inline-block rounded-[var(--radius-full)] px-2 py-0.5 text-[10px] font-medium ${categoryColors[article.category] || ""}`}

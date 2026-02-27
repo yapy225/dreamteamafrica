@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/db";
 import { formatPrice } from "@/lib/utils";
 import MarketplaceFilters from "./MarketplaceFilters";
@@ -98,7 +99,11 @@ export default async function MarketplacePage({
               href={`/marketplace/${product.slug}`}
               className="group rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1"
             >
-              <div className="aspect-square rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-sand to-dta-beige" />
+              <div className="relative aspect-square overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-sand to-dta-beige">
+                {product.images[0] && (
+                  <Image src={product.images[0]} alt={product.name} fill className="object-cover transition-transform duration-300 group-hover:scale-105" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" />
+                )}
+              </div>
               <div className="p-4">
                 <h3 className="font-serif text-base font-semibold text-dta-dark group-hover:text-dta-accent transition-colors">
                   {product.name}

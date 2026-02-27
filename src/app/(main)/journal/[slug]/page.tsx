@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Calendar, User, Eye, Clock, MapPin, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
@@ -223,7 +224,11 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
                   href={`/journal/${r.slug}`}
                   className="group overflow-hidden rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1"
                 >
-                  <div className="aspect-[16/10] bg-gradient-to-br from-dta-accent/15 to-dta-sand" />
+                  <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-dta-accent/15 to-dta-sand">
+                    {r.coverImage && (
+                      <Image src={r.coverImage} alt={r.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 33vw" />
+                    )}
+                  </div>
                   <div className="p-5">
                     <span
                       className={`inline-block rounded-[var(--radius-full)] px-2.5 py-0.5 text-xs font-medium ${categoryColors[r.category] || ""}`}

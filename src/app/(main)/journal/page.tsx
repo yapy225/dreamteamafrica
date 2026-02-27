@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 
@@ -60,7 +61,11 @@ export default async function JournalPage() {
           className="group mb-10 block rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)]"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2">
-            <div className="aspect-[16/10] rounded-l-[var(--radius-card)] bg-gradient-to-br from-dta-accent/20 to-dta-sand lg:aspect-auto" />
+            <div className="relative aspect-[16/10] overflow-hidden rounded-l-[var(--radius-card)] bg-gradient-to-br from-dta-accent/20 to-dta-sand lg:aspect-auto">
+              {uneArticle.coverImage && (
+                <Image src={uneArticle.coverImage} alt={uneArticle.title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" />
+              )}
+            </div>
             <div className="p-8">
               <div className="flex items-center gap-2">
                 <span className="rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
@@ -122,7 +127,11 @@ export default async function JournalPage() {
             href={`/journal/${article.slug}`}
             className="group rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1"
           >
-            <div className="aspect-[16/10] rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-beige to-dta-sand" />
+            <div className="relative aspect-[16/10] overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-beige to-dta-sand">
+              {article.coverImage && (
+                <Image src={article.coverImage} alt={article.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 33vw" />
+              )}
+            </div>
             <div className="p-5">
               <div className="flex items-center gap-2">
                 <span

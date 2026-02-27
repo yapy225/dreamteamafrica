@@ -223,7 +223,7 @@ async function main() {
         description:
           "Magnifique collier inspiré des symboles Adinkra du peuple Akan. Plaqué or 18 carats, travail artisanal minutieux. Chaque pièce est unique et raconte une histoire millénaire.",
         price: 89,
-        images: ["/images/products/collier-akan.jpg"],
+        images: ["https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=800&q=80"],
         category: "Bijoux",
         country: "Sénégal",
         stock: 15,
@@ -237,7 +237,7 @@ async function main() {
         description:
           "Bracelet coloré en perles de verre, tissé à la main selon la tradition Massaï. Fermeture ajustable. Disponible en plusieurs combinaisons de couleurs.",
         price: 35,
-        images: ["/images/products/bracelet-massai.jpg"],
+        images: ["https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=800&q=80"],
         category: "Bijoux",
         country: "Sénégal",
         stock: 30,
@@ -251,7 +251,7 @@ async function main() {
         description:
           "Écharpe tissée à la main en authentique tissu Kente du Ghana. Motifs géométriques traditionnels aux couleurs vibrantes. 100% coton premium.",
         price: 65,
-        images: ["/images/products/echarpe-kente.jpg"],
+        images: ["https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=800&q=80"],
         category: "Mode",
         country: "Ghana",
         stock: 20,
@@ -265,7 +265,7 @@ async function main() {
         description:
           "Chemise pour homme en wax Ankara haut de gamme. Coupe ajustée moderne, col Mao. Parfaite pour un look afro-chic élégant.",
         price: 75,
-        images: ["/images/products/chemise-ankara.jpg"],
+        images: ["https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80"],
         category: "Mode",
         country: "Ghana",
         stock: 12,
@@ -279,7 +279,7 @@ async function main() {
         description:
           "Sac à main en cuir tanné végétal de Tombouctou. Gravures traditionnelles Touareg, doublure coton. Un accessoire d'exception alliant tradition et modernité.",
         price: 120,
-        images: ["/images/products/sac-tombouctou.jpg"],
+        images: ["https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&q=80"],
         category: "Maroquinerie",
         country: "Mali",
         stock: 8,
@@ -293,7 +293,7 @@ async function main() {
         description:
           "Portefeuille compact en cuir du Sahel avec motifs gravés à la main. Plusieurs compartiments, finition soignée. Pièce unique numérotée.",
         price: 55,
-        images: ["/images/products/portefeuille-sahel.jpg"],
+        images: ["https://images.unsplash.com/photo-1627123424574-724758594e93?w=800&q=80"],
         category: "Maroquinerie",
         country: "Mali",
         stock: 18,
@@ -307,7 +307,7 @@ async function main() {
         description:
           "Reproduction artisanale d'une tête Nok en terre cuite. Inspirée de la civilisation Nok (500 av. J.-C.). Pièce décorative majestueuse, hauteur 30cm.",
         price: 150,
-        images: ["/images/products/sculpture-nok.jpg"],
+        images: ["https://images.unsplash.com/photo-1582582494705-f8ce0b0c24f0?w=800&q=80"],
         category: "Décoration",
         country: "Nigeria",
         stock: 5,
@@ -321,7 +321,7 @@ async function main() {
         description:
           "Masque décoratif sculpté à la main en bois d'ébène. Inspiré des masques cérémoniels Igbo. Chaque pièce est unique, signée par l'artiste.",
         price: 95,
-        images: ["/images/products/masque-igbo.jpg"],
+        images: ["https://images.unsplash.com/photo-1580618864180-f6e7fb65f0be?w=800&q=80"],
         category: "Décoration",
         country: "Nigeria",
         stock: 10,
@@ -343,6 +343,7 @@ async function main() {
           "De la Fashion Week aux boutiques du Marais, les créateurs africains s'imposent comme les nouveaux visionnaires de la mode mondiale.",
         content:
           "La mode africaine connaît un essor sans précédent sur la scène internationale. Les créateurs du continent, longtemps cantonnés aux marchés locaux, investissent désormais les plus grands podiums du monde. À Paris, capitale incontestée de la mode, cette révolution est particulièrement visible.\n\nDes marques comme Tongoro, Maki Oh et Lisa Folawiyo présentent régulièrement leurs collections lors de la Fashion Week parisienne, attirant l'attention des acheteurs internationaux et des médias spécialisés. Le wax, le kente et le bogolan ne sont plus de simples curiosités exotiques mais des matières nobles qui inspirent les plus grandes maisons.\n\nCette montée en puissance s'accompagne d'une prise de conscience plus large sur la richesse des savoir-faire textiles africains.",
+        coverImage: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80",
         category: "CULTURE",
         position: "UNE",
         authorId: admin.id,
@@ -359,6 +360,7 @@ async function main() {
           "Portrait de ces femmes et hommes qui, depuis l'Europe, investissent et innovent pour transformer le continent.",
         content:
           "La diaspora africaine en Europe représente un formidable levier de développement pour le continent. Chaque année, les transferts de fonds de la diaspora dépassent les aides publiques au développement. Mais au-delà des remises financières, c'est un véritable écosystème entrepreneurial qui se construit.\n\nDes startups tech aux projets agricoles, en passant par l'immobilier et les énergies renouvelables, les entrepreneurs de la diaspora multiplient les initiatives. Leur double culture et leur connaissance des marchés européens et africains constituent un avantage compétitif unique.\n\nÀ Paris, plusieurs incubateurs se sont spécialisés dans l'accompagnement de ces projets bicontinentaux.",
+        coverImage: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1200&q=80",
         category: "BUSINESS",
         position: "FACE_UNE",
         authorId: admin.id,
@@ -374,6 +376,7 @@ async function main() {
           "Les chefs africains étoilés révolutionnent la gastronomie parisienne en fusionnant saveurs ancestrales et techniques modernes.",
         content:
           "La scène gastronomique parisienne vit une révolution culinaire portée par des chefs d'origine africaine. Du thiéboudienne revisité au foutou en version fine dining, les saveurs du continent s'invitent dans les restaurants les plus prisés de la capitale.\n\nDes chefs comme Mory Sacko, étoilé Michelin avec son restaurant MoSuke, ouvrent la voie à une nouvelle génération de cuisiniers qui refusent de choisir entre leurs racines africaines et l'excellence de la gastronomie française.\n\nCette fusion culinaire trouve un écho particulier auprès d'une clientèle cosmopolite en quête d'authenticité et de nouvelles expériences gustatives.",
+        coverImage: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80",
         category: "LIFESTYLE",
         position: "PAGES_4_5",
         authorId: admin.id,
@@ -389,6 +392,7 @@ async function main() {
           "Entre héritage culturel et intégration, comment les Afro-européens construisent-ils leur identité plurielle ?",
         content:
           "Être d'origine africaine en Europe, c'est naviguer entre deux mondes, deux cultures, parfois deux langues. Cette double appartenance, longtemps vécue comme un tiraillement, est de plus en plus revendiquée comme une richesse par les nouvelles générations.\n\nLes Afro-européens créent leur propre culture, un mélange unique d'influences qui se manifeste dans la musique, la mode, la cuisine et les arts. L'afrobeat se mêle à l'électro, le wax se porte avec du streetwear, et les recettes de grand-mère se réinventent dans des food trucks branchés.\n\nCette identité plurielle est au cœur du projet Dream Team Africa.",
+        coverImage: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&q=80",
         category: "DIASPORA",
         position: "PAGES_6_7",
         authorId: admin.id,
@@ -404,6 +408,7 @@ async function main() {
           "L'alternance politique sénégalaise confirme la maturité démocratique de ce pays modèle du continent.",
         content:
           "Le Sénégal continue de s'affirmer comme un modèle démocratique en Afrique de l'Ouest. Les récentes élections ont démontré la solidité des institutions sénégalaises et la maturité de son électorat.\n\nCette stabilité politique est un atout majeur pour le développement économique du pays et pour attirer les investissements de la diaspora. Le nouveau gouvernement a d'ailleurs annoncé plusieurs mesures en faveur des Sénégalais de l'extérieur.\n\nPour la diaspora en France, ces évolutions politiques sont suivies avec attention et espoir.",
+        coverImage: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?w=1200&q=80",
         category: "ACTUALITE",
         position: "PAGES_8_9",
         authorId: admin.id,
@@ -419,6 +424,7 @@ async function main() {
           "Il est temps de créer un espace culturel commun à l'ensemble du continent et de sa diaspora.",
         content:
           "L'Afrique possède une richesse culturelle incommensurable, mais cette richesse reste fragmentée, sous-valorisée et insuffisamment partagée entre les pays du continent et avec la diaspora.\n\nIl est urgent de mettre en place une véritable politique culturelle panafricaine qui permette la circulation des artistes, la protection des savoirs traditionnels et la promotion des industries créatives africaines sur la scène mondiale.\n\nDream Team Africa s'inscrit dans cette vision en créant un pont culturel entre l'Afrique et l'Europe, entre tradition et modernité.",
+        coverImage: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=1200&q=80",
         category: "OPINION",
         position: "PAGES_10_11",
         authorId: admin.id,

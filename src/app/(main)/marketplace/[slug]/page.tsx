@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, MapPin, Tag, Package, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
@@ -39,7 +40,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const related = await prisma.product.findMany({
     where: { category: product.category, published: true, id: { not: product.id } },
     take: 4,
-    include: { artisan: { select: { name: true, country: true } } },
+    select: { id: true, slug: true, name: true, price: true, images: true, artisan: { select: { name: true, country: true } } },
   });
 
   const initials = (product.artisan.name || "A")
@@ -77,7 +78,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 sm:px-6 lg:grid-cols-5 lg:gap-14 lg:px-8">
           {/* Image */}
           <div className="lg:col-span-3">
-            <div className="aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-dta-sand to-dta-beige" />
+            <div className="relative aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-dta-sand to-dta-beige">
+              {product.images[0] && (
+                <Image src={product.images[0]} alt={product.name} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 60vw" priority />
+              )}
+            </div>
           </div>
 
           {/* Details */}
@@ -233,7 +238,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                   href={`/marketplace/${p.slug}`}
                   className="group rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1"
                 >
-                  <div className="aspect-square rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-sand to-dta-beige" />
+                  <div className="relative aspect-square overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-sand to-dta-beige">
+                    {p.images[0] && (
+                      <Image src={p.images[0]} alt={p.name} fill className="object-cover transition-transform duration-300 group-hover:scale-105" sizes="(max-width: 640px) 50vw, 25vw" />
+                    )}
+                  </div>
                   <div className="p-4">
                     <h3 className="truncate font-serif text-sm font-semibold text-dta-dark transition-colors group-hover:text-dta-accent">
                       {p.name}

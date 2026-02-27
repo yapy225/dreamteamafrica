@@ -8,6 +8,7 @@ const footerSections = [
       { href: "/evenements", label: "Événements" },
       { href: "/marketplace", label: "Marketplace" },
       { href: "/journal", label: "L'Afropéen" },
+      { href: "/officiel-afrique", label: "L'Officiel d'Afrique" },
     ],
   },
   {

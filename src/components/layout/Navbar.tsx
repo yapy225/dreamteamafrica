@@ -12,6 +12,7 @@ const navLinks = [
   { href: "/marketplace", label: "Marketplace" },
   { href: "/journal", label: "L'Afropéen" },
   { href: "/ads", label: "DTA Ads" },
+  { href: "/officiel-afrique", label: "L'Officiel" },
 ];
 
 export default function Navbar() {

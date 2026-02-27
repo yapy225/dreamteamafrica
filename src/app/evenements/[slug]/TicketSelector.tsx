@@ -48,45 +48,45 @@ export default function TicketSelector({ eventId, tier, price, highlight }: Tick
   };
 
   return (
-    <div className="mt-4">
-      <div className="flex items-center gap-3">
+    <div className="mt-4 space-y-3">
+      <div className="flex items-center justify-center gap-3">
         <div className="flex items-center rounded-[var(--radius-button)] border border-dta-sand">
           <button
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            className="px-2.5 py-1.5 text-dta-char/50 transition-colors hover:text-dta-dark"
+            className="px-3 py-2 text-dta-char/50 transition-colors hover:text-dta-dark"
             disabled={quantity <= 1}
           >
             <Minus size={14} />
           </button>
-          <span className="w-8 text-center text-sm font-medium text-dta-dark">{quantity}</span>
+          <span className="w-10 text-center text-sm font-medium text-dta-dark">{quantity}</span>
           <button
             onClick={() => setQuantity(Math.min(10, quantity + 1))}
-            className="px-2.5 py-1.5 text-dta-char/50 transition-colors hover:text-dta-dark"
+            className="px-3 py-2 text-dta-char/50 transition-colors hover:text-dta-dark"
             disabled={quantity >= 10}
           >
             <Plus size={14} />
           </button>
         </div>
-
-        <button
-          onClick={handleCheckout}
-          disabled={loading}
-          className={`flex-1 rounded-[var(--radius-button)] px-4 py-2.5 text-sm font-semibold transition-all duration-200 disabled:opacity-50 ${
-            highlight
-              ? "bg-dta-accent text-white hover:bg-dta-accent-dark"
-              : "bg-dta-dark text-white hover:bg-dta-char"
-          }`}
-        >
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <Loader2 size={14} className="animate-spin" />
-              Redirection...
-            </span>
-          ) : (
-            `Acheter — ${new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(price * quantity)}`
-          )}
-        </button>
       </div>
+
+      <button
+        onClick={handleCheckout}
+        disabled={loading}
+        className={`w-full rounded-[var(--radius-button)] px-4 py-3 text-sm font-semibold transition-all duration-200 disabled:opacity-50 ${
+          highlight
+            ? "bg-dta-accent text-white hover:bg-dta-accent-dark"
+            : "bg-dta-dark text-white hover:bg-dta-char"
+        }`}
+      >
+        {loading ? (
+          <span className="flex items-center justify-center gap-2">
+            <Loader2 size={14} className="animate-spin" />
+            Redirection...
+          </span>
+        ) : (
+          `Acheter — ${new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(price * quantity)}`
+        )}
+      </button>
     </div>
   );
 }

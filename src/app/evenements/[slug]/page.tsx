@@ -1,9 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, MapPin, Users, Clock } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, ArrowLeft, ExternalLink } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
 import TicketSelector from "./TicketSelector";
+import ShareButton from "./ShareButton";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +33,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   const soldCount = event._count.tickets;
   const remaining = event.capacity - soldCount;
   const soldOut = remaining <= 0;
+  const progressPercent = Math.min(100, Math.round((soldCount / event.capacity) * 100));
 
   const tiers = [
     {
@@ -68,17 +71,32 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
 
   const eventDate = new Date(event.date);
   const endDate = event.endDate ? new Date(event.endDate) : null;
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue + " " + event.address)}`;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      {/* Hero banner */}
-      <div className="relative mb-10 overflow-hidden rounded-[var(--radius-card)] bg-dta-dark">
+    <div>
+      {/* A — Navigation Bar */}
+      <div className="sticky top-0 z-30 border-b border-dta-sand/50 bg-white/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+          <Link
+            href="/evenements"
+            className="flex items-center gap-2 text-sm font-medium text-dta-char transition-colors hover:text-dta-accent"
+          >
+            <ArrowLeft size={16} />
+            Retour aux événements
+          </Link>
+          <ShareButton />
+        </div>
+      </div>
+
+      {/* B — Immersive Hero */}
+      <div className="relative flex min-h-[70vh] items-end bg-dta-dark">
         {event.coverImage ? (
           <Image
             src={event.coverImage}
             alt={event.title}
             fill
-            className="object-cover opacity-40"
+            className="object-cover opacity-60"
             priority
           />
         ) : (
@@ -86,112 +104,232 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
             <div className="h-full w-full bg-[radial-gradient(ellipse_at_bottom_left,_var(--color-dta-accent)_0%,_transparent_60%)]" />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-dta-dark/90 via-dta-dark/60 to-dta-dark/40" />
-        <div className="relative px-8 py-16 sm:px-12 sm:py-20">
-          <div className="flex items-start gap-6">
-            <div className="hidden flex-shrink-0 rounded-[var(--radius-button)] bg-white/10 px-5 py-4 text-center sm:block">
-              <span className="block text-sm font-bold uppercase text-dta-accent">
-                {eventDate.toLocaleDateString("fr-FR", { month: "short" })}
-              </span>
-              <span className="block font-serif text-4xl font-bold text-white">
-                {eventDate.getDate()}
-              </span>
-            </div>
-            <div className="flex-1">
-              <h1 className="font-serif text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
-                {event.title}
-              </h1>
-              <div className="mt-4 flex flex-wrap gap-4 text-sm text-dta-sand">
-                <span className="flex items-center gap-1.5">
-                  <Calendar size={16} className="text-dta-accent" />
-                  {formatDate(event.date)}
-                  {endDate && ` — ${formatDate(endDate)}`}
+        <div className="absolute inset-0 bg-gradient-to-t from-dta-dark via-dta-dark/50 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--color-dta-accent)_0%,_transparent_50%)] opacity-15" />
+
+        <div className="relative w-full px-4 pb-12 pt-24 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex items-end gap-6">
+              <div className="hidden flex-shrink-0 rounded-[var(--radius-card)] bg-white/10 px-6 py-5 text-center backdrop-blur-sm sm:block">
+                <span className="block text-sm font-bold uppercase tracking-wider text-dta-accent">
+                  {eventDate.toLocaleDateString("fr-FR", { month: "short" })}
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <Clock size={16} className="text-dta-accent" />
-                  {eventDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                <span className="block font-serif text-5xl font-bold text-white">
+                  {eventDate.getDate()}
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <MapPin size={16} className="text-dta-accent" />
-                  {event.venue}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Users size={16} className="text-dta-accent" />
-                  {remaining > 0 ? `${remaining} places restantes` : "Complet"}
-                </span>
+              </div>
+              <div className="flex-1">
+                <h1 className="font-serif text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
+                  {event.title}
+                </h1>
+                <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-dta-sand/90">
+                  <span className="flex items-center gap-2">
+                    <Calendar size={16} className="text-dta-accent" />
+                    {formatDate(event.date)}
+                    {endDate && ` — ${formatDate(endDate)}`}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Clock size={16} className="text-dta-accent" />
+                    {eventDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <MapPin size={16} className="text-dta-accent" />
+                    {event.venue}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Users size={16} className="text-dta-accent" />
+                    {remaining > 0 ? `${remaining} places restantes` : "Complet"}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
-        {/* Left — Details */}
-        <div className="lg:col-span-2">
-          <div className="rounded-[var(--radius-card)] bg-white p-8 shadow-[var(--shadow-card)]">
-            <h2 className="font-serif text-2xl font-bold text-dta-dark">À propos</h2>
-            <div className="mt-4 whitespace-pre-line text-sm leading-relaxed text-dta-char/80">
-              {event.description}
+      {/* C — Quick-Info Strip */}
+      <div className="border-b border-dta-sand/50 bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-dta-accent/10">
+                <Calendar size={18} className="text-dta-accent" />
+              </div>
+              <div>
+                <p className="text-xs text-dta-taupe">Date</p>
+                <p className="text-sm font-medium text-dta-dark">{formatDate(event.date)}</p>
+              </div>
             </div>
-          </div>
-
-          <div className="mt-6 rounded-[var(--radius-card)] bg-white p-8 shadow-[var(--shadow-card)]">
-            <h2 className="font-serif text-2xl font-bold text-dta-dark">Lieu</h2>
-            <div className="mt-4">
-              <p className="font-medium text-dta-dark">{event.venue}</p>
-              <p className="mt-1 text-sm text-dta-char/70">{event.address}</p>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-dta-accent/10">
+                <Clock size={18} className="text-dta-accent" />
+              </div>
+              <div>
+                <p className="text-xs text-dta-taupe">Heure</p>
+                <p className="text-sm font-medium text-dta-dark">
+                  {eventDate.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-dta-accent/10">
+                <MapPin size={18} className="text-dta-accent" />
+              </div>
+              <div>
+                <p className="text-xs text-dta-taupe">Lieu</p>
+                <p className="text-sm font-medium text-dta-dark">{event.venue}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-dta-accent/10">
+                <Users size={18} className="text-dta-accent" />
+              </div>
+              <div>
+                <p className="text-xs text-dta-taupe">Places</p>
+                <p className="text-sm font-medium text-dta-dark">
+                  {remaining > 0 ? `${remaining} restantes` : "Complet"}
+                </p>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Right — Tickets */}
-        <div className="space-y-4">
-          <h2 className="font-serif text-2xl font-bold text-dta-dark">Billetterie</h2>
-          {soldOut ? (
-            <div className="rounded-[var(--radius-card)] bg-dta-beige p-6 text-center">
-              <p className="font-serif text-xl font-bold text-dta-dark">Complet</p>
-              <p className="mt-2 text-sm text-dta-char/70">
-                Cet événement affiche complet. Inscrivez-vous pour être notifié en cas de désistement.
-              </p>
-            </div>
-          ) : (
-            tiers.map((tier) => (
-              <div
-                key={tier.id}
-                className={`rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-200 ${
-                  tier.highlight ? "ring-2 ring-dta-accent" : ""
-                }`}
-              >
-                {tier.highlight && (
-                  <span className="mb-3 inline-block rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
-                    Populaire
-                  </span>
-                )}
-                <div className="flex items-baseline justify-between">
-                  <h3 className="font-serif text-lg font-bold text-dta-dark">{tier.name}</h3>
-                  <span className="font-serif text-2xl font-bold text-dta-accent">
-                    {formatPrice(tier.price)}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-dta-char/60">{tier.description}</p>
-                <ul className="mt-3 space-y-1.5">
-                  {tier.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-xs text-dta-char/70">
-                      <span className="h-1 w-1 flex-shrink-0 rounded-full bg-dta-accent" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <TicketSelector
-                  eventId={event.id}
-                  eventSlug={event.slug}
-                  tier={tier.id}
-                  price={tier.price}
-                  highlight={tier.highlight}
-                />
+      {/* D — Content Body */}
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-5">
+          {/* Left — About */}
+          <div className="lg:col-span-3">
+            <div className="rounded-[var(--radius-card)] bg-white p-8 shadow-[var(--shadow-card)]">
+              <h2 className="font-serif text-2xl font-bold text-dta-dark">À propos</h2>
+              <div className="mt-4 whitespace-pre-line text-sm leading-relaxed text-dta-char/80">
+                {event.description}
               </div>
-            ))
-          )}
+            </div>
+          </div>
+
+          {/* Right — Venue */}
+          <div className="lg:col-span-2">
+            <div className="rounded-[var(--radius-card)] bg-white p-8 shadow-[var(--shadow-card)]">
+              <h2 className="font-serif text-2xl font-bold text-dta-dark">Lieu</h2>
+              <div className="mt-4">
+                <p className="font-medium text-dta-dark">{event.venue}</p>
+                <p className="mt-1 text-sm text-dta-char/70">{event.address}</p>
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-beige px-4 py-2.5 text-sm font-medium text-dta-dark transition-colors hover:bg-dta-sand"
+                >
+                  <ExternalLink size={14} />
+                  Voir sur Google Maps
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* E — Tickets Section */}
+      <div className="bg-dta-beige py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="font-serif text-3xl font-bold text-dta-dark">Billetterie</h2>
+            <p className="mt-2 text-sm text-dta-char/70">
+              Choisissez votre formule et réservez vos places
+            </p>
+          </div>
+
+          {/* Capacity progress bar */}
+          <div className="mx-auto mt-8 max-w-md">
+            <div className="flex items-center justify-between text-xs text-dta-taupe">
+              <span>{soldCount} vendus</span>
+              <span>{event.capacity} places</span>
+            </div>
+            <div className="mt-1.5 h-2 overflow-hidden rounded-[var(--radius-full)] bg-dta-sand">
+              <div
+                className="h-full rounded-[var(--radius-full)] bg-dta-accent transition-all duration-500"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+            <p className="mt-1.5 text-center text-xs font-medium text-dta-char/60">
+              {remaining > 0
+                ? `${remaining} places restantes`
+                : "Complet"}
+            </p>
+          </div>
+
+          {/* Ticket tiers */}
+          <div className="mt-10">
+            {soldOut ? (
+              <div className="mx-auto max-w-md rounded-[var(--radius-card)] bg-white p-8 text-center shadow-[var(--shadow-card)]">
+                <p className="font-serif text-2xl font-bold text-dta-dark">Complet</p>
+                <p className="mt-3 text-sm text-dta-char/70">
+                  Cet événement affiche complet. Inscrivez-vous pour être notifié en cas de désistement.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                {tiers.map((tier) => (
+                  <div
+                    key={tier.id}
+                    className={`rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-200 ${
+                      tier.highlight
+                        ? "ring-2 ring-dta-accent md:scale-105"
+                        : ""
+                    }`}
+                  >
+                    {tier.highlight && (
+                      <span className="mb-3 inline-block rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
+                        Populaire
+                      </span>
+                    )}
+                    <div className="flex items-baseline justify-between">
+                      <h3 className="font-serif text-lg font-bold text-dta-dark">{tier.name}</h3>
+                      <span className="font-serif text-2xl font-bold text-dta-accent">
+                        {formatPrice(tier.price)}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs text-dta-char/60">{tier.description}</p>
+                    <ul className="mt-4 space-y-2">
+                      {tier.features.map((f) => (
+                        <li key={f} className="flex items-center gap-2 text-xs text-dta-char/70">
+                          <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-dta-accent" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                    <TicketSelector
+                      eventId={event.id}
+                      eventSlug={event.slug}
+                      tier={tier.id}
+                      price={tier.price}
+                      highlight={tier.highlight}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* F — Final CTA */}
+      <div className="bg-white py-12">
+        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+          <p className="text-sm text-dta-char/60">
+            Des questions ?{" "}
+            <Link href="/contact" className="font-medium text-dta-accent hover:text-dta-accent-dark">
+              Contactez-nous
+            </Link>
+          </p>
+          <Link
+            href="/evenements"
+            className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-dta-char/50 transition-colors hover:text-dta-accent"
+          >
+            <ArrowLeft size={14} />
+            Voir tous les événements
+          </Link>
         </div>
       </div>
     </div>

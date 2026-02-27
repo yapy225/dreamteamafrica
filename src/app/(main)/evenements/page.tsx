@@ -66,7 +66,7 @@ export default async function EvenementsPage() {
         >
           <div className="grid grid-cols-1 lg:grid-cols-2">
             {/* Image */}
-            <div className="relative aspect-[16/10] overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-accent/20 to-dta-sand lg:aspect-auto lg:min-h-[400px] lg:rounded-l-[var(--radius-card)] lg:rounded-tr-none">
+            <div className="relative aspect-square overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-accent/20 to-dta-sand lg:aspect-auto lg:min-h-[400px] lg:rounded-l-[var(--radius-card)] lg:rounded-tr-none">
               {featuredEvent.coverImage && (
                 <Image
                   src={featuredEvent.coverImage}
@@ -173,7 +173,7 @@ export default async function EvenementsPage() {
                 className="group rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card-hover)]"
               >
                 {/* Cover image with date badge overlay */}
-                <div className="relative aspect-[16/10] overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-beige to-dta-sand">
+                <div className="relative aspect-square overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-beige to-dta-sand">
                   {event.coverImage && (
                     <Image
                       src={event.coverImage}

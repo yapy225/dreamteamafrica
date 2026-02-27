@@ -58,7 +58,7 @@ export default async function DashboardPage() {
       count: null,
       color: "bg-red-100 text-red-600",
     },
-    ...(session.user.role === "ADMIN"
+    ...(session.user.role === "ARTISAN" || session.user.role === "ADMIN"
       ? [
           {
             href: "/dashboard/events",

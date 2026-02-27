@@ -13,7 +13,7 @@ export default async function EditEventPage({
 }) {
   const session = await auth();
   if (!session) redirect("/auth/signin");
-  if (session.user.role !== "ADMIN") redirect("/dashboard");
+  if (session.user.role !== "ADMIN" && session.user.role !== "ARTISAN") redirect("/dashboard");
 
   const { id } = await params;
   const event = await prisma.event.findUnique({ where: { id } });

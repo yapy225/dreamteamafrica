@@ -7,7 +7,7 @@ export const metadata = { title: "Nouveau contenu — Officiel d'Afrique" };
 export default async function NewOfficielPage() {
   const session = await auth();
   if (!session) redirect("/auth/signin");
-  if (session.user.role !== "ADMIN") redirect("/dashboard");
+  if (session.user.role !== "ADMIN" && session.user.role !== "ARTISAN") redirect("/dashboard");
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">

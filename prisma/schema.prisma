@@ -279,3 +279,34 @@ model AdCampaign {
   @@index([format])
   @@index([active])
 }
+
+// ─── L'OFFICIEL D'AFRIQUE — INSCRIPTIONS ────────────────
+
+model Inscription {
+  id          String   @id @default(cuid())
+  entreprise  String
+  categorie   String
+  directeur   String
+  adresse     String?
+  ville       String
+  codePostal  String?
+  pays        String
+  mobile      String
+  telephone   String?
+  email       String
+  siteWeb     String?
+  facebook    String?
+  instagram   String?
+  tiktok      String?
+  whatsapp    String?
+  youtube     String?
+  linkedin    String?
+  description String   @db.Text
+  motsCles    String?
+  newsletter  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([email])
+  @@index([categorie])
+}

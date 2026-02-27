@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import Providers from "@/components/layout/Providers";
 import "./globals.css";
 
@@ -70,18 +68,9 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${cormorant.variable} ${outfit.variable} bg-dta-bg font-sans text-dta-dark antialiased`}
+        className={`${cormorant.variable} ${outfit.variable} antialiased`}
       >
-        <Providers>
-          <a href="#main-content" className="skip-to-content">
-            Aller au contenu principal
-          </a>
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
-            <main id="main-content" className="flex-1">{children}</main>
-            <Footer />
-          </div>
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

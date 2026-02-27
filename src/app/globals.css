@@ -32,21 +32,6 @@
   --shadow-nav: 0 1px 8px rgba(0, 0, 0, 0.04);
 }
 
-/* Base styles */
-body {
-  background: var(--color-dta-bg);
-  color: var(--color-dta-dark);
-  font-family: var(--font-sans), system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif), Georgia, serif;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
 /* Smooth transitions globally */
 *, *::before, *::after {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);

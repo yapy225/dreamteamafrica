@@ -2,12 +2,50 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, RefreshCw, Plus, Trash2 } from "lucide-react";
+
+function toSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+interface ProgramItem {
+  date: string;
+  time: string;
+  venue: string;
+  address: string;
+  type: string;
+  title: string;
+  director: string;
+  synopsis: string;
+  pricing: string;
+  note: string;
+}
+
+const emptyProgramItem: ProgramItem = {
+  date: "",
+  time: "",
+  venue: "",
+  address: "",
+  type: "Projection du film",
+  title: "",
+  director: "",
+  synopsis: "",
+  pricing: "",
+  note: "",
+};
 
 interface EventFormProps {
   initialData?: {
     id: string;
     title: string;
+    slug: string;
     description: string;
     coverImage: string | null;
     venue: string;
@@ -15,6 +53,8 @@ interface EventFormProps {
     date: string;
     endDate: string | null;
     capacity: number;
+    showCapacity: boolean;
+    program: ProgramItem[] | null;
     priceEarly: number;
     priceStd: number;
     priceVip: number;
@@ -28,6 +68,7 @@ export default function EventForm({ initialData }: EventFormProps) {
 
   const [form, setForm] = useState({
     title: initialData?.title || "",
+    slug: initialData?.slug || "",
     description: initialData?.description || "",
     coverImage: initialData?.coverImage || "",
     venue: initialData?.venue || "",
@@ -35,11 +76,15 @@ export default function EventForm({ initialData }: EventFormProps) {
     date: initialData?.date || "",
     endDate: initialData?.endDate || "",
     capacity: initialData?.capacity?.toString() || "100",
+    showCapacity: initialData?.showCapacity ?? true,
     priceEarly: initialData?.priceEarly?.toString() || "0",
     priceStd: initialData?.priceStd?.toString() || "0",
     priceVip: initialData?.priceVip?.toString() || "0",
     published: initialData?.published ?? false,
   });
+  const [program, setProgram] = useState<ProgramItem[]>(
+    initialData?.program ?? [],
+  );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -66,6 +111,10 @@ export default function EventForm({ initialData }: EventFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (form.slug && !SLUG_REGEX.test(form.slug)) {
+      setError("Le slug ne doit contenir que des minuscules, chiffres et tirets.");
+      return;
+    }
     setError("");
     setLoading(true);
 
@@ -76,7 +125,10 @@ export default function EventForm({ initialData }: EventFormProps) {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          program: program.length > 0 ? program : null,
+        }),
       });
 
       if (!res.ok) {
@@ -88,8 +140,10 @@ export default function EventForm({ initialData }: EventFormProps) {
 
       router.push("/dashboard/events");
       router.refresh();
-    } catch {
+    } catch (err) {
+      console.error("EventForm submit error:", err);
       setError("Erreur réseau.");
+    } finally {
       setLoading(false);
     }
   };
@@ -116,6 +170,44 @@ export default function EventForm({ initialData }: EventFormProps) {
           className={inputClass}
           placeholder="Ex: Festival International du Cinéma Africain"
         />
+      </div>
+
+      {/* Slug */}
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-dta-char">
+          Slug (URL)
+        </label>
+        <div className="flex gap-2">
+          <input
+            required
+            value={form.slug}
+            onChange={(e) => {
+              const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
+              setForm({ ...form, slug: val });
+            }}
+            className={`${inputClass} font-mono text-xs`}
+            placeholder="mon-evenement-2026"
+          />
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, slug: toSlug(form.title) })}
+            className="flex flex-shrink-0 items-center gap-1.5 rounded-[var(--radius-button)] border border-dta-sand px-3 py-2.5 text-xs font-medium text-dta-char hover:bg-dta-beige"
+            title="Régénérer depuis le titre"
+          >
+            <RefreshCw size={14} />
+            Régénérer
+          </button>
+        </div>
+        {form.slug && !SLUG_REGEX.test(form.slug) && (
+          <p className="mt-1 text-xs text-red-500">
+            Le slug ne doit contenir que des minuscules, chiffres et tirets.
+          </p>
+        )}
+        {form.slug && SLUG_REGEX.test(form.slug) && (
+          <p className="mt-1 text-xs text-dta-taupe">
+            Aperçu : <span className="font-mono text-dta-accent">/evenements/{form.slug}</span>
+          </p>
+        )}
       </div>
 
       <div>
@@ -197,6 +289,26 @@ export default function EventForm({ initialData }: EventFormProps) {
           onChange={(e) => setForm({ ...form, capacity: e.target.value })}
           className={inputClass}
         />
+        <div className="mt-3 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, showCapacity: !form.showCapacity })}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              form.showCapacity ? "bg-dta-accent" : "bg-dta-sand"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                form.showCapacity ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+          <span className="text-sm text-dta-char">
+            {form.showCapacity
+              ? "Capacité affichée sur la page publique"
+              : "Capacité masquée sur la page publique"}
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -267,6 +379,217 @@ export default function EventForm({ initialData }: EventFormProps) {
             </span>
           )}
         </div>
+      </div>
+
+      {/* Programme */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <label className="block text-sm font-medium text-dta-char">
+            Programmation
+          </label>
+          <button
+            type="button"
+            onClick={() => setProgram([...program, { ...emptyProgramItem }])}
+            className="flex items-center gap-1.5 rounded-[var(--radius-button)] border border-dta-sand px-3 py-2 text-xs font-medium text-dta-char hover:bg-dta-beige"
+          >
+            <Plus size={14} />
+            Ajouter une séance
+          </button>
+        </div>
+        {program.length === 0 && (
+          <p className="text-xs text-dta-taupe">
+            Aucune séance programmée. Cliquez sur &quot;Ajouter une
+            séance&quot; pour créer le programme.
+          </p>
+        )}
+        {program.map((item, idx) => (
+          <div
+            key={idx}
+            className="relative rounded-[var(--radius-card)] border border-dta-sand bg-dta-bg p-4 space-y-3"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-dta-accent">
+                Séance {idx + 1}
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  setProgram(program.filter((_, i) => i !== idx))
+                }
+                className="text-red-400 hover:text-red-600"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={item.date}
+                  onChange={(e) => {
+                    const updated = [...program];
+                    updated[idx] = { ...item, date: e.target.value };
+                    setProgram(updated);
+                  }}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">
+                  Heure
+                </label>
+                <input
+                  type="time"
+                  value={item.time}
+                  onChange={(e) => {
+                    const updated = [...program];
+                    updated[idx] = { ...item, time: e.target.value };
+                    setProgram(updated);
+                  }}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">
+                  Type
+                </label>
+                <select
+                  value={item.type}
+                  onChange={(e) => {
+                    const updated = [...program];
+                    updated[idx] = { ...item, type: e.target.value };
+                    setProgram(updated);
+                  }}
+                  className={inputClass}
+                >
+                  <option>Projection du film</option>
+                  <option>Projection du documentaire</option>
+                  <option>Concert</option>
+                  <option>Conférence</option>
+                  <option>Atelier</option>
+                  <option>Table ronde</option>
+                  <option>Exposition</option>
+                  <option>Autre</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">
+                  Titre de l&apos;oeuvre / séance
+                </label>
+                <input
+                  value={item.title}
+                  onChange={(e) => {
+                    const updated = [...program];
+                    updated[idx] = { ...item, title: e.target.value };
+                    setProgram(updated);
+                  }}
+                  className={inputClass}
+                  placeholder="Ex: Dahomey"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">
+                  Réalisateur / Intervenant
+                </label>
+                <input
+                  value={item.director}
+                  onChange={(e) => {
+                    const updated = [...program];
+                    updated[idx] = { ...item, director: e.target.value };
+                    setProgram(updated);
+                  }}
+                  className={inputClass}
+                  placeholder="Ex: Mati Diop"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">
+                  Lieu
+                </label>
+                <input
+                  value={item.venue}
+                  onChange={(e) => {
+                    const updated = [...program];
+                    updated[idx] = { ...item, venue: e.target.value };
+                    setProgram(updated);
+                  }}
+                  className={inputClass}
+                  placeholder="Ex: Cinéma Kosmos"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">
+                  Adresse
+                </label>
+                <input
+                  value={item.address}
+                  onChange={(e) => {
+                    const updated = [...program];
+                    updated[idx] = { ...item, address: e.target.value };
+                    setProgram(updated);
+                  }}
+                  className={inputClass}
+                  placeholder="243 ter Av. de la République, 94120 Fontenay-sous-Bois"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-dta-taupe">
+                Synopsis
+              </label>
+              <textarea
+                rows={3}
+                value={item.synopsis}
+                onChange={(e) => {
+                  const updated = [...program];
+                  updated[idx] = { ...item, synopsis: e.target.value };
+                  setProgram(updated);
+                }}
+                className={inputClass}
+                placeholder="Synopsis de l'oeuvre..."
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">
+                  Tarification
+                </label>
+                <input
+                  value={item.pricing}
+                  onChange={(e) => {
+                    const updated = [...program];
+                    updated[idx] = { ...item, pricing: e.target.value };
+                    setProgram(updated);
+                  }}
+                  className={inputClass}
+                  placeholder="Ex: Billetterie sur place : 7 €"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">
+                  Note (débat, partenaire...)
+                </label>
+                <input
+                  value={item.note}
+                  onChange={(e) => {
+                    const updated = [...program];
+                    updated[idx] = { ...item, note: e.target.value };
+                    setProgram(updated);
+                  }}
+                  className={inputClass}
+                  placeholder="Ex: Projection suivie d'un débat animé par..."
+                />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {isEditing && (

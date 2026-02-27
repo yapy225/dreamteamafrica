@@ -19,7 +19,7 @@ const TYPE_LABELS: Record<string, { label: string; color: string }> = {
 export default async function DashboardOfficielPage() {
   const session = await auth();
   if (!session) redirect("/auth/signin");
-  if (session.user.role !== "ADMIN" && session.user.role !== "ARTISAN") redirect("/dashboard");
+  // Accessible à tous les utilisateurs connectés
 
   const contents = await prisma.officielContent.findMany({
     orderBy: { createdAt: "desc" },

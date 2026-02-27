@@ -9,9 +9,6 @@ export async function POST(request: Request) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
-    if (session.user.role !== "ADMIN" && session.user.role !== "ARTISAN") {
-      return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
-    }
 
     const body = await request.json();
     const { title, type, content, excerpt, coverImage, category, published } =

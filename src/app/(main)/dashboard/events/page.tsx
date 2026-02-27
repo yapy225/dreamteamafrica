@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Eye, EyeOff, CalendarDays } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, CalendarDays, Users } from "lucide-react";
+import ToggleEventButton from "./ToggleEventButton";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
@@ -12,7 +13,7 @@ export const metadata = { title: "Gestion des événements" };
 export default async function DashboardEventsPage() {
   const session = await auth();
   if (!session) redirect("/auth/signin");
-  if (session.user.role !== "ADMIN" && session.user.role !== "ARTISAN") redirect("/dashboard");
+  // Accessible à tous les utilisateurs connectés
 
   const events = await prisma.event.findMany({
     orderBy: { date: "desc" },
@@ -86,14 +87,17 @@ export default async function DashboardEventsPage() {
                     </span>
                   )}
                 </div>
-                <div className="mt-1 flex items-center gap-3 text-xs text-dta-taupe">
+                <p className="mt-0.5 truncate text-xs text-dta-taupe/60 font-mono">
+                  /{event.slug}
+                </p>
+                <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-dta-taupe">
                   <span>{formatDate(event.date)}</span>
                   <span>&middot;</span>
                   <span>{event.venue}</span>
                   <span>&middot;</span>
-                  <span>
-                    {event._count.tickets} billet
-                    {event._count.tickets !== 1 ? "s" : ""} vendus
+                  <span className="flex items-center gap-1">
+                    <Users size={10} />
+                    {event._count.tickets}/{event.capacity} places
                   </span>
                   <span>&middot;</span>
                   <span>
@@ -118,6 +122,10 @@ export default async function DashboardEventsPage() {
                 >
                   <Pencil size={16} />
                 </Link>
+                <ToggleEventButton
+                  eventId={event.id}
+                  published={event.published}
+                />
                 <DeleteEventButton
                   eventId={event.id}
                   eventTitle={event.title}

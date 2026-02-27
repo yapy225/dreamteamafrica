@@ -127,7 +127,7 @@ export default async function EvenementsPage() {
               </p>
 
               {/* Capacity bar */}
-              {featuredEvent.capacity > 0 && (
+              {featuredEvent.showCapacity && featuredEvent.capacity > 0 && (
                 <div className="mt-4">
                   <div className="mb-1.5 flex items-center justify-between text-xs text-dta-taupe">
                     <span className="flex items-center gap-1">
@@ -224,7 +224,7 @@ export default async function EvenementsPage() {
                         {formatPrice(lowestPrice(event))}
                       </span>
                     </p>
-                    {event.capacity > 0 && (
+                    {event.showCapacity && event.capacity > 0 && (
                       <span className="flex items-center gap-1 rounded-[var(--radius-full)] bg-dta-beige px-2.5 py-1 text-xs font-medium text-dta-char">
                         <Ticket size={12} />
                         {remainingPlaces(event)} places
@@ -233,7 +233,7 @@ export default async function EvenementsPage() {
                   </div>
 
                   {/* Capacity bar */}
-                  {event.capacity > 0 && (
+                  {event.showCapacity && event.capacity > 0 && (
                     <div className="mt-3 h-1.5 w-full overflow-hidden rounded-[var(--radius-full)] bg-dta-beige">
                       <div
                         className="h-full rounded-[var(--radius-full)] bg-dta-accent/70 transition-all"

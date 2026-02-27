@@ -11,9 +11,6 @@ export async function PUT(
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
-    if (session.user.role !== "ADMIN" && session.user.role !== "ARTISAN") {
-      return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
-    }
 
     const { id } = await params;
     const item = await prisma.officielContent.findUnique({ where: { id } });
@@ -56,9 +53,6 @@ export async function DELETE(
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
-    }
-    if (session.user.role !== "ADMIN" && session.user.role !== "ARTISAN") {
-      return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
     }
 
     const { id } = await params;

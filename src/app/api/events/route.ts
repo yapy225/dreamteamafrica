@@ -9,13 +9,11 @@ export async function POST(request: Request) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
-    if (session.user.role !== "ADMIN" && session.user.role !== "ARTISAN") {
-      return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
-    }
 
     const body = await request.json();
     const {
       title,
+      slug: rawSlug,
       description,
       coverImage,
       venue,
@@ -36,7 +34,7 @@ export async function POST(request: Request) {
       );
     }
 
-    let slug = slugify(title);
+    let slug = rawSlug || slugify(title);
     const existing = await prisma.event.findUnique({ where: { slug } });
     if (existing) {
       slug = `${slug}-${Date.now().toString(36)}`;
@@ -53,6 +51,8 @@ export async function POST(request: Request) {
         date: new Date(date),
         endDate: endDate ? new Date(endDate) : null,
         capacity: parseInt(capacity),
+        showCapacity: body.showCapacity ?? true,
+        program: body.program ?? null,
         priceEarly: parseFloat(priceEarly) || 0,
         priceStd: parseFloat(priceStd) || 0,
         priceVip: parseFloat(priceVip) || 0,
@@ -63,6 +63,8 @@ export async function POST(request: Request) {
     return NextResponse.json(event, { status: 201 });
   } catch (error) {
     console.error("Create event error:", error);
-    return NextResponse.json({ error: "Erreur interne." }, { status: 500 });
+    const message =
+      error instanceof Error ? error.message : "Erreur interne.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

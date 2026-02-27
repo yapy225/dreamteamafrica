@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, MapPin, Users, Clock, ArrowLeft, ExternalLink } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, ArrowLeft, ExternalLink, Film, Music, Mic2 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
 import TicketSelector from "./TicketSelector";
@@ -173,10 +173,12 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                     <MapPin size={16} className="text-dta-accent" />
                     {event.venue}
                   </span>
-                  <span className="flex items-center gap-2">
-                    <Users size={16} className="text-dta-accent" />
-                    {remaining > 0 ? `${remaining} places restantes` : "Complet"}
-                  </span>
+                  {event.showCapacity && (
+                    <span className="flex items-center gap-2">
+                      <Users size={16} className="text-dta-accent" />
+                      {remaining > 0 ? `${remaining} places restantes` : "Complet"}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -217,17 +219,19 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                 <p className="text-sm font-medium text-dta-dark">{event.venue}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-dta-accent/10">
-                <Users size={18} className="text-dta-accent" />
+            {event.showCapacity && (
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-dta-accent/10">
+                  <Users size={18} className="text-dta-accent" />
+                </div>
+                <div>
+                  <p className="text-xs text-dta-taupe">Places</p>
+                  <p className="text-sm font-medium text-dta-dark">
+                    {remaining > 0 ? `${remaining} restantes` : "Complet"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-dta-taupe">Places</p>
-                <p className="text-sm font-medium text-dta-dark">
-                  {remaining > 0 ? `${remaining} restantes` : "Complet"}
-                </p>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -267,6 +271,127 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
         </div>
       </div>
 
+      {/* D2 — Programmation */}
+      {Array.isArray(event.program) && event.program.length > 0 && (() => {
+        const items = event.program as Array<{
+          date: string; time: string; venue: string; address: string;
+          type: string; title: string; director: string; synopsis: string;
+          pricing: string; note: string;
+        }>;
+        // Group by date
+        const grouped = items.reduce<Record<string, typeof items>>((acc, item) => {
+          const key = item.date || "other";
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(item);
+          return acc;
+        }, {});
+
+        function typeIcon(type: string) {
+          if (type.toLowerCase().includes("concert")) return <Music size={18} className="text-dta-accent" />;
+          if (type.toLowerCase().includes("conférence") || type.toLowerCase().includes("table")) return <Mic2 size={18} className="text-dta-accent" />;
+          return <Film size={18} className="text-dta-accent" />;
+        }
+
+        function formatProgramDate(dateStr: string) {
+          if (!dateStr) return "";
+          const d = new Date(dateStr + "T12:00:00");
+          return d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+        }
+
+        return (
+          <div className="bg-dta-bg py-16">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="text-center">
+                <h2 className="font-serif text-3xl font-bold text-dta-dark">Programmation</h2>
+                <p className="mt-2 text-sm text-dta-char/70">
+                  Le programme détaillé de l&apos;événement
+                </p>
+              </div>
+
+              <div className="mt-10 space-y-10">
+                {Object.entries(grouped).map(([dateKey, dayItems]) => (
+                  <div key={dateKey}>
+                    {/* Day header */}
+                    <div className="mb-6 flex items-center gap-3">
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[var(--radius-button)] bg-dta-accent/10">
+                        <Calendar size={18} className="text-dta-accent" />
+                      </div>
+                      <h3 className="font-serif text-xl font-bold capitalize text-dta-dark">
+                        {formatProgramDate(dateKey)}
+                      </h3>
+                    </div>
+
+                    <div className="space-y-6">
+                      {dayItems.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] sm:p-8"
+                        >
+                          <div className="flex flex-col gap-6 sm:flex-row">
+                            {/* Time badge */}
+                            <div className="flex flex-shrink-0 items-start gap-3 sm:flex-col sm:items-center sm:text-center">
+                              <div className="flex h-14 w-14 items-center justify-center rounded-[var(--radius-card)] bg-dta-accent/10">
+                                {typeIcon(item.type)}
+                              </div>
+                              <div>
+                                <p className="font-serif text-lg font-bold text-dta-dark">
+                                  {item.time ? item.time.replace(":", "h") : ""}
+                                </p>
+                                <p className="text-xs text-dta-taupe">{item.type}</p>
+                              </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1">
+                              <h4 className="font-serif text-xl font-bold text-dta-dark">
+                                {item.title}
+                              </h4>
+                              {item.director && (
+                                <p className="mt-1 text-sm font-medium text-dta-accent">
+                                  Réalisé par {item.director}
+                                </p>
+                              )}
+
+                              {item.synopsis && (
+                                <p className="mt-3 text-sm leading-relaxed text-dta-char/80">
+                                  {item.synopsis}
+                                </p>
+                              )}
+
+                              {/* Venue + pricing */}
+                              <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-dta-taupe">
+                                {item.venue && (
+                                  <span className="flex items-center gap-1.5">
+                                    <MapPin size={13} className="text-dta-accent" />
+                                    {item.venue}
+                                    {item.address && `, ${item.address}`}
+                                  </span>
+                                )}
+                                {item.pricing && (
+                                  <span className="rounded-[var(--radius-full)] bg-dta-accent/10 px-3 py-1 font-medium text-dta-accent">
+                                    {item.pricing}
+                                  </span>
+                                )}
+                              </div>
+
+                              {item.note && (
+                                <p className="mt-3 rounded-[var(--radius-input)] border-l-2 border-dta-accent/30 bg-dta-beige/50 px-4 py-2.5 text-xs italic text-dta-char/70">
+                                  {item.note}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* E — Tickets Section */}
       <div className="bg-dta-beige py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -278,23 +403,25 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           </div>
 
           {/* Capacity progress bar */}
-          <div className="mx-auto mt-8 max-w-md">
-            <div className="flex items-center justify-between text-xs text-dta-taupe">
-              <span>{soldCount} vendus</span>
-              <span>{event.capacity} places</span>
+          {event.showCapacity && (
+            <div className="mx-auto mt-8 max-w-md">
+              <div className="flex items-center justify-between text-xs text-dta-taupe">
+                <span>{soldCount} vendus</span>
+                <span>{event.capacity} places</span>
+              </div>
+              <div className="mt-1.5 h-2 overflow-hidden rounded-[var(--radius-full)] bg-dta-sand">
+                <div
+                  className="h-full rounded-[var(--radius-full)] bg-dta-accent transition-all duration-500"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <p className="mt-1.5 text-center text-xs font-medium text-dta-char/60">
+                {remaining > 0
+                  ? `${remaining} places restantes`
+                  : "Complet"}
+              </p>
             </div>
-            <div className="mt-1.5 h-2 overflow-hidden rounded-[var(--radius-full)] bg-dta-sand">
-              <div
-                className="h-full rounded-[var(--radius-full)] bg-dta-accent transition-all duration-500"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <p className="mt-1.5 text-center text-xs font-medium text-dta-char/60">
-              {remaining > 0
-                ? `${remaining} places restantes`
-                : "Complet"}
-            </p>
-          </div>
+          )}
 
           {/* Ticket tiers */}
           <div className="mt-10">

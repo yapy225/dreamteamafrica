@@ -13,7 +13,7 @@ export default async function EditOfficielPage({
 }) {
   const session = await auth();
   if (!session) redirect("/auth/signin");
-  if (session.user.role !== "ADMIN" && session.user.role !== "ARTISAN") redirect("/dashboard");
+  // Accessible à tous les utilisateurs connectés
 
   const { id } = await params;
   const item = await prisma.officielContent.findUnique({ where: { id } });

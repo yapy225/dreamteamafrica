@@ -168,8 +168,10 @@ model Event {
   address     String
   date        DateTime
   endDate     DateTime?
-  capacity    Int
-  priceEarly  Float
+  capacity     Int
+  showCapacity Boolean  @default(true)
+  program      Json?
+  priceEarly   Float
   priceStd    Float
   priceVip    Float
   published   Boolean  @default(true)

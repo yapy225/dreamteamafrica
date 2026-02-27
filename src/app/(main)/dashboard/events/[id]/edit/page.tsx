@@ -13,7 +13,7 @@ export default async function EditEventPage({
 }) {
   const session = await auth();
   if (!session) redirect("/auth/signin");
-  if (session.user.role !== "ADMIN" && session.user.role !== "ARTISAN") redirect("/dashboard");
+  // Accessible à tous les utilisateurs connectés
 
   const { id } = await params;
   const event = await prisma.event.findUnique({ where: { id } });
@@ -29,6 +29,7 @@ export default async function EditEventPage({
           initialData={{
             id: event.id,
             title: event.title,
+            slug: event.slug,
             description: event.description,
             coverImage: event.coverImage,
             venue: event.venue,
@@ -38,6 +39,8 @@ export default async function EditEventPage({
               ? event.endDate.toISOString().slice(0, 16)
               : null,
             capacity: event.capacity,
+            showCapacity: event.showCapacity,
+            program: (event.program as Array<{date:string;time:string;venue:string;address:string;type:string;title:string;director:string;synopsis:string;pricing:string;note:string}>) ?? null,
             priceEarly: event.priceEarly,
             priceStd: event.priceStd,
             priceVip: event.priceVip,

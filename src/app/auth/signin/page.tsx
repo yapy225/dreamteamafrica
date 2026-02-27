@@ -123,6 +123,14 @@ export default function SignInPage() {
                 className="w-full rounded-[var(--radius-input)] border border-dta-sand bg-dta-bg px-4 py-2.5 text-sm text-dta-dark placeholder:text-dta-taupe focus:border-dta-accent focus:outline-none focus:ring-1 focus:ring-dta-accent"
                 placeholder="••••••••"
               />
+              <div className="mt-1.5 text-right">
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-xs text-dta-accent hover:text-dta-accent-dark"
+                >
+                  Mot de passe oublié ?
+                </Link>
+              </div>
             </div>
 
             <button

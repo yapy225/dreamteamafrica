@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Ticket, ShoppingBag, Newspaper, Megaphone } from "lucide-react";
+import { Ticket, ShoppingBag, Newspaper, Megaphone, CalendarDays, BookOpen } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
@@ -58,6 +58,24 @@ export default async function DashboardPage() {
       count: null,
       color: "bg-red-100 text-red-600",
     },
+    ...(session.user.role === "ADMIN"
+      ? [
+          {
+            href: "/dashboard/events",
+            icon: CalendarDays,
+            label: "Gestion événements",
+            count: null,
+            color: "bg-teal-100 text-teal-600",
+          },
+          {
+            href: "/dashboard/officiel-afrique",
+            icon: BookOpen,
+            label: "Officiel d'Afrique",
+            count: null,
+            color: "bg-indigo-100 text-indigo-600",
+          },
+        ]
+      : []),
   ];
 
   return (

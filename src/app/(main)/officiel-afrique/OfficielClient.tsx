@@ -154,6 +154,10 @@ export default function OfficielClient() {
   const [shaking, setShaking] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [proofBadge, setProofBadge] = useState("Afro Coiffure Paris — il y a 2 min");
+  const [comments, setComments] = useState<{ name: string; text: string; date: string }[]>([]);
+  const [commentForm, setCommentForm] = useState({ name: "", email: "", text: "" });
+  const [nlEmail, setNlEmail] = useState("");
+  const [nlDone, setNlDone] = useState(false);
 
   const [form, setForm] = useState({
     entreprise: "", categorie: "", directeur: "",
@@ -595,6 +599,174 @@ export default function OfficielClient() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ═══ AVIS CLIENTS ═══ */}
+      <section className={`${s.sec} ${s.secReviews}`}>
+        <div className={`${s.secHeader} ${s.reveal}`}>
+          <div className={s.secLabel}>Témoignages</div>
+          <h2 className={s.secTitle}>Ce qu&apos;ils disent de <span className={s.gold}>L&apos;Officiel</span></h2>
+        </div>
+        <div className={s.reviewGrid}>
+          {[
+            {
+              title: "Un outil révolutionnaire",
+              text: "L'Officiel d'Afrique comble un vide immense. Enfin un annuaire dédié à notre diaspora, pensé par et pour nous. L'interface digitale est moderne et l'accès aux contacts est d'une simplicité remarquable. C'est une vraie innovation !",
+              name: "Aminata Diallo",
+              role: "Directrice artistique — Label Wari Music",
+              stars: 5,
+            },
+            {
+              title: "Félicitations pour cet outil incroyable",
+              text: "Bravo à toute l'équipe ! Ce guide est exactement ce dont la communauté avait besoin. J'ai déjà pu connecter avec 3 nouveaux partenaires pour mes événements. L'annuaire est complet, bien organisé et très professionnel.",
+              name: "Ibrahima Koné",
+              role: "Organisateur d'événements — Sabar Events",
+              stars: 5,
+            },
+            {
+              title: "Y aura-t-il une version print ?",
+              text: "L'outil digital est fantastique, je l'utilise au quotidien pour trouver des contacts. Ma seule question : est-ce qu'une version papier est prévue ? Ce serait parfait à avoir sur mon bureau et à distribuer lors des salons professionnels.",
+              name: "Fatou Ndiaye",
+              role: "Chef de produit — Teranga Consulting",
+              stars: 4,
+            },
+          ].map((r, i) => (
+            <div key={i} className={`${s.reviewCard} ${s.reveal}`}>
+              <div className={s.reviewStars}>
+                {Array.from({ length: 5 }).map((_, j) => (
+                  <span key={j} className={j < r.stars ? s.starFull : s.starEmpty}>★</span>
+                ))}
+              </div>
+              <h3 className={s.reviewTitle}>{r.title}</h3>
+              <p className={s.reviewText}>&ldquo;{r.text}&rdquo;</p>
+              <div className={s.reviewAuthor}>
+                <div className={s.reviewAvatar}>{r.name.charAt(0)}</div>
+                <div>
+                  <div className={s.reviewName}>{r.name}</div>
+                  <div className={s.reviewRole}>{r.role}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ COMMENTAIRES ═══ */}
+      <section className={`${s.sec} ${s.secComments}`}>
+        <div className={`${s.secHeader} ${s.reveal}`}>
+          <div className={s.secLabel}>Votre avis compte</div>
+          <h2 className={s.secTitle}>Laissez un <span className={s.gold}>commentaire</span></h2>
+        </div>
+        <div className={s.commentWrap}>
+          <div className={`${s.commentFormCard} ${s.reveal}`}>
+            <div className={s.frow}>
+              <div className={s.fg}>
+                <label className={s.fgLabel}>Nom *</label>
+                <input
+                  className={s.fgInput}
+                  type="text"
+                  placeholder="Votre nom"
+                  value={commentForm.name}
+                  onChange={(e) => setCommentForm((p) => ({ ...p, name: e.target.value }))}
+                />
+              </div>
+              <div className={s.fg}>
+                <label className={s.fgLabel}>Email *</label>
+                <input
+                  className={s.fgInput}
+                  type="email"
+                  placeholder="votre@email.com"
+                  value={commentForm.email}
+                  onChange={(e) => setCommentForm((p) => ({ ...p, email: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className={s.fg}>
+              <label className={s.fgLabel}>Commentaire *</label>
+              <textarea
+                className={s.fgTextarea}
+                rows={4}
+                placeholder="Partagez votre avis sur L'Officiel d'Afrique…"
+                value={commentForm.text}
+                onChange={(e) => setCommentForm((p) => ({ ...p, text: e.target.value }))}
+              />
+            </div>
+            <button
+              className={s.btnGold}
+              onClick={() => {
+                if (!commentForm.name.trim() || !commentForm.email.trim() || !commentForm.text.trim()) return;
+                setComments((prev) => [
+                  {
+                    name: commentForm.name,
+                    text: commentForm.text,
+                    date: new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }),
+                  },
+                  ...prev,
+                ]);
+                setCommentForm({ name: "", email: "", text: "" });
+              }}
+            >
+              Publier mon commentaire
+            </button>
+          </div>
+
+          {comments.length > 0 && (
+            <div className={s.commentList}>
+              {comments.map((c, i) => (
+                <div key={i} className={s.commentItem}>
+                  <div className={s.commentHead}>
+                    <div className={s.reviewAvatar}>{c.name.charAt(0)}</div>
+                    <div>
+                      <div className={s.commentAuthorName}>{c.name}</div>
+                      <div className={s.commentDate}>{c.date}</div>
+                    </div>
+                  </div>
+                  <p className={s.commentBody}>{c.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ═══ NEWSLETTER ═══ */}
+      <section className={`${s.sec} ${s.secNewsletter}`}>
+        <div className={s.reveal}>
+          <div className={s.nlInner}>
+            <h2 className={s.nlTitle}>Restez informé</h2>
+            <p className={s.nlSub}>
+              Recevez les actualités de L&apos;Officiel d&apos;Afrique et les nouveautés de l&apos;édition 2026
+            </p>
+            {!nlDone ? (
+              <>
+                <div className={s.nlRow}>
+                  <input
+                    className={s.nlInput}
+                    type="email"
+                    placeholder="Votre adresse email"
+                    value={nlEmail}
+                    onChange={(e) => setNlEmail(e.target.value)}
+                  />
+                  <button
+                    className={s.nlBtn}
+                    onClick={() => {
+                      if (nlEmail.includes("@")) setNlDone(true);
+                    }}
+                  >
+                    S&apos;inscrire
+                  </button>
+                </div>
+                <p className={s.nlRgpd}>
+                  En vous inscrivant, vous acceptez de recevoir nos communications. Vous pouvez vous désabonner à tout moment. Conformément au RGPD, vos données sont traitées de manière sécurisée et ne sont jamais partagées avec des tiers.
+                </p>
+              </>
+            ) : (
+              <div className={s.nlSuccess}>
+                ✓ Inscription confirmée ! Vous recevrez nos prochaines actualités.
+              </div>
+            )}
+          </div>
         </div>
       </section>
 

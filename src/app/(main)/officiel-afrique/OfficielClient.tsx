@@ -42,27 +42,27 @@ const CATEGORIES = [
 ];
 
 const CAT_CARDS = [
-  { icon: "🎤", name: "Artistes", desc: "Rappeurs, Chanteurs, Danseurs, DJ's, Compositeurs…" },
-  { icon: "💿", name: "Disques", desc: "Majors, Labels indépendants, Distribution, Éditions, Management…" },
-  { icon: "🎛️", name: "Studios", desc: "Enregistrement, Répétitions, Mastering, Fabrication, Matériel…" },
-  { icon: "📡", name: "Médias", desc: "Presse, Radio, TV, Internet…" },
-  { icon: "📲", name: "Réseaux sociaux", desc: "Influenceurs, Community managers, Créateurs de contenu…" },
-  { icon: "🏪", name: "Magasins spécialisés", desc: "Disques, Mode, VPC…" },
-  { icon: "🎭", name: "Scènes", desc: "Tourneurs, Festivals, Salles de concerts, Théâtres, MJC…" },
-  { icon: "🎨", name: "Services", desc: "Graphistes, Audiovisuel, Vidéo…" },
-  { icon: "🏛️", name: "Organismes", desc: "SACEM, SDRM, FCM, INPI…" },
-  { icon: "✨", name: "Événements", desc: "Musique, Mode, Sport, Cinéma…" },
-  { icon: "🏳️", name: "Ambassades & Consulats", desc: "Représentations diplomatiques africaines en France" },
-  { icon: "⚽", name: "Agents sportifs", desc: "Agents, managers et consultants sportifs" },
-  { icon: "⚽", name: "Clubs de football", desc: "Clubs professionnels et amateurs" },
-  { icon: "🏀", name: "Clubs de basketball", desc: "Clubs et associations de basketball" },
-  { icon: "🏉", name: "Clubs de rugby", desc: "Clubs et structures de rugby" },
-  { icon: "✈️", name: "Aéroports internationaux", desc: "Liaisons aériennes vers l'Afrique" },
-  { icon: "🤲", name: "Associations", desc: "Associations culturelles, sociales et communautaires" },
-  { icon: "🍽️", name: "Restaurants", desc: "Restaurants africains, traiteurs, cuisine du monde" },
-  { icon: "🪩", name: "Discothèques", desc: "Night-clubs, soirées afro, tropical…" },
-  { icon: "🤝", name: "Coopérations", desc: "Partenariats France-Afrique, coopération internationale" },
-  { icon: "🌍", name: "International", desc: "Europe, Japon, Canada, USA…" },
+  { value: "artistes", icon: "🎤", name: "Artistes", desc: "Rappeurs, Chanteurs, Danseurs, DJ's, Compositeurs…" },
+  { value: "disques", icon: "💿", name: "Disques", desc: "Majors, Labels indépendants, Distribution, Éditions, Management…" },
+  { value: "studios", icon: "🎛️", name: "Studios", desc: "Enregistrement, Répétitions, Mastering, Fabrication, Matériel…" },
+  { value: "medias", icon: "📡", name: "Médias", desc: "Presse, Radio, TV, Internet…" },
+  { value: "reseaux-sociaux", icon: "📲", name: "Réseaux sociaux", desc: "Influenceurs, Community managers, Créateurs de contenu…" },
+  { value: "magasins", icon: "🏪", name: "Magasins spécialisés", desc: "Disques, Mode, VPC…" },
+  { value: "scenes", icon: "🎭", name: "Scènes", desc: "Tourneurs, Festivals, Salles de concerts, Théâtres, MJC…" },
+  { value: "services", icon: "🎨", name: "Services", desc: "Graphistes, Audiovisuel, Vidéo…" },
+  { value: "organismes", icon: "🏛️", name: "Organismes", desc: "SACEM, SDRM, FCM, INPI…" },
+  { value: "evenements", icon: "✨", name: "Événements", desc: "Musique, Mode, Sport, Cinéma…" },
+  { value: "ambassades", icon: "🏳️", name: "Ambassades & Consulats", desc: "Représentations diplomatiques africaines en France" },
+  { value: "agents-sportifs", icon: "⚽", name: "Agents sportifs", desc: "Agents, managers et consultants sportifs" },
+  { value: "football", icon: "⚽", name: "Clubs de football", desc: "Clubs professionnels et amateurs" },
+  { value: "basketball", icon: "🏀", name: "Clubs de basketball", desc: "Clubs et associations de basketball" },
+  { value: "rugby", icon: "🏉", name: "Clubs de rugby", desc: "Clubs et structures de rugby" },
+  { value: "aeroports", icon: "✈️", name: "Aéroports internationaux", desc: "Liaisons aériennes vers l'Afrique" },
+  { value: "associations", icon: "🤲", name: "Associations", desc: "Associations culturelles, sociales et communautaires" },
+  { value: "restaurants", icon: "🍽️", name: "Restaurants", desc: "Restaurants africains, traiteurs, cuisine du monde" },
+  { value: "discotheques", icon: "🪩", name: "Discothèques", desc: "Night-clubs, soirées afro, tropical…" },
+  { value: "cooperations", icon: "🤝", name: "Coopérations", desc: "Partenariats France-Afrique, coopération internationale" },
+  { value: "international", icon: "🌍", name: "International", desc: "Europe, Japon, Canada, USA…" },
 ];
 
 const FAQ_ITEMS = [
@@ -159,6 +159,17 @@ export default function OfficielClient() {
   const [nlEmail, setNlEmail] = useState("");
   const [nlDone, setNlDone] = useState(false);
 
+  // Annuaire state
+  const [annQuery, setAnnQuery] = useState("");
+  const [annCat, setAnnCat] = useState("");
+  const [annPage, setAnnPage] = useState(1);
+  const [annResults, setAnnResults] = useState<{
+    data: { id: string; entreprise: string; categorie: string; ville: string; pays: string; description: string; siteWeb: string | null; facebook: string | null; instagram: string | null; tiktok: string | null; linkedin: string | null; youtube: string | null; email: string; mobile: string }[];
+    total: number; page: number; totalPages: number;
+  } | null>(null);
+  const [annLoading, setAnnLoading] = useState(false);
+  const [catStats, setCatStats] = useState<Record<string, number>>({});
+
   const [form, setForm] = useState({
     entreprise: "", categorie: "", directeur: "",
     adresse: "", ville: "", codePostal: "", pays: "",
@@ -171,9 +182,63 @@ export default function OfficielClient() {
 
   const formCardRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLDivElement>(null);
+  const annuaireRef = useRef<HTMLDivElement>(null);
 
   useScrollReveal();
   useAnimatedCounter(counterRef, 3214);
+
+  // Fetch category stats on mount
+  useEffect(() => {
+    fetch("/api/inscription/stats")
+      .then((r) => r.json())
+      .then((d) => setCatStats(d))
+      .catch(() => {});
+  }, []);
+
+  const searchAnnuaire = useCallback(
+    async (cat?: string, page?: number) => {
+      setAnnLoading(true);
+      const params = new URLSearchParams();
+      const q = annQuery.trim();
+      const c = cat ?? annCat;
+      const p = page ?? annPage;
+      if (q) params.set("q", q);
+      if (c) params.set("categorie", c);
+      params.set("page", String(p));
+      try {
+        const res = await fetch(`/api/inscription/annuaire?${params}`);
+        const data = await res.json();
+        setAnnResults(data);
+      } catch {
+        setAnnResults(null);
+      } finally {
+        setAnnLoading(false);
+      }
+    },
+    [annQuery, annCat, annPage]
+  );
+
+  const handleCatClick = useCallback(
+    (catValue: string) => {
+      setAnnCat(catValue);
+      setAnnPage(1);
+      setAnnQuery("");
+      annuaireRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      // Fetch after state update
+      setTimeout(() => {
+        const params = new URLSearchParams();
+        params.set("categorie", catValue);
+        params.set("page", "1");
+        setAnnLoading(true);
+        fetch(`/api/inscription/annuaire?${params}`)
+          .then((r) => r.json())
+          .then((d) => setAnnResults(d))
+          .catch(() => setAnnResults(null))
+          .finally(() => setAnnLoading(false));
+      }, 50);
+    },
+    []
+  );
 
   // Social proof rotation
   useEffect(() => {
@@ -491,6 +556,109 @@ export default function OfficielClient() {
         </div>
       </section>
 
+      {/* ═══ ANNUAIRE ═══ */}
+      <section className={`${s.sec} ${s.secAnnuaire}`} id="annuaire" ref={annuaireRef}>
+        <div className={`${s.secHeader} ${s.reveal}`}>
+          <div className={s.secLabel}>Base de données</div>
+          <h2 className={s.secTitle}>Consulter <span className={s.gold}>l&apos;annuaire</span></h2>
+          <p className={s.secSubtitle}>Recherchez parmi les entreprises validées de la diaspora africaine</p>
+        </div>
+        <div className={s.annSearch}>
+          <div className={s.annSearchRow}>
+            <input
+              className={s.annInput}
+              type="text"
+              placeholder="Rechercher par nom, ville ou mot-clé…"
+              value={annQuery}
+              onChange={(e) => setAnnQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { setAnnPage(1); searchAnnuaire(annCat, 1); } }}
+            />
+            <select
+              className={s.annSelect}
+              value={annCat}
+              onChange={(e) => { setAnnCat(e.target.value); setAnnPage(1); }}
+            >
+              <option value="">Toutes les catégories</option>
+              {CATEGORIES.map((g) =>
+                g.items.map((it) => (
+                  <option key={it.value} value={it.value}>{it.label}</option>
+                ))
+              )}
+            </select>
+            <button className={s.annBtn} onClick={() => { setAnnPage(1); searchAnnuaire(annCat, 1); }}>
+              Rechercher
+            </button>
+          </div>
+        </div>
+
+        {annLoading && (
+          <div className={s.annLoading}>Chargement…</div>
+        )}
+
+        {annResults && !annLoading && (
+          <>
+            <div className={s.annMeta}>
+              {annResults.total} résultat{annResults.total !== 1 ? "s" : ""}
+              {annCat && <> — <button className={s.annClearFilter} onClick={() => { setAnnCat(""); setAnnPage(1); searchAnnuaire("", 1); }}>Effacer le filtre</button></>}
+            </div>
+
+            {annResults.data.length === 0 ? (
+              <div className={s.annEmpty}>
+                Aucune entreprise trouvée. Essayez un autre terme ou catégorie.
+              </div>
+            ) : (
+              <div className={s.annGrid}>
+                {annResults.data.map((item) => (
+                  <div key={item.id} className={s.annCard}>
+                    <div className={s.annCardTop}>
+                      <div className={s.annCardName}>{item.entreprise}</div>
+                      <div className={s.annCardCat}>
+                        {CAT_CARDS.find((c) => c.value === item.categorie)?.icon}{" "}
+                        {CAT_CARDS.find((c) => c.value === item.categorie)?.name || item.categorie}
+                      </div>
+                    </div>
+                    <div className={s.annCardLoc}>{item.ville}, {item.pays}</div>
+                    <p className={s.annCardDesc}>{item.description}</p>
+                    <div className={s.annCardSocial}>
+                      {item.siteWeb && <a href={item.siteWeb.startsWith("http") ? item.siteWeb : `https://${item.siteWeb}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>🌐 Site</a>}
+                      {item.facebook && <a href={item.facebook.startsWith("http") ? item.facebook : `https://facebook.com/${item.facebook}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>📘 Facebook</a>}
+                      {item.instagram && <a href={item.instagram.startsWith("http") ? item.instagram : `https://instagram.com/${item.instagram}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>📸 Instagram</a>}
+                      {item.tiktok && <a href={item.tiktok.startsWith("http") ? item.tiktok : `https://tiktok.com/${item.tiktok}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>🎵 TikTok</a>}
+                      {item.linkedin && <a href={item.linkedin.startsWith("http") ? item.linkedin : `https://linkedin.com/in/${item.linkedin}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>💼 LinkedIn</a>}
+                      {item.youtube && <a href={item.youtube.startsWith("http") ? item.youtube : `https://youtube.com/${item.youtube}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>▶️ YouTube</a>}
+                    </div>
+                    <div className={s.annCardContact}>
+                      <a href={`mailto:${item.email}`} className={s.annContactLink}>✉ {item.email}</a>
+                      <a href={`tel:${item.mobile}`} className={s.annContactLink}>📱 {item.mobile}</a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {annResults.totalPages > 1 && (
+              <div className={s.annPagination}>
+                <button
+                  className={s.annPageBtn}
+                  disabled={annResults.page <= 1}
+                  onClick={() => { const p = annResults.page - 1; setAnnPage(p); searchAnnuaire(annCat, p); }}
+                >
+                  ← Précédent
+                </button>
+                <span className={s.annPageInfo}>Page {annResults.page} / {annResults.totalPages}</span>
+                <button
+                  className={s.annPageBtn}
+                  disabled={annResults.page >= annResults.totalPages}
+                  onClick={() => { const p = annResults.page + 1; setAnnPage(p); searchAnnuaire(annCat, p); }}
+                >
+                  Suivant →
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+
       {/* ═══ CATEGORIES ═══ */}
       <section className={`${s.sec} ${s.secCat}`} id="rubriques">
         <div className={`${s.secHeader} ${s.reveal}`}>
@@ -500,10 +668,13 @@ export default function OfficielClient() {
         </div>
         <div className={s.catMega}>
           {CAT_CARDS.map((c) => (
-            <div key={c.name} className={s.catCard}>
+            <div key={c.name} className={s.catCard} onClick={() => handleCatClick(c.value)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && handleCatClick(c.value)}>
               <div className={s.catIcon}>{c.icon}</div>
               <div className={s.catName}>{c.name}</div>
               <div className={s.catDesc}>{c.desc}</div>
+              {(catStats[c.value] ?? 0) > 0 && (
+                <div className={s.catBadge}>{catStats[c.value]}</div>
+              )}
             </div>
           ))}
         </div>

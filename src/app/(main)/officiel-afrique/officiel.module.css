@@ -528,7 +528,7 @@
   background: var(--noir);
   border: 1px solid var(--blanc-08);
   transition: all .4s;
-  cursor: default;
+  cursor: pointer;
   position: relative;
   overflow: hidden;
 }
@@ -955,6 +955,287 @@
 .flN {
   font-weight: 700;
   color: var(--gold);
+}
+
+/* ══ CATEGORY BADGE ══ */
+.catBadge {
+  position: absolute;
+  top: .6rem;
+  right: .6rem;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 .4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold);
+  color: var(--noir);
+  font-size: .65rem;
+  font-weight: 700;
+  border-radius: 50px;
+}
+
+/* ══ ANNUAIRE ══ */
+.secAnnuaire {
+  background: var(--noir);
+}
+
+.annSearch {
+  max-width: 900px;
+  margin: 0 auto 2rem;
+}
+
+.annSearchRow {
+  display: flex;
+  gap: 0;
+}
+
+.annInput {
+  flex: 1;
+  padding: .85rem 1rem;
+  background: var(--noir-3);
+  border: 1px solid var(--blanc-08);
+  color: var(--blanc);
+  font-family: var(--font-dm-sans), 'DM Sans', sans-serif;
+  font-size: .88rem;
+  font-weight: 300;
+  outline: none;
+  transition: border .3s;
+}
+
+.annInput:focus {
+  border-color: var(--gold);
+}
+
+.annInput::placeholder {
+  color: var(--blanc-30);
+}
+
+.annSelect {
+  width: 220px;
+  padding: .85rem .9rem;
+  background: var(--noir-3);
+  border: 1px solid var(--blanc-08);
+  border-left: none;
+  color: var(--blanc);
+  font-family: var(--font-dm-sans), 'DM Sans', sans-serif;
+  font-size: .82rem;
+  font-weight: 300;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23C8A246' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right .9rem center;
+  padding-right: 2.2rem;
+}
+
+.annSelect option {
+  background: var(--noir-3);
+  color: var(--blanc);
+}
+
+.annBtn {
+  padding: .85rem 1.5rem;
+  background: var(--gold);
+  color: var(--noir);
+  border: none;
+  font-family: var(--font-dm-sans), 'DM Sans', sans-serif;
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .3s;
+  white-space: nowrap;
+}
+
+.annBtn:hover {
+  background: var(--gold-light);
+}
+
+@media (max-width: 640px) {
+  .annSearchRow {
+    flex-direction: column;
+  }
+  .annSelect {
+    width: 100%;
+    border-left: 1px solid var(--blanc-08);
+    border-top: none;
+  }
+  .annInput {
+    border-bottom: none;
+  }
+}
+
+.annLoading {
+  text-align: center;
+  color: var(--gold);
+  font-size: .85rem;
+  padding: 2rem;
+}
+
+.annMeta {
+  max-width: 900px;
+  margin: 0 auto 1rem;
+  font-size: .78rem;
+  color: var(--blanc-30);
+}
+
+.annClearFilter {
+  background: none;
+  border: none;
+  color: var(--gold);
+  cursor: pointer;
+  font-size: .78rem;
+  text-decoration: underline;
+  font-family: inherit;
+}
+
+.annEmpty {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--blanc-30);
+  font-size: .9rem;
+}
+
+.annGrid {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 700px) {
+  .annGrid { grid-template-columns: 1fr; }
+}
+
+.annCard {
+  padding: 1.5rem;
+  background: var(--noir-3);
+  border: 1px solid var(--blanc-08);
+  transition: all .4s;
+}
+
+.annCard:hover {
+  border-color: rgba(200,162,70,0.2);
+}
+
+.annCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: .5rem;
+  margin-bottom: .5rem;
+}
+
+.annCardName {
+  font-family: var(--font-playfair), 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--gold-light);
+}
+
+.annCardCat {
+  font-size: .68rem;
+  color: var(--blanc-30);
+  white-space: nowrap;
+}
+
+.annCardLoc {
+  font-size: .78rem;
+  color: var(--blanc-60);
+  margin-bottom: .6rem;
+}
+
+.annCardDesc {
+  font-size: .82rem;
+  line-height: 1.6;
+  color: var(--blanc-60);
+  font-weight: 300;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: .8rem;
+}
+
+.annCardSocial {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-bottom: .6rem;
+}
+
+.annSocialLink {
+  padding: .2rem .5rem;
+  background: var(--blanc-08);
+  font-size: .68rem;
+  color: var(--blanc-60);
+  text-decoration: none;
+  transition: all .3s;
+}
+
+.annSocialLink:hover {
+  color: var(--gold);
+  background: rgba(200,162,70,0.1);
+}
+
+.annCardContact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  padding-top: .6rem;
+  border-top: 1px solid var(--blanc-08);
+}
+
+.annContactLink {
+  font-size: .75rem;
+  color: var(--gold);
+  text-decoration: none;
+  transition: color .3s;
+}
+
+.annContactLink:hover {
+  color: var(--gold-light);
+}
+
+.annPagination {
+  max-width: 900px;
+  margin: 2rem auto 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.annPageBtn {
+  padding: .55rem 1.2rem;
+  background: var(--noir-3);
+  border: 1px solid var(--blanc-08);
+  color: var(--blanc-60);
+  font-family: var(--font-dm-sans), 'DM Sans', sans-serif;
+  font-size: .78rem;
+  cursor: pointer;
+  transition: all .3s;
+}
+
+.annPageBtn:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.annPageBtn:disabled {
+  opacity: .3;
+  cursor: not-allowed;
+}
+
+.annPageInfo {
+  font-size: .78rem;
+  color: var(--blanc-30);
 }
 
 /* ══ REVIEWS ══ */

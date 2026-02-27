@@ -35,6 +35,12 @@ enum ArticleCategory {
   OPINION
 }
 
+enum InscriptionStatus {
+  PENDING
+  VALIDATED
+  REJECTED
+}
+
 enum TicketTier {
   EARLY_BIRD
   STANDARD
@@ -301,12 +307,14 @@ model Inscription {
   whatsapp    String?
   youtube     String?
   linkedin    String?
-  description String   @db.Text
+  description String            @db.Text
   motsCles    String?
-  newsletter  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  newsletter  Boolean           @default(false)
+  status      InscriptionStatus @default(PENDING)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
   @@index([email])
   @@index([categorie])
+  @@index([status])
 }

@@ -2,7 +2,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
-import { Calendar, ShoppingBag, Newspaper, Megaphone, MapPin, ArrowRight } from "lucide-react";
+import {
+  Calendar,
+  ShoppingBag,
+  Newspaper,
+  Megaphone,
+  MapPin,
+  ArrowRight,
+} from "lucide-react";
+import ArticleCard from "@/components/journal/ArticleCard";
+import Newsletter from "@/components/journal/Newsletter";
+import styles from "./home.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -16,50 +26,6 @@ export const metadata = {
       "Événements exclusifs, marketplace artisanale et journal de la diaspora. La culture africaine rayonne à Paris.",
     type: "website",
   },
-};
-
-const features = [
-  {
-    icon: Calendar,
-    title: "Événements culturels",
-    description:
-      "Cinéma, musique, danse, gastronomie et artisanat africain. Une saison complète à Paris.",
-    href: "/evenements",
-    cta: "Voir le programme",
-  },
-  {
-    icon: ShoppingBag,
-    title: "Marketplace artisanale",
-    description:
-      "Créations uniques d'artisans africains. Mode, bijoux, décoration et bien plus.",
-    href: "/marketplace",
-    cta: "Explorer la boutique",
-  },
-  {
-    icon: Newspaper,
-    title: "L'Afropéen",
-    description:
-      "Le journal de la diaspora africaine en Europe. Actualités, culture, business et lifestyle.",
-    href: "/journal",
-    cta: "Lire le journal",
-  },
-  {
-    icon: Megaphone,
-    title: "DTA Ads",
-    description:
-      "Boostez votre visibilité auprès de la communauté africaine de Paris.",
-    href: "/ads",
-    cta: "En savoir plus",
-  },
-];
-
-const categoryColors: Record<string, string> = {
-  ACTUALITE: "bg-blue-100 text-blue-700",
-  CULTURE: "bg-purple-100 text-purple-700",
-  DIASPORA: "bg-green-100 text-green-700",
-  BUSINESS: "bg-amber-100 text-amber-700",
-  LIFESTYLE: "bg-pink-100 text-pink-700",
-  OPINION: "bg-red-100 text-red-700",
 };
 
 export default async function Home() {
@@ -77,55 +43,57 @@ export default async function Home() {
         take: 4,
       }),
       prisma.article.findMany({
-        where: { position: { not: "ARCHIVES" } },
+        where: { status: "PUBLISHED" },
         include: { author: { select: { name: true } } },
         orderBy: { publishedAt: "desc" },
         take: 3,
       }),
       prisma.event.count({ where: { published: true } }),
       prisma.product.count({ where: { published: true } }),
-      prisma.article.count({ where: { position: { not: "ARCHIVES" } } }),
+      prisma.article.count({ where: { status: "PUBLISHED" } }),
     ]);
 
   const featuredEvent = events[0];
   const otherEvents = events.slice(1);
 
   const featuredArticle = articles[0];
-  const otherArticles = articles.slice(1);
+  const sideArticles = articles.slice(1);
 
   return (
     <>
-      {/* ── A. Hero ── */}
-      <section className="relative min-h-[90vh] overflow-hidden bg-dta-dark">
+      {/* ══ 1. Hero Cinématique ══ */}
+      <section
+        className={`relative min-h-screen overflow-hidden bg-dta-dark ${styles.grainOverlay}`}
+      >
         {/* Kente strip */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-dta-accent via-emerald-700 to-dta-accent" />
+        <div className="absolute inset-x-0 top-0 z-10 h-[1.5px] bg-gradient-to-r from-dta-accent via-emerald-700 to-dta-accent" />
 
         {/* Background gradients */}
         <div className="absolute inset-0 bg-gradient-to-br from-dta-dark via-dta-char to-dta-dark" />
         <div className="absolute inset-0 opacity-15">
           <div className="h-full w-full bg-[radial-gradient(ellipse_at_top_right,_var(--color-dta-accent)_0%,_transparent_50%)]" />
         </div>
-        <div className="absolute inset-0 opacity-8">
+        <div className="absolute inset-0 opacity-[0.08]">
           <div className="h-full w-full bg-[radial-gradient(ellipse_at_bottom_left,_#166534_0%,_transparent_40%)]" />
         </div>
 
-        <div className="relative flex min-h-[90vh] flex-col justify-between px-4 sm:px-6 lg:px-8">
+        <div className="relative flex min-h-screen flex-col justify-between px-4 sm:px-6 lg:px-8">
           {/* Main hero content */}
           <div className="mx-auto flex w-full max-w-7xl flex-1 items-center">
             <div className="max-w-3xl">
-              <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-dta-accent">
-                Saison 2026 &middot; Paris
+              <p className="mag-fade-up mag-d1 text-xs font-medium uppercase tracking-[0.25em] text-dta-accent">
+                Saison 2026 &mdash; Paris
               </p>
-              <h1 className="font-serif text-4xl font-bold leading-[1.1] text-white sm:text-5xl lg:text-7xl">
+              <h1 className="mag-fade-up mag-d2 mt-6 font-serif text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-8xl">
                 La culture africaine
                 <br />
                 <span className="text-dta-accent">rayonne à Paris</span>
               </h1>
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-dta-sand/90">
+              <p className="mag-fade-up mag-d3 mt-8 max-w-xl font-serif text-lg italic leading-relaxed text-dta-sand/80">
                 Événements exclusifs, marketplace artisanale et journal de la
                 diaspora. Vivez la saison culturelle africaine 2026.
               </p>
-              <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+              <div className="mag-fade-up mag-d4 mt-10 flex flex-col gap-4 sm:flex-row">
                 <Link
                   href="/evenements"
                   className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-dta-accent-dark hover:shadow-lg"
@@ -135,7 +103,7 @@ export default async function Home() {
                 </Link>
                 <Link
                   href="/marketplace"
-                  className="inline-flex items-center justify-center rounded-[var(--radius-button)] border border-dta-taupe/30 px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:border-dta-accent hover:text-dta-accent"
+                  className="inline-flex items-center justify-center rounded-[var(--radius-button)] border border-white/30 px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:border-white hover:bg-white/5"
                 >
                   Explorer la marketplace
                 </Link>
@@ -143,100 +111,117 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* Stats row */}
-          <div className="mx-auto w-full max-w-7xl border-t border-white/10 py-8">
-            <div className="flex flex-wrap items-center justify-center gap-8 text-center sm:justify-start sm:gap-16">
-              <div>
-                <span className="font-serif text-3xl font-bold text-white">
-                  {eventCount}
-                </span>
-                <p className="mt-1 text-xs uppercase tracking-wider text-dta-sand/60">
-                  événements
-                </p>
-              </div>
-              <div className="h-8 w-px bg-white/10" />
-              <div>
-                <span className="font-serif text-3xl font-bold text-white">
-                  {productCount}
-                </span>
-                <p className="mt-1 text-xs uppercase tracking-wider text-dta-sand/60">
-                  artisans
-                </p>
-              </div>
-              <div className="h-8 w-px bg-white/10" />
-              <div>
-                <span className="font-serif text-3xl font-bold text-white">
-                  {articleCount}
-                </span>
-                <p className="mt-1 text-xs uppercase tracking-wider text-dta-sand/60">
-                  articles
-                </p>
+          {/* Stats ribbon */}
+          <div className="mag-fade-up mag-d7 mx-auto w-full max-w-7xl">
+            <div className="rounded-t-2xl bg-white/5 px-8 py-6 backdrop-blur-md">
+              <div className="flex flex-wrap items-center justify-center gap-8 text-center sm:justify-start sm:gap-16">
+                <div>
+                  <span className="font-serif text-4xl font-bold text-white">
+                    {eventCount}
+                  </span>
+                  <p className="mt-1 text-xs uppercase tracking-wider text-dta-sand/60">
+                    événements
+                  </p>
+                </div>
+                <div className="h-8 w-px bg-white/10" />
+                <div>
+                  <span className="font-serif text-4xl font-bold text-white">
+                    {productCount}
+                  </span>
+                  <p className="mt-1 text-xs uppercase tracking-wider text-dta-sand/60">
+                    créations
+                  </p>
+                </div>
+                <div className="h-8 w-px bg-white/10" />
+                <div>
+                  <span className="font-serif text-4xl font-bold text-white">
+                    {articleCount}
+                  </span>
+                  <p className="mt-1 text-xs uppercase tracking-wider text-dta-sand/60">
+                    articles
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── B. Season Banner ── */}
-      <section className="bg-dta-accent px-4 py-4">
-        <p className="text-center text-sm font-semibold tracking-wide text-white sm:text-base">
-          Saison Culturelle Africaine 2026 — Avril à Décembre &middot; Paris
+      {/* ══ 2. Bandeau Saison ══ */}
+      <section className="bg-dta-accent py-4">
+        <p className="text-center text-sm font-semibold tracking-wide text-white">
+          &mdash; Saison Culturelle Africaine 2026 &mdash; Avril à Décembre
+          &mdash; Paris &mdash;
         </p>
       </section>
 
-      {/* ── C. Upcoming Events ── */}
+      {/* ══ 3. Événements ══ */}
       <section className="bg-dta-beige px-4 py-20 sm:py-28">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between">
-            <div>
-              <h2 className="font-serif text-3xl font-bold text-dta-dark sm:text-4xl">
-                Prochains événements
-              </h2>
-              <p className="mt-3 text-dta-char/70">
-                La saison culturelle 2026 vous attend
-              </p>
+          {/* Editorial header */}
+          <div className="mb-12">
+            <div className="mag-fade-up mb-4 h-px w-16 bg-dta-accent" />
+            <p className="mag-fade-up mag-d1 text-xs font-medium uppercase tracking-[0.2em] text-dta-accent">
+              Agenda
+            </p>
+            <div className="flex items-end justify-between">
+              <div>
+                <h2 className="mag-fade-up mag-d2 mt-3 font-serif text-4xl font-bold text-dta-dark sm:text-5xl">
+                  Prochains événements
+                </h2>
+                <p className="mag-fade-up mag-d3 mt-3 font-serif italic text-dta-char/70">
+                  La saison culturelle 2026 vous attend
+                </p>
+              </div>
+              <Link
+                href="/evenements"
+                className="hidden items-center gap-1 text-sm font-medium text-dta-accent transition-colors hover:text-dta-accent-dark sm:flex"
+              >
+                Tout voir <ArrowRight size={14} />
+              </Link>
             </div>
-            <Link
-              href="/evenements"
-              className="hidden items-center gap-1 text-sm font-medium text-dta-accent transition-colors hover:text-dta-accent-dark sm:flex"
-            >
-              Tout voir <ArrowRight size={14} />
-            </Link>
           </div>
 
           {events.length > 0 ? (
-            <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-5">
-              {/* Featured event (large card) */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+              {/* Featured event — immersive card */}
               {featuredEvent && (
                 <Link
                   href={`/evenements/${featuredEvent.slug}`}
-                  className="group lg:col-span-3 rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1 overflow-hidden"
+                  className="group relative col-span-1 min-h-[480px] overflow-hidden rounded-[var(--radius-card)] lg:col-span-7"
                 >
-                  <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-dta-accent/20 to-dta-sand">
+                  <div className="absolute inset-0 bg-gradient-to-br from-dta-accent/30 to-dta-sand">
                     {featuredEvent.coverImage && (
-                      <Image src={featuredEvent.coverImage} alt={featuredEvent.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" sizes="(max-width: 1024px) 100vw, 60vw" />
+                      <Image
+                        src={featuredEvent.coverImage}
+                        alt={featuredEvent.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 1024px) 100vw, 58vw"
+                      />
                     )}
                   </div>
-                  <div className="p-6">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="relative flex h-full min-h-[480px] flex-col justify-end p-8">
                     <div className="mb-3 flex items-center gap-3">
-                      <span className="rounded-[var(--radius-full)] bg-dta-accent/10 px-3 py-1 text-xs font-semibold text-dta-accent">
+                      <span className="rounded-full bg-dta-accent px-4 py-1 text-xs font-semibold text-white">
                         {formatDate(featuredEvent.date)}
                       </span>
-                      <span className="flex items-center gap-1 text-xs text-dta-taupe">
+                      <span className="flex items-center gap-1 text-xs text-white/80">
                         <MapPin size={12} /> {featuredEvent.venue}
                       </span>
                     </div>
-                    <h3 className="font-serif text-xl font-bold text-dta-dark transition-colors group-hover:text-dta-accent sm:text-2xl">
+                    <h3 className="font-serif text-2xl font-bold text-white sm:text-3xl">
                       {featuredEvent.title}
                     </h3>
-                    <p className="mt-2 line-clamp-2 text-sm text-dta-char/70">
+                    <p className="mt-2 line-clamp-2 max-w-lg text-sm text-white/80">
                       {featuredEvent.description}
                     </p>
                     <div className="mt-4 flex items-center justify-between">
-                      <span className="text-sm font-semibold text-dta-accent">
+                      <span className="text-sm font-semibold text-white">
                         À partir de {formatPrice(featuredEvent.priceEarly)}
                       </span>
-                      <span className="text-sm font-medium text-dta-accent opacity-0 transition-opacity group-hover:opacity-100">
+                      <span className="text-sm font-medium text-white opacity-0 transition-opacity group-hover:opacity-100">
                         Voir les détails &rarr;
                       </span>
                     </div>
@@ -244,21 +229,36 @@ export default async function Home() {
                 </Link>
               )}
 
-              {/* Stacked smaller event cards */}
-              <div className="flex flex-col gap-4 lg:col-span-2">
+              {/* Stacked event cards */}
+              <div className="col-span-1 flex flex-col gap-4 lg:col-span-5">
                 {otherEvents.map((event) => (
                   <Link
                     key={event.id}
                     href={`/evenements/${event.slug}`}
                     className="group flex items-start gap-4 rounded-[var(--radius-card)] bg-white p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)]"
                   >
-                    <div className="flex-shrink-0 rounded-[var(--radius-button)] bg-dta-accent/10 px-3 py-2 text-center">
-                      <span className="block text-xs font-semibold uppercase text-dta-accent">
-                        {new Intl.DateTimeFormat("fr-FR", { month: "short" }).format(new Date(event.date))}
-                      </span>
-                      <span className="block font-serif text-2xl font-bold text-dta-dark">
-                        {new Date(event.date).getDate()}
-                      </span>
+                    {/* Thumbnail */}
+                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-dta-accent/20 to-dta-sand">
+                      {event.coverImage && (
+                        <Image
+                          src={event.coverImage}
+                          alt={event.title}
+                          fill
+                          className="object-cover"
+                          sizes="80px"
+                        />
+                      )}
+                      {/* Date callout */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 text-center">
+                        <span className="block text-[10px] font-semibold uppercase text-white/80">
+                          {new Intl.DateTimeFormat("fr-FR", {
+                            month: "short",
+                          }).format(new Date(event.date))}
+                        </span>
+                        <span className="block font-serif text-xl font-bold text-white">
+                          {new Date(event.date).getDate()}
+                        </span>
+                      </div>
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="font-serif text-base font-semibold leading-snug text-dta-dark transition-colors group-hover:text-dta-accent">
@@ -292,98 +292,231 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── D. Features ── */}
-      <section className="px-4 py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="font-serif text-3xl font-bold text-dta-dark sm:text-4xl">
-              Votre plateforme culturelle
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-dta-char/70">
-              Dream Team Africa réunit événements, commerce et média pour
-              célébrer la richesse de la culture africaine en Europe.
-            </p>
+      {/* ══ 4. Citation Éditoriale ══ */}
+      <section className="bg-dta-bg px-4 py-24">
+        <div className="mx-auto max-w-3xl text-center">
+          {/* Editorial divider */}
+          <div className={styles.editorialDivider}>
+            <span />
           </div>
 
-          <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature) => (
-              <Link
-                key={feature.title}
-                href={feature.href}
-                className="group rounded-[var(--radius-card)] bg-white p-8 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1"
-              >
-                <div className="mb-5 inline-flex rounded-2xl bg-dta-accent/10 p-4 text-dta-accent transition-colors group-hover:bg-dta-accent group-hover:text-white">
-                  <feature.icon size={28} />
-                </div>
-                <h3 className="font-serif text-lg font-semibold text-dta-dark">
-                  {feature.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-dta-char/70">
-                  {feature.description}
-                </p>
-                <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-dta-accent transition-colors group-hover:text-dta-accent-dark">
-                  {feature.cta} <ArrowRight size={14} />
-                </span>
-              </Link>
-            ))}
+          <blockquote className="mt-10 font-serif text-3xl font-light leading-[1.3] text-dta-dark sm:text-4xl lg:text-5xl">
+            &laquo;&nbsp;Événements, marketplace et média réunis pour célébrer
+            la richesse de la culture africaine en Europe.&nbsp;&raquo;
+          </blockquote>
+          <p className="mt-6 text-sm font-medium uppercase tracking-[0.15em] text-dta-taupe">
+            &mdash; Dream Team Africa
+          </p>
+
+          {/* Icon links */}
+          <div className="mt-10 flex items-center justify-center gap-8">
+            <Link
+              href="/evenements"
+              className="flex flex-col items-center gap-2 text-dta-taupe transition-colors hover:text-dta-accent"
+            >
+              <Calendar size={22} />
+              <span className="text-[10px] uppercase tracking-wider">
+                Agenda
+              </span>
+            </Link>
+            <Link
+              href="/marketplace"
+              className="flex flex-col items-center gap-2 text-dta-taupe transition-colors hover:text-dta-accent"
+            >
+              <ShoppingBag size={22} />
+              <span className="text-[10px] uppercase tracking-wider">
+                Boutique
+              </span>
+            </Link>
+            <Link
+              href="/journal"
+              className="flex flex-col items-center gap-2 text-dta-taupe transition-colors hover:text-dta-accent"
+            >
+              <Newspaper size={22} />
+              <span className="text-[10px] uppercase tracking-wider">
+                Journal
+              </span>
+            </Link>
+            <Link
+              href="/ads"
+              className="flex flex-col items-center gap-2 text-dta-taupe transition-colors hover:text-dta-accent"
+            >
+              <Megaphone size={22} />
+              <span className="text-[10px] uppercase tracking-wider">
+                Publicité
+              </span>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ── E. Featured Products ── */}
-      <section className="bg-dta-beige px-4 py-20 sm:py-28">
+      {/* ══ 5. Marketplace ══ */}
+      <section className="bg-dta-dark px-4 py-20 sm:py-28">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between">
-            <div>
-              <h2 className="font-serif text-3xl font-bold text-dta-dark sm:text-4xl">
-                Marketplace artisanale
-              </h2>
-              <p className="mt-3 text-dta-char/70">
-                Des créations uniques façonnées par les meilleurs artisans
-              </p>
+          {/* Editorial header — white */}
+          <div className="mb-12">
+            <div className="mb-4 h-px w-16 bg-dta-accent" />
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-dta-accent">
+              Marketplace
+            </p>
+            <div className="flex items-end justify-between">
+              <div>
+                <h2 className="mt-3 font-serif text-4xl font-bold text-white sm:text-5xl">
+                  Créations artisanales
+                </h2>
+                <p className="mt-3 font-serif italic text-dta-sand/70">
+                  Des pièces uniques façonnées par les meilleurs artisans
+                </p>
+              </div>
+              <Link
+                href="/marketplace"
+                className="hidden items-center gap-1 text-sm font-medium text-dta-accent transition-colors hover:text-dta-accent-light sm:flex"
+              >
+                Explorer <ArrowRight size={14} />
+              </Link>
             </div>
-            <Link
-              href="/marketplace"
-              className="hidden items-center gap-1 text-sm font-medium text-dta-accent transition-colors hover:text-dta-accent-dark sm:flex"
-            >
-              Explorer <ArrowRight size={14} />
-            </Link>
           </div>
 
           {products.length > 0 ? (
-            <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {products.map((product) => (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12">
+              {/* P1: portrait */}
+              {products[0] && (
                 <Link
-                  key={product.id}
-                  href={`/marketplace/${product.slug}`}
-                  className="group rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1"
+                  href={`/marketplace/${products[0].slug}`}
+                  className="group relative col-span-1 overflow-hidden rounded-[var(--radius-card)] sm:col-span-1 lg:col-span-5 lg:row-span-2"
                 >
-                  <div className="relative aspect-square overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-sand to-dta-beige">
-                    {product.images[0] && (
-                      <Image src={product.images[0]} alt={product.name} fill className="object-cover transition-transform duration-300 group-hover:scale-105" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" />
-                    )}
-                  </div>
-                  <div className="p-5">
-                    <h3 className="font-serif text-base font-semibold text-dta-dark transition-colors group-hover:text-dta-accent">
-                      {product.name}
-                    </h3>
-                    <p className="mt-1 text-xs text-dta-taupe">
-                      par {product.artisan.name} — {product.artisan.country}
-                    </p>
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="font-serif text-lg font-bold text-dta-accent">
-                        {formatPrice(product.price)}
-                      </span>
-                      <span className="rounded-[var(--radius-full)] bg-dta-beige px-2 py-0.5 text-xs text-dta-char">
-                        {product.category}
-                      </span>
+                  <div className="relative aspect-[3/4] lg:aspect-auto lg:h-full">
+                    <div className="absolute inset-0 bg-gradient-to-br from-dta-sand to-dta-beige">
+                      {products[0].images[0] && (
+                        <Image
+                          src={products[0].images[0]}
+                          alt={products[0].name}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          sizes="(max-width: 1024px) 100vw, 42vw"
+                        />
+                      )}
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-6">
+                      <h3 className="font-serif text-lg font-bold text-white">
+                        {products[0].name}
+                      </h3>
+                      <p className="mt-1 text-xs text-white/70">
+                        par {products[0].artisan.name}
+                      </p>
+                      <p className="mt-2 font-serif text-xl font-bold text-white">
+                        {formatPrice(products[0].price)}
+                      </p>
                     </div>
                   </div>
                 </Link>
-              ))}
+              )}
+
+              {/* P2: landscape */}
+              {products[1] && (
+                <Link
+                  href={`/marketplace/${products[1].slug}`}
+                  className="group relative col-span-1 overflow-hidden rounded-[var(--radius-card)] sm:col-span-1 lg:col-span-7"
+                >
+                  <div className="relative aspect-[16/10]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-dta-sand to-dta-beige">
+                      {products[1].images[0] && (
+                        <Image
+                          src={products[1].images[0]}
+                          alt={products[1].name}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          sizes="(max-width: 1024px) 100vw, 58vw"
+                        />
+                      )}
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-6">
+                      <h3 className="font-serif text-lg font-bold text-white">
+                        {products[1].name}
+                      </h3>
+                      <p className="mt-1 text-xs text-white/70">
+                        par {products[1].artisan.name}
+                      </p>
+                      <p className="mt-2 font-serif text-xl font-bold text-white">
+                        {formatPrice(products[1].price)}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              )}
+
+              {/* P3: landscape */}
+              {products[2] && (
+                <Link
+                  href={`/marketplace/${products[2].slug}`}
+                  className="group relative col-span-1 overflow-hidden rounded-[var(--radius-card)] sm:col-span-1 lg:col-span-7"
+                >
+                  <div className="relative aspect-[16/10]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-dta-sand to-dta-beige">
+                      {products[2].images[0] && (
+                        <Image
+                          src={products[2].images[0]}
+                          alt={products[2].name}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          sizes="(max-width: 1024px) 100vw, 58vw"
+                        />
+                      )}
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-6">
+                      <h3 className="font-serif text-lg font-bold text-white">
+                        {products[2].name}
+                      </h3>
+                      <p className="mt-1 text-xs text-white/70">
+                        par {products[2].artisan.name}
+                      </p>
+                      <p className="mt-2 font-serif text-xl font-bold text-white">
+                        {formatPrice(products[2].price)}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              )}
+
+              {/* P4: portrait */}
+              {products[3] && (
+                <Link
+                  href={`/marketplace/${products[3].slug}`}
+                  className="group relative col-span-1 overflow-hidden rounded-[var(--radius-card)] sm:col-span-1 lg:col-span-5 lg:row-span-2"
+                >
+                  <div className="relative aspect-[3/4] lg:aspect-auto lg:h-full">
+                    <div className="absolute inset-0 bg-gradient-to-br from-dta-sand to-dta-beige">
+                      {products[3].images[0] && (
+                        <Image
+                          src={products[3].images[0]}
+                          alt={products[3].name}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          sizes="(max-width: 1024px) 100vw, 42vw"
+                        />
+                      )}
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-6">
+                      <h3 className="font-serif text-lg font-bold text-white">
+                        {products[3].name}
+                      </h3>
+                      <p className="mt-1 text-xs text-white/70">
+                        par {products[3].artisan.name}
+                      </p>
+                      <p className="mt-2 font-serif text-xl font-bold text-white">
+                        {formatPrice(products[3].price)}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              )}
             </div>
           ) : (
-            <p className="mt-10 text-center text-dta-char/60">
+            <p className="mt-10 text-center text-dta-sand/60">
               La boutique ouvre bientôt.
             </p>
           )}
@@ -399,90 +532,55 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── F. Latest Articles ── */}
-      <section className="px-4 py-20 sm:py-28">
+      {/* ══ 6. L'Afropéen — Articles ══ */}
+      <section className="bg-dta-beige px-4 py-20 sm:py-28">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between">
-            <div>
-              <h2 className="font-serif text-3xl font-bold text-dta-dark sm:text-4xl">
-                L&apos;Afropéen — Le journal
-              </h2>
-              <p className="mt-3 text-dta-char/70">
-                Actualités, culture et lifestyle de la diaspora
-              </p>
+          {/* Editorial header */}
+          <div className="mb-12">
+            <div className="mb-4 h-px w-16 bg-dta-accent" />
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-dta-accent">
+              L&apos;Afropéen
+            </p>
+            <div className="flex items-end justify-between">
+              <div>
+                <h2 className="mt-3 font-serif text-4xl font-bold text-dta-dark sm:text-5xl">
+                  Le journal
+                </h2>
+                <p className="mt-3 font-serif italic text-dta-char/70">
+                  Actualités, culture et lifestyle de la diaspora
+                </p>
+              </div>
+              <Link
+                href="/journal"
+                className="hidden items-center gap-1 text-sm font-medium text-dta-accent transition-colors hover:text-dta-accent-dark sm:flex"
+              >
+                Lire le journal <ArrowRight size={14} />
+              </Link>
             </div>
-            <Link
-              href="/journal"
-              className="hidden items-center gap-1 text-sm font-medium text-dta-accent transition-colors hover:text-dta-accent-dark sm:flex"
-            >
-              Lire le journal <ArrowRight size={14} />
-            </Link>
           </div>
 
           {articles.length > 0 ? (
-            <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-5">
-              {/* Featured article */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+              {/* Featured article — hero variant */}
               {featuredArticle && (
-                <Link
-                  href={`/journal/${featuredArticle.slug}`}
-                  className="group lg:col-span-3 rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1 overflow-hidden"
-                >
-                  <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-dta-accent/20 to-dta-sand">
-                    {featuredArticle.coverImage && (
-                      <Image src={featuredArticle.coverImage} alt={featuredArticle.title} fill className="object-cover transition-transform duration-300 group-hover:scale-105" sizes="(max-width: 1024px) 100vw, 60vw" />
-                    )}
-                  </div>
-                  <div className="p-6">
-                    <div className="mb-3 flex items-center gap-2">
-                      <span
-                        className={`rounded-[var(--radius-full)] px-3 py-1 text-xs font-medium ${categoryColors[featuredArticle.category] || ""}`}
-                      >
-                        {featuredArticle.category}
-                      </span>
-                      <span className="text-xs text-dta-taupe">
-                        {formatDate(featuredArticle.publishedAt)}
-                      </span>
-                    </div>
-                    <h3 className="font-serif text-xl font-bold text-dta-dark transition-colors group-hover:text-dta-accent sm:text-2xl">
-                      {featuredArticle.title}
-                    </h3>
-                    <p className="mt-2 line-clamp-2 text-sm text-dta-char/70">
-                      {featuredArticle.excerpt}
-                    </p>
-                    <p className="mt-4 text-xs text-dta-taupe">
-                      Par {featuredArticle.author.name}
-                    </p>
-                  </div>
-                </Link>
+                <div className="lg:col-span-3">
+                  <ArticleCard
+                    article={featuredArticle}
+                    variant="hero"
+                    showLifecycleDay
+                  />
+                </div>
               )}
 
-              {/* Stacked smaller article cards */}
+              {/* Side articles */}
               <div className="flex flex-col gap-4 lg:col-span-2">
-                {otherArticles.map((article) => (
-                  <Link
+                {sideArticles.map((article) => (
+                  <ArticleCard
                     key={article.id}
-                    href={`/journal/${article.slug}`}
-                    className="group flex gap-4 rounded-[var(--radius-card)] bg-white p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)]"
-                  >
-                    <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-dta-accent/15 to-dta-sand">
-                      {article.coverImage && (
-                        <Image src={article.coverImage} alt={article.title} fill className="object-cover" sizes="96px" />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span
-                        className={`inline-block rounded-[var(--radius-full)] px-2 py-0.5 text-[10px] font-medium ${categoryColors[article.category] || ""}`}
-                      >
-                        {article.category}
-                      </span>
-                      <h3 className="mt-1 font-serif text-sm font-semibold leading-snug text-dta-dark transition-colors group-hover:text-dta-accent line-clamp-2">
-                        {article.title}
-                      </h3>
-                      <p className="mt-1 text-xs text-dta-taupe">
-                        {formatDate(article.publishedAt)}
-                      </p>
-                    </div>
-                  </Link>
+                    article={article}
+                    variant="side"
+                    showLifecycleDay
+                  />
                 ))}
               </div>
             </div>
@@ -503,58 +601,121 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── G. L'Officiel d'Afrique Promo ── */}
+      {/* ══ 7. L'Officiel d'Afrique ══ */}
       <section className="bg-dta-dark px-4 py-20 sm:py-28">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-medium uppercase tracking-[0.15em] text-dta-accent">
-              Nouveau
-            </p>
-            <h2 className="mt-4 font-serif text-3xl font-bold text-white sm:text-4xl">
-              L&apos;Officiel d&apos;Afrique 2026
-            </h2>
-            <p className="mt-4 text-lg leading-relaxed text-dta-sand/80">
-              Le premier annuaire professionnel de la diaspora africaine à
-              Paris. Référencez votre entreprise gratuitement auprès de
-              milliers de professionnels et particuliers.
-            </p>
-            <Link
-              href="/officiel-afrique"
-              className="mt-8 inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-dta-accent-dark hover:shadow-lg"
-            >
-              Inscrire mon entreprise
-              <ArrowRight size={16} />
-            </Link>
+          <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-5">
+            {/* Text — left 60% */}
+            <div className="lg:col-span-3">
+              <span className="inline-block rounded-full bg-dta-accent/20 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-dta-accent">
+                Nouveau
+              </span>
+              <h2 className="mt-6 font-serif text-4xl font-bold text-white sm:text-5xl">
+                L&apos;Officiel d&apos;Afrique 2026
+              </h2>
+              <p className="mt-4 max-w-lg font-serif text-lg italic leading-relaxed text-dta-sand/80">
+                Le premier annuaire professionnel de la diaspora africaine à
+                Paris. Référencez votre entreprise gratuitement auprès de
+                milliers de professionnels et particuliers.
+              </p>
+              <Link
+                href="/officiel-afrique"
+                className="mt-8 inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-dta-accent-dark hover:shadow-lg"
+              >
+                Inscrire mon entreprise
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+
+            {/* Decorative watermark — right */}
+            <div className="hidden select-none lg:col-span-2 lg:flex lg:items-center lg:justify-center">
+              <span className="font-serif text-[180px] font-bold leading-none text-white/[0.03]">
+                2026
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── H. Community CTA ── */}
-      <section className="px-4 py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="rounded-[var(--radius-card)] bg-gradient-to-br from-dta-beige to-white px-8 py-16 text-center sm:px-16">
-            <h2 className="font-serif text-3xl font-bold text-dta-dark sm:text-4xl">
-              Rejoignez la communauté
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-dta-char/70">
-              Que vous soyez amateur de culture, artisan créateur ou
-              professionnel, Dream Team Africa est votre plateforme.
-            </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link
-                href="/auth/signup"
-                className="inline-flex items-center rounded-[var(--radius-button)] bg-dta-accent px-8 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-dta-accent-dark"
-              >
-                Créer un compte
-              </Link>
-              <Link
-                href="/auth/signup?role=artisan"
-                className="inline-flex items-center rounded-[var(--radius-button)] border-2 border-dta-accent px-8 py-3.5 text-sm font-semibold text-dta-accent transition-all duration-300 hover:bg-dta-accent hover:text-white"
-              >
-                Devenir artisan
-              </Link>
+      {/* ══ 8. Newsletter ══ */}
+      <Newsletter />
+
+      {/* ══ 9. Communauté ══ */}
+      <section className="bg-gradient-to-b from-dta-bg to-dta-beige px-4 py-20 sm:py-28">
+        <div className="mx-auto max-w-3xl text-center">
+          {/* Editorial divider */}
+          <div className={styles.editorialDivider}>
+            <span />
+          </div>
+
+          <h2 className="mt-10 font-serif text-4xl font-bold text-dta-dark sm:text-5xl">
+            Rejoignez la communauté
+          </h2>
+          <p className="mt-4 font-serif italic text-dta-char/70">
+            Que vous soyez amateur de culture, artisan créateur ou
+            professionnel, Dream Team Africa est votre plateforme.
+          </p>
+
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Link
+              href="/auth/signup"
+              className="inline-flex items-center rounded-[var(--radius-button)] bg-dta-accent px-8 py-3.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-dta-accent-dark"
+            >
+              Créer un compte
+            </Link>
+            <Link
+              href="/auth/signup?role=artisan"
+              className="inline-flex items-center rounded-[var(--radius-button)] border-2 border-dta-accent px-8 py-3.5 text-sm font-semibold text-dta-accent transition-all duration-300 hover:bg-dta-accent hover:text-white"
+            >
+              Devenir artisan
+            </Link>
+          </div>
+
+          {/* Stats recall */}
+          <div className="mt-14 flex items-center justify-center gap-10">
+            <div>
+              <span className="font-serif text-3xl font-bold text-dta-accent">
+                {eventCount}
+              </span>
+              <p className="mt-1 text-xs uppercase tracking-wider text-dta-taupe">
+                événements
+              </p>
+            </div>
+            <div className="h-6 w-px bg-dta-taupe/30" />
+            <div>
+              <span className="font-serif text-3xl font-bold text-dta-accent">
+                {productCount}
+              </span>
+              <p className="mt-1 text-xs uppercase tracking-wider text-dta-taupe">
+                créations
+              </p>
+            </div>
+            <div className="h-6 w-px bg-dta-taupe/30" />
+            <div>
+              <span className="font-serif text-3xl font-bold text-dta-accent">
+                {articleCount}
+              </span>
+              <p className="mt-1 text-xs uppercase tracking-wider text-dta-taupe">
+                articles
+              </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ══ 10. Colophon Éditorial ══ */}
+      <section className="bg-dta-dark py-8">
+        <div className="flex items-center justify-center gap-3">
+          <Image
+            src="/logo-dta.png"
+            alt="Dream Team Africa"
+            width={32}
+            height={32}
+            className="opacity-40"
+          />
+          <p className="text-xs text-dta-sand/40">
+            Dream Team Africa &mdash; Paris, 2026
+          </p>
         </div>
       </section>
     </>

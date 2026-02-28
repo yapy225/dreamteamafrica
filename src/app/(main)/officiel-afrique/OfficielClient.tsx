@@ -117,6 +117,7 @@ export default function OfficielClient() {
   const [nlEmail, setNlEmail] = useState("");
   const [nlDone, setNlDone] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [heroSearch, setHeroSearch] = useState("");
 
   const [form, setForm] = useState({
     entreprise: "", categorie: "", directeur: "",
@@ -129,8 +130,22 @@ export default function OfficielClient() {
   });
 
   const formCardRef = useRef<HTMLDivElement>(null);
+  const catSectionRef = useRef<HTMLDivElement>(null);
 
   useScrollReveal();
+
+  const filteredCats = heroSearch.trim()
+    ? CAT_CARDS.filter((c) =>
+        c.name.toLowerCase().includes(heroSearch.toLowerCase()) ||
+        c.desc.toLowerCase().includes(heroSearch.toLowerCase())
+      )
+    : CAT_CARDS;
+
+  const handleHeroSearch = () => {
+    if (heroSearch.trim()) {
+      catSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const updateForm = useCallback((field: string, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -250,6 +265,19 @@ export default function OfficielClient() {
               <div><div className={s.metricVal}>21</div><div className={s.metricLbl}>Catégories</div></div>
               <div><div className={s.metricVal}>100%</div><div className={s.metricLbl}>Gratuit</div></div>
               <div><div className={s.metricVal}>100%</div><div className={s.metricLbl}>Digital</div></div>
+            </div>
+            <div className={s.heroSearchBar}>
+              <input
+                className={s.heroSearchInput}
+                type="text"
+                placeholder="Rechercher une catégorie… (ex: artistes, restaurants, médias)"
+                value={heroSearch}
+                onChange={(e) => setHeroSearch(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") handleHeroSearch(); }}
+              />
+              <button className={s.heroSearchBtn} onClick={handleHeroSearch}>
+                Rechercher
+              </button>
             </div>
           </div>
 
@@ -438,20 +466,29 @@ export default function OfficielClient() {
       </section>
 
       {/* ═══ CATEGORIES ═══ */}
-      <section className={`${s.sec} ${s.secCat}`} id="rubriques">
+      <section className={`${s.sec} ${s.secCat}`} id="rubriques" ref={catSectionRef}>
         <div className={`${s.secHeader} ${s.reveal}`}>
           <div className={s.secLabel}>L&apos;annuaire complet</div>
           <h2 className={s.secTitle}>+20 rubriques pour <span className={s.gold}>toute la diaspora</span></h2>
           <p className={s.secSubtitle}>Chaque rubrique est précédée d&apos;interviews de personnalités emblématiques : Artistes, Chefs de Produits, Managers, Directeurs artistiques…</p>
         </div>
+        {heroSearch.trim() && (
+          <div className={s.catFilterInfo}>
+            {filteredCats.length} catégorie{filteredCats.length !== 1 ? "s" : ""} pour &laquo;&nbsp;{heroSearch.trim()}&nbsp;&raquo;
+            <button className={s.catFilterClear} onClick={() => setHeroSearch("")}>Effacer</button>
+          </div>
+        )}
         <div className={s.catMega}>
-          {CAT_CARDS.map((c) => (
+          {filteredCats.map((c) => (
             <div key={c.name} className={s.catCard} onClick={scrollToForm} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && scrollToForm()}>
               <div className={s.catIcon}>{c.icon}</div>
               <div className={s.catName}>{c.name}</div>
               <div className={s.catDesc}>{c.desc}</div>
             </div>
           ))}
+          {filteredCats.length === 0 && (
+            <div className={s.catEmpty}>Aucune catégorie ne correspond à votre recherche.</div>
+          )}
         </div>
       </section>
 

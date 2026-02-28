@@ -481,13 +481,13 @@ export default async function Home() {
                 </Link>
               )}
 
-              {/* P4: portrait */}
+              {/* P4: full-width landscape banner */}
               {products[3] && (
                 <Link
                   href={`/marketplace/${products[3].slug}`}
-                  className="group relative col-span-1 overflow-hidden rounded-[var(--radius-card)] sm:col-span-1 lg:col-span-5 lg:row-span-2"
+                  className="group relative col-span-1 overflow-hidden rounded-[var(--radius-card)] sm:col-span-2 lg:col-span-12"
                 >
-                  <div className="relative aspect-[3/4] lg:aspect-auto lg:h-full">
+                  <div className="relative aspect-[16/10] lg:aspect-[21/9]">
                     <div className="absolute inset-0 bg-gradient-to-br from-dta-sand to-dta-beige">
                       {products[3].images[0] && (
                         <Image
@@ -495,7 +495,7 @@ export default async function Home() {
                           alt={products[3].name}
                           fill
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          sizes="(max-width: 1024px) 100vw, 42vw"
+                          sizes="(max-width: 1024px) 100vw, 100vw"
                         />
                       )}
                     </div>

@@ -47,8 +47,6 @@ export async function GET(request: Request) {
           tiktok: true,
           linkedin: true,
           youtube: true,
-          email: true,
-          mobile: true,
         },
         orderBy: { entreprise: "asc" },
         skip: (page - 1) * perPage,

@@ -118,17 +118,6 @@ export default function OfficielClient() {
   const [nlDone, setNlDone] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  // Annuaire state
-  const [annQuery, setAnnQuery] = useState("");
-  const [annCat, setAnnCat] = useState("");
-  const [annPage, setAnnPage] = useState(1);
-  const [annResults, setAnnResults] = useState<{
-    data: { id: string; entreprise: string; categorie: string; ville: string; pays: string; description: string; siteWeb: string | null; facebook: string | null; instagram: string | null; tiktok: string | null; linkedin: string | null; youtube: string | null; email: string; mobile: string }[];
-    total: number; page: number; totalPages: number;
-  } | null>(null);
-  const [annLoading, setAnnLoading] = useState(false);
-  const [catStats, setCatStats] = useState<Record<string, number>>({});
-
   const [form, setForm] = useState({
     entreprise: "", categorie: "", directeur: "",
     adresse: "", ville: "", codePostal: "", pays: "",
@@ -140,61 +129,8 @@ export default function OfficielClient() {
   });
 
   const formCardRef = useRef<HTMLDivElement>(null);
-  const annuaireRef = useRef<HTMLDivElement>(null);
 
   useScrollReveal();
-  // Fetch category stats on mount
-  useEffect(() => {
-    fetch("/api/inscription/stats")
-      .then((r) => r.json())
-      .then((d) => setCatStats(d))
-      .catch(() => {});
-  }, []);
-
-  const searchAnnuaire = useCallback(
-    async (cat?: string, page?: number) => {
-      setAnnLoading(true);
-      const params = new URLSearchParams();
-      const q = annQuery.trim();
-      const c = cat ?? annCat;
-      const p = page ?? annPage;
-      if (q) params.set("q", q);
-      if (c) params.set("categorie", c);
-      params.set("page", String(p));
-      try {
-        const res = await fetch(`/api/inscription/annuaire?${params}`);
-        const data = await res.json();
-        setAnnResults(data);
-      } catch {
-        setAnnResults(null);
-      } finally {
-        setAnnLoading(false);
-      }
-    },
-    [annQuery, annCat, annPage]
-  );
-
-  const handleCatClick = useCallback(
-    (catValue: string) => {
-      setAnnCat(catValue);
-      setAnnPage(1);
-      setAnnQuery("");
-      annuaireRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      // Fetch after state update
-      setTimeout(() => {
-        const params = new URLSearchParams();
-        params.set("categorie", catValue);
-        params.set("page", "1");
-        setAnnLoading(true);
-        fetch(`/api/inscription/annuaire?${params}`)
-          .then((r) => r.json())
-          .then((d) => setAnnResults(d))
-          .catch(() => setAnnResults(null))
-          .finally(() => setAnnLoading(false));
-      }, 50);
-    },
-    []
-  );
 
   const updateForm = useCallback((field: string, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -501,105 +437,6 @@ export default function OfficielClient() {
         </div>
       </section>
 
-      {/* ═══ ANNUAIRE ═══ */}
-      <section className={`${s.sec} ${s.secAnnuaire}`} id="annuaire" ref={annuaireRef}>
-        <div className={`${s.secHeader} ${s.reveal}`}>
-          <div className={s.secLabel}>Base de données</div>
-          <h2 className={s.secTitle}>Consulter <span className={s.gold}>l&apos;annuaire</span></h2>
-          <p className={s.secSubtitle}>Recherchez parmi les entreprises validées de la diaspora africaine</p>
-        </div>
-        <div className={s.annSearch}>
-          <div className={s.annSearchRow}>
-            <input
-              className={s.annInput}
-              type="text"
-              placeholder="Rechercher par nom, ville ou mot-clé…"
-              value={annQuery}
-              onChange={(e) => setAnnQuery(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") { setAnnPage(1); searchAnnuaire(annCat, 1); } }}
-            />
-            <select
-              className={s.annSelect}
-              value={annCat}
-              onChange={(e) => { setAnnCat(e.target.value); setAnnPage(1); }}
-            >
-              <option value="">Toutes les catégories</option>
-              {CATEGORIES.map((g) =>
-                g.items.map((it) => (
-                  <option key={it.value} value={it.value}>{it.label}</option>
-                ))
-              )}
-            </select>
-            <button className={s.annBtn} onClick={() => { setAnnPage(1); searchAnnuaire(annCat, 1); }}>
-              Rechercher
-            </button>
-          </div>
-        </div>
-
-        {annLoading && (
-          <div className={s.annLoading}>Chargement…</div>
-        )}
-
-        {annResults && !annLoading && (
-          <>
-            <div className={s.annMeta}>
-              {annResults.total} résultat{annResults.total !== 1 ? "s" : ""}
-              {annCat && <> — <button className={s.annClearFilter} onClick={() => { setAnnCat(""); setAnnPage(1); searchAnnuaire("", 1); }}>Effacer le filtre</button></>}
-            </div>
-
-            {annResults.data.length === 0 ? (
-              <div className={s.annEmpty}>
-                Aucune entreprise trouvée. Essayez un autre terme ou catégorie.
-              </div>
-            ) : (
-              <div className={s.annGrid}>
-                {annResults.data.map((item) => (
-                  <div key={item.id} className={s.annCard}>
-                    <div className={s.annCardTop}>
-                      <div className={s.annCardName}>{item.entreprise}</div>
-                      <div className={s.annCardCat}>
-                        {CAT_CARDS.find((c) => c.value === item.categorie)?.icon}{" "}
-                        {CAT_CARDS.find((c) => c.value === item.categorie)?.name || item.categorie}
-                      </div>
-                    </div>
-                    <div className={s.annCardLoc}>{item.ville}, {item.pays}</div>
-                    <p className={s.annCardDesc}>{item.description}</p>
-                    <div className={s.annCardSocial}>
-                      {item.siteWeb && <a href={item.siteWeb.startsWith("http") ? item.siteWeb : `https://${item.siteWeb}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>🌐 Site</a>}
-                      {item.facebook && <a href={item.facebook.startsWith("http") ? item.facebook : `https://facebook.com/${item.facebook}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>📘 Facebook</a>}
-                      {item.instagram && <a href={item.instagram.startsWith("http") ? item.instagram : `https://instagram.com/${item.instagram}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>📸 Instagram</a>}
-                      {item.tiktok && <a href={item.tiktok.startsWith("http") ? item.tiktok : `https://tiktok.com/${item.tiktok}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>🎵 TikTok</a>}
-                      {item.linkedin && <a href={item.linkedin.startsWith("http") ? item.linkedin : `https://linkedin.com/in/${item.linkedin}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>💼 LinkedIn</a>}
-                      {item.youtube && <a href={item.youtube.startsWith("http") ? item.youtube : `https://youtube.com/${item.youtube}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>▶️ YouTube</a>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {annResults.totalPages > 1 && (
-              <div className={s.annPagination}>
-                <button
-                  className={s.annPageBtn}
-                  disabled={annResults.page <= 1}
-                  onClick={() => { const p = annResults.page - 1; setAnnPage(p); searchAnnuaire(annCat, p); }}
-                >
-                  ← Précédent
-                </button>
-                <span className={s.annPageInfo}>Page {annResults.page} / {annResults.totalPages}</span>
-                <button
-                  className={s.annPageBtn}
-                  disabled={annResults.page >= annResults.totalPages}
-                  onClick={() => { const p = annResults.page + 1; setAnnPage(p); searchAnnuaire(annCat, p); }}
-                >
-                  Suivant →
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </section>
-
       {/* ═══ CATEGORIES ═══ */}
       <section className={`${s.sec} ${s.secCat}`} id="rubriques">
         <div className={`${s.secHeader} ${s.reveal}`}>
@@ -609,13 +446,10 @@ export default function OfficielClient() {
         </div>
         <div className={s.catMega}>
           {CAT_CARDS.map((c) => (
-            <div key={c.name} className={s.catCard} onClick={() => handleCatClick(c.value)} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && handleCatClick(c.value)}>
+            <div key={c.name} className={s.catCard} onClick={scrollToForm} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && scrollToForm()}>
               <div className={s.catIcon}>{c.icon}</div>
               <div className={s.catName}>{c.name}</div>
               <div className={s.catDesc}>{c.desc}</div>
-              {(catStats[c.value] ?? 0) > 0 && (
-                <div className={s.catBadge}>{catStats[c.value]}</div>
-              )}
             </div>
           ))}
         </div>

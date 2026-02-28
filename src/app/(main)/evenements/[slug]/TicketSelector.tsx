@@ -11,9 +11,11 @@ interface TicketSelectorProps {
   tier: "EARLY_BIRD" | "STANDARD" | "VIP";
   price: number;
   highlight: boolean;
+  sessionLabel?: string;
+  sessionPrice?: number | null;
 }
 
-export default function TicketSelector({ eventId, tier, price, highlight }: TicketSelectorProps) {
+export default function TicketSelector({ eventId, tier, price, highlight, sessionLabel, sessionPrice }: TicketSelectorProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
@@ -30,7 +32,13 @@ export default function TicketSelector({ eventId, tier, price, highlight }: Tick
       const res = await fetch("/api/checkout/tickets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventId, tier, quantity }),
+        body: JSON.stringify({
+          eventId,
+          tier,
+          quantity,
+          sessionLabel,
+          ...(typeof sessionPrice === "number" ? { sessionPrice } : {}),
+        }),
       });
 
       const data = await res.json();

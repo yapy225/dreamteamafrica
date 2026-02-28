@@ -5,6 +5,7 @@ import { Calendar, MapPin, Users, Clock, ArrowLeft, ExternalLink, Film, Music, M
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
 import TicketSelector from "./TicketSelector";
+import TicketSectionClient from "./TicketSectionClient";
 import ShareButton from "./ShareButton";
 
 export const dynamic = "force-dynamic";
@@ -398,7 +399,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           <div className="text-center">
             <h2 className="font-serif text-3xl font-bold text-dta-dark">Billetterie</h2>
             <p className="mt-2 text-sm text-dta-char/70">
-              Choisissez votre formule et réservez vos places
+              {Array.isArray(event.program) && event.program.length > 0
+                ? "Choisissez votre séance puis votre formule"
+                : "Choisissez votre formule et réservez vos places"}
             </p>
           </div>
 
@@ -423,58 +426,68 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
             </div>
           )}
 
-          {/* Ticket tiers */}
-          <div className="mt-10">
-            {soldOut ? (
-              <div className="mx-auto max-w-md rounded-[var(--radius-card)] bg-white p-8 text-center shadow-[var(--shadow-card)]">
-                <p className="font-serif text-2xl font-bold text-dta-dark">Complet</p>
-                <p className="mt-3 text-sm text-dta-char/70">
-                  Cet événement affiche complet. Inscrivez-vous pour être notifié en cas de désistement.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                {tiers.map((tier) => (
-                  <div
-                    key={tier.id}
-                    className={`rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-200 ${
-                      tier.highlight
-                        ? "ring-2 ring-dta-accent md:scale-105"
-                        : ""
-                    }`}
-                  >
-                    {tier.highlight && (
-                      <span className="mb-3 inline-block rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
-                        Populaire
-                      </span>
-                    )}
-                    <div className="flex items-baseline justify-between">
-                      <h3 className="font-serif text-lg font-bold text-dta-dark">{tier.name}</h3>
-                      <span className="font-serif text-2xl font-bold text-dta-accent">
-                        {formatPrice(tier.price)}
-                      </span>
+          {/* Ticket tiers — with or without session selector */}
+          {Array.isArray(event.program) && event.program.length > 0 ? (
+            <TicketSectionClient
+              eventId={event.id}
+              eventSlug={event.slug}
+              tiers={tiers}
+              soldOut={soldOut}
+              sessions={(event.program as Array<{date:string;time:string;venue:string;address:string;title:string;type:string;price?:number;pricing:string}>)}
+            />
+          ) : (
+            <div className="mt-10">
+              {soldOut ? (
+                <div className="mx-auto max-w-md rounded-[var(--radius-card)] bg-white p-8 text-center shadow-[var(--shadow-card)]">
+                  <p className="font-serif text-2xl font-bold text-dta-dark">Complet</p>
+                  <p className="mt-3 text-sm text-dta-char/70">
+                    Cet événement affiche complet. Inscrivez-vous pour être notifié en cas de désistement.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                  {tiers.map((tier) => (
+                    <div
+                      key={tier.id}
+                      className={`rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-200 ${
+                        tier.highlight
+                          ? "ring-2 ring-dta-accent md:scale-105"
+                          : ""
+                      }`}
+                    >
+                      {tier.highlight && (
+                        <span className="mb-3 inline-block rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
+                          Populaire
+                        </span>
+                      )}
+                      <div className="flex items-baseline justify-between">
+                        <h3 className="font-serif text-lg font-bold text-dta-dark">{tier.name}</h3>
+                        <span className="font-serif text-2xl font-bold text-dta-accent">
+                          {formatPrice(tier.price)}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-dta-char/60">{tier.description}</p>
+                      <ul className="mt-4 space-y-2">
+                        {tier.features.map((f) => (
+                          <li key={f} className="flex items-center gap-2 text-xs text-dta-char/70">
+                            <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-dta-accent" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                      <TicketSelector
+                        eventId={event.id}
+                        eventSlug={event.slug}
+                        tier={tier.id}
+                        price={tier.price}
+                        highlight={tier.highlight}
+                      />
                     </div>
-                    <p className="mt-1 text-xs text-dta-char/60">{tier.description}</p>
-                    <ul className="mt-4 space-y-2">
-                      {tier.features.map((f) => (
-                        <li key={f} className="flex items-center gap-2 text-xs text-dta-char/70">
-                          <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-dta-accent" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                    <TicketSelector
-                      eventId={event.id}
-                      eventSlug={event.slug}
-                      tier={tier.id}
-                      price={tier.price}
-                      highlight={tier.highlight}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

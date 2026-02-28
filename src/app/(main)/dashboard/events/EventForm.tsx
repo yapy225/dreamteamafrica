@@ -24,6 +24,7 @@ interface ProgramItem {
   title: string;
   director: string;
   synopsis: string;
+  price: string;
   pricing: string;
   note: string;
 }
@@ -37,6 +38,7 @@ const emptyProgramItem: ProgramItem = {
   title: "",
   director: "",
   synopsis: "",
+  price: "0",
   pricing: "",
   note: "",
 };
@@ -556,10 +558,28 @@ export default function EventForm({ initialData }: EventFormProps) {
                 placeholder="Synopsis de l'oeuvre..."
               />
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div>
                 <label className="mb-1 block text-xs text-dta-taupe">
-                  Tarification
+                  Prix (€)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={item.price}
+                  onChange={(e) => {
+                    const updated = [...program];
+                    updated[idx] = { ...item, price: e.target.value };
+                    setProgram(updated);
+                  }}
+                  className={inputClass}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">
+                  Label tarif (affiché)
                 </label>
                 <input
                   value={item.pricing}

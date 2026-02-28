@@ -10,15 +10,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
 
-    const { eventId, tier, quantity } = await request.json();
+    const { eventId, tier, quantity, sessionLabel, sessionPrice } =
+      await request.json();
 
     if (!eventId || !tier || !quantity || quantity < 1 || quantity > 10) {
-      return NextResponse.json({ error: "Données invalides." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Données invalides." },
+        { status: 400 },
+      );
     }
 
     const validTiers = ["EARLY_BIRD", "STANDARD", "VIP"];
     if (!validTiers.includes(tier)) {
-      return NextResponse.json({ error: "Tier invalide." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Tier invalide." },
+        { status: 400 },
+      );
     }
 
     const event = await prisma.event.findUnique({
@@ -27,29 +34,61 @@ export async function POST(request: Request) {
     });
 
     if (!event) {
-      return NextResponse.json({ error: "Événement introuvable." }, { status: 404 });
+      return NextResponse.json(
+        { error: "Événement introuvable." },
+        { status: 404 },
+      );
     }
 
     const remaining = event.capacity - event._count.tickets;
     if (remaining < quantity) {
       return NextResponse.json(
         { error: `Seulement ${remaining} place(s) restante(s).` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const priceMap: Record<string, number> = {
-      EARLY_BIRD: event.priceEarly,
-      STANDARD: event.priceStd,
-      VIP: event.priceVip,
-    };
-    const unitPrice = priceMap[tier];
+    // Use session-specific price if provided, otherwise use tier price
+    let unitPrice: number;
+    const parsedSessionPrice =
+      sessionPrice != null && !isNaN(Number(sessionPrice))
+        ? Number(sessionPrice)
+        : null;
+    if (parsedSessionPrice !== null) {
+      // Validate session price against program data
+      const programItems = event.program as
+        | Array<{ price?: number | string }>
+        | null;
+      const validSessionPrice = programItems?.some(
+        (item) =>
+          item.price != null && Number(item.price) === parsedSessionPrice,
+      );
+      if (!validSessionPrice) {
+        return NextResponse.json(
+          { error: "Prix de séance invalide." },
+          { status: 400 },
+        );
+      }
+      unitPrice = parsedSessionPrice;
+    } else {
+      const priceMap: Record<string, number> = {
+        EARLY_BIRD: event.priceEarly,
+        STANDARD: event.priceStd,
+        VIP: event.priceVip,
+      };
+      unitPrice = priceMap[tier];
+    }
 
     const tierLabels: Record<string, string> = {
       EARLY_BIRD: "Early Bird",
       STANDARD: "Standard",
       VIP: "VIP",
     };
+
+    const productName =
+      parsedSessionPrice !== null && sessionLabel
+        ? `${event.title} — ${sessionLabel.split(" — ")[0]}`
+        : `${event.title} — ${tierLabels[tier]}`;
 
     const checkoutSession = await getStripe().checkout.sessions.create({
       mode: "payment",
@@ -60,8 +99,10 @@ export async function POST(request: Request) {
             currency: "eur",
             unit_amount: Math.round(unitPrice * 100),
             product_data: {
-              name: `${event.title} — ${tierLabels[tier]}`,
-              description: `${event.venue} — ${new Date(event.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`,
+              name: productName,
+              description: sessionLabel
+                ? sessionLabel
+                : `${event.venue} — ${new Date(event.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`,
             },
           },
           quantity,
@@ -74,6 +115,7 @@ export async function POST(request: Request) {
         tier,
         quantity: String(quantity),
         unitPrice: String(unitPrice),
+        ...(sessionLabel && { sessionLabel }),
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/evenements/confirmation/{CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/evenements/${event.slug}`,

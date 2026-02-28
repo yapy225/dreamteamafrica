@@ -40,7 +40,7 @@ export default async function EditEventPage({
               : null,
             capacity: event.capacity,
             showCapacity: event.showCapacity,
-            program: (event.program as Array<{date:string;time:string;venue:string;address:string;type:string;title:string;director:string;synopsis:string;pricing:string;note:string}>) ?? null,
+            program: (event.program as Array<{date:string;time:string;venue:string;address:string;type:string;title:string;director:string;synopsis:string;price:string;pricing:string;note:string}>) ?? null,
             priceEarly: event.priceEarly,
             priceStd: event.priceStd,
             priceVip: event.priceVip,

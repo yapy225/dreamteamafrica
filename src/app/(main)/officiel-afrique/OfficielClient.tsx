@@ -65,14 +65,6 @@ const CAT_CARDS = [
   { value: "international", icon: "🌍", name: "International", desc: "Europe, Japon, Canada, USA…" },
 ];
 
-const FAQ_ITEMS = [
-  { q: "L'inscription est-elle vraiment gratuite ?", a: "Oui, l'inscription de base est 100% gratuite et sans engagement. Votre entreprise sera visible dans l'annuaire digital 2026. Des options de mise en avant premium (encart publicitaire, interview, logo…) sont disponibles en option." },
-  { q: "Qui peut s'inscrire dans l'annuaire ?", a: "Toute entreprise, association, artiste, club sportif ou professionnel lié à la diaspora africaine : musique, restauration, mode, sport, ambassades, événementiel, coopération, médias, services…" },
-  { q: "Comment les particuliers trouvent-ils mon entreprise ?", a: "L'annuaire est organisé par catégories avec un moteur de recherche intégré. Les particuliers peuvent chercher par ville, catégorie, mot-clé ou nom d'entreprise. Votre fiche complète s'affiche avec toutes vos coordonnées et réseaux sociaux." },
-  { q: "Combien de temps pour la validation ?", a: "Notre équipe éditoriale vérifie chaque inscription sous 48h ouvrées. Vous recevez un email de confirmation dès que votre fiche est active." },
-  { q: "Puis-je modifier mes informations après ?", a: "Absolument ! Vous pouvez mettre à jour vos coordonnées, description, réseaux sociaux et informations à tout moment en nous contactant par email." },
-  { q: "Comment fonctionne l'offre pour les annonceurs ?", a: "Les annonceurs peuvent réserver des espaces publicitaires ciblés dans l'annuaire : bannières, pages dédiées, interviews sponsorisées. Contactez notre régie pour les tarifs et les formats disponibles." },
-];
 
 const SOCIAL_PROOF_BIZ = [
   "Afro Coiffure Paris", "Chez Tonton Traiteur", "Dakar Records Studio", "Wax & Style Boutique",
@@ -89,13 +81,6 @@ const HOW_STEPS = [
   { title: "Recevez des contacts qualifiés", desc: "Annonceurs, professionnels et particuliers vous trouvent directement via l'annuaire. Développez votre réseau.", tag: "📈 Croissance organique" },
 ];
 
-const ADV_CARDS = [
-  { kw: "Ciblez", text: "Touchez précisément la cible composée de professionnels, d'indépendants et de particuliers de la culture africaine." },
-  { kw: "Communiquez", text: "Atteignez un maximum de personnes cible en une seule opération à travers l'annuaire digital." },
-  { kw: "Optimisez", text: "Ciblez parfaitement votre plan promo au travers de cette édition et des actions marketing associées." },
-  { kw: "Visibilité annuelle", text: "Développez une visibilité sur un an à travers toute la France et à l'international." },
-  { kw: "Sensibilisez", text: "Mettez en avant vos produits auprès de professionnels grâce à votre présence dans le guide." },
-];
 
 // ─── HOOKS ────────────────────────────────────────────────
 
@@ -152,7 +137,6 @@ export default function OfficielClient() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [shaking, setShaking] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [proofBadge, setProofBadge] = useState("Afro Coiffure Paris — il y a 2 min");
   const [comments, setComments] = useState<{ name: string; text: string; date: string }[]>([]);
   const [commentForm, setCommentForm] = useState({ name: "", email: "", text: "" });
@@ -347,8 +331,6 @@ export default function OfficielClient() {
         </div>
         <div className={s.topnavLinks}>
           <a href="#rubriques" className={`${s.topnavLink} ${s.topnavLinkHide}`}>Rubriques</a>
-          <a href="#plan-media" className={`${s.topnavLink} ${s.topnavLinkHide}`}>Plan Média</a>
-          <a href="#faq" className={`${s.topnavLink} ${s.topnavLinkHide}`}>FAQ</a>
           <button className={s.topnavCta} onClick={scrollToForm}>S&apos;inscrire gratuitement ✦</button>
         </div>
       </nav>
@@ -680,43 +662,6 @@ export default function OfficielClient() {
         </div>
       </section>
 
-      {/* ═══ PLAN MEDIA ═══ */}
-      <section className={`${s.sec} ${s.secMedia}`} id="plan-media">
-        <div className={`${s.secHeader} ${s.reveal}`}>
-          <div className={s.secLabel}>Plan Média</div>
-          <h2 className={s.secTitle}>Communiquez dans <span className={s.gold}>le Guide</span></h2>
-          <p className={s.secSubtitle}>Le premier guide officiel de la culture africaine — une base de données ciblée pour annonceurs, professionnels et particuliers.</p>
-        </div>
-        <div className={s.mediaInner}>
-          <div className={`${s.mediaCols} ${s.reveal}`}>
-            <div>
-              <div className={s.mediaColTitle}>Pour les Annonceurs & Professionnels</div>
-              <p className={s.mediaColText}>Touchez précisément votre cible composée de professionnels, d&apos;indépendants et de particuliers. Communiquez auprès d&apos;un maximum de personnes en une seule opération : DJ&apos;s, journalistes, émissions de radio spécialisées, agents sportifs, restaurateurs…</p>
-            </div>
-            <div>
-              <div className={s.mediaColTitle}>Pour les Particuliers</div>
-              <p className={s.mediaColText}>Trouvez facilement les entreprises, services et contacts dont vous avez besoin : démarches administratives, studios, scènes, promotions artistiques, restaurants, associations, ambassades et bien plus encore.</p>
-            </div>
-          </div>
-          <div className={s.advGrid}>
-            {ADV_CARDS.map((c) => (
-              <div key={c.kw} className={`${s.advCard} ${s.reveal}`}>
-                <div className={s.advKw}>{c.kw}</div>
-                <p className={s.advText}>{c.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Distribution */}
-      <div className={s.distStrip}>
-        <div className={s.reveal}>
-          <div className={s.distIcon}>📲</div>
-          <div className={s.distLabel}>Distribution</div>
-          <div className={s.distVal}>100% Digitale</div>
-        </div>
-      </div>
 
       {/* ═══ HOW ═══ */}
       <section className={`${s.sec} ${s.secHow}`}>
@@ -752,26 +697,6 @@ export default function OfficielClient() {
         </div>
       </section>
 
-      {/* ═══ FAQ ═══ */}
-      <section className={`${s.sec} ${s.secFaq}`} id="faq">
-        <div className={`${s.secHeader} ${s.reveal}`}>
-          <div className={s.secLabel}>Questions fréquentes</div>
-          <h2 className={s.secTitle}>Tout savoir sur <span className={s.gold}>l&apos;inscription</span></h2>
-        </div>
-        <div className={s.faqList}>
-          {FAQ_ITEMS.map((item, i) => (
-            <div key={i} className={s.faqItem}>
-              <button className={s.faqQ} onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                {item.q}
-                <span className={`${s.faqArrow} ${openFaq === i ? s.faqArrowOpen : ""}`}>+</span>
-              </button>
-              <div className={`${s.faqA} ${openFaq === i ? s.faqAOpen : ""}`}>
-                <p>{item.a}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* ═══ AVIS CLIENTS ═══ */}
       <section className={`${s.sec} ${s.secReviews}`}>

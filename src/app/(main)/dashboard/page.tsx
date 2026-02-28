@@ -65,15 +65,15 @@ export default async function DashboardPage() {
       count: null,
       color: "bg-teal-100 text-teal-600",
     },
-    {
-      href: "/dashboard/officiel-afrique",
-      icon: BookOpen,
-      label: "Officiel d'Afrique",
-      count: null,
-      color: "bg-indigo-100 text-indigo-600",
-    },
     ...(session.user.role === "ADMIN"
       ? [
+          {
+            href: "/dashboard/officiel-afrique",
+            icon: BookOpen,
+            label: "Officiel d'Afrique",
+            count: null,
+            color: "bg-indigo-100 text-indigo-600",
+          },
           {
             href: "/dashboard/journal-ads",
             icon: BarChart3,

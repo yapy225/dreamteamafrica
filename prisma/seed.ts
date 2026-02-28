@@ -15,6 +15,7 @@ async function main() {
   await prisma.article.deleteMany();
   await prisma.journalAd.deleteMany();
   await prisma.newsletterSubscriber.deleteMany();
+  await prisma.inscription.deleteMany();
   await prisma.product.deleteMany();
   await prisma.event.deleteMany();
   await prisma.session.deleteMany();
@@ -987,6 +988,191 @@ async function main() {
   ]);
 
   console.log(`Created ${subscribers.length} newsletter subscribers`);
+
+  // ─── INSCRIPTIONS (L'OFFICIEL D'AFRIQUE) ────────────────
+
+  const inscriptions = await Promise.all([
+    prisma.inscription.create({
+      data: {
+        entreprise: "Chez Mama Afrique",
+        categorie: "Restaurant",
+        directeur: "Marie-Claire Kouassi",
+        adresse: "12 rue de la Paix",
+        ville: "Paris",
+        codePostal: "75010",
+        pays: "France",
+        mobile: "+33 6 12 34 56 78",
+        email: "contact@chezmamaafrique.fr",
+        siteWeb: "https://chezmamaafrique.fr",
+        instagram: "@chezmamaafrique",
+        description: "Restaurant africain authentique proposant des spécialités ivoiriennes, sénégalaises et camerounaises. Ambiance chaleureuse, plats faits maison.",
+        motsCles: "restaurant, africain, ivoirien, sénégalais, Paris",
+        newsletter: true,
+        status: "VALIDATED",
+      },
+    }),
+    prisma.inscription.create({
+      data: {
+        entreprise: "Afro Styles Coiffure",
+        categorie: "Coiffure & Beauté",
+        directeur: "Fatima Diop",
+        adresse: "45 avenue de la République",
+        ville: "Montreuil",
+        codePostal: "93100",
+        pays: "France",
+        mobile: "+33 7 98 76 54 32",
+        email: "rdv@afrostyles.fr",
+        facebook: "AfroStylesCoiffure",
+        instagram: "@afrostyles_official",
+        description: "Salon de coiffure afro spécialisé dans les tresses, locks, tissages et soins capillaires naturels. Produits bio et made in Africa.",
+        motsCles: "coiffure, afro, tresses, locks, beauté",
+        newsletter: true,
+        status: "VALIDATED",
+      },
+    }),
+    prisma.inscription.create({
+      data: {
+        entreprise: "Wax & Co Design",
+        categorie: "Mode & Textile",
+        directeur: "Adama Traoré",
+        ville: "Lyon",
+        codePostal: "69003",
+        pays: "France",
+        mobile: "+33 6 55 44 33 22",
+        email: "hello@waxandco.com",
+        siteWeb: "https://waxandco.com",
+        instagram: "@waxandco",
+        tiktok: "@waxandco_design",
+        description: "Marque de mode éthique utilisant des tissus wax africains. Collections homme et femme, sur mesure et prêt-à-porter.",
+        motsCles: "mode, wax, africain, éthique, lyon",
+        newsletter: true,
+        status: "VALIDATED",
+      },
+    }),
+    prisma.inscription.create({
+      data: {
+        entreprise: "Dakar Digital Agency",
+        categorie: "Technologie",
+        directeur: "Ibrahima Sow",
+        ville: "Dakar",
+        pays: "Sénégal",
+        mobile: "+221 77 123 45 67",
+        email: "contact@dakardigital.sn",
+        siteWeb: "https://dakardigital.sn",
+        linkedin: "dakar-digital-agency",
+        description: "Agence digitale spécialisée en développement web, mobile et marketing digital pour les entreprises africaines et de la diaspora.",
+        motsCles: "digital, tech, web, Dakar, marketing",
+        newsletter: false,
+        status: "PENDING",
+      },
+    }),
+    prisma.inscription.create({
+      data: {
+        entreprise: "Mami Wata Cosmetics",
+        categorie: "Santé & Bien-être",
+        directeur: "Grace Okonkwo",
+        adresse: "78 boulevard Voltaire",
+        ville: "Paris",
+        codePostal: "75011",
+        pays: "France",
+        mobile: "+33 6 77 88 99 00",
+        email: "info@mamiwatacosmetics.com",
+        siteWeb: "https://mamiwatacosmetics.com",
+        instagram: "@mamiwatacosmetics",
+        youtube: "MamiWataBeauty",
+        description: "Cosmétiques naturels inspirés des traditions africaines. Soins pour la peau et les cheveux, 100% naturels et fabriqués en France.",
+        motsCles: "cosmétiques, naturel, beauté, soins, afro",
+        newsletter: true,
+        status: "PENDING",
+      },
+    }),
+    prisma.inscription.create({
+      data: {
+        entreprise: "Saveurs du Sahel",
+        categorie: "Commerce",
+        directeur: "Moussa Keita",
+        ville: "Marseille",
+        codePostal: "13001",
+        pays: "France",
+        mobile: "+33 6 11 22 33 44",
+        email: "commandes@saveursdusahel.fr",
+        description: "Épicerie fine africaine : épices, farines, condiments, boissons traditionnelles. Import direct du Mali, Burkina Faso et Niger.",
+        motsCles: "épicerie, africain, sahel, épices, Marseille",
+        newsletter: false,
+        status: "VALIDATED",
+      },
+    }),
+    prisma.inscription.create({
+      data: {
+        entreprise: "Kora Music School",
+        categorie: "Culture & Art",
+        directeur: "Sékou Diabaté",
+        ville: "Bruxelles",
+        pays: "Belgique",
+        mobile: "+32 471 23 45 67",
+        email: "inscription@koramusicschool.be",
+        siteWeb: "https://koramusicschool.be",
+        facebook: "KoraMusicSchool",
+        description: "École de musique traditionnelle africaine. Cours de kora, djembé, balafon. Stages et concerts toute l'année.",
+        motsCles: "musique, kora, djembé, cours, Bruxelles",
+        newsletter: true,
+        status: "PENDING",
+      },
+    }),
+    prisma.inscription.create({
+      data: {
+        entreprise: "Baobab Immobilier",
+        categorie: "Immobilier",
+        directeur: "Jean-Pierre Ndoye",
+        ville: "Abidjan",
+        pays: "Côte d'Ivoire",
+        mobile: "+225 07 08 09 10 11",
+        email: "info@baobab-immo.ci",
+        siteWeb: "https://baobab-immo.ci",
+        whatsapp: "+22507080910",
+        description: "Agence immobilière pour la diaspora. Achat, vente et gestion locative de biens en Côte d'Ivoire. Accompagnement à distance.",
+        motsCles: "immobilier, diaspora, Abidjan, investissement",
+        newsletter: true,
+        status: "REJECTED",
+      },
+    }),
+    prisma.inscription.create({
+      data: {
+        entreprise: "Trans-Africa Express",
+        categorie: "Transport",
+        directeur: "Ousmane Bah",
+        ville: "Paris",
+        codePostal: "75018",
+        pays: "France",
+        mobile: "+33 6 99 88 77 66",
+        email: "contact@transafricaexpress.fr",
+        description: "Service de transport et livraison de colis vers l'Afrique de l'Ouest. Envoi de fret maritime et aérien. Devis gratuit.",
+        motsCles: "transport, colis, Afrique, fret, livraison",
+        newsletter: false,
+        status: "PENDING",
+      },
+    }),
+    prisma.inscription.create({
+      data: {
+        entreprise: "Afrika Tiss",
+        categorie: "Artisanat",
+        directeur: "Aminata Coulibaly",
+        adresse: "5 rue des Artisans",
+        ville: "Toulouse",
+        codePostal: "31000",
+        pays: "France",
+        mobile: "+33 6 44 55 66 77",
+        email: "atelier@afrikatiss.com",
+        instagram: "@afrikatiss",
+        description: "Atelier de couture et de création textile. Confection sur mesure en wax, bazin et bogolan. Cours de couture africaine.",
+        motsCles: "artisanat, couture, wax, bogolan, Toulouse",
+        newsletter: true,
+        status: "VALIDATED",
+      },
+    }),
+  ]);
+
+  console.log(`Created ${inscriptions.length} inscriptions`);
 
   console.log("\nSeed completed successfully!");
   console.log("─────────────────────────────");

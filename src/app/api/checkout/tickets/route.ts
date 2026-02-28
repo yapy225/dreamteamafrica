@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
 
-    const { eventId, tier, quantity, sessionLabel, sessionPrice } =
+    const { eventId, tier, quantity, sessionLabel } =
       await request.json();
 
     if (!eventId || !tier || !quantity || quantity < 1 || quantity > 10) {
@@ -48,47 +48,34 @@ export async function POST(request: Request) {
       );
     }
 
-    // Use session-specific price if provided, otherwise use tier price
+    // Resolve price: custom tiers JSON > legacy price fields
     let unitPrice: number;
-    const parsedSessionPrice =
-      sessionPrice != null && !isNaN(Number(sessionPrice))
-        ? Number(sessionPrice)
-        : null;
-    if (parsedSessionPrice !== null) {
-      // Validate session price against program data
-      const programItems = event.program as
-        | Array<{ price?: number | string }>
-        | null;
-      const validSessionPrice = programItems?.some(
-        (item) =>
-          item.price != null && Number(item.price) === parsedSessionPrice,
-      );
-      if (!validSessionPrice) {
-        return NextResponse.json(
-          { error: "Prix de séance invalide." },
-          { status: 400 },
-        );
-      }
-      unitPrice = parsedSessionPrice;
+    let tierName: string;
+
+    const customTiers = event.tiers as Array<{ id: string; name: string; price: number }> | null;
+    const matchedTier = Array.isArray(customTiers)
+      ? customTiers.find((t) => t.id === tier)
+      : null;
+
+    if (matchedTier) {
+      unitPrice = matchedTier.price;
+      tierName = matchedTier.name;
     } else {
       const priceMap: Record<string, number> = {
         EARLY_BIRD: event.priceEarly,
         STANDARD: event.priceStd,
         VIP: event.priceVip,
       };
+      const labelMap: Record<string, string> = {
+        EARLY_BIRD: "Early Bird",
+        STANDARD: "Standard",
+        VIP: "VIP",
+      };
       unitPrice = priceMap[tier];
+      tierName = labelMap[tier];
     }
 
-    const tierLabels: Record<string, string> = {
-      EARLY_BIRD: "Early Bird",
-      STANDARD: "Standard",
-      VIP: "VIP",
-    };
-
-    const productName =
-      parsedSessionPrice !== null && sessionLabel
-        ? `${event.title} — ${sessionLabel.split(" — ")[0]}`
-        : `${event.title} — ${tierLabels[tier]}`;
+    const productName = `${event.title} — ${tierName}`;
 
     const checkoutSession = await getStripe().checkout.sessions.create({
       mode: "payment",

@@ -15,7 +15,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
     }
 
-    const { title, excerpt, content, category, coverImage } = await request.json();
+    const {
+      title,
+      excerpt,
+      content,
+      category,
+      coverImage,
+      gradientClass,
+      isSponsored,
+      sponsorName,
+      status,
+    } = await request.json();
 
     if (!title || !excerpt || !content || !category) {
       return NextResponse.json({ error: "Champs requis manquants." }, { status: 400 });
@@ -25,6 +35,8 @@ export async function POST(request: Request) {
     if (!validCategories.includes(category)) {
       return NextResponse.json({ error: "Catégorie invalide." }, { status: 400 });
     }
+
+    const readingTimeMin = Math.max(1, Math.ceil(content.split(/\s+/).filter(Boolean).length / 200));
 
     let slug = slugify(title);
     const existing = await prisma.article.findUnique({ where: { slug } });
@@ -40,6 +52,11 @@ export async function POST(request: Request) {
         content,
         category,
         coverImage: coverImage || null,
+        gradientClass: gradientClass || null,
+        isSponsored: isSponsored || false,
+        sponsorName: sponsorName || null,
+        readingTimeMin,
+        status: status || "PUBLISHED",
         position: "UNE",
         dayCount: 1,
         publishedAt: new Date(),

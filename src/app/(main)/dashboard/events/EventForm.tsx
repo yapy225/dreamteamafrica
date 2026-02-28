@@ -43,6 +43,21 @@ const emptyProgramItem: ProgramItem = {
   note: "",
 };
 
+interface TierItem {
+  id: "EARLY_BIRD" | "STANDARD" | "VIP";
+  name: string;
+  price: string;
+  description: string;
+  features: string;
+  highlight: boolean;
+}
+
+const defaultTiers: TierItem[] = [
+  { id: "EARLY_BIRD", name: "Early Bird", price: "0", description: "Accès général — Tarif réduit pour les premiers acheteurs", features: "Accès à l'événement\nBillet nominatif\nProgramme officiel", highlight: false },
+  { id: "STANDARD", name: "Standard", price: "0", description: "Billetterie en ligne — Accès complet à l'événement", features: "Accès à l'événement\nBillet nominatif\nProgramme officiel", highlight: true },
+  { id: "VIP", name: "Billetterie sur place", price: "0", description: "", features: "Accès à l'événement\nBillet nominatif\nProgramme officiel", highlight: false },
+];
+
 interface EventFormProps {
   initialData?: {
     id: string;
@@ -57,6 +72,7 @@ interface EventFormProps {
     capacity: number;
     showCapacity: boolean;
     program: ProgramItem[] | null;
+    tiers: Array<{ id: string; name: string; price: number; description: string; features: string[]; highlight: boolean }> | null;
     priceEarly: number;
     priceStd: number;
     priceVip: number;
@@ -86,6 +102,23 @@ export default function EventForm({ initialData }: EventFormProps) {
   });
   const [program, setProgram] = useState<ProgramItem[]>(
     initialData?.program ?? [],
+  );
+  const [tiers, setTiers] = useState<TierItem[]>(
+    initialData?.tiers
+      ? initialData.tiers.map((t) => ({
+          id: t.id as TierItem["id"],
+          name: t.name,
+          price: String(t.price),
+          description: t.description,
+          features: t.features.join("\n"),
+          highlight: t.highlight,
+        }))
+      : defaultTiers.map((t) => ({
+          ...t,
+          price: t.id === "EARLY_BIRD" ? (initialData?.priceEarly?.toString() || "0")
+            : t.id === "STANDARD" ? (initialData?.priceStd?.toString() || "0")
+            : (initialData?.priceVip?.toString() || "0"),
+        })),
   );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -130,6 +163,14 @@ export default function EventForm({ initialData }: EventFormProps) {
         body: JSON.stringify({
           ...form,
           program: program.length > 0 ? program : null,
+          tiers: tiers.map((t) => ({
+            id: t.id,
+            name: t.name,
+            price: Number(t.price) || 0,
+            description: t.description,
+            features: t.features.split("\n").map((f) => f.trim()).filter(Boolean),
+            highlight: t.highlight,
+          })),
         }),
       });
 
@@ -313,46 +354,96 @@ export default function EventForm({ initialData }: EventFormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-dta-char">
-            Prix Early Bird (€)
-          </label>
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            value={form.priceEarly}
-            onChange={(e) => setForm({ ...form, priceEarly: e.target.value })}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-dta-char">
-            Prix Standard (€)
-          </label>
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            value={form.priceStd}
-            onChange={(e) => setForm({ ...form, priceStd: e.target.value })}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-dta-char">
-            Prix VIP (€)
-          </label>
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            value={form.priceVip}
-            onChange={(e) => setForm({ ...form, priceVip: e.target.value })}
-            className={inputClass}
-          />
-        </div>
+      {/* Billetterie — 3 tiers */}
+      <div className="space-y-4">
+        <label className="block text-sm font-medium text-dta-char">
+          Billetterie — Types de billets
+        </label>
+        {tiers.map((tier, idx) => (
+          <div
+            key={tier.id}
+            className={`rounded-[var(--radius-card)] border p-4 space-y-3 ${
+              tier.highlight ? "border-dta-accent bg-dta-accent/5" : "border-dta-sand bg-dta-bg"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-dta-accent">
+                {tier.id === "EARLY_BIRD" ? "Tier 1" : tier.id === "STANDARD" ? "Tier 2" : "Tier 3"}
+              </span>
+              <label className="flex items-center gap-2 text-xs text-dta-taupe cursor-pointer">
+                <input
+                  type="radio"
+                  name="highlightTier"
+                  checked={tier.highlight}
+                  onChange={() => {
+                    setTiers(tiers.map((t, i) => ({ ...t, highlight: i === idx })));
+                  }}
+                  className="accent-dta-accent"
+                />
+                Populaire
+              </label>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">Nom du billet</label>
+                <input
+                  value={tier.name}
+                  onChange={(e) => {
+                    const updated = [...tiers];
+                    updated[idx] = { ...tier, name: e.target.value };
+                    setTiers(updated);
+                  }}
+                  className={inputClass}
+                  placeholder="Ex: Early Bird"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">Prix (€)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={tier.price}
+                  onChange={(e) => {
+                    const updated = [...tiers];
+                    updated[idx] = { ...tier, price: e.target.value };
+                    setTiers(updated);
+                  }}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-dta-taupe">Description</label>
+              <input
+                value={tier.description}
+                onChange={(e) => {
+                  const updated = [...tiers];
+                  updated[idx] = { ...tier, description: e.target.value };
+                  setTiers(updated);
+                }}
+                className={inputClass}
+                placeholder="Ex: Accès général — Tarif réduit"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-dta-taupe">
+                Avantages (1 par ligne)
+              </label>
+              <textarea
+                rows={3}
+                value={tier.features}
+                onChange={(e) => {
+                  const updated = [...tiers];
+                  updated[idx] = { ...tier, features: e.target.value };
+                  setTiers(updated);
+                }}
+                className={inputClass}
+                placeholder={"Accès à l'événement\nBillet nominatif\nProgramme officiel"}
+              />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Image upload */}

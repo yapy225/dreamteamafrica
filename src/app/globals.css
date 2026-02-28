@@ -92,3 +92,61 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ─── L'AFROPÉEN — Journal Styles ─── */
+
+/* Gradient placeholders (g1–g12) */
+.j-g1  { background: linear-gradient(145deg, #C4B5A4, #A69888); }
+.j-g2  { background: linear-gradient(145deg, #8B7D6B, #6E6155); }
+.j-g3  { background: linear-gradient(145deg, #6B8FA0, #4A6B7A); }
+.j-g4  { background: linear-gradient(145deg, #A08060, #846A4E); }
+.j-g5  { background: linear-gradient(145deg, #8B6F4E, #A68B6B); }
+.j-g6  { background: linear-gradient(145deg, #7A8B7A, #687968); }
+.j-g7  { background: linear-gradient(145deg, #9B8574, #897362); }
+.j-g8  { background: linear-gradient(145deg, #6B7C8A, #5A6B78); }
+.j-g9  { background: linear-gradient(145deg, #B89F7E, #A88F6E); }
+.j-g10 { background: linear-gradient(145deg, #7A6B5A, #6B5C4B); }
+.j-g11 { background: linear-gradient(145deg, #5A7A6A, #4A6A5A); }
+.j-g12 { background: linear-gradient(145deg, #8A7A6A, #7A6A5A); }
+
+/* Journal fade-in animation */
+@keyframes j-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.j-fade-in { animation: j-fade-in 0.6s ease-out both; }
+
+/* Archive card opacity */
+.j-archive-card {
+  opacity: 0.75;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.j-archive-card:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+/* Pulse animation for video badge */
+@keyframes j-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.j-pulse { animation: j-pulse 1.5s ease-in-out infinite; }
+
+/* Nav link underline animation */
+.j-nav-link {
+  position: relative;
+}
+.j-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-dta-accent);
+  transition: width 0.3s ease;
+}
+.j-nav-link:hover::after {
+  width: 100%;
+}

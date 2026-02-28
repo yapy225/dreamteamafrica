@@ -53,6 +53,7 @@ export async function POST(request: Request) {
         capacity: parseInt(capacity),
         showCapacity: body.showCapacity ?? true,
         program: body.program ?? null,
+        tiers: body.tiers ?? null,
         priceEarly: parseFloat(priceEarly) || 0,
         priceStd: parseFloat(priceStd) || 0,
         priceVip: parseFloat(priceVip) || 0,

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Ticket, ShoppingBag, Newspaper, Megaphone, CalendarDays, BookOpen } from "lucide-react";
+import { Ticket, ShoppingBag, Newspaper, Megaphone, CalendarDays, BookOpen, BarChart3, Mail } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
@@ -72,6 +72,24 @@ export default async function DashboardPage() {
       count: null,
       color: "bg-indigo-100 text-indigo-600",
     },
+    ...(session.user.role === "ADMIN"
+      ? [
+          {
+            href: "/dashboard/journal-ads",
+            icon: BarChart3,
+            label: "Pubs Journal",
+            count: null,
+            color: "bg-orange-100 text-orange-600",
+          },
+          {
+            href: "/dashboard/newsletter",
+            icon: Mail,
+            label: "Newsletter",
+            count: null,
+            color: "bg-cyan-100 text-cyan-600",
+          },
+        ]
+      : []),
   ];
 
   return (

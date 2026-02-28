@@ -60,6 +60,9 @@ export async function PUT(
         ...(body.program !== undefined && {
           program: body.program,
         }),
+        ...(body.tiers !== undefined && {
+          tiers: body.tiers,
+        }),
         ...(body.priceEarly !== undefined && {
           priceEarly: parseFloat(body.priceEarly),
         }),

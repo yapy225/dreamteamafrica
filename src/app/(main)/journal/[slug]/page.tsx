@@ -1,44 +1,49 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Calendar, User, Eye, Clock, MapPin, ArrowRight } from "lucide-react";
+import { Calendar, User, Eye, Clock, MapPin, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
+import {
+  getLifecycleDay,
+  getZoneForDay,
+  getZoneLabel,
+  CATEGORY_CONFIG,
+  GRADIENT_MAP,
+} from "@/lib/journal";
 import ShareButton from "./ShareButton";
+import JournalNav from "@/components/journal/JournalNav";
+import Newsletter from "@/components/journal/Newsletter";
+import JournalFooter from "@/components/journal/JournalFooter";
 
 export const dynamic = "force-dynamic";
 
-const categoryColors: Record<string, string> = {
-  ACTUALITE: "bg-blue-100 text-blue-700",
-  CULTURE: "bg-purple-100 text-purple-700",
-  DIASPORA: "bg-green-100 text-green-700",
-  BUSINESS: "bg-amber-100 text-amber-700",
-  LIFESTYLE: "bg-pink-100 text-pink-700",
-  OPINION: "bg-red-100 text-red-700",
-};
-
-const categoryColorsDark: Record<string, string> = {
-  ACTUALITE: "bg-blue-500/20 text-blue-300",
-  CULTURE: "bg-purple-500/20 text-purple-300",
-  DIASPORA: "bg-green-500/20 text-green-300",
-  BUSINESS: "bg-amber-500/20 text-amber-300",
-  LIFESTYLE: "bg-pink-500/20 text-pink-300",
-  OPINION: "bg-red-500/20 text-red-300",
-};
-
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
   const article = await prisma.article.findUnique({ where: { slug } });
   if (!article) return { title: "Article introuvable" };
   return {
-    title: article.title,
+    title: `${article.title} - L'Afropeen`,
     description: article.excerpt,
     openGraph: {
       title: article.title,
       description: article.excerpt,
       type: "article",
       publishedTime: article.publishedAt.toISOString(),
-      ...(article.coverImage && { images: [{ url: article.coverImage, width: 1200, height: 630, alt: article.title }] }),
+      ...(article.coverImage && {
+        images: [
+          {
+            url: article.coverImage,
+            width: 1200,
+            height: 630,
+            alt: article.title,
+          },
+        ],
+      }),
     },
     twitter: {
       card: "summary_large_image",
@@ -49,12 +54,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export default async function ArticleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ArticleDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
 
   const article = await prisma.article.findUnique({
     where: { slug },
-    include: { author: { select: { name: true, bio: true, country: true } } },
+    include: {
+      author: { select: { name: true, bio: true, country: true } },
+    },
   });
 
   if (!article) notFound();
@@ -65,13 +76,25 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
     data: { views: { increment: 1 } },
   });
 
-  const wordCount = article.content.split(/\s+/).length;
-  const readTime = Math.max(1, Math.ceil(wordCount / 200));
+  const readTime = article.readingTimeMin ?? Math.max(1, Math.ceil(article.content.split(/\s+/).length / 200));
   const viewCount = article.views + 1;
+  const lifecycleDay = getLifecycleDay(article.publishedAt);
+  const zone = getZoneForDay(lifecycleDay);
+  const zoneLabel = getZoneLabel(zone);
+  const catConfig = CATEGORY_CONFIG[article.category];
+
+  // Gradient background for hero when no cover image
+  const gradientStyle = !article.coverImage && article.gradientClass
+    ? { background: GRADIENT_MAP[article.gradientClass] }
+    : undefined;
 
   // Related articles
   const related = await prisma.article.findMany({
-    where: { category: article.category, id: { not: article.id } },
+    where: {
+      category: article.category,
+      id: { not: article.id },
+      status: "PUBLISHED",
+    },
     take: 3,
     orderBy: { publishedAt: "desc" },
     include: { author: { select: { name: true } } },
@@ -96,11 +119,13 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
     author: {
       "@type": "Person",
       name: article.author.name,
-      ...(article.author.country && { nationality: article.author.country }),
+      ...(article.author.country && {
+        nationality: article.author.country,
+      }),
     },
     publisher: {
       "@type": "Organization",
-      name: "Dream Team Africa",
+      name: "L'Afropeen - DreamTeamAfrica",
       logo: {
         "@type": "ImageObject",
         url: `${process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com"}/logo-dta.png`,
@@ -114,29 +139,18 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      {/* ── A. Sticky Nav ── */}
-      <nav className="sticky top-0 z-40 border-b border-dta-sand/50 bg-white/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-          <Link
-            href="/journal"
-            className="flex items-center gap-1.5 text-sm font-medium text-dta-char transition-colors hover:text-dta-accent"
-          >
-            <ArrowLeft size={16} />
-            Retour au journal
-          </Link>
-          <ShareButton />
-        </div>
-      </nav>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
-      {/* ── B. Article Hero ── */}
+      {/* Journal Nav */}
+      <JournalNav />
+
+      {/* Article Hero */}
       <section className="relative min-h-[50vh] overflow-hidden bg-dta-dark">
         {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-dta-dark via-dta-char to-dta-dark" />
-        <div className="absolute inset-0 opacity-15">
-          <div className="h-full w-full bg-[radial-gradient(ellipse_at_top_right,_var(--color-dta-accent)_0%,_transparent_50%)]" />
-        </div>
-        {article.coverImage && (
+        {article.coverImage ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -146,17 +160,40 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-dta-dark via-dta-dark/60 to-transparent" />
           </>
+        ) : gradientStyle ? (
+          <>
+            <div className="absolute inset-0 opacity-30" style={gradientStyle} />
+            <div className="absolute inset-0 bg-gradient-to-t from-dta-dark via-dta-dark/60 to-transparent" />
+          </>
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-br from-dta-dark via-dta-char to-dta-dark" />
+            <div className="absolute inset-0 opacity-15">
+              <div className="h-full w-full bg-[radial-gradient(ellipse_at_top_right,_var(--color-dta-accent)_0%,_transparent_50%)]" />
+            </div>
+          </>
         )}
 
         <div className="relative flex min-h-[50vh] items-end px-4 pb-12 pt-16 sm:px-6 lg:px-8">
           <div className="mx-auto w-full max-w-3xl">
             {/* Badges */}
-            <div className="flex items-center gap-2">
-              <span
-                className={`rounded-[var(--radius-full)] px-3 py-1 text-xs font-semibold ${categoryColorsDark[article.category] || ""}`}
-              >
-                {article.category}
+            <div className="flex flex-wrap items-center gap-2">
+              {catConfig && (
+                <span
+                  className={`rounded-[var(--radius-full)] px-3 py-1 text-xs font-semibold ${catConfig.badgeHero}`}
+                >
+                  {catConfig.label}
+                </span>
+              )}
+              <span className="rounded-[var(--radius-full)] bg-white/20 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
+                J{lifecycleDay} &mdash; {zoneLabel}
               </span>
+              {article.isSponsored && (
+                <span className="rounded-[var(--radius-full)] bg-dta-accent/30 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                  Article invite
+                  {article.sponsorName && ` — ${article.sponsorName}`}
+                </span>
+              )}
               {article.featured && (
                 <span className="rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
                   En vedette
@@ -193,11 +230,16 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
                 {viewCount} vue{viewCount > 1 ? "s" : ""}
               </span>
             </div>
+
+            {/* Share */}
+            <div className="mt-4">
+              <ShareButton />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── C. Article Body ── */}
+      {/* Article Body */}
       <article className="px-4 py-14 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-3xl">
           {paragraphs.map((paragraph, i) => (
@@ -215,7 +257,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
         </div>
       </article>
 
-      {/* ── D. Author Card ── */}
+      {/* Author Card */}
       <section className="bg-dta-beige px-4 py-14">
         <div className="mx-auto max-w-3xl">
           <div className="rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] sm:p-8">
@@ -244,13 +286,16 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
         </div>
       </section>
 
-      {/* ── E. Related Articles ── */}
+      {/* Newsletter */}
+      <Newsletter />
+
+      {/* Related Articles */}
       {related.length > 0 && (
         <section className="px-4 py-16">
           <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div className="flex items-end justify-between">
               <h2 className="font-serif text-2xl font-bold text-dta-dark sm:text-3xl">
-                À lire aussi
+                A lire aussi
               </h2>
               <Link
                 href="/journal"
@@ -261,32 +306,44 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
             </div>
 
             <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
-              {related.map((r) => (
-                <Link
-                  key={r.id}
-                  href={`/journal/${r.slug}`}
-                  className="group overflow-hidden rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1"
-                >
-                  <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-dta-accent/15 to-dta-sand">
-                    {r.coverImage && (
-                      <Image src={r.coverImage} alt={r.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 33vw" />
-                    )}
-                  </div>
-                  <div className="p-5">
-                    <span
-                      className={`inline-block rounded-[var(--radius-full)] px-2.5 py-0.5 text-xs font-medium ${categoryColors[r.category] || ""}`}
-                    >
-                      {r.category}
-                    </span>
-                    <h3 className="mt-2 font-serif text-base font-semibold leading-snug text-dta-dark transition-colors group-hover:text-dta-accent line-clamp-2">
-                      {r.title}
-                    </h3>
-                    <p className="mt-2 text-xs text-dta-taupe">
-                      Par {r.author.name} &middot; {formatDate(r.publishedAt)}
-                    </p>
-                  </div>
-                </Link>
-              ))}
+              {related.map((r) => {
+                const rCatConfig = CATEGORY_CONFIG[r.category];
+                return (
+                  <Link
+                    key={r.id}
+                    href={`/journal/${r.slug}`}
+                    className="group overflow-hidden rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1"
+                  >
+                    <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-dta-accent/15 to-dta-sand">
+                      {r.coverImage && (
+                        <Image
+                          src={r.coverImage}
+                          alt={r.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                        />
+                      )}
+                    </div>
+                    <div className="p-5">
+                      {rCatConfig && (
+                        <span
+                          className={`inline-block rounded-[var(--radius-full)] px-2.5 py-0.5 text-xs font-medium ${rCatConfig.badge}`}
+                        >
+                          {rCatConfig.label}
+                        </span>
+                      )}
+                      <h3 className="mt-2 line-clamp-2 font-serif text-base font-semibold leading-snug text-dta-dark transition-colors group-hover:text-dta-accent">
+                        {r.title}
+                      </h3>
+                      <p className="mt-2 text-xs text-dta-taupe">
+                        Par {r.author.name} &middot;{" "}
+                        {formatDate(r.publishedAt)}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
 
             <div className="mt-6 text-center sm:hidden">
@@ -301,18 +358,7 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
         </section>
       )}
 
-      {/* ── F. Footer CTA ── */}
-      <section className="px-4 py-10">
-        <div className="mx-auto max-w-7xl text-center sm:px-6 lg:px-8">
-          <Link
-            href="/journal"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-dta-taupe transition-colors hover:text-dta-accent"
-          >
-            <ArrowLeft size={14} />
-            Retour au journal
-          </Link>
-        </div>
-      </section>
+      <JournalFooter />
     </>
   );
 }

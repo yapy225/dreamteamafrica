@@ -22,7 +22,22 @@ export async function PUT(
       return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
     }
 
-    const { title, excerpt, content, category, coverImage, featured } = await request.json();
+    const {
+      title,
+      excerpt,
+      content,
+      category,
+      coverImage,
+      featured,
+      gradientClass,
+      isSponsored,
+      sponsorName,
+      status,
+    } = await request.json();
+
+    const readingTimeMin = content
+      ? Math.max(1, Math.ceil(content.split(/\s+/).filter(Boolean).length / 200))
+      : undefined;
 
     const updated = await prisma.article.update({
       where: { id },
@@ -33,6 +48,11 @@ export async function PUT(
         ...(category && { category }),
         ...(coverImage !== undefined && { coverImage }),
         ...(featured !== undefined && { featured }),
+        ...(gradientClass !== undefined && { gradientClass }),
+        ...(isSponsored !== undefined && { isSponsored }),
+        ...(sponsorName !== undefined && { sponsorName }),
+        ...(status && { status }),
+        ...(readingTimeMin !== undefined && { readingTimeMin }),
       },
     });
 

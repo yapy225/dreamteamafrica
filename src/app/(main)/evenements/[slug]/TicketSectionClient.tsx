@@ -11,7 +11,6 @@ interface ProgramSession {
   address: string;
   title: string;
   type: string;
-  price?: number | string;
   pricing: string;
 }
 
@@ -74,13 +73,6 @@ export default function TicketSectionClient({
     ? `${selected.title} — ${formatSessionDateLong(selected.date)}${selected.time ? ` à ${selected.time.replace(":", "h")}` : ""}`
     : undefined;
 
-  // Does the selected session have its own price?
-  const rawPrice = selected?.price;
-  const sessionPrice =
-    rawPrice != null && rawPrice !== "" && !isNaN(Number(rawPrice))
-      ? Number(rawPrice)
-      : null;
-
   return (
     <div>
       {/* Session selector */}
@@ -90,51 +82,42 @@ export default function TicketSectionClient({
             Choisissez votre séance
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            {sessions.map((s, idx) => {
-              const numPrice = s.price != null && s.price !== "" && !isNaN(Number(s.price)) ? Number(s.price) : null;
-              const hasPrice = numPrice !== null;
-              return (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedIdx(idx)}
-                  className={`rounded-[var(--radius-card)] border-2 px-4 py-3 text-left transition-all ${
-                    selectedIdx === idx
-                      ? "border-dta-accent bg-white shadow-[var(--shadow-card)]"
-                      : "border-transparent bg-white/60 hover:bg-white"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[var(--radius-button)] ${
-                        selectedIdx === idx
-                          ? "bg-dta-accent text-white"
-                          : "bg-dta-accent/10 text-dta-accent"
-                      }`}
-                    >
-                      <Calendar size={16} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold capitalize text-dta-dark">
-                        {formatSessionDate(s.date)}
-                        {s.time && (
-                          <span className="ml-1.5 font-normal text-dta-taupe">
-                            {s.time.replace(":", "h")}
-                          </span>
-                        )}
-                      </p>
-                      <p className="text-xs text-dta-char/70 line-clamp-1">
-                        {s.title}
-                        {hasPrice && (
-                          <span className="ml-1 font-semibold text-dta-accent">
-                            — {numPrice === 0 ? "Gratuit" : fmtPrice(numPrice!)}
-                          </span>
-                        )}
-                      </p>
-                    </div>
+            {sessions.map((s, idx) => (
+              <button
+                key={idx}
+                onClick={() => setSelectedIdx(idx)}
+                className={`rounded-[var(--radius-card)] border-2 px-4 py-3 text-left transition-all ${
+                  selectedIdx === idx
+                    ? "border-dta-accent bg-white shadow-[var(--shadow-card)]"
+                    : "border-transparent bg-white/60 hover:bg-white"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[var(--radius-button)] ${
+                      selectedIdx === idx
+                        ? "bg-dta-accent text-white"
+                        : "bg-dta-accent/10 text-dta-accent"
+                    }`}
+                  >
+                    <Calendar size={16} />
                   </div>
-                </button>
-              );
-            })}
+                  <div>
+                    <p className="text-sm font-semibold capitalize text-dta-dark">
+                      {formatSessionDate(s.date)}
+                      {s.time && (
+                        <span className="ml-1.5 font-normal text-dta-taupe">
+                          {s.time.replace(":", "h")}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-dta-char/70 line-clamp-1">
+                      {s.title}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))}
           </div>
 
           {/* Selected session detail */}
@@ -161,11 +144,6 @@ export default function TicketSectionClient({
                   </span>
                 )}
               </div>
-              {sessionPrice !== null && (
-                <p className="mt-3 font-serif text-2xl font-bold text-dta-accent">
-                  {sessionPrice === 0 ? "Gratuit" : fmtPrice(sessionPrice)}
-                </p>
-              )}
               {selected.pricing && (
                 <p className="mt-1 text-xs text-dta-taupe">
                   {selected.pricing}
@@ -176,7 +154,7 @@ export default function TicketSectionClient({
         </div>
       )}
 
-      {/* Ticket purchase */}
+      {/* Ticket tiers — always 3 tiers */}
       <div className="mt-10">
         {soldOut ? (
           <div className="mx-auto max-w-md rounded-[var(--radius-card)] bg-white p-8 text-center shadow-[var(--shadow-card)]">
@@ -188,38 +166,7 @@ export default function TicketSectionClient({
               cas de désistement.
             </p>
           </div>
-        ) : sessionPrice !== null ? (
-          /* Session has its own price → single ticket card */
-          <div className="mx-auto max-w-md rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] ring-2 ring-dta-accent">
-            <div className="flex items-baseline justify-between">
-              <h3 className="font-serif text-lg font-bold text-dta-dark">
-                {selected.title}
-              </h3>
-              <span className="font-serif text-2xl font-bold text-dta-accent">
-                {sessionPrice === 0 ? "Gratuit" : fmtPrice(sessionPrice)}
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-dta-char/60">
-              {formatSessionDateLong(selected.date)}
-              {selected.time && ` à ${selected.time.replace(":", "h")}`}
-              {selected.venue && ` — ${selected.venue}`}
-            </p>
-            {selected.pricing && (
-              <p className="mt-2 text-xs text-dta-taupe">{selected.pricing}</p>
-            )}
-            <TicketSelector
-              key={selectedIdx}
-              eventId={eventId}
-              eventSlug={eventSlug}
-              tier="STANDARD"
-              price={sessionPrice}
-              highlight
-              sessionLabel={sessionLabel}
-              sessionPrice={sessionPrice}
-            />
-          </div>
         ) : (
-          /* No session price → classic 3 tiers */
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {tiers.map((tier) => (
               <div
@@ -240,7 +187,7 @@ export default function TicketSectionClient({
                     {tier.name}
                   </h3>
                   <span className="font-serif text-2xl font-bold text-dta-accent">
-                    {fmtPrice(tier.price)}
+                    {tier.price === 0 ? "Gratuit" : fmtPrice(tier.price)}
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-dta-char/60">

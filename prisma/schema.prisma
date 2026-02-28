@@ -67,6 +67,19 @@ enum AdPlan {
   PREMIUM   // 149€/month
 }
 
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum JournalAdPlacement {
+  BANNER
+  INLINE
+  VIDEO
+  SIDEBAR
+}
+
 // ─── AUTH MODELS ─────────────────────────────────────────
 
 model User {
@@ -138,13 +151,18 @@ model Article {
   slug        String          @unique
   excerpt     String
   content     String          @db.Text
-  coverImage  String?
-  category    ArticleCategory
-  position    ArticlePosition @default(UNE)
-  publishedAt DateTime        @default(now())
-  dayCount    Int             @default(1)
-  featured    Boolean         @default(false)
-  views       Int             @default(0)
+  coverImage     String?
+  gradientClass  String?
+  category       ArticleCategory
+  position       ArticlePosition @default(UNE)
+  publishedAt    DateTime        @default(now())
+  dayCount       Int             @default(1)
+  featured       Boolean         @default(false)
+  isSponsored    Boolean         @default(false)
+  sponsorName    String?
+  readingTimeMin Int?
+  status         ArticleStatus   @default(PUBLISHED)
+  views          Int             @default(0)
   authorId    String
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
@@ -171,6 +189,7 @@ model Event {
   capacity     Int
   showCapacity Boolean  @default(true)
   program      Json?
+  tiers        Json?
   priceEarly   Float
   priceStd    Float
   priceVip    Float
@@ -343,4 +362,37 @@ model OfficielContent {
   @@index([type])
   @@index([category])
   @@index([published])
+}
+
+// ─── JOURNAL ADS (DTA ADS JOURNAL) ──────────────────────
+
+model JournalAd {
+  id             String              @id @default(cuid())
+  title          String
+  description    String              @db.Text
+  placement      JournalAdPlacement
+  ctaText        String?
+  ctaUrl         String
+  imageUrl       String?
+  gradientClass  String?
+  campaignStart  DateTime            @default(now())
+  campaignEnd    DateTime?
+  campaignWeeks  Int                 @default(4)
+  active         Boolean             @default(true)
+  impressions    Int                 @default(0)
+  clicks         Int                 @default(0)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([placement])
+  @@index([active])
+}
+
+// ─── NEWSLETTER ─────────────────────────────────────────
+
+model NewsletterSubscriber {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  isActive     Boolean  @default(true)
+  subscribedAt DateTime @default(now())
 }

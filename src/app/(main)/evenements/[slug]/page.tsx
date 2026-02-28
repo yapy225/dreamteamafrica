@@ -49,39 +49,21 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   const soldOut = remaining <= 0;
   const progressPercent = Math.min(100, Math.round((soldCount / event.capacity) * 100));
 
-  const tiers = [
-    {
-      id: "EARLY_BIRD" as const,
-      name: "Early Bird",
-      price: event.priceEarly,
-      description: "Accès général — Tarif réduit pour les premiers acheteurs",
-      features: ["Accès à l'événement", "Badge nominatif"],
-      highlight: false,
-    },
-    {
-      id: "STANDARD" as const,
-      name: "Standard",
-      price: event.priceStd,
-      description: "Accès complet à l'événement avec avantages inclus",
-      features: ["Accès à l'événement", "Badge nominatif", "Programme officiel", "Accès au networking"],
-      highlight: true,
-    },
-    {
-      id: "VIP" as const,
-      name: "VIP",
-      price: event.priceVip,
-      description: "L'expérience premium avec accès exclusif et privilèges",
-      features: [
-        "Accès prioritaire",
-        "Badge VIP nominatif",
-        "Programme officiel",
-        "Accès backstage",
-        "Cocktail privé",
-        "Place réservée",
-      ],
-      highlight: false,
-    },
-  ];
+  const customTiers = event.tiers as Array<{ id: string; name: string; price: number; description: string; features: string[]; highlight: boolean }> | null;
+  const tiers = Array.isArray(customTiers) && customTiers.length > 0
+    ? customTiers.map((t) => ({
+        id: t.id as "EARLY_BIRD" | "STANDARD" | "VIP",
+        name: t.name,
+        price: t.price,
+        description: t.description,
+        features: t.features,
+        highlight: t.highlight,
+      }))
+    : [
+        { id: "EARLY_BIRD" as const, name: "Early Bird", price: event.priceEarly, description: "Accès général — Tarif réduit pour les premiers acheteurs", features: ["Accès à l'événement", "Badge nominatif"], highlight: false },
+        { id: "STANDARD" as const, name: "Standard", price: event.priceStd, description: "Accès complet à l'événement avec avantages inclus", features: ["Accès à l'événement", "Badge nominatif", "Programme officiel", "Accès au networking"], highlight: true },
+        { id: "VIP" as const, name: "VIP", price: event.priceVip, description: "L'expérience premium avec accès exclusif et privilèges", features: ["Accès prioritaire", "Badge VIP nominatif", "Programme officiel", "Accès backstage", "Cocktail privé", "Place réservée"], highlight: false },
+      ];
 
   const eventDate = new Date(event.date);
   const endDate = event.endDate ? new Date(event.endDate) : null;
@@ -433,7 +415,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
               eventSlug={event.slug}
               tiers={tiers}
               soldOut={soldOut}
-              sessions={(event.program as Array<{date:string;time:string;venue:string;address:string;title:string;type:string;price?:number;pricing:string}>)}
+              sessions={(event.program as Array<{date:string;time:string;venue:string;address:string;title:string;type:string;pricing:string}>)}
             />
           ) : (
             <div className="mt-10">

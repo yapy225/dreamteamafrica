@@ -12,10 +12,9 @@ interface TicketSelectorProps {
   price: number;
   highlight: boolean;
   sessionLabel?: string;
-  sessionPrice?: number | null;
 }
 
-export default function TicketSelector({ eventId, tier, price, highlight, sessionLabel, sessionPrice }: TicketSelectorProps) {
+export default function TicketSelector({ eventId, tier, price, highlight, sessionLabel }: TicketSelectorProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
@@ -37,7 +36,6 @@ export default function TicketSelector({ eventId, tier, price, highlight, sessio
           tier,
           quantity,
           sessionLabel,
-          ...(typeof sessionPrice === "number" ? { sessionPrice } : {}),
         }),
       });
 

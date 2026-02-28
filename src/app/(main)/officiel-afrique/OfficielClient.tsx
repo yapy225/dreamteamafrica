@@ -66,14 +66,6 @@ const CAT_CARDS = [
 ];
 
 
-const SOCIAL_PROOF_BIZ = [
-  "Afro Coiffure Paris", "Chez Tonton Traiteur", "Dakar Records Studio", "Wax & Style Boutique",
-  "Salon Beauté Mama", "Ndombolo Dance", "Faso Mode Paris", "Griots Productions",
-  "Dakar Express", "Amina Couture", "Black Star Records", "Bamako Digital",
-  "Teranga Consulting", "Kinshasa Gallery", "Abidjan Vibes DJ", "Congo Traiteur",
-  "Lomé Fashion", "Douala Events", "Nairobi Connect", "Accra Sports Agency",
-];
-
 const HOW_STEPS = [
   { title: "Remplissez le formulaire", desc: "Renseignez les informations de votre entreprise, vos coordonnées, réseaux sociaux et une description de votre activité.", tag: "⏱ Moins de 3 minutes" },
   { title: "Validation éditoriale", desc: "Notre équipe vérifie et valide votre fiche sous 48h. Vous recevez un email de confirmation.", tag: "✓ Validation sous 48h" },
@@ -111,31 +103,6 @@ function useScrollReveal() {
   }, []);
 }
 
-function useAnimatedCounter(ref: React.RefObject<HTMLDivElement | null>, target: number) {
-  useEffect(() => {
-    if (!ref.current) return;
-    const el = ref.current;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((en) => {
-          if (en.isIntersecting) {
-            let c = 0;
-            const step = Math.ceil(target / 50);
-            const iv = setInterval(() => {
-              c += step;
-              if (c >= target) { c = target; clearInterval(iv); }
-              el.textContent = c.toLocaleString("fr-FR");
-            }, 30);
-            obs.unobserve(el);
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [ref, target]);
-}
 
 // ─── MAIN COMPONENT ───────────────────────────────────────
 
@@ -145,7 +112,6 @@ export default function OfficielClient() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [shaking, setShaking] = useState(false);
-  const [proofBadge, setProofBadge] = useState("Afro Coiffure Paris — il y a 2 min");
   const [comments, setComments] = useState<{ name: string; text: string; date: string }[]>([]);
   const [commentForm, setCommentForm] = useState({ name: "", email: "", text: "" });
   const [nlEmail, setNlEmail] = useState("");
@@ -174,12 +140,9 @@ export default function OfficielClient() {
   });
 
   const formCardRef = useRef<HTMLDivElement>(null);
-  const counterRef = useRef<HTMLDivElement>(null);
   const annuaireRef = useRef<HTMLDivElement>(null);
 
   useScrollReveal();
-  useAnimatedCounter(counterRef, 3214);
-
   // Fetch category stats on mount
   useEffect(() => {
     fetch("/api/inscription/stats")
@@ -232,16 +195,6 @@ export default function OfficielClient() {
     },
     []
   );
-
-  // Social proof rotation
-  useEffect(() => {
-    const iv = setInterval(() => {
-      const biz = SOCIAL_PROOF_BIZ[Math.floor(Math.random() * SOCIAL_PROOF_BIZ.length)];
-      const mins = Math.floor(Math.random() * 25) + 1;
-      setProofBadge(`${biz} — il y a ${mins} min`);
-    }, 7000);
-    return () => clearInterval(iv);
-  }, []);
 
   const updateForm = useCallback((field: string, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -358,8 +311,8 @@ export default function OfficielClient() {
               Le premier annuaire professionnel de la diaspora africaine à Paris. Rendez votre activité visible auprès de milliers d&apos;annonceurs, de professionnels et de particuliers qui recherchent vos services.
             </p>
             <div className={s.heroMetrics}>
-              <div><div className={s.metricVal}>15 000+</div><div className={s.metricLbl}>Contacts ciblés</div></div>
-              <div><div className={s.metricVal}>20+</div><div className={s.metricLbl}>Catégories</div></div>
+              <div><div className={s.metricVal}>21</div><div className={s.metricLbl}>Catégories</div></div>
+              <div><div className={s.metricVal}>100%</div><div className={s.metricLbl}>Gratuit</div></div>
               <div><div className={s.metricVal}>100%</div><div className={s.metricLbl}>Digital</div></div>
             </div>
           </div>
@@ -370,7 +323,7 @@ export default function OfficielClient() {
             <div className={s.fcardInner}>
               <div className={s.fcardTitle}>Inscription gratuite</div>
               <div className={s.fcardSub}>
-                Édition 2026 — Rejoignez <span className={s.fcardSubGreen}>3 214</span> entreprises déjà inscrites
+                Édition 2026 — Inscrivez votre entreprise gratuitement
               </div>
 
               {/* Progress bar */}
@@ -619,10 +572,6 @@ export default function OfficielClient() {
                       {item.linkedin && <a href={item.linkedin.startsWith("http") ? item.linkedin : `https://linkedin.com/in/${item.linkedin}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>💼 LinkedIn</a>}
                       {item.youtube && <a href={item.youtube.startsWith("http") ? item.youtube : `https://youtube.com/${item.youtube}`} target="_blank" rel="noopener noreferrer" className={s.annSocialLink}>▶️ YouTube</a>}
                     </div>
-                    <div className={s.annCardContact}>
-                      <a href={`mailto:${item.email}`} className={s.annContactLink}>✉ {item.email}</a>
-                      <a href={`tel:${item.mobile}`} className={s.annContactLink}>📱 {item.mobile}</a>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -696,13 +645,13 @@ export default function OfficielClient() {
       {/* ═══ SOCIAL PROOF ═══ */}
       <section className={`${s.sec} ${s.secProof}`}>
         <div className={s.reveal}>
-          <div className={s.proofBig} ref={counterRef}>3 214</div>
-          <div className={s.proofSub}>entreprises déjà inscrites pour l&apos;édition 2026</div>
+          <div className={s.proofBig}>21 catégories</div>
+          <div className={s.proofSub}>pour référencer toute la diversité de la diaspora africaine</div>
           <div className={s.proofBadges}>
-            <span className={s.pbadge}>🟢 {proofBadge}</span>
-            <span className={s.pbadge}>🟢 Chez Tonton Traiteur — il y a 8 min</span>
-            <span className={s.pbadge}>🟢 Dakar Records Studio — il y a 15 min</span>
-            <span className={s.pbadge}>🟢 Wax & Style Boutique — il y a 22 min</span>
+            <span className={s.pbadge}>🟢 Artistes & Musique</span>
+            <span className={s.pbadge}>🟢 Médias & Communication</span>
+            <span className={s.pbadge}>🟢 Scènes & Événements</span>
+            <span className={s.pbadge}>🟢 Commerce & Services</span>
           </div>
         </div>
       </section>
@@ -911,14 +860,14 @@ export default function OfficielClient() {
       <footer className={s.footer}>
         <div className={s.kente} style={{ marginBottom: "1.5rem", opacity: 0.5 }} />
         <div className={s.ftLogo}>L&apos;Officiel <span className={s.topnavLogoAccent}>d&apos;Afrique</span></div>
-        <div className={s.ftSub}>L&apos;annuaire de la diaspora africaine à Paris — +15 000 contacts</div>
+        <div className={s.ftSub}>L&apos;annuaire professionnel de la diaspora africaine à Paris</div>
         <div className={s.ftCopy}>© 2026 L&apos;Officiel d&apos;Afrique — Tous droits réservés</div>
       </footer>
 
       {/* Floating badge */}
       <div className={s.floater} onClick={scrollToForm}>
         <span className={s.dot} />
-        <span><span className={s.flN}>+37</span> inscriptions aujourd&apos;hui</span>
+        <span>Inscription <span className={s.flN}>gratuite</span></span>
       </div>
     </div>
   );

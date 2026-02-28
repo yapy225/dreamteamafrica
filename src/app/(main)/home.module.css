@@ -13,10 +13,17 @@
 .editorialDivider::after {
   content: "";
   display: block;
-  width: 120px;
+  width: 60px;
   height: 1px;
   background: var(--color-dta-taupe);
   opacity: 0.4;
+}
+
+@media (min-width: 640px) {
+  .editorialDivider::before,
+  .editorialDivider::after {
+    width: 120px;
+  }
 }
 
 .editorialDivider span {

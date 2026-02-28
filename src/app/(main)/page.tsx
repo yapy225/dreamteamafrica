@@ -113,31 +113,31 @@ export default async function Home() {
 
           {/* Stats ribbon */}
           <div className="mag-fade-up mag-d7 mx-auto w-full max-w-7xl">
-            <div className="rounded-t-2xl bg-white/5 px-8 py-6 backdrop-blur-md">
-              <div className="flex flex-wrap items-center justify-center gap-8 text-center sm:justify-start sm:gap-16">
+            <div className="rounded-t-2xl bg-white/5 px-5 py-6 backdrop-blur-md sm:px-8">
+              <div className="flex items-center justify-center gap-6 text-center sm:justify-start sm:gap-16">
                 <div>
-                  <span className="font-serif text-4xl font-bold text-white">
+                  <span className="font-serif text-3xl font-bold text-white sm:text-4xl">
                     {eventCount}
                   </span>
-                  <p className="mt-1 text-xs uppercase tracking-wider text-dta-sand/60">
+                  <p className="mt-1 text-[10px] uppercase tracking-wider text-dta-sand/60 sm:text-xs">
                     événements
                   </p>
                 </div>
                 <div className="h-8 w-px bg-white/10" />
                 <div>
-                  <span className="font-serif text-4xl font-bold text-white">
+                  <span className="font-serif text-3xl font-bold text-white sm:text-4xl">
                     {productCount}
                   </span>
-                  <p className="mt-1 text-xs uppercase tracking-wider text-dta-sand/60">
+                  <p className="mt-1 text-[10px] uppercase tracking-wider text-dta-sand/60 sm:text-xs">
                     créations
                   </p>
                 </div>
                 <div className="h-8 w-px bg-white/10" />
                 <div>
-                  <span className="font-serif text-4xl font-bold text-white">
+                  <span className="font-serif text-3xl font-bold text-white sm:text-4xl">
                     {articleCount}
                   </span>
-                  <p className="mt-1 text-xs uppercase tracking-wider text-dta-sand/60">
+                  <p className="mt-1 text-[10px] uppercase tracking-wider text-dta-sand/60 sm:text-xs">
                     articles
                   </p>
                 </div>
@@ -188,7 +188,7 @@ export default async function Home() {
               {featuredEvent && (
                 <Link
                   href={`/evenements/${featuredEvent.slug}`}
-                  className="group relative col-span-1 min-h-[480px] overflow-hidden rounded-[var(--radius-card)] lg:col-span-7"
+                  className="group relative col-span-1 min-h-[360px] overflow-hidden rounded-[var(--radius-card)] sm:min-h-[480px] lg:col-span-7"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-dta-accent/30 to-dta-sand">
                     {featuredEvent.coverImage && (
@@ -202,7 +202,7 @@ export default async function Home() {
                     )}
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                  <div className="relative flex h-full min-h-[480px] flex-col justify-end p-8">
+                  <div className="relative flex h-full min-h-[360px] flex-col justify-end p-5 sm:min-h-[480px] sm:p-8">
                     <div className="mb-3 flex items-center gap-3">
                       <span className="rounded-full bg-dta-accent px-4 py-1 text-xs font-semibold text-white">
                         {formatDate(featuredEvent.date)}
@@ -672,30 +672,30 @@ export default async function Home() {
           </div>
 
           {/* Stats recall */}
-          <div className="mt-14 flex items-center justify-center gap-10">
+          <div className="mt-14 flex items-center justify-center gap-6 sm:gap-10">
             <div>
-              <span className="font-serif text-3xl font-bold text-dta-accent">
+              <span className="font-serif text-2xl font-bold text-dta-accent sm:text-3xl">
                 {eventCount}
               </span>
-              <p className="mt-1 text-xs uppercase tracking-wider text-dta-taupe">
+              <p className="mt-1 text-[10px] uppercase tracking-wider text-dta-taupe sm:text-xs">
                 événements
               </p>
             </div>
             <div className="h-6 w-px bg-dta-taupe/30" />
             <div>
-              <span className="font-serif text-3xl font-bold text-dta-accent">
+              <span className="font-serif text-2xl font-bold text-dta-accent sm:text-3xl">
                 {productCount}
               </span>
-              <p className="mt-1 text-xs uppercase tracking-wider text-dta-taupe">
+              <p className="mt-1 text-[10px] uppercase tracking-wider text-dta-taupe sm:text-xs">
                 créations
               </p>
             </div>
             <div className="h-6 w-px bg-dta-taupe/30" />
             <div>
-              <span className="font-serif text-3xl font-bold text-dta-accent">
+              <span className="font-serif text-2xl font-bold text-dta-accent sm:text-3xl">
                 {articleCount}
               </span>
-              <p className="mt-1 text-xs uppercase tracking-wider text-dta-taupe">
+              <p className="mt-1 text-[10px] uppercase tracking-wider text-dta-taupe sm:text-xs">
                 articles
               </p>
             </div>

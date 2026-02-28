@@ -385,7 +385,7 @@ export default async function Home() {
                   href={`/marketplace/${products[0].slug}`}
                   className="group relative col-span-1 overflow-hidden rounded-[var(--radius-card)] sm:col-span-1 lg:col-span-5 lg:row-span-2"
                 >
-                  <div className="relative aspect-[3/4] lg:aspect-auto lg:h-full">
+                  <div className="relative aspect-[3/4] sm:aspect-[16/10] lg:aspect-auto lg:h-full">
                     <div className="absolute inset-0 bg-gradient-to-br from-dta-sand to-dta-beige">
                       {products[0].images[0] && (
                         <Image
@@ -451,7 +451,7 @@ export default async function Home() {
               {products[2] && (
                 <Link
                   href={`/marketplace/${products[2].slug}`}
-                  className="group relative col-span-1 overflow-hidden rounded-[var(--radius-card)] sm:col-span-1 lg:col-span-7"
+                  className="group relative col-span-1 overflow-hidden rounded-[var(--radius-card)] sm:col-span-2 lg:col-span-7"
                 >
                   <div className="relative aspect-[16/10]">
                     <div className="absolute inset-0 bg-gradient-to-br from-dta-sand to-dta-beige">

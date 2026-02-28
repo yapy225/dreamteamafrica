@@ -178,10 +178,10 @@ export default function ArticleCard({
     return (
       <Link
         href={`/journal/${article.slug}`}
-        className="group grid grid-cols-[160px_1fr] gap-4 overflow-hidden rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)]"
+        className="group grid grid-cols-1 gap-0 overflow-hidden rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)] sm:grid-cols-[160px_1fr] sm:gap-4"
       >
         {/* Image */}
-        <div className="relative overflow-hidden">
+        <div className="relative h-[140px] overflow-hidden sm:h-full">
           {article.coverImage ? (
             <Image
               src={article.coverImage}
@@ -196,7 +196,7 @@ export default function ArticleCard({
         </div>
 
         {/* Content */}
-        <div className="flex flex-col justify-center py-4 pr-4">
+        <div className="flex flex-col justify-center p-4 sm:py-4 sm:pr-4 sm:pl-0">
           <div className="mb-1.5 flex flex-wrap items-center gap-2">
             {catConfig && (
               <span

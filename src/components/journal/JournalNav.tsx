@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Menu, X, Search } from "lucide-react";
 
 const categories = [
@@ -13,9 +14,141 @@ const categories = [
   { label: "Opinion", cat: "OPINION" },
 ];
 
+interface SearchResult {
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  publishedAt: string;
+  author: { name: string | null };
+}
+
+function useDebounce(value: string, delay: number) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debounced;
+}
+
+function SearchDropdown({
+  query,
+  onClose,
+  inputRef,
+}: {
+  query: string;
+  onClose: () => void;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+}) {
+  const router = useRouter();
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const debouncedQuery = useDebounce(query, 300);
+
+  useEffect(() => {
+    if (!debouncedQuery || debouncedQuery.length < 2) {
+      setResults([]);
+      return;
+    }
+    setLoading(true);
+    fetch(`/api/journal/search?q=${encodeURIComponent(debouncedQuery)}&limit=8`)
+      .then((res) => res.json())
+      .then((data: SearchResult[]) => {
+        if (Array.isArray(data)) setResults(data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [debouncedQuery]);
+
+  // Click-outside to close
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(e.target as Node)
+      ) {
+        onClose();
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose, inputRef]);
+
+  // Keyboard: Enter navigates to first result, Escape closes
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      } else if (e.key === "Enter" && results.length > 0) {
+        e.preventDefault();
+        router.push(`/journal/${results[0].slug}`);
+        onClose();
+      }
+    },
+    [results, router, onClose]
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
+  if (!query || query.length < 2) return null;
+
+  return (
+    <div
+      ref={dropdownRef}
+      className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[360px] overflow-y-auto rounded-[var(--radius-card)] border border-dta-sand bg-white shadow-lg"
+    >
+      {loading && (
+        <div className="px-4 py-3 text-sm text-dta-taupe">Recherche...</div>
+      )}
+      {!loading && results.length === 0 && (
+        <div className="px-4 py-3 text-sm text-dta-taupe">
+          Aucun r&eacute;sultat pour &laquo;&nbsp;{query}&nbsp;&raquo;
+        </div>
+      )}
+      {results.map((r) => (
+        <Link
+          key={r.slug}
+          href={`/journal/${r.slug}`}
+          onClick={onClose}
+          className="block border-b border-dta-sand/30 px-4 py-3 transition-colors last:border-0 hover:bg-dta-beige"
+        >
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-dta-taupe">
+            {r.category}
+          </span>
+          <h4 className="mt-0.5 text-sm font-bold text-dta-dark">
+            {r.title}
+          </h4>
+          <p className="mt-0.5 line-clamp-1 text-xs text-dta-char/60">
+            {r.excerpt}
+          </p>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export default function JournalNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const desktopInputRef = useRef<HTMLInputElement>(null);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value);
+    setSearchOpen(value.length >= 2);
+  };
+
+  const closeSearch = useCallback(() => {
+    setSearchOpen(false);
+  }, []);
 
   return (
     <nav
@@ -61,12 +194,21 @@ export default function JournalNav() {
                 className="absolute left-2.5 top-1/2 -translate-y-1/2 text-dta-taupe"
               />
               <input
+                ref={desktopInputRef}
                 type="search"
                 placeholder="Rechercher..."
                 value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onFocus={() => searchValue.length >= 2 && setSearchOpen(true)}
                 className="w-[180px] rounded-[var(--radius-input)] border border-dta-sand bg-dta-beige py-1.5 pl-8 pr-3 text-sm text-dta-dark placeholder:text-dta-taupe focus:border-dta-accent focus:outline-none"
               />
+              {searchOpen && (
+                <SearchDropdown
+                  query={searchValue}
+                  onClose={closeSearch}
+                  inputRef={desktopInputRef}
+                />
+              )}
             </div>
             <Link
               href="/journal#newsletter"
@@ -123,12 +265,21 @@ export default function JournalNav() {
                 className="absolute left-2.5 top-1/2 -translate-y-1/2 text-dta-taupe"
               />
               <input
+                ref={mobileInputRef}
                 type="search"
                 placeholder="Rechercher..."
                 value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onFocus={() => searchValue.length >= 2 && setSearchOpen(true)}
                 className="w-full rounded-[var(--radius-input)] border border-dta-sand bg-dta-beige py-2 pl-8 pr-3 text-sm text-dta-dark placeholder:text-dta-taupe focus:border-dta-accent focus:outline-none"
               />
+              {searchOpen && (
+                <SearchDropdown
+                  query={searchValue}
+                  onClose={closeSearch}
+                  inputRef={mobileInputRef}
+                />
+              )}
             </div>
           </div>
         </div>

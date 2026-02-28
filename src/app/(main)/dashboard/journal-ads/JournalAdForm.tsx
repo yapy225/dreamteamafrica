@@ -37,6 +37,9 @@ interface JournalAdFormProps {
     ctaUrl: string;
     imageUrl: string | null;
     gradientClass: string | null;
+    iconSvg: string | null;
+    price: string | null;
+    advertiserName: string | null;
     campaignWeeks: number;
     active: boolean;
   };
@@ -54,6 +57,9 @@ export default function JournalAdForm({ initialData }: JournalAdFormProps) {
     ctaUrl: initialData?.ctaUrl || "",
     imageUrl: initialData?.imageUrl || "",
     gradientClass: initialData?.gradientClass || "",
+    iconSvg: initialData?.iconSvg || "",
+    price: initialData?.price || "",
+    advertiserName: initialData?.advertiserName || "",
     campaignWeeks: initialData?.campaignWeeks ?? 4,
     active: initialData?.active ?? true,
   });
@@ -79,6 +85,9 @@ export default function JournalAdForm({ initialData }: JournalAdFormProps) {
           ctaText: form.ctaText || null,
           imageUrl: form.imageUrl || null,
           gradientClass: form.gradientClass || null,
+          iconSvg: form.iconSvg || null,
+          price: form.price || null,
+          advertiserName: form.advertiserName || null,
         }),
       });
 
@@ -217,6 +226,47 @@ export default function JournalAdForm({ initialData }: JournalAdFormProps) {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-dta-char">
+            Nom de l&apos;annonceur{" "}
+            <span className="text-dta-taupe">(optionnel)</span>
+          </label>
+          <input
+            value={form.advertiserName}
+            onChange={(e) => setForm({ ...form, advertiserName: e.target.value })}
+            className={inputClass}
+            placeholder="Nom de la marque"
+          />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-dta-char">
+            Prix affiché{" "}
+            <span className="text-dta-taupe">(optionnel)</span>
+          </label>
+          <input
+            value={form.price}
+            onChange={(e) => setForm({ ...form, price: e.target.value })}
+            className={inputClass}
+            placeholder="12.90 EUR"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-dta-char">
+          Icône SVG{" "}
+          <span className="text-dta-taupe">(optionnel — markup SVG)</span>
+        </label>
+        <textarea
+          rows={3}
+          value={form.iconSvg}
+          onChange={(e) => setForm({ ...form, iconSvg: e.target.value })}
+          className={inputClass}
+          placeholder='<svg viewBox="0 0 24 24">...</svg>'
+        />
       </div>
 
       <div>

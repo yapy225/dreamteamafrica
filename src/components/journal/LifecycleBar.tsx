@@ -1,4 +1,4 @@
-import { LIFECYCLE_RULES, type JournalZone } from "@/lib/journal";
+import { type JournalZone } from "@/lib/journal";
 
 /* ─── Types ─────────────────────────────────────────────── */
 
@@ -11,20 +11,24 @@ interface LifecycleBarProps {
 type Segment = {
   zone: JournalZone;
   shortLabel: string;
+  fullLabel: string;
 };
 
-const segments: Segment[] = [
-  ...LIFECYCLE_RULES.map((r) => ({
-    zone: r.zone,
-    shortLabel: r.shortLabel,
-  })),
-  { zone: "ARCHIVES" as JournalZone, shortLabel: "Archives" },
+const computedSegments: Segment[] = [
+  { zone: "UNE", shortLabel: "Une", fullLabel: "J1-3 \u00b7 \u00c0 la Une" },
+  { zone: "FACE_UNE", shortLabel: "Face", fullLabel: "J4-6 \u00b7 Face Une" },
+  { zone: "PAGES_4_5", shortLabel: "P.4-5", fullLabel: "J7-8 \u00b7 Pages 4\u20135" },
+  { zone: "PAGES_6_7", shortLabel: "P.6-7", fullLabel: "J9-10 \u00b7 Pages 6\u20137" },
+  { zone: "PAGES_8_9", shortLabel: "P.8-9", fullLabel: "J11-12 \u00b7 Pages 8\u20139" },
+  { zone: "PAGES_10_11", shortLabel: "P.10-11", fullLabel: "J13-16 \u00b7 Pages 10\u201311" },
+  { zone: "PAGES_12_13", shortLabel: "P.12-13", fullLabel: "J17-21 \u00b7 Pages 12\u201313" },
+  { zone: "ARCHIVES", shortLabel: "Archives", fullLabel: "J22+ \u00b7 Archives" },
 ];
 
 /* ─── Component ─────────────────────────────────────────── */
 
 export default function LifecycleBar({ activeZone }: LifecycleBarProps) {
-  const activeIndex = segments.findIndex((s) => s.zone === activeZone);
+  const activeIndex = computedSegments.findIndex((s) => s.zone === activeZone);
 
   return (
     <div
@@ -33,7 +37,7 @@ export default function LifecycleBar({ activeZone }: LifecycleBarProps) {
       className="overflow-x-auto scrollbar-none"
     >
       <div className="flex items-center gap-1 min-w-max px-1 py-3">
-        {segments.map((segment, i) => {
+        {computedSegments.map((segment, i) => {
           const isActive = i === activeIndex;
           const isPast = i < activeIndex;
           const isFuture = i > activeIndex;
@@ -63,9 +67,9 @@ export default function LifecycleBar({ activeZone }: LifecycleBarProps) {
                 }`}
               />
 
-              {/* Label */}
+              {/* Label — short on mobile, full on desktop */}
               <span
-                className={`whitespace-nowrap text-xs ${
+                className={`whitespace-nowrap text-xs sm:hidden ${
                   isActive
                     ? "font-bold text-dta-accent"
                     : isPast
@@ -76,6 +80,19 @@ export default function LifecycleBar({ activeZone }: LifecycleBarProps) {
                 }`}
               >
                 {segment.shortLabel}
+              </span>
+              <span
+                className={`hidden whitespace-nowrap text-xs sm:inline ${
+                  isActive
+                    ? "font-bold text-dta-accent"
+                    : isPast
+                      ? "text-dta-sand"
+                      : isFuture
+                        ? "text-dta-taupe/50"
+                        : "text-dta-taupe"
+                }`}
+              >
+                {segment.fullLabel}
               </span>
             </div>
           );

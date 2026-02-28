@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
+import { campaignProgress } from "@/lib/journal";
 
 interface SidebarAd {
   id: string;
@@ -11,6 +12,11 @@ interface SidebarAd {
   ctaUrl: string;
   imageUrl: string | null;
   gradientClass: string | null;
+  iconSvg: string | null;
+  price: string | null;
+  advertiserName: string | null;
+  campaignWeeks: number;
+  campaignStart: string;
 }
 
 export default function AdSidebar() {
@@ -80,47 +86,85 @@ export default function AdSidebar() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {displayAds.map((ad, i) => (
-        <a
-          key={`${ad.id}-${i}`}
-          href={ad.ctaUrl}
-          target="_blank"
-          rel="noopener noreferrer sponsored"
-          onClick={() => handleClick(ad)}
-          className="group block overflow-hidden rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)]"
-        >
-          {/* Image / gradient */}
-          <div className="relative h-32 overflow-hidden">
-            {ad.imageUrl ? (
-              <Image
-                src={ad.imageUrl}
-                alt={ad.title}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="280px"
-              />
-            ) : (
-              <div
-                className={`absolute inset-0 ${ad.gradientClass ?? "j-g5"}`}
-              />
-            )}
-          </div>
+    <div className="flex gap-4 overflow-x-auto lg:flex-col lg:overflow-x-visible">
+      {displayAds.map((ad, i) => {
+        const progress = campaignProgress(ad.campaignStart, ad.campaignWeeks);
 
-          {/* Content */}
-          <div className="p-3">
-            <h4 className="font-serif text-sm font-bold leading-snug text-dta-dark group-hover:text-dta-accent">
-              {ad.title}
-            </h4>
-            <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-dta-char/70">
-              {ad.description}
-            </p>
-            <span className="mt-2 inline-block text-xs font-semibold text-dta-accent">
-              {ad.ctaText || "En savoir plus"} &rarr;
-            </span>
-          </div>
-        </a>
-      ))}
+        return (
+          <a
+            key={`${ad.id}-${i}`}
+            href={ad.ctaUrl}
+            target="_blank"
+            rel="noopener noreferrer sponsored"
+            onClick={() => handleClick(ad)}
+            className="group block w-[240px] shrink-0 overflow-hidden rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)] lg:w-full"
+          >
+            {/* Image / gradient */}
+            <div className="relative h-32 overflow-hidden">
+              {ad.imageUrl ? (
+                <Image
+                  src={ad.imageUrl}
+                  alt={ad.title}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="280px"
+                />
+              ) : (
+                <div
+                  className={`absolute inset-0 ${ad.gradientClass ?? "j-g5"}`}
+                />
+              )}
+
+              {/* Sponsored badge on image */}
+              <span className="absolute left-2 top-2 z-10 rounded-full bg-black/30 px-2 py-0.5 text-[9px] font-medium text-white backdrop-blur-sm">
+                Encart sponsoris&eacute;
+              </span>
+
+              {/* Icon SVG overlay */}
+              {ad.iconSvg && (
+                <span
+                  className="absolute bottom-2 right-2 z-10 h-6 w-6 text-white/40"
+                  dangerouslySetInnerHTML={{ __html: ad.iconSvg }}
+                />
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="p-3">
+              <h4 className="font-serif text-sm font-bold leading-snug text-dta-dark group-hover:text-dta-accent">
+                {ad.title}
+              </h4>
+              <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-dta-char/70">
+                {ad.description}
+              </p>
+
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-xs font-semibold text-dta-accent">
+                  {ad.ctaText || "En savoir plus"} &rarr;
+                </span>
+                {ad.price && (
+                  <span className="text-xs font-bold text-dta-dark">
+                    {ad.price}
+                  </span>
+                )}
+              </div>
+
+              {/* Campaign week indicator */}
+              <div className="mt-2 flex items-center gap-2">
+                <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-dta-sand">
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full bg-dta-accent/50"
+                    style={{ width: `${progress.percent}%` }}
+                  />
+                </div>
+                <span className="text-[9px] text-dta-taupe">
+                  {progress.label}
+                </span>
+              </div>
+            </div>
+          </a>
+        );
+      })}
     </div>
   );
 }

@@ -112,6 +112,24 @@ export const CATEGORY_CONFIG: Record<
   },
 };
 
+/** Compute campaign progress for ads */
+export function campaignProgress(
+  start: string | Date,
+  weeks: number
+): { current: number; total: number; label: string; percent: number } {
+  const startDate = new Date(start);
+  const now = new Date();
+  const diffMs = now.getTime() - startDate.getTime();
+  const currentWeek = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24 * 7)));
+  const clamped = Math.min(currentWeek, weeks);
+  return {
+    current: clamped,
+    total: weeks,
+    label: `S${clamped}/${weeks}`,
+    percent: Math.round((clamped / weeks) * 100),
+  };
+}
+
 /** Group published articles by computed lifecycle zone */
 export function groupArticlesByZone<
   T extends { publishedAt: Date; isSponsored: boolean },

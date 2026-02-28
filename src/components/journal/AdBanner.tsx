@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { campaignProgress } from "@/lib/journal";
 
 interface BannerAd {
   id: string;
@@ -12,14 +13,6 @@ interface BannerAd {
   gradientClass: string | null;
   campaignWeeks: number;
   campaignStart: string;
-}
-
-function campaignWeekLabel(start: string, weeks: number): string {
-  const startDate = new Date(start);
-  const now = new Date();
-  const diffMs = now.getTime() - startDate.getTime();
-  const currentWeek = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24 * 7)));
-  return `S${Math.min(currentWeek, weeks)}/${weeks}`;
 }
 
 export default function AdBanner() {
@@ -90,6 +83,7 @@ export default function AdBanner() {
   if (ads.length === 0) return null;
 
   const ad = ads[activeIndex];
+  const progress = campaignProgress(ad.campaignStart, ad.campaignWeeks);
 
   return (
     <div className="h-[44px] bg-dta-beige">
@@ -123,10 +117,18 @@ export default function AdBanner() {
             {ad.ctaText || "En savoir plus"}
           </a>
 
-          {/* Campaign week */}
-          <span className="hidden shrink-0 text-[10px] text-dta-taupe lg:inline">
-            {campaignWeekLabel(ad.campaignStart, ad.campaignWeeks)}
-          </span>
+          {/* Campaign week + progress bar */}
+          <div className="hidden shrink-0 items-center gap-2 lg:flex">
+            <div className="relative h-3 w-12 overflow-hidden rounded-full bg-dta-sand">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full bg-dta-accent/60 transition-all duration-500"
+                style={{ width: `${progress.percent}%` }}
+              />
+            </div>
+            <span className="text-[10px] text-dta-taupe">
+              {progress.label}
+            </span>
+          </div>
         </div>
       </div>
     </div>

@@ -13,6 +13,8 @@ async function main() {
   await prisma.ticket.deleteMany();
   await prisma.adCampaign.deleteMany();
   await prisma.article.deleteMany();
+  await prisma.journalAd.deleteMany();
+  await prisma.newsletterSubscriber.deleteMany();
   await prisma.product.deleteMany();
   await prisma.event.deleteMany();
   await prisma.session.deleteMany();
@@ -332,9 +334,13 @@ async function main() {
 
   console.log(`Created ${products.length} products`);
 
-  // ─── ARTICLES ───────────────────────────────────────────
+  // ─── ARTICLES (25 total) ────────────────────────────────
+
+  const now = Date.now();
+  const DAY = 24 * 60 * 60 * 1000;
 
   const articles = await Promise.all([
+    // ── UNE (J1-3) — 3 articles ──
     prisma.article.create({
       data: {
         title: "La mode africaine conquiert les podiums parisiens",
@@ -354,6 +360,41 @@ async function main() {
     }),
     prisma.article.create({
       data: {
+        title: "Nollywood dépasse Hollywood en volume de production",
+        slug: "nollywood-depasse-hollywood",
+        excerpt:
+          "L'industrie cinématographique nigériane produit désormais plus de films que Hollywood et attire les investisseurs internationaux.",
+        content:
+          "Nollywood, l'industrie cinématographique du Nigeria, a franchi un cap symbolique en dépassant Hollywood en nombre de films produits annuellement. Avec plus de 2 500 productions par an, cette industrie représente un chiffre d'affaires de plusieurs milliards de dollars.\n\nCette croissance fulgurante s'accompagne d'une amélioration notable de la qualité des productions. Les plateformes de streaming internationales investissent massivement dans le contenu africain, offrant une visibilité sans précédent aux créateurs du continent.\n\nLe succès de séries comme Blood Sisters sur Netflix témoigne de l'appétit mondial pour les histoires africaines.",
+        coverImage: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1200&q=80",
+        category: "CULTURE",
+        position: "UNE",
+        authorId: admin.id,
+        publishedAt: new Date(now - 1 * DAY),
+        dayCount: 2,
+        featured: true,
+      },
+    }),
+    prisma.article.create({
+      data: {
+        title: "Le franc CFA en question : vers une monnaie panafricaine ?",
+        slug: "franc-cfa-monnaie-panafricaine",
+        excerpt:
+          "Le débat sur la souveraineté monétaire africaine s'intensifie alors que l'Union Africaine explore des alternatives au franc CFA.",
+        content:
+          "Le débat autour du franc CFA refait surface avec une intensité nouvelle. Plusieurs économistes africains et européens plaident pour une réforme profonde du système monétaire hérité de la colonisation.\n\nL'Union Africaine a lancé un groupe de travail pour étudier la faisabilité d'une monnaie unique panafricaine, inspirée du modèle de l'euro. Les enjeux sont considérables : souveraineté économique, stabilité financière et intégration régionale.\n\nPour la diaspora, cette question est centrale car elle impacte directement les transferts de fonds vers le continent.",
+        gradientClass: "j-g3",
+        category: "ACTUALITE",
+        position: "UNE",
+        authorId: admin.id,
+        publishedAt: new Date(now - 2 * DAY),
+        dayCount: 3,
+      },
+    }),
+
+    // ── FACE_UNE (J4-6) — 3 articles ──
+    prisma.article.create({
+      data: {
         title: "Les entrepreneurs de la diaspora qui font bouger l'Afrique",
         slug: "entrepreneurs-diaspora-afrique",
         excerpt:
@@ -364,10 +405,46 @@ async function main() {
         category: "BUSINESS",
         position: "FACE_UNE",
         authorId: admin.id,
-        publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+        publishedAt: new Date(now - 3 * DAY),
         dayCount: 4,
       },
     }),
+    prisma.article.create({
+      data: {
+        title: "La tech africaine lève des fonds records en 2026",
+        slug: "tech-africaine-fonds-records-2026",
+        excerpt:
+          "Les startups du continent attirent des investissements massifs, portées par l'innovation mobile et la fintech.",
+        content:
+          "L'écosystème tech africain continue sa croissance exponentielle. Au premier semestre 2026, les startups africaines ont levé plus de 3 milliards de dollars, un record historique.\n\nLa fintech reste le secteur dominant avec des champions comme Flutterwave, Chipper Cash et Wave qui étendent leurs services à travers le continent. Mais d'autres secteurs émergent : healthtech, agritech, edtech.\n\nLes hubs technologiques comme Lagos, Nairobi, Le Caire et Cape Town rivalisent désormais avec des écosystèmes plus matures.",
+        coverImage: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1200&q=80",
+        category: "BUSINESS",
+        position: "FACE_UNE",
+        authorId: admin.id,
+        publishedAt: new Date(now - 4 * DAY),
+        dayCount: 5,
+        isSponsored: true,
+        sponsorName: "AfricaTech Fund",
+      },
+    }),
+    prisma.article.create({
+      data: {
+        title: "Afrobeats : la musique africaine s'impose dans les charts mondiaux",
+        slug: "afrobeats-charts-mondiaux",
+        excerpt:
+          "De Burna Boy à Tems, les artistes africains dominent les playlists internationales et redéfinissent la pop culture.",
+        content:
+          "L'Afrobeats est devenu un phénomène mondial incontournable. Les artistes nigérians, ghanéens et sud-africains occupent désormais les premières places des charts internationaux.\n\nBurna Boy, Wizkid, Tems, Ayra Starr — ces noms sont devenus familiers pour des millions de fans à travers le monde. Les collaborations avec des artistes occidentaux se multiplient, mais c'est surtout le son africain qui s'exporte tel quel.\n\nLes festivals européens font désormais la part belle aux artistes africains, et Paris n'est pas en reste avec ses nombreux événements dédiés.",
+        coverImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80",
+        category: "CULTURE",
+        position: "FACE_UNE",
+        authorId: admin.id,
+        publishedAt: new Date(now - 5 * DAY),
+        dayCount: 6,
+      },
+    }),
+
+    // ── PAGES_4_5 (J7-8) — 2 articles ──
     prisma.article.create({
       data: {
         title: "Gastronomie : quand l'Afrique réinvente la cuisine française",
@@ -380,10 +457,28 @@ async function main() {
         category: "LIFESTYLE",
         position: "PAGES_4_5",
         authorId: admin.id,
-        publishedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+        publishedAt: new Date(now - 7 * DAY),
         dayCount: 8,
       },
     }),
+    prisma.article.create({
+      data: {
+        title: "Le boom du tourisme en Afrique de l'Est",
+        slug: "boom-tourisme-afrique-est",
+        excerpt:
+          "Le Kenya, la Tanzanie et le Rwanda battent des records de fréquentation touristique, portés par l'écotourisme.",
+        content:
+          "L'Afrique de l'Est s'impose comme une destination touristique majeure. Le Kenya et la Tanzanie, avec leurs parcs nationaux emblématiques, accueillent un nombre record de visiteurs.\n\nLe Rwanda, souvent cité en exemple pour sa politique de tourisme haut de gamme, attire une clientèle internationale avec le gorilla trekking et ses lodges de luxe. L'Éthiopie, avec ses sites historiques classés UNESCO, connaît également un regain d'intérêt.\n\nL'écotourisme et le tourisme communautaire émergent comme des alternatives durables, bénéficiant directement aux populations locales.",
+        coverImage: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1200&q=80",
+        category: "LIFESTYLE",
+        position: "PAGES_4_5",
+        authorId: admin.id,
+        publishedAt: new Date(now - 6 * DAY),
+        dayCount: 7,
+      },
+    }),
+
+    // ── PAGES_6_7 (J9-10) — 2 articles ──
     prisma.article.create({
       data: {
         title: "La diaspora africaine face aux défis de la double identité",
@@ -396,10 +491,28 @@ async function main() {
         category: "DIASPORA",
         position: "PAGES_6_7",
         authorId: admin.id,
-        publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-        dayCount: 11,
+        publishedAt: new Date(now - 9 * DAY),
+        dayCount: 10,
       },
     }),
+    prisma.article.create({
+      data: {
+        title: "Les associations panafricaines d'Europe se fédèrent",
+        slug: "associations-panafricaines-europe",
+        excerpt:
+          "Un mouvement de structuration sans précédent unit les associations de la diaspora pour peser davantage.",
+        content:
+          "Les associations panafricaines d'Europe franchissent un cap en créant une fédération continentale. L'objectif : mutualiser les ressources, coordonner les actions et parler d'une seule voix auprès des institutions européennes.\n\nDe Paris à Londres, de Bruxelles à Berlin, les structures associatives de la diaspora africaine se comptent par milliers. Longtemps fragmentées, elles s'organisent désormais en réseau pour maximiser leur impact.\n\nCette structuration répond à un besoin croissant de représentation et de lobbying auprès des instances de décision.",
+        gradientClass: "j-g6",
+        category: "DIASPORA",
+        position: "PAGES_6_7",
+        authorId: admin.id,
+        publishedAt: new Date(now - 8 * DAY),
+        dayCount: 9,
+      },
+    }),
+
+    // ── PAGES_8_9 (J11-12) — 2 articles ──
     prisma.article.create({
       data: {
         title: "Élections au Sénégal : un tournant démocratique pour l'Afrique de l'Ouest",
@@ -412,10 +525,28 @@ async function main() {
         category: "ACTUALITE",
         position: "PAGES_8_9",
         authorId: admin.id,
-        publishedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000),
-        dayCount: 13,
+        publishedAt: new Date(now - 11 * DAY),
+        dayCount: 12,
       },
     }),
+    prisma.article.create({
+      data: {
+        title: "L'Union Africaine renforce sa position sur la scène internationale",
+        slug: "union-africaine-scene-internationale",
+        excerpt:
+          "L'admission de l'UA au G20 marque un tournant dans la représentation du continent dans la gouvernance mondiale.",
+        content:
+          "L'Union Africaine a franchi une étape historique en devenant membre permanent du G20. Cette reconnaissance internationale reflète le poids économique et démographique croissant du continent africain.\n\nAvec une population qui devrait atteindre 2,5 milliards d'habitants d'ici 2050, l'Afrique ne peut plus être ignorée dans les discussions sur les grands enjeux mondiaux : climat, commerce, santé, numérique.\n\nPour la diaspora, cette montée en puissance est source de fierté et d'opportunités.",
+        gradientClass: "j-g8",
+        category: "ACTUALITE",
+        position: "PAGES_8_9",
+        authorId: admin.id,
+        publishedAt: new Date(now - 10 * DAY),
+        dayCount: 11,
+      },
+    }),
+
+    // ── PAGES_10_11 (J13-16) — 2 articles ──
     prisma.article.create({
       data: {
         title: "Tribune : Pour une vraie politique culturelle panafricaine",
@@ -428,13 +559,434 @@ async function main() {
         category: "OPINION",
         position: "PAGES_10_11",
         authorId: admin.id,
-        publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+        publishedAt: new Date(now - 15 * DAY),
         dayCount: 16,
+      },
+    }),
+    prisma.article.create({
+      data: {
+        title: "Faut-il repenser l'aide au développement ?",
+        slug: "repenser-aide-au-developpement",
+        excerpt:
+          "De plus en plus de voix africaines s'élèvent pour réclamer un nouveau paradigme dans les relations économiques Nord-Sud.",
+        content:
+          "Le modèle traditionnel de l'aide au développement est de plus en plus contesté par les intellectuels et entrepreneurs africains. Dambisa Moyo, dans son ouvrage Dead Aid, a ouvert la voie à une critique radicale de l'assistanat.\n\nAujourd'hui, un consensus émerge autour de l'idée que le commerce, l'investissement et l'entrepreneuriat sont plus efficaces que l'aide pour sortir de la pauvreté. Les succès du Rwanda, de l'Éthiopie et du Kenya en témoignent.\n\nLa diaspora a un rôle clé à jouer dans cette transformation en investissant directement dans l'économie africaine.",
+        gradientClass: "j-g10",
+        category: "OPINION",
+        position: "PAGES_10_11",
+        authorId: admin.id,
+        publishedAt: new Date(now - 13 * DAY),
+        dayCount: 14,
+        isSponsored: true,
+        sponsorName: "Africa Investment Forum",
+      },
+    }),
+
+    // ── PAGES_12_13 (J17-21) — 3 articles ──
+    prisma.article.create({
+      data: {
+        title: "L'art contemporain africain explose sur le marché mondial",
+        slug: "art-contemporain-africain-marche-mondial",
+        excerpt:
+          "Les galeries internationales s'arrachent les œuvres d'artistes africains dont les cotes atteignent des sommets.",
+        content:
+          "L'art contemporain africain vit un âge d'or. Les œuvres de El Anatsui, Njideka Akunyili Crosby, et Amoako Boafo se vendent à des prix records dans les grandes maisons de ventes aux enchères.\n\nLes foires d'art comme 1-54 Contemporary African Art Fair, fondée à Londres, s'étendent désormais à Paris, New York et Marrakech. Les collectionneurs occidentaux découvrent la richesse et la diversité de la création contemporaine africaine.\n\nPour les artistes de la diaspora, cette reconnaissance ouvre de nouvelles perspectives.",
+        coverImage: "https://images.unsplash.com/photo-1561839561-b13bcfe95249?w=1200&q=80",
+        category: "CULTURE",
+        position: "PAGES_12_13",
+        authorId: admin.id,
+        publishedAt: new Date(now - 17 * DAY),
+        dayCount: 18,
+      },
+    }),
+    prisma.article.create({
+      data: {
+        title: "Sport : les athlètes africains brillent aux championnats du monde",
+        slug: "athletes-africains-championnats-monde",
+        excerpt:
+          "Du marathon au sprint, les sportifs africains dominent les compétitions internationales d'athlétisme.",
+        content:
+          "Les athlètes africains continuent de régner sur l'athlétisme mondial. Le Kenya et l'Éthiopie dominent les courses de fond, tandis que le Nigeria et l'Afrique du Sud s'illustrent dans les sprints et les relais.\n\nAu-delà de l'athlétisme, le football africain gagne en prestige avec des joueurs qui évoluent dans les plus grands clubs européens. La CAN, Coupe d'Afrique des Nations, attire un public mondial croissant.\n\nLe sport reste un puissant vecteur d'intégration pour la diaspora et de fierté pour tout le continent.",
+        coverImage: "https://images.unsplash.com/photo-1461896836934-bd45ba8fcfa7?w=1200&q=80",
+        category: "LIFESTYLE",
+        position: "PAGES_12_13",
+        authorId: admin.id,
+        publishedAt: new Date(now - 18 * DAY),
+        dayCount: 19,
+      },
+    }),
+    prisma.article.create({
+      data: {
+        title: "Les langues africaines à l'ère du numérique",
+        slug: "langues-africaines-ere-numerique",
+        excerpt:
+          "Des initiatives innovantes visent à préserver et numériser les 2 000 langues du continent africain.",
+        content:
+          "L'Afrique compte plus de 2 000 langues, une richesse linguistique unique au monde. Mais beaucoup de ces langues sont menacées de disparition face à la domination des langues coloniales.\n\nDes projets innovants comme Masakhane, qui développe des modèles d'IA pour les langues africaines, ou encore la numérisation de contenus en langues locales, offrent de nouvelles perspectives pour la préservation de ce patrimoine.\n\nLa diaspora contribue activement à ces efforts, en finançant des projets et en transmettant les langues aux nouvelles générations.",
+        gradientClass: "j-g11",
+        category: "CULTURE",
+        position: "PAGES_12_13",
+        authorId: admin.id,
+        publishedAt: new Date(now - 19 * DAY),
+        dayCount: 20,
+        isSponsored: true,
+        sponsorName: "Masakhane NLP",
+      },
+    }),
+
+    // ── ARCHIVES (J22+) — 6 articles ──
+    prisma.article.create({
+      data: {
+        title: "Énergies renouvelables : l'Afrique, futur leader mondial du solaire",
+        slug: "energies-renouvelables-afrique-solaire",
+        excerpt:
+          "Le continent le plus ensoleillé du monde pourrait devenir le premier producteur d'énergie solaire d'ici 2040.",
+        content:
+          "L'Afrique reçoit plus de rayonnement solaire que tout autre continent. Pourtant, elle ne représente que 1% de la capacité solaire mondiale installée. Ce paradoxe est en train de changer.\n\nDes projets massifs comme le Noor au Maroc, les fermes solaires au Kenya et les installations off-grid en Afrique de l'Ouest transforment le paysage énergétique du continent.\n\nLa diaspora investit de plus en plus dans les projets d'énergies renouvelables, attirée par les rendements et l'impact social positif.",
+        coverImage: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200&q=80",
+        category: "BUSINESS",
+        position: "ARCHIVES",
+        authorId: admin.id,
+        publishedAt: new Date(now - 25 * DAY),
+        dayCount: 26,
+      },
+    }),
+    prisma.article.create({
+      data: {
+        title: "La littérature africaine francophone en plein renouveau",
+        slug: "litterature-africaine-francophone-renouveau",
+        excerpt:
+          "Une nouvelle génération d'écrivains africains francophones séduit la critique et le grand public.",
+        content:
+          "La littérature africaine francophone connaît un renouveau spectaculaire. Mohamed Mbougar Sarr, prix Goncourt 2021 avec La plus secrète mémoire des hommes, a ouvert la voie à une nouvelle génération d'écrivains.\n\nDjamili Amadou Amal, Djaïli Amadou Amal, Gauz, Nathacha Appanah — autant de voix qui enrichissent la littérature francophone tout en explorant les thématiques propres au continent africain et à sa diaspora.\n\nLes festivals littéraires africains se multiplient en Europe, témoignant de l'engouement croissant pour ces voix nouvelles.",
+        coverImage: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1200&q=80",
+        category: "CULTURE",
+        position: "ARCHIVES",
+        authorId: admin.id,
+        publishedAt: new Date(now - 28 * DAY),
+        dayCount: 29,
+      },
+    }),
+    prisma.article.create({
+      data: {
+        title: "Santé : les innovations médicales made in Africa",
+        slug: "innovations-medicales-made-in-africa",
+        excerpt:
+          "Du vaccin antipaludéen aux applications de télémédecine, le continent innove pour répondre à ses défis sanitaires.",
+        content:
+          "L'Afrique n'attend plus les solutions venues d'ailleurs. Le continent développe ses propres innovations médicales, adaptées à ses réalités. Le vaccin antipaludéen développé au Burkina Faso, les applications de télémédecine au Rwanda, les drones de livraison de sang au Ghana.\n\nCes innovations, nées de la nécessité, sont souvent plus adaptées et moins coûteuses que les solutions occidentales. Elles attirent l'attention de la communauté scientifique internationale.\n\nLa diaspora médicale africaine en Europe joue un rôle crucial dans le transfert de compétences et de technologies.",
+        gradientClass: "j-g4",
+        category: "ACTUALITE",
+        position: "ARCHIVES",
+        authorId: admin.id,
+        publishedAt: new Date(now - 30 * DAY),
+        dayCount: 31,
+      },
+    }),
+    prisma.article.create({
+      data: {
+        title: "Agriculture urbaine : les fermes verticales fleurissent à Lagos",
+        slug: "agriculture-urbaine-fermes-verticales-lagos",
+        excerpt:
+          "Face à l'urbanisation galopante, Lagos mise sur l'agriculture verticale pour nourrir ses 20 millions d'habitants.",
+        content:
+          "Lagos, mégalopole de plus de 20 millions d'habitants, fait face à un défi alimentaire majeur. L'agriculture urbaine, et en particulier les fermes verticales, apparaît comme une solution prometteuse.\n\nDes startups nigérianes développent des solutions innovantes de culture hydroponique et aéroponique, permettant de produire des légumes frais en plein cœur de la ville. Ces initiatives créent des emplois et réduisent la dépendance aux importations.\n\nLe modèle essaime dans d'autres villes africaines, de Nairobi à Dakar.",
+        coverImage: "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=1200&q=80",
+        category: "BUSINESS",
+        position: "ARCHIVES",
+        authorId: admin.id,
+        publishedAt: new Date(now - 35 * DAY),
+        dayCount: 36,
+      },
+    }),
+    prisma.article.create({
+      data: {
+        title: "Mode éthique : le wax peut-il sauver la fast fashion ?",
+        slug: "mode-ethique-wax-fast-fashion",
+        excerpt:
+          "Les textiles africains traditionnels offrent une alternative durable et éthique à la mode jetable.",
+        content:
+          "Alors que l'industrie de la fast fashion est de plus en plus critiquée pour son impact environnemental, les textiles africains traditionnels offrent une alternative séduisante. Le wax, le kente, le bogolan sont des tissus durables, fabriqués artisanalement.\n\nDes créateurs de la diaspora développent des marques de mode éthique qui valorisent ces savoir-faire tout en répondant aux attentes des consommateurs occidentaux en matière de durabilité.\n\nCette tendance s'inscrit dans un mouvement plus large de décolonisation de la mode et de valorisation des cultures non-occidentales.",
+        gradientClass: "j-g7",
+        category: "LIFESTYLE",
+        position: "ARCHIVES",
+        authorId: admin.id,
+        publishedAt: new Date(now - 40 * DAY),
+        dayCount: 41,
+      },
+    }),
+    prisma.article.create({
+      data: {
+        title: "Éducation : les universités africaines attirent les étudiants du monde entier",
+        slug: "universites-africaines-etudiants-monde",
+        excerpt:
+          "De nouvelles universités d'excellence émergent sur le continent et attirent des talents internationaux.",
+        content:
+          "L'enseignement supérieur africain se transforme. Des institutions comme l'African Leadership University au Rwanda, l'Ashesi University au Ghana et l'ALU School of Business attirent des étudiants du monde entier.\n\nCes universités nouvelle génération proposent des cursus innovants, axés sur l'entrepreneuriat, le leadership et la résolution des problèmes africains. Elles forment la prochaine génération de leaders du continent.\n\nPour les jeunes de la diaspora, ces universités représentent une opportunité de renouer avec leurs racines tout en bénéficiant d'une formation d'excellence.",
+        coverImage: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&q=80",
+        category: "ACTUALITE",
+        position: "ARCHIVES",
+        authorId: admin.id,
+        publishedAt: new Date(now - 45 * DAY),
+        dayCount: 46,
       },
     }),
   ]);
 
   console.log(`Created ${articles.length} articles`);
+
+  // ─── JOURNAL ADS (15 total) ─────────────────────────────
+
+  const journalAds = await Promise.all([
+    // 6 BANNER ads
+    prisma.journalAd.create({
+      data: {
+        title: "Foire D'Afrique Paris 2026",
+        description: "Le plus grand salon africain de Paris — 1er & 2 mai. Artisanat, gastronomie, concerts live.",
+        placement: "BANNER",
+        ctaText: "Réserver",
+        ctaUrl: "https://dreamteamafrica.com/events/foire-afrique-paris-2026",
+        gradientClass: "j-g1",
+        advertiserName: "Dream Team Africa",
+        campaignWeeks: 6,
+        campaignStart: new Date(now - 7 * DAY),
+      },
+    }),
+    prisma.journalAd.create({
+      data: {
+        title: "Tongoro — Collection Été 2026",
+        description: "Découvrez la nouvelle collection inspirée des textiles du Sahel. Livraison offerte en Europe.",
+        placement: "BANNER",
+        ctaText: "Découvrir",
+        ctaUrl: "https://tongoro.com",
+        imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&q=80",
+        advertiserName: "Tongoro Studio",
+        price: "89 EUR",
+        campaignWeeks: 4,
+        campaignStart: new Date(now - 3 * DAY),
+      },
+    }),
+    prisma.journalAd.create({
+      data: {
+        title: "Wave — Envoyez de l'argent en Afrique",
+        description: "Transferts instantanés, frais réduits. Plus de 10 pays disponibles.",
+        placement: "BANNER",
+        ctaText: "Essayer Wave",
+        ctaUrl: "https://wave.com",
+        gradientClass: "j-g3",
+        advertiserName: "Wave",
+        iconSvg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>',
+        campaignWeeks: 8,
+        campaignStart: new Date(now - 14 * DAY),
+      },
+    }),
+    prisma.journalAd.create({
+      data: {
+        title: "Flutterwave Business",
+        description: "La passerelle de paiement N°1 en Afrique. Intégration en 5 minutes.",
+        placement: "BANNER",
+        ctaText: "Commencer",
+        ctaUrl: "https://flutterwave.com",
+        gradientClass: "j-g5",
+        advertiserName: "Flutterwave",
+        campaignWeeks: 4,
+        campaignStart: new Date(now - 5 * DAY),
+      },
+    }),
+    prisma.journalAd.create({
+      data: {
+        title: "Festival du Conte Africain",
+        description: "Sous l'arbre à palabre — 11 novembre 2026 à Paris. Griots et conteurs.",
+        placement: "BANNER",
+        ctaText: "Billetterie",
+        ctaUrl: "https://dreamteamafrica.com/events/festival-conte-africain-2026",
+        gradientClass: "j-g9",
+        advertiserName: "Dream Team Africa",
+        campaignWeeks: 3,
+        campaignStart: new Date(now - 1 * DAY),
+      },
+    }),
+    prisma.journalAd.create({
+      data: {
+        title: "Air Sénégal — Vols directs Paris-Dakar",
+        description: "À partir de 299€ A/R. Nouveaux horaires été 2026.",
+        placement: "BANNER",
+        ctaText: "Réserver",
+        ctaUrl: "https://flyairsenegal.com",
+        imageUrl: "https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=400&q=80",
+        advertiserName: "Air Sénégal",
+        price: "299 EUR",
+        campaignWeeks: 6,
+        campaignStart: new Date(now - 10 * DAY),
+      },
+    }),
+
+    // 2 INLINE ads
+    prisma.journalAd.create({
+      data: {
+        title: "Salon Made In Africa — L'artisanat africain à Paris",
+        description: "Plus de 500 artisans exposants. Mode, décoration, cosmétiques, épicerie fine. 11-12 décembre 2026 à l'Espace Mas.",
+        placement: "INLINE",
+        ctaText: "Obtenir mon badge",
+        ctaUrl: "https://dreamteamafrica.com/events/salon-made-in-africa-2026",
+        imageUrl: "https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=800&q=80",
+        advertiserName: "Dream Team Africa",
+        iconSvg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-9m3 10H5m14-5H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>',
+        campaignWeeks: 8,
+        campaignStart: new Date(now - 10 * DAY),
+      },
+    }),
+    prisma.journalAd.create({
+      data: {
+        title: "Chipper Cash — Transferts gratuits entre pays africains",
+        description: "Envoyez et recevez de l'argent sans frais dans 9 pays d'Afrique. Téléchargez l'app.",
+        placement: "INLINE",
+        ctaText: "Télécharger",
+        ctaUrl: "https://chippercash.com",
+        gradientClass: "j-g6",
+        advertiserName: "Chipper Cash",
+        price: "0 EUR de frais",
+        iconSvg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
+        campaignWeeks: 6,
+        campaignStart: new Date(now - 5 * DAY),
+      },
+    }),
+
+    // 1 VIDEO ad
+    prisma.journalAd.create({
+      data: {
+        title: "Évasion Paris — Croisière culturelle sur la Seine",
+        description: "Concerts, dégustations, art contemporain africain. Une expérience unique le 13 juin 2026.",
+        placement: "VIDEO",
+        ctaText: "Réserver ma place",
+        ctaUrl: "https://dreamteamafrica.com/events/evasion-paris-2026",
+        imageUrl: "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&q=80",
+        advertiserName: "Évasion Paris",
+        price: "150 EUR",
+        campaignWeeks: 10,
+        campaignStart: new Date(now - 14 * DAY),
+      },
+    }),
+
+    // 6 SIDEBAR ads
+    prisma.journalAd.create({
+      data: {
+        title: "Bijoux Akan — Collection Adinkra",
+        description: "Bijoux artisanaux inspirés des symboles Akan. Plaqué or 18 carats.",
+        placement: "SIDEBAR",
+        ctaText: "Voir la collection",
+        ctaUrl: "https://dreamteamafrica.com/marketplace/bijoux",
+        imageUrl: "https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=400&q=80",
+        advertiserName: "Aminata Créations",
+        price: "89 EUR",
+        campaignWeeks: 4,
+        campaignStart: new Date(now - 2 * DAY),
+      },
+    }),
+    prisma.journalAd.create({
+      data: {
+        title: "Cuir de Tombouctou",
+        description: "Sacs et accessoires en cuir tanné végétal. Gravures Touareg authentiques.",
+        placement: "SIDEBAR",
+        ctaText: "Commander",
+        ctaUrl: "https://dreamteamafrica.com/marketplace/maroquinerie",
+        imageUrl: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80",
+        advertiserName: "Fatou Cuir",
+        price: "120 EUR",
+        campaignWeeks: 4,
+        campaignStart: new Date(now - 3 * DAY),
+      },
+    }),
+    prisma.journalAd.create({
+      data: {
+        title: "Kente Premium — Tissu artisanal du Ghana",
+        description: "Écharpes et accessoires en authentique Kente. Livraison Europe offerte.",
+        placement: "SIDEBAR",
+        ctaText: "Acheter",
+        ctaUrl: "https://dreamteamafrica.com/marketplace/mode",
+        gradientClass: "j-g2",
+        advertiserName: "Kofi Textiles",
+        price: "65 EUR",
+        iconSvg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2 12 3.46 8 2 3.62 3.46a1 1 0 00-.62.94V20a1 1 0 001.38.92L8 19l4 1.46L16 19l4.38 1.92A1 1 0 0021 20V4.4a1 1 0 00-.62-.94z"/></svg>',
+        campaignWeeks: 3,
+        campaignStart: new Date(now - 1 * DAY),
+      },
+    }),
+    prisma.journalAd.create({
+      data: {
+        title: "Juste Une Danse — Billetterie ouverte",
+        description: "Festival des danses traditionnelles africaines. 31 octobre à l'Espace Mas.",
+        placement: "SIDEBAR",
+        ctaText: "Prendre un billet",
+        ctaUrl: "https://dreamteamafrica.com/events/juste-une-danse-2026",
+        gradientClass: "j-g4",
+        advertiserName: "Dream Team Africa",
+        campaignWeeks: 6,
+        campaignStart: new Date(now - 7 * DAY),
+      },
+    }),
+    prisma.journalAd.create({
+      data: {
+        title: "Masques Igbo — Art décoratif",
+        description: "Masques sculptés à la main en bois d'ébène. Pièces uniques signées.",
+        placement: "SIDEBAR",
+        ctaText: "Découvrir",
+        ctaUrl: "https://dreamteamafrica.com/marketplace/decoration",
+        imageUrl: "https://images.unsplash.com/photo-1580618864180-f6e7fb65f0be?w=400&q=80",
+        advertiserName: "Chidi Art",
+        price: "95 EUR",
+        campaignWeeks: 4,
+        campaignStart: new Date(now - 4 * DAY),
+      },
+    }),
+    prisma.journalAd.create({
+      data: {
+        title: "Africa Tech Summit 2026",
+        description: "Le rendez-vous annuel de la tech africaine. Conférences, networking, hackathon.",
+        placement: "SIDEBAR",
+        ctaText: "S'inscrire",
+        ctaUrl: "https://africatechsummit.com",
+        gradientClass: "j-g8",
+        advertiserName: "Africa Tech Summit",
+        iconSvg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-4.96.44 2.5 2.5 0 01-2.96-3.08 3 3 0 01.02-5.72 2.5 2.5 0 012.96-3.08A2.5 2.5 0 019.5 2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44 2.5 2.5 0 002.96-3.08 3 3 0 00-.02-5.72 2.5 2.5 0 00-2.96-3.08A2.5 2.5 0 0014.5 2z"/></svg>',
+        campaignWeeks: 5,
+        campaignStart: new Date(now - 8 * DAY),
+      },
+    }),
+  ]);
+
+  console.log(`Created ${journalAds.length} journal ads`);
+
+  // ─── NEWSLETTER SUBSCRIBERS (8 emails) ──────────────────
+
+  const subscribers = await Promise.all([
+    prisma.newsletterSubscriber.create({
+      data: { email: "reader1@example.com", isActive: true },
+    }),
+    prisma.newsletterSubscriber.create({
+      data: { email: "reader2@example.com", isActive: true },
+    }),
+    prisma.newsletterSubscriber.create({
+      data: { email: "aminata.fan@gmail.com", isActive: true },
+    }),
+    prisma.newsletterSubscriber.create({
+      data: { email: "diaspora.paris@outlook.fr", isActive: true },
+    }),
+    prisma.newsletterSubscriber.create({
+      data: { email: "culturevibe@proton.me", isActive: true },
+    }),
+    prisma.newsletterSubscriber.create({
+      data: { email: "ancien.lecteur@free.fr", isActive: false },
+    }),
+    prisma.newsletterSubscriber.create({
+      data: { email: "unsubscribed@test.com", isActive: false },
+    }),
+    prisma.newsletterSubscriber.create({
+      data: { email: "news.afrique@laposte.net", isActive: true },
+    }),
+  ]);
+
+  console.log(`Created ${subscribers.length} newsletter subscribers`);
 
   console.log("\nSeed completed successfully!");
   console.log("─────────────────────────────");

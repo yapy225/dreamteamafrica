@@ -36,6 +36,9 @@ export default async function EditJournalAdPage({
             ctaUrl: ad.ctaUrl,
             imageUrl: ad.imageUrl,
             gradientClass: ad.gradientClass,
+            iconSvg: ad.iconSvg,
+            price: ad.price,
+            advertiserName: ad.advertiserName,
             campaignWeeks: ad.campaignWeeks,
             active: ad.active,
           }}

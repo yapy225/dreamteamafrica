@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Play } from "lucide-react";
+import { campaignProgress } from "@/lib/journal";
 
 interface VideoAd {
   id: string;
@@ -11,19 +12,16 @@ interface VideoAd {
   ctaUrl: string;
   imageUrl: string | null;
   gradientClass: string | null;
+  advertiserName: string | null;
   campaignWeeks: number;
   campaignStart: string;
 }
 
-function campaignWeekLabel(start: string, weeks: number): string {
-  const startDate = new Date(start);
-  const now = new Date();
-  const diffMs = now.getTime() - startDate.getTime();
-  const currentWeek = Math.max(
-    1,
-    Math.ceil(diffMs / (1000 * 60 * 60 * 24 * 7))
-  );
-  return `S${Math.min(currentWeek, weeks)}/${weeks}`;
+function brandInitials(name: string | null): string {
+  if (!name) return "AD";
+  const words = name.trim().split(/\s+/);
+  if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
 }
 
 export default function AdVideo() {
@@ -62,6 +60,8 @@ export default function AdVideo() {
   };
 
   if (!ad) return null;
+
+  const progress = campaignProgress(ad.campaignStart, ad.campaignWeeks);
 
   return (
     <div className="overflow-hidden rounded-xl bg-[#222] shadow-[var(--shadow-card)]">
@@ -111,9 +111,11 @@ export default function AdVideo() {
 
       {/* Bottom info */}
       <div className="flex items-center gap-4 px-5 py-4">
-        {/* Brand logo area */}
+        {/* Brand logo area — initials from advertiserName */}
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10">
-          <span className="text-xs font-bold text-white/60">AD</span>
+          <span className="text-xs font-bold text-white/60">
+            {brandInitials(ad.advertiserName)}
+          </span>
         </div>
 
         {/* Title */}
@@ -122,7 +124,7 @@ export default function AdVideo() {
             {ad.title}
           </h3>
           <p className="mt-0.5 line-clamp-1 text-xs text-white/50">
-            {ad.description}
+            {ad.advertiserName ? `${ad.advertiserName} \u00b7 ` : ""}{ad.description}
           </p>
         </div>
 
@@ -138,7 +140,7 @@ export default function AdVideo() {
             {ad.ctaText || "D\u00e9couvrir"}
           </a>
           <span className="hidden text-[10px] text-white/30 lg:inline">
-            {campaignWeekLabel(ad.campaignStart, ad.campaignWeeks)}
+            {progress.label}
           </span>
         </div>
       </div>

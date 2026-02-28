@@ -375,6 +375,9 @@ model JournalAd {
   ctaUrl         String
   imageUrl       String?
   gradientClass  String?
+  iconSvg        String?             @db.Text
+  price          String?
+  advertiserName String?
   campaignStart  DateTime            @default(now())
   campaignEnd    DateTime?
   campaignWeeks  Int                 @default(4)

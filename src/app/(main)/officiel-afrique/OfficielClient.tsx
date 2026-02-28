@@ -82,6 +82,14 @@ const HOW_STEPS = [
 ];
 
 
+const FAQ_ITEMS = [
+  { q: "L\u2019inscription est-elle vraiment gratuite ?", a: "Oui, l\u2019inscription de base est 100% gratuite et sans engagement. Votre entreprise sera visible dans l\u2019annuaire digital 2026. Des options de mise en avant premium (encart publicitaire, interview, logo\u2026) sont disponibles en option." },
+  { q: "Qui peut s\u2019inscrire dans l\u2019annuaire ?", a: "Toute entreprise, association, artiste, club sportif ou professionnel li\u00e9 \u00e0 la diaspora africaine : musique, restauration, mode, sport, ambassades, \u00e9v\u00e9nementiel, coop\u00e9ration, m\u00e9dias, services\u2026" },
+  { q: "Comment les particuliers trouvent-ils mon entreprise ?", a: "L\u2019annuaire est organis\u00e9 par cat\u00e9gories avec un moteur de recherche int\u00e9gr\u00e9. Les particuliers peuvent chercher par ville, cat\u00e9gorie, mot-cl\u00e9 ou nom d\u2019entreprise. Votre fiche compl\u00e8te s\u2019affiche avec toutes vos coordonn\u00e9es et r\u00e9seaux sociaux." },
+  { q: "Combien de temps pour la validation ?", a: "Notre \u00e9quipe \u00e9ditoriale v\u00e9rifie chaque inscription sous 48h ouvr\u00e9es. Vous recevez un email de confirmation d\u00e8s que votre fiche est active." },
+  { q: "Puis-je modifier mes informations apr\u00e8s ?", a: "Absolument ! Vous pouvez mettre \u00e0 jour vos coordonn\u00e9es, description, r\u00e9seaux sociaux et informations \u00e0 tout moment en nous contactant par email." },
+];
+
 // ─── HOOKS ────────────────────────────────────────────────
 
 function useScrollReveal() {
@@ -142,6 +150,7 @@ export default function OfficielClient() {
   const [commentForm, setCommentForm] = useState({ name: "", email: "", text: "" });
   const [nlEmail, setNlEmail] = useState("");
   const [nlDone, setNlDone] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   // Annuaire state
   const [annQuery, setAnnQuery] = useState("");
@@ -331,6 +340,7 @@ export default function OfficielClient() {
         </div>
         <div className={s.topnavLinks}>
           <a href="#rubriques" className={`${s.topnavLink} ${s.topnavLinkHide}`}>Rubriques</a>
+          <a href="#faq" className={`${s.topnavLink} ${s.topnavLinkHide}`}>FAQ</a>
           <button className={s.topnavCta} onClick={scrollToForm}>S&apos;inscrire gratuitement ✦</button>
         </div>
       </nav>
@@ -742,6 +752,27 @@ export default function OfficielClient() {
                   <div className={s.reviewName}>{r.name}</div>
                   <div className={s.reviewRole}>{r.role}</div>
                 </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ FAQ ═══ */}
+      <section className={`${s.sec} ${s.secFaq}`} id="faq">
+        <div className={`${s.secHeader} ${s.reveal}`}>
+          <div className={s.secLabel}>Questions fréquentes</div>
+          <h2 className={s.secTitle}>Tout savoir sur <span className={s.gold}>l&apos;inscription</span></h2>
+        </div>
+        <div className={s.faqList}>
+          {FAQ_ITEMS.map((item, i) => (
+            <div key={i} className={s.faqItem}>
+              <button className={s.faqQ} onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                {item.q}
+                <span className={`${s.faqArrow} ${openFaq === i ? s.faqArrowOpen : ""}`}>+</span>
+              </button>
+              <div className={`${s.faqA} ${openFaq === i ? s.faqAOpen : ""}`}>
+                <p>{item.a}</p>
               </div>
             </div>
           ))}

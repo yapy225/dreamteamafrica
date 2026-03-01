@@ -63,9 +63,9 @@ export const metadata: Metadata = {
     images: [`${siteUrl}/logo-dta.png`],
   },
   robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true },
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false },
   },
 };
 

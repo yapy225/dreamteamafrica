@@ -111,7 +111,7 @@ async function main() {
         description:
           "Deux journées de cinéma, de mémoire et de dialogue au cœur de Fontenay-sous-Bois.\n\nLe Festival International du Cinéma Africain (FICA) revient pour une nouvelle édition les 4 et 5 avril 2026. Au programme : deux films puissants suivis de débats avec le Ciné Club Afro, dans un lieu chaleureux ouvert à toutes et tous.\n\nL'esprit du FICA :\n• Valoriser le cinéma africain et de la diaspora\n• Créer un espace de débat et de réflexion autour des œuvres\n• Rendre la culture accessible (séance du dimanche gratuite)\n• Tisser des liens entre artistes, associations et publics\n• Célébrer la diversité des récits et des regards sur l'Afrique",
         coverImage:
-          "https://dreamteamafricamedia.b-cdn.net/saisonculturelleafricaine/fica/festivalinternationalducinemaafricain.png",
+          "https://dreamteamafricamedia.b-cdn.net/events/fica/fica-2026.png",
         venue: "Maison des Citoyens et de la Vie Associative",
         address: "16 rue du Révérend Père Lucien Aubry, 94120 Fontenay-sous-Bois",
         date: new Date("2026-04-04T14:00:00"),

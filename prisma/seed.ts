@@ -1152,7 +1152,7 @@ async function main() {
   ];
 
   const inscriptions = await Promise.all(
-    inscriptionData.map((d) => prisma.inscription.create({ data: d }))
+    inscriptionData.map((d) => prisma.inscription.create({ data: { ...d, status: d.status as "VALIDATED" | "PENDING" | "REJECTED" } }))
   );
 
   console.log(`Created ${inscriptions.length} inscriptions (${inscriptionData.filter(d => d.status === "VALIDATED").length} validated, ${inscriptionData.filter(d => d.status === "PENDING").length} pending, ${inscriptionData.filter(d => d.status === "REJECTED").length} rejected)`);

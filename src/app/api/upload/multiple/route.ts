@@ -10,18 +10,20 @@ export async function POST(request: Request) {
     }
 
     const formData = await request.formData();
-    const file = formData.get("file") as File | null;
+    const files = formData.getAll("files") as File[];
     const folder = (formData.get("folder") as string) || "";
 
-    if (!file) {
+    if (!files.length) {
       return NextResponse.json({ error: "Aucun fichier fourni." }, { status: 400 });
     }
 
-    const result = await uploadFile(file, folder);
+    const results = await Promise.all(
+      files.map((file) => uploadFile(file, folder)),
+    );
 
-    return NextResponse.json({ url: result.url, path: result.path }, { status: 201 });
+    return NextResponse.json({ files: results }, { status: 201 });
   } catch (error) {
-    console.error("Upload error:", error);
+    console.error("Multiple upload error:", error);
     return NextResponse.json({ error: "Erreur lors de l'upload." }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import BunnyCdnInput from "@/components/BunnyCdnInput";
 
 const categories = ["Bijoux", "Mode", "Maroquinerie", "Décoration", "Art", "Textile", "Cosmétiques", "Alimentaire"];
 const countries = [
@@ -143,6 +144,12 @@ export default function ProductForm({ initialData }: ProductFormProps) {
           </select>
         </div>
       </div>
+
+      <BunnyCdnInput
+        value={form.images[0] || ""}
+        onChange={(url) => setForm({ ...form, images: url ? [url] : [] })}
+        label="Image du produit"
+      />
 
       <div>
         <label className="mb-1.5 block text-sm font-medium text-dta-char">Pays d&apos;origine</label>

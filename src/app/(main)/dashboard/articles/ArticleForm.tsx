@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import BunnyCdnInput from "@/components/BunnyCdnInput";
 
 const categories = [
   { value: "ACTUALITE", label: "Actualite" },
@@ -199,18 +200,11 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
         </p>
       </div>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-dta-char">
-          Image de couverture{" "}
-          <span className="text-dta-taupe">(URL, optionnel)</span>
-        </label>
-        <input
-          value={form.coverImage}
-          onChange={(e) => setForm({ ...form, coverImage: e.target.value })}
-          className={inputClass}
-          placeholder="https://..."
-        />
-      </div>
+      <BunnyCdnInput
+        value={form.coverImage}
+        onChange={(url) => setForm({ ...form, coverImage: url })}
+        label="Image de couverture"
+      />
 
       {/* Gradient picker */}
       <div>

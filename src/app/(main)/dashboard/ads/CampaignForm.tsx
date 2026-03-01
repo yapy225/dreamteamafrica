@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import BunnyCdnInput from "@/components/BunnyCdnInput";
 
 const formats = [
   { value: "SPONSORED_ARTICLE", label: "Article sponsorisé" },
@@ -194,17 +195,11 @@ export default function CampaignForm({ initialData, defaultPlan }: CampaignFormP
       </div>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-dta-char">
-            Image <span className="text-dta-taupe">(URL, optionnel)</span>
-          </label>
-          <input
-            value={form.imageUrl}
-            onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-            className={inputClass}
-            placeholder="https://..."
-          />
-        </div>
+        <BunnyCdnInput
+          value={form.imageUrl}
+          onChange={(url) => setForm({ ...form, imageUrl: url })}
+          label="Image"
+        />
 
         {form.format === "VIDEO" && (
           <div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import BunnyCdnInput from "@/components/BunnyCdnInput";
 
 const placements = [
   { value: "BANNER", label: "Bannière" },
@@ -189,17 +190,11 @@ export default function JournalAdForm({ initialData }: JournalAdFormProps) {
         </div>
       </div>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-dta-char">
-          Image URL <span className="text-dta-taupe">(optionnel)</span>
-        </label>
-        <input
-          value={form.imageUrl}
-          onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-          className={inputClass}
-          placeholder="https://..."
-        />
-      </div>
+      <BunnyCdnInput
+        value={form.imageUrl}
+        onChange={(url) => setForm({ ...form, imageUrl: url })}
+        label="Image"
+      />
 
       <div>
         <label className="mb-1.5 block text-sm font-medium text-dta-char">

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Upload, RefreshCw, Plus, Trash2 } from "lucide-react";
+import { Loader2, RefreshCw, Plus, Trash2 } from "lucide-react";
+import BunnyCdnInput from "@/components/BunnyCdnInput";
 
 function toSlug(text: string): string {
   return text
@@ -122,27 +123,6 @@ export default function EventForm({ initialData }: EventFormProps) {
   );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
-      if (!res.ok) throw new Error("Upload failed");
-
-      const { url } = await res.json();
-      setForm((prev) => ({ ...prev, coverImage: url }));
-    } catch {
-      setError("Erreur lors de l'upload de l'image.");
-    }
-    setUploading(false);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -446,33 +426,11 @@ export default function EventForm({ initialData }: EventFormProps) {
         ))}
       </div>
 
-      {/* Image upload */}
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-dta-char">
-          Image de couverture
-        </label>
-        <div className="flex items-center gap-3">
-          <label className="flex cursor-pointer items-center gap-2 rounded-[var(--radius-button)] border border-dta-sand px-4 py-2.5 text-sm font-medium text-dta-char hover:bg-dta-beige">
-            {uploading ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <Upload size={16} />
-            )}
-            {uploading ? "Upload..." : "Choisir un fichier"}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleUpload}
-              className="hidden"
-            />
-          </label>
-          {form.coverImage && (
-            <span className="truncate text-xs text-dta-taupe">
-              {form.coverImage}
-            </span>
-          )}
-        </div>
-      </div>
+      <BunnyCdnInput
+        value={form.coverImage}
+        onChange={(url) => setForm({ ...form, coverImage: url })}
+        label="Image de couverture"
+      />
 
       {/* Programme */}
       <div className="space-y-4">

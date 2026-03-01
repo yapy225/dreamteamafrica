@@ -93,7 +93,7 @@ async function main() {
         description:
           "Le plus grand salon de la culture africaine à Paris. Artisanat, gastronomie, musique et conférences.",
         coverImage:
-          "https://fxsckhiprgvaidgc.public.blob.vercel-storage.com/saisonculturelleafricaine/foiredafriqueparis/foiredafriqueparis%201%3A1.png",
+          "https://dreamteamafricamedia.b-cdn.net/saisonculturelleafricaine/foiredafriqueparis/foiredafriqueparis.png",
         venue: "Espace Mas",
         address: "10 rue des terres au curé, Paris",
         date: new Date("2026-05-01T12:00:00"),
@@ -111,7 +111,7 @@ async function main() {
         description:
           "Deux journées de cinéma, de mémoire et de dialogue au cœur de Fontenay-sous-Bois.\n\nLe Festival International du Cinéma Africain (FICA) revient pour une nouvelle édition les 4 et 5 avril 2026. Au programme : deux films puissants suivis de débats avec le Ciné Club Afro, dans un lieu chaleureux ouvert à toutes et tous.\n\nL'esprit du FICA :\n• Valoriser le cinéma africain et de la diaspora\n• Créer un espace de débat et de réflexion autour des œuvres\n• Rendre la culture accessible (séance du dimanche gratuite)\n• Tisser des liens entre artistes, associations et publics\n• Célébrer la diversité des récits et des regards sur l'Afrique",
         coverImage:
-          "https://fxsckhiprgvaidgc.public.blob.vercel-storage.com/saisonculturelleafricaine/fica/festivalinternationalducinemaafricain%201%3A1.png",
+          "https://dreamteamafricamedia.b-cdn.net/saisonculturelleafricaine/fica/festivalinternationalducinemaafricain.png",
         venue: "Maison des Citoyens et de la Vie Associative",
         address: "16 rue du Révérend Père Lucien Aubry, 94120 Fontenay-sous-Bois",
         date: new Date("2026-04-04T14:00:00"),
@@ -181,7 +181,7 @@ async function main() {
         description:
           "Balade en bateau sur la Seine à Paris. Croisière culturelle avec concerts, dégustations et art contemporain africain.",
         coverImage:
-          "https://fxsckhiprgvaidgc.public.blob.vercel-storage.com/saisonculturelleafricaine/evasionparis/evasionparis.png",
+          "https://dreamteamafricamedia.b-cdn.net/saisonculturelleafricaine/evasionparis/evasionparis.png",
         venue: "La Seine",
         address: "Paris",
         date: new Date("2026-06-13T12:00:00"),
@@ -199,7 +199,7 @@ async function main() {
         description:
           "Festival multiculturel en plein air. Musique, danse, gastronomie et rencontres dans un cadre verdoyant. Entrée gratuite.",
         coverImage:
-          "https://fxsckhiprgvaidgc.public.blob.vercel-storage.com/saisonculturelleafricaine/conteafricain/conte%20africain.png",
+          "https://dreamteamafricamedia.b-cdn.net/saisonculturelleafricaine/conteafricain/conte-africain.png",
         venue: "Parc des Épivans",
         address: "Fontenay-sous-Bois",
         date: new Date("2026-06-27T13:00:00"),
@@ -217,7 +217,7 @@ async function main() {
         description:
           "Festival des danses traditionnelles africaines. Compétitions, spectacles et ateliers.",
         coverImage:
-          "https://fxsckhiprgvaidgc.public.blob.vercel-storage.com/saisonculturelleafricaine/justeunedanse/justeunedanse11.png",
+          "https://dreamteamafricamedia.b-cdn.net/saisonculturelleafricaine/justeunedanse/justeunedanse11.png",
         venue: "Espace Mas",
         address: "10 rue des terres au curé, Paris",
         date: new Date("2026-10-31T12:00:00"),
@@ -235,7 +235,7 @@ async function main() {
         description:
           "Les griots et conteurs d'Afrique partagent leurs histoires millénaires. Spectacles pour toute la famille.",
         coverImage:
-          "https://fxsckhiprgvaidgc.public.blob.vercel-storage.com/saisonculturelleafricaine/conteafricain/conte%20africain%20festival.png",
+          "https://dreamteamafricamedia.b-cdn.net/saisonculturelleafricaine/conteafricain/conte-africain-festival.png",
         venue: "Espace Mas",
         address: "10 rue des terres au curé, Paris",
         date: new Date("2026-11-11T12:00:00"),
@@ -253,7 +253,7 @@ async function main() {
         description:
           "L'artisanat africain à l'honneur. Mode, décoration, cosmétiques, épicerie fine. 500+ artisans exposants.",
         coverImage:
-          "https://fxsckhiprgvaidgc.public.blob.vercel-storage.com/saisonculturelleafricaine/salonmadeinafrica/salonmadeinafrica%201%3A1.png",
+          "https://dreamteamafricamedia.b-cdn.net/saisonculturelleafricaine/salonmadeinafrica/salonmadeinafrica.png",
         venue: "Espace Mas",
         address: "10 rue des terres au curé, Paris",
         date: new Date("2026-12-11T12:00:00"),

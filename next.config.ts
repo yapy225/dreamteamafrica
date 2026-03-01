@@ -18,7 +18,6 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "fxsckhiprgvaidgc.public.blob.vercel-storage.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "dreamteamafricamedia.b-cdn.net" },
     ],

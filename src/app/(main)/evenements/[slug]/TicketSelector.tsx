@@ -8,7 +8,7 @@ import { Minus, Plus, Loader2 } from "lucide-react";
 interface TicketSelectorProps {
   eventId: string;
   eventSlug: string;
-  tier: string;
+  tier: "EARLY_BIRD" | "STANDARD" | "VIP";
   price: number;
   highlight: boolean;
   sessionLabel?: string;
@@ -90,9 +90,7 @@ export default function TicketSelector({ eventId, tier, price, highlight, sessio
             Redirection...
           </span>
         ) : (
-          price === 0
-            ? "Réserver ma place gratuitement"
-            : `Acheter — ${new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(price * quantity)}`
+          `Acheter — ${new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(price * quantity)}`
         )}
       </button>
     </div>

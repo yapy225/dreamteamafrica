@@ -20,6 +20,14 @@ export async function POST(request: Request) {
       );
     }
 
+    const validTiers = ["EARLY_BIRD", "STANDARD", "VIP"];
+    if (!validTiers.includes(tier)) {
+      return NextResponse.json(
+        { error: "Tier invalide." },
+        { status: 400 },
+      );
+    }
+
     const event = await prisma.event.findUnique({
       where: { id: eventId },
       include: { _count: { select: { tickets: true } } },
@@ -29,6 +37,14 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Événement introuvable." },
         { status: 404 },
+      );
+    }
+
+    const remaining = event.capacity - event._count.tickets;
+    if (remaining < quantity) {
+      return NextResponse.json(
+        { error: `Seulement ${remaining} place(s) restante(s).` },
+        { status: 400 },
       );
     }
 
@@ -45,13 +61,6 @@ export async function POST(request: Request) {
       unitPrice = matchedTier.price;
       tierName = matchedTier.name;
     } else {
-      const validTiers = ["EARLY_BIRD", "STANDARD", "VIP"];
-      if (!validTiers.includes(tier)) {
-        return NextResponse.json(
-          { error: "Tier invalide." },
-          { status: 400 },
-        );
-      }
       const priceMap: Record<string, number> = {
         EARLY_BIRD: event.priceEarly,
         STANDARD: event.priceStd,
@@ -66,35 +75,7 @@ export async function POST(request: Request) {
       tierName = labelMap[tier];
     }
 
-    const remaining = event.capacity - event._count.tickets;
-    if (remaining < quantity) {
-      return NextResponse.json(
-        { error: `Seulement ${remaining} place(s) restante(s).` },
-        { status: 400 },
-      );
-    }
-
     const productName = `${event.title} — ${tierName}`;
-
-    // Free ticket: create directly without Stripe
-    if (unitPrice === 0) {
-      const tickets = await prisma.$transaction(
-        Array.from({ length: quantity }, () =>
-          prisma.ticket.create({
-            data: {
-              eventId: event.id,
-              userId: session.user.id,
-              tier,
-              price: 0,
-              sessionLabel: sessionLabel || null,
-            },
-          })
-        )
-      );
-      return NextResponse.json({
-        url: `${process.env.NEXT_PUBLIC_APP_URL}/evenements/confirmation/${tickets[0].id}`,
-      });
-    }
 
     const checkoutSession = await getStripe().checkout.sessions.create({
       mode: "payment",

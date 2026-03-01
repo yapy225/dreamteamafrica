@@ -15,7 +15,7 @@ interface ProgramSession {
 }
 
 interface Tier {
-  id: string;
+  id: "EARLY_BIRD" | "STANDARD" | "VIP";
   name: string;
   price: number;
   description: string;

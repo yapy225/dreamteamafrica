@@ -23,13 +23,6 @@ const tierColors: Record<string, string> = {
   VIP: "bg-amber-100 text-amber-700",
 };
 
-function getTierLabel(tier: string, event?: { tiers: unknown }): string {
-  if (tierLabels[tier]) return tierLabels[tier];
-  const custom = event?.tiers as Array<{ id: string; name: string }> | null;
-  const match = Array.isArray(custom) ? custom.find((t) => t.id === tier) : null;
-  return match?.name ?? tier;
-}
-
 export default async function TicketsPage() {
   const session = await auth();
   if (!session) redirect("/auth/signin");
@@ -125,7 +118,6 @@ function TicketCard({
       slug: string;
       venue: string;
       date: Date;
-      tiers: unknown;
     };
   };
 }) {
@@ -153,8 +145,8 @@ function TicketCard({
               {ticket.event.title}
             </Link>
             <div className="mt-1 flex items-center gap-2">
-              <span className={`rounded-[var(--radius-full)] px-2.5 py-0.5 text-xs font-semibold ${tierColors[ticket.tier] || "bg-dta-accent/10 text-dta-accent"}`}>
-                {getTierLabel(ticket.tier, ticket.event)}
+              <span className={`rounded-[var(--radius-full)] px-2.5 py-0.5 text-xs font-semibold ${tierColors[ticket.tier] || ""}`}>
+                {tierLabels[ticket.tier]}
               </span>
               <span className="text-xs text-dta-taupe">
                 {formatPrice(ticket.price)}

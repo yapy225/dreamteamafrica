@@ -52,7 +52,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   const customTiers = event.tiers as Array<{ id: string; name: string; price: number; description: string; features: string[]; highlight: boolean }> | null;
   const tiers = Array.isArray(customTiers) && customTiers.length > 0
     ? customTiers.map((t) => ({
-        id: t.id,
+        id: t.id as "EARLY_BIRD" | "STANDARD" | "VIP",
         name: t.name,
         price: t.price,
         description: t.description,

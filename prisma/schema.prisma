@@ -41,12 +41,6 @@ enum InscriptionStatus {
   REJECTED
 }
 
-enum TicketTier {
-  EARLY_BIRD
-  STANDARD
-  VIP
-}
-
 enum OrderStatus {
   PENDING
   PAID
@@ -203,14 +197,15 @@ model Event {
 }
 
 model Ticket {
-  id              String     @id @default(cuid())
+  id              String   @id @default(cuid())
   eventId         String
   userId          String
-  tier            TicketTier
+  tier            String
   price           Float
   qrCode          String?
   stripeSessionId String?
-  purchasedAt     DateTime   @default(now())
+  sessionLabel    String?
+  purchasedAt     DateTime @default(now())
 
   event Event @relation(fields: [eventId], references: [id])
   user  User  @relation(fields: [userId], references: [id])

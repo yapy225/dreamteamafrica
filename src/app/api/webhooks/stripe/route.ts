@@ -69,7 +69,7 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
         id: ticketId,
         eventId,
         userId,
-        tier: tier as "EARLY_BIRD" | "STANDARD" | "VIP",
+        tier,
         price,
         qrCode,
         stripeSessionId: session.id,

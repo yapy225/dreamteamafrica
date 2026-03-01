@@ -17,6 +17,13 @@ const tierLabels: Record<string, string> = {
   VIP: "VIP",
 };
 
+function getTierLabel(tier: string, event?: { tiers: unknown }): string {
+  if (tierLabels[tier]) return tierLabels[tier];
+  const custom = event?.tiers as Array<{ id: string; name: string }> | null;
+  const match = Array.isArray(custom) ? custom.find((t) => t.id === tier) : null;
+  return match?.name ?? tier;
+}
+
 export default async function ConfirmationPage({
   params,
 }: {
@@ -111,7 +118,7 @@ export default async function ConfirmationPage({
               <div>
                 <div className="flex items-center gap-2">
                   <span className="rounded-[var(--radius-full)] bg-dta-accent/10 px-3 py-1 text-xs font-semibold text-dta-accent">
-                    {tierLabels[ticket.tier]}
+                    {getTierLabel(ticket.tier, event)}
                   </span>
                   {finalTickets.length > 1 && (
                     <span className="text-xs text-dta-taupe">

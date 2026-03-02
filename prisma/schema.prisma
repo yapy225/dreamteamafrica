@@ -391,6 +391,20 @@ model JournalAd {
   @@index([active])
 }
 
+// ─── COMMENTS (AVIS PUBLICS) ──────────────────────────────
+
+model Comment {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  rating    Int      // 1–5
+  message   String   @db.Text
+  approved  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 // ─── NEWSLETTER ─────────────────────────────────────────
 
 model NewsletterSubscriber {

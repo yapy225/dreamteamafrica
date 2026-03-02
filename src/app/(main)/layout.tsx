@@ -1,5 +1,6 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import GlobalSections from "@/components/sections/GlobalSections";
 
 export default function MainLayout({
   children,
@@ -15,6 +16,7 @@ export default function MainLayout({
       <main id="main-content" className="flex-1">
         {children}
       </main>
+      <GlobalSections />
       <Footer />
     </div>
   );

@@ -13,6 +13,22 @@ export default function DashboardLoading() {
           </div>
         ))}
       </div>
+      {/* Revenue skeleton */}
+      <div className="mb-10 mt-10 space-y-6">
+        <div className="h-6 w-32 animate-pulse rounded-lg bg-dta-sand" />
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-20 animate-pulse rounded-[var(--radius-card)] bg-dta-sand/30" />
+          ))}
+        </div>
+        <div className="h-[350px] animate-pulse rounded-[var(--radius-card)] bg-dta-sand/20" />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-[240px] animate-pulse rounded-[var(--radius-card)] bg-dta-sand/20" />
+          ))}
+        </div>
+      </div>
+
       <div className="mt-10 space-y-3">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="h-20 animate-pulse rounded-[var(--radius-card)] bg-dta-sand/40" />

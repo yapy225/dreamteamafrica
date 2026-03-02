@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Ticket, ShoppingBag, Newspaper, Megaphone, CalendarDays, BookOpen, BarChart3, Mail } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getRevenueData } from "@/lib/revenue";
+import { RevenueSection } from "@/components/dashboard/revenue/RevenueSection";
 
 export const dynamic = "force-dynamic";
 
@@ -13,9 +15,12 @@ export default async function DashboardPage() {
     redirect("/auth/signin");
   }
 
-  const [ticketCount, orderCount] = await Promise.all([
+  const isAdmin = session.user.role === "ADMIN";
+
+  const [ticketCount, orderCount, revenueData] = await Promise.all([
     prisma.ticket.count({ where: { userId: session.user.id } }),
     prisma.order.count({ where: { userId: session.user.id } }),
+    isAdmin ? getRevenueData() : null,
   ]);
 
   const quickLinks = [
@@ -130,6 +135,9 @@ export default async function DashboardPage() {
           </p>
         </div>
       </div>
+
+      {/* Revenue charts (admin only) */}
+      {revenueData && <RevenueSection data={revenueData} />}
 
       {/* Quick links */}
       <h2 className="mb-4 font-serif text-xl font-bold text-dta-dark">Accès rapide</h2>

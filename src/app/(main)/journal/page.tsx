@@ -65,10 +65,10 @@ export default async function JournalPage() {
       <AdBanner />
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 py-8 sm:px-6 lg:px-8">
-        {/* Hero: UNE + FACE_UNE */}
+        {/* Hero: UNE + FACE_UNE (fallback si UNE vide) */}
         <HeroCarousel
-          uneArticles={zones.UNE}
-          faceUneArticles={zones.FACE_UNE}
+          uneArticles={zones.UNE.length > 0 ? zones.UNE : zones.FACE_UNE}
+          faceUneArticles={zones.UNE.length > 0 ? zones.FACE_UNE : zones.PAGES_4_5}
         />
 
         {/* Lifecycle Bar */}

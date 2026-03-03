@@ -98,8 +98,21 @@ function computeReadingTime(html: string): number {
 // ============================================================
 export async function POST(request: NextRequest) {
   try {
-    // 1. Parser le body
-    const body: WebhookPayload = await request.json();
+    // 1. Parser le body (nettoyer les caracteres de controle invalides)
+    const rawText = await request.text();
+    const cleanText = rawText.replace(/[\x00-\x1F\x7F]/g, (ch) =>
+      ch === "\n" || ch === "\r" || ch === "\t" ? ch : ""
+    );
+
+    let body: WebhookPayload;
+    try {
+      body = JSON.parse(cleanText);
+    } catch {
+      return NextResponse.json(
+        { success: false, message: "JSON invalide" },
+        { status: 400 }
+      );
+    }
 
     // 2. Verifier la cle secrete
     const SECRET = process.env.WEBHOOK_SECRET_KEY;

@@ -152,8 +152,10 @@ model Article {
   excerpt     String
   content     String          @db.Text
   coverImage     String?
+  altText        String?
   gradientClass  String?
   category       ArticleCategory
+  tags           String[]        @default([])
   position       ArticlePosition @default(UNE)
   publishedAt    DateTime        @default(now())
   dayCount       Int             @default(1)
@@ -163,12 +165,27 @@ model Article {
   readingTimeMin Int?
   status         ArticleStatus   @default(PUBLISHED)
   views          Int             @default(0)
+  source         String          @default("manual")
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Réseaux sociaux
+  socialTwitter   String?
+  socialInstagram String?
+  socialLinkedin  String?
+  socialFacebook  String?
+  socialTiktok    String?
+
   authorId    String
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
   author User @relation(fields: [authorId], references: [id])
 
+  @@index([slug])
+  @@index([status])
   @@index([position])
   @@index([category])
   @@index([publishedAt])

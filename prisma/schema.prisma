@@ -166,6 +166,8 @@ model Article {
   status         ArticleStatus   @default(PUBLISHED)
   views          Int             @default(0)
   source         String          @default("manual")
+  sourceUrl      String?
+  authorType     String          @default("humain")
 
   // SEO
   metaTitle       String?

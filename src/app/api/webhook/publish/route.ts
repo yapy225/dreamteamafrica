@@ -4,13 +4,13 @@
 //
 // Endpoint securise par cle secrete (pas NextAuth, car c'est
 // Make.com qui appelle, pas un utilisateur connecte).
-// Utilise Prisma comme le reste du projet.
+// Accepte les champs en camelCase ET snake_case.
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-// --- Types ---
+// --- Types (accepte camelCase + snake_case) ---
 interface WebhookPayload {
   secret_key: string;
 
@@ -18,15 +18,28 @@ interface WebhookPayload {
   title: string;
   slug?: string;
   excerpt: string;
-  content: string;
+  content?: string;
+  content_html?: string;
   category: string;
   coverImage?: string;
+  cover_image?: string;
+  image_url?: string;
   altText?: string;
+  alt_text?: string;
   tags?: string[];
+  keywords?: string[];
 
   // SEO
   metaTitle?: string;
+  meta_title?: string;
   metaDescription?: string;
+  meta_description?: string;
+
+  // Tracabilite
+  sourceUrl?: string;
+  source_url?: string;
+  authorType?: string;
+  author_type?: string;
 
   // Reseaux sociaux
   social?: {
@@ -42,6 +55,12 @@ interface WebhookPayload {
   featured?: boolean;
   source?: string;
   authorId?: string;
+  author_id?: string;
+}
+
+// --- Helper: resoudre camelCase / snake_case ---
+function resolve<T>(camel: T | undefined, snake: T | undefined): T | undefined {
+  return camel !== undefined ? camel : snake;
 }
 
 // --- Categories valides (enum Prisma ArticleCategory) ---
@@ -123,19 +142,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Valider les champs obligatoires
-    if (!body.title || !body.excerpt || !body.content || !body.category) {
+    // 3. Resoudre les aliases camelCase / snake_case
+    const contentRaw = resolve(body.content, body.content_html);
+    const coverImage = resolve(body.coverImage, body.cover_image) || body.image_url;
+    const altText = resolve(body.altText, body.alt_text);
+    const tags = body.tags || body.keywords || [];
+    const metaTitle = resolve(body.metaTitle, body.meta_title);
+    const metaDescription = resolve(body.metaDescription, body.meta_description);
+    const sourceUrl = resolve(body.sourceUrl, body.source_url);
+    const authorType = resolve(body.authorType, body.author_type) || "ia";
+    const authorId = resolve(body.authorId, body.author_id);
+
+    // 4. Valider les champs obligatoires
+    if (!body.title || !body.excerpt || !contentRaw || !body.category) {
       return NextResponse.json(
         {
           success: false,
           message:
-            "Champs obligatoires manquants : title, excerpt, content, category",
+            "Champs obligatoires manquants : title, excerpt, content (ou content_html), category",
         },
         { status: 400 }
       );
     }
 
-    // 4. Valider la categorie (doit correspondre a l'enum Prisma)
+    // 5. Valider la categorie (doit correspondre a l'enum Prisma)
     const category = body.category.toUpperCase();
     if (!VALID_CATEGORIES.includes(category as any)) {
       return NextResponse.json(
@@ -147,7 +177,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 5. Preparer le slug (unique)
+    // 6. Preparer le slug (unique)
     let slug = body.slug ? generateSlug(body.slug) : generateSlug(body.title);
 
     // Verifier collision et mettre a jour si existant
@@ -157,26 +187,26 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingBySlug) {
-      // Mettre a jour l'article existant
       const updated = await prisma.article.update({
         where: { slug },
         data: {
           title: body.title.trim(),
           excerpt: body.excerpt.trim(),
-          content: sanitizeHtml(body.content),
+          content: sanitizeHtml(contentRaw),
           category: category as any,
-          coverImage: body.coverImage || undefined,
-          altText: body.altText?.trim() || undefined,
-          tags: body.tags || [],
-          metaTitle: body.metaTitle?.trim() || body.title.trim(),
-          metaDescription:
-            body.metaDescription?.trim() || body.excerpt.trim(),
+          coverImage: coverImage || undefined,
+          altText: altText?.trim() || undefined,
+          tags,
+          metaTitle: metaTitle?.trim() || body.title.trim(),
+          metaDescription: metaDescription?.trim() || body.excerpt.trim(),
+          sourceUrl: sourceUrl || undefined,
+          authorType,
           socialTwitter: body.social?.twitter || undefined,
           socialInstagram: body.social?.instagram || undefined,
           socialLinkedin: body.social?.linkedin || undefined,
           socialFacebook: body.social?.facebook || undefined,
           socialTiktok: body.social?.tiktok || undefined,
-          readingTimeMin: computeReadingTime(body.content),
+          readingTimeMin: computeReadingTime(contentRaw),
           source: body.source || "make_webhook",
         },
       });
@@ -192,9 +222,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 6. Trouver l'auteur par defaut (premier ADMIN)
-    let authorId = body.authorId;
-    if (!authorId) {
+    // 7. Trouver l'auteur par defaut (premier ADMIN)
+    let resolvedAuthorId = authorId;
+    if (!resolvedAuthorId) {
       const adminUser = await prisma.user.findFirst({
         where: { role: "ADMIN" },
         select: { id: true },
@@ -208,24 +238,25 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         );
       }
-      authorId = adminUser.id;
+      resolvedAuthorId = adminUser.id;
     }
 
-    // 7. Creer l'article
+    // 8. Creer l'article
     const article = await prisma.article.create({
       data: {
         title: body.title.trim(),
         slug,
         excerpt: body.excerpt.trim(),
-        content: sanitizeHtml(body.content),
+        content: sanitizeHtml(contentRaw),
         category: category as any,
-        coverImage: body.coverImage || null,
-        altText: body.altText?.trim() || null,
-        tags: body.tags || [],
-        readingTimeMin: computeReadingTime(body.content),
-        metaTitle: body.metaTitle?.trim() || body.title.trim(),
-        metaDescription:
-          body.metaDescription?.trim() || body.excerpt.trim(),
+        coverImage: coverImage || null,
+        altText: altText?.trim() || null,
+        tags,
+        readingTimeMin: computeReadingTime(contentRaw),
+        metaTitle: metaTitle?.trim() || body.title.trim(),
+        metaDescription: metaDescription?.trim() || body.excerpt.trim(),
+        sourceUrl: sourceUrl || null,
+        authorType,
         socialTwitter: body.social?.twitter || null,
         socialInstagram: body.social?.instagram || null,
         socialLinkedin: body.social?.linkedin || null,
@@ -237,11 +268,11 @@ export async function POST(request: NextRequest) {
         featured: body.featured || false,
         source: body.source || "make_webhook",
         publishedAt: new Date(),
-        authorId,
+        authorId: resolvedAuthorId,
       },
     });
 
-    // 8. Reponse succes
+    // 9. Reponse succes
     return NextResponse.json(
       {
         success: true,
@@ -254,7 +285,6 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("[WEBHOOK PUBLISH ERROR]", error);
 
-    // Doublon slug (race condition)
     if (error?.code === "P2002") {
       return NextResponse.json(
         { success: false, message: "Un article avec ce slug existe deja" },

@@ -29,8 +29,10 @@ export default async function ArchivesPage({
   archiveCutoff.setDate(archiveCutoff.getDate() - 21);
 
   const where: Record<string, unknown> = {
-    status: "PUBLISHED",
-    publishedAt: { lte: archiveCutoff },
+    OR: [
+      { status: "PUBLISHED", publishedAt: { lte: archiveCutoff } },
+      { status: "ARCHIVED" },
+    ],
   };
   if (categoryFilter) where.category = categoryFilter;
 
@@ -66,7 +68,7 @@ export default async function ArchivesPage({
           </h1>
           <p className="mt-2 text-dta-char/70">
             {totalCount} article{totalCount !== 1 ? "s" : ""} archiv
-            {totalCount !== 1 ? "es" : "e"} (+ de 21 jours)
+            {totalCount !== 1 ? "es" : "e"}
           </p>
         </div>
 

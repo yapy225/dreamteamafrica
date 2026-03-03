@@ -23,13 +23,23 @@ export const metadata = {
 };
 
 export default async function JournalPage() {
-  const articles = await prisma.article.findMany({
-    where: { status: "PUBLISHED" },
-    include: { author: { select: { name: true } } },
-    orderBy: { publishedAt: "desc" },
-  });
+  const [publishedArticles, archivedArticles] = await Promise.all([
+    prisma.article.findMany({
+      where: { status: "PUBLISHED" },
+      include: { author: { select: { name: true } } },
+      orderBy: { publishedAt: "desc" },
+    }),
+    prisma.article.findMany({
+      where: { status: "ARCHIVED" },
+      include: { author: { select: { name: true } } },
+      orderBy: { publishedAt: "desc" },
+    }),
+  ]);
 
-  const zones = groupArticlesByZone(articles);
+  const zones = groupArticlesByZone(publishedArticles);
+
+  // Add manually archived articles to the ARCHIVES zone
+  zones.ARCHIVES = [...zones.ARCHIVES, ...archivedArticles];
 
   // Determine which zone to highlight in the lifecycle bar
   const firstActiveZone: JournalZone =

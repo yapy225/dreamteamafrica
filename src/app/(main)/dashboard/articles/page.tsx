@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 import { getLifecycleDay, getZoneForDay, getZoneLabel, CATEGORY_CONFIG } from "@/lib/journal";
 import DeleteArticleButton from "./DeleteArticleButton";
+import ArticleStatusButton from "./ArticleStatusButton";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Mes articles" };
@@ -145,6 +146,10 @@ export default async function ArticlesPage() {
                   >
                     <Pencil size={16} />
                   </Link>
+                  <ArticleStatusButton
+                    articleId={article.id}
+                    currentStatus={article.status}
+                  />
                   <DeleteArticleButton
                     articleId={article.id}
                     articleTitle={article.title}

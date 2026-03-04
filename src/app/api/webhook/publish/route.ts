@@ -186,6 +186,16 @@ export async function POST(request: NextRequest) {
           success: false,
           message:
             "Champs obligatoires manquants : title, excerpt, content (ou content_html), category",
+          debug: {
+            raw_keys: Object.keys(rawBody),
+            normalized_keys: Object.keys(normalized),
+            has_title: !!body.title,
+            has_excerpt: !!body.excerpt,
+            has_content: !!contentRaw,
+            has_category: !!body.category,
+            title_value: body.title?.substring(0, 30) ?? "VIDE",
+            category_value: body.category ?? "VIDE",
+          },
         },
         { status: 400 }
       );

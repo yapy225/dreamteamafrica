@@ -138,15 +138,26 @@ export async function POST(request: NextRequest) {
       ch === "\n" || ch === "\r" || ch === "\t" ? ch : ""
     );
 
-    let body: WebhookPayload;
+    let rawBody: Record<string, unknown>;
     try {
-      body = JSON.parse(cleanText);
+      rawBody = JSON.parse(cleanText);
     } catch {
       return NextResponse.json(
         { success: false, message: "JSON invalide" },
         { status: 400 }
       );
     }
+
+    // Normaliser les cles: "Title" → "title", "Secret key" → "secret_key", etc.
+    const normalized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(rawBody)) {
+      const k = key
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, "_");
+      normalized[k] = value;
+    }
+    const body = normalized as unknown as WebhookPayload;
 
     // 2. Verifier la cle secrete
     const SECRET = process.env.WEBHOOK_SECRET_KEY;

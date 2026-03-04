@@ -137,7 +137,16 @@ export async function POST(request: NextRequest) {
     const SECRET = process.env.WEBHOOK_SECRET_KEY;
     if (!SECRET || body.secret_key !== SECRET) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized" },
+        {
+          success: false,
+          message: "Unauthorized",
+          debug: {
+            received_keys: Object.keys(body),
+            secret_key_length: body.secret_key?.length ?? 0,
+            expected_length: SECRET?.length ?? 0,
+            secret_key_start: body.secret_key?.substring(0, 20) ?? "MISSING",
+          },
+        },
         { status: 401 }
       );
     }

@@ -73,6 +73,21 @@ const VALID_CATEGORIES = [
   "OPINION",
 ] as const;
 
+// --- Mapping categories Airtable → Prisma ---
+const CATEGORY_MAP: Record<string, string> = {
+  "ACTUALITÉ GÉNÉRALE": "ACTUALITE",
+  "ACTUALITE GENERALE": "ACTUALITE",
+  "ÉCONOMIE & FINANCE": "BUSINESS",
+  "ECONOMIE & FINANCE": "BUSINESS",
+  "DIASPORA & CULTURE": "CULTURE",
+  "INSTITUTIONNEL": "ACTUALITE",
+  "TECHNOLOGIE": "BUSINESS",
+  "SPORT": "LIFESTYLE",
+  "MUSIQUE": "CULTURE",
+  "MODE": "LIFESTYLE",
+  "POLITIQUE": "ACTUALITE",
+};
+
 // --- Sanitisation HTML ---
 function sanitizeHtml(dirty: string): string {
   return dirty
@@ -137,16 +152,7 @@ export async function POST(request: NextRequest) {
     const SECRET = process.env.WEBHOOK_SECRET_KEY;
     if (!SECRET || body.secret_key !== SECRET) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Unauthorized",
-          debug: {
-            received_keys: Object.keys(body),
-            secret_key_length: body.secret_key?.length ?? 0,
-            expected_length: SECRET?.length ?? 0,
-            secret_key_start: body.secret_key?.substring(0, 20) ?? "MISSING",
-          },
-        },
+        { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
@@ -174,16 +180,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 5. Valider la categorie (doit correspondre a l'enum Prisma)
-    const category = body.category.toUpperCase();
+    // 5. Valider la categorie (mapping Airtable → Prisma + enum)
+    let category = body.category.toUpperCase().trim();
+    // Essayer le mapping Airtable si la categorie n'est pas directement valide
     if (!VALID_CATEGORIES.includes(category as any)) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: `Categorie invalide : ${body.category}. Valides : ${VALID_CATEGORIES.join(", ")}`,
-        },
-        { status: 400 }
-      );
+      category = CATEGORY_MAP[category] || category;
+    }
+    if (!VALID_CATEGORIES.includes(category as any)) {
+      // Fallback: assigner ACTUALITE plutot que rejeter
+      category = "ACTUALITE";
     }
 
     // 6. Preparer le slug (unique)

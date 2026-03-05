@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Calendar, MapPin, Users, Ticket, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
+import AdSlot from "@/components/ads/AdSlot";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,9 @@ export default async function EvenementsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      {/* ── Ad Banner Top ── */}
+      <AdSlot page="EVENEMENTS" placement="BANNER_TOP" />
+
       {/* ── A. Page Header ─────────────────────────────── */}
       <div className="mb-14 text-center">
         <h1 className="font-serif text-4xl font-bold text-dta-dark sm:text-5xl">
@@ -249,6 +253,11 @@ export default async function EvenementsPage() {
           </div>
         </>
       )}
+
+      {/* ── Ad Inline ── */}
+      <div className="mt-10">
+        <AdSlot page="EVENEMENTS" placement="INLINE" />
+      </div>
 
       {/* ── D. Info Strip ──────────────────────────────── */}
       <div className="mt-16 grid grid-cols-1 gap-4 rounded-[var(--radius-card)] bg-dta-beige/50 p-6 sm:grid-cols-3 sm:gap-6 sm:p-8">

@@ -1,8 +1,10 @@
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/db";
 import { formatPrice } from "@/lib/utils";
 import MarketplaceFilters from "./MarketplaceFilters";
+import AdSlot from "@/components/ads/AdSlot";
 
 export const dynamic = "force-dynamic";
 
@@ -105,6 +107,11 @@ export default async function MarketplacePage({
         </div>
       </section>
 
+      {/* ── Ad Banner Top ── */}
+      <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+        <AdSlot page="MARKETPLACE" placement="BANNER_TOP" />
+      </div>
+
       {/* ── Filters ── */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="-mt-6 relative z-10">
@@ -138,12 +145,15 @@ export default async function MarketplacePage({
             </Link>
           </div>
         ) : (
+          <>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {products.map((product) => {
+            {products.map((product, idx) => {
               const badge = getBadge(product);
-              return (
+              return (<React.Fragment key={product.id}>
+                {idx === 4 && (
+                  <AdSlot page="MARKETPLACE" placement="IN_GRID" />
+                )}
                 <Link
-                  key={product.id}
                   href={`/marketplace/${product.slug}`}
                   className="group rounded-2xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                 >
@@ -197,9 +207,17 @@ export default async function MarketplacePage({
                     )}
                   </div>
                 </Link>
-              );
+              </React.Fragment>);
             })}
           </div>
+
+          {/* Inline ad between products and footer */}
+          {products.length > 4 && (
+            <div className="mt-8">
+              <AdSlot page="MARKETPLACE" placement="INLINE" />
+            </div>
+          )}
+          </>
         )}
       </section>
     </div>

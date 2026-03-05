@@ -3,9 +3,9 @@ import { auth } from "@/lib/auth";
 import { getStripe } from "@/lib/stripe";
 
 const PLAN_PRICES: Record<string, { amount: number; name: string }> = {
-  STARTER: { amount: 2900, name: "DTA Ads — Starter" },
-  PRO: { amount: 7900, name: "DTA Ads — Pro" },
-  PREMIUM: { amount: 14900, name: "DTA Ads — Premium" },
+  ESSENTIEL: { amount: 2900, name: "DTA Ads — Essentiel" },
+  BUSINESS: { amount: 7900, name: "DTA Ads — Business" },
+  ELITE: { amount: 14900, name: "DTA Ads — Elite" },
 };
 
 export async function POST(request: Request) {

@@ -32,12 +32,19 @@ export default async function EditCampaignPage({
           initialData={{
             id: campaign.id,
             title: campaign.title,
-            format: campaign.format,
+            supportType: campaign.supportType,
+            mediaFormat: campaign.mediaFormat,
             plan: campaign.plan,
+            placements: campaign.placements,
+            pages: campaign.pages,
             content: campaign.content,
             imageUrl: campaign.imageUrl,
             videoUrl: campaign.videoUrl,
             targetUrl: campaign.targetUrl,
+            ctaText: campaign.ctaText,
+            advertiserName: campaign.advertiserName,
+            satelliteKeywords: campaign.satelliteKeywords,
+            satelliteTargetUrl: campaign.satelliteTargetUrl,
             active: campaign.active,
           }}
         />

@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/db";
 
 const AD_PLAN_PRICES: Record<string, number> = {
-  STARTER: 29,
-  PRO: 79,
-  PREMIUM: 149,
+  ESSENTIEL: 29,
+  BUSINESS: 79,
+  ELITE: 149,
 };
 
 const MONTH_LABELS = [

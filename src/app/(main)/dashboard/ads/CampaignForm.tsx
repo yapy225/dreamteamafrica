@@ -5,28 +5,60 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import BunnyCdnInput from "@/components/BunnyCdnInput";
 
-const formats = [
-  { value: "SPONSORED_ARTICLE", label: "Article sponsorisé" },
-  { value: "BANNER", label: "Bannière publicitaire" },
-  { value: "VIDEO", label: "Publicité vidéo" },
+const supportTypes = [
+  { value: "IMAGE", label: "Image / Banniere" },
+  { value: "VIDEO", label: "Video" },
+  { value: "ARTICLE", label: "Article sponsorise" },
+  { value: "SATELLITE", label: "Article satellite (SEO)" },
+];
+
+const mediaFormats = [
+  { value: "SQUARE_1080", label: "Carre — 1080x1080" },
+  { value: "LANDSCAPE_1920", label: "Paysage — 1920x1080" },
+  { value: "PORTRAIT_1080", label: "Portrait — 1080x1920" },
 ];
 
 const plans = [
-  { value: "STARTER", label: "Starter — 29 €/mois" },
-  { value: "PRO", label: "Pro — 79 €/mois" },
-  { value: "PREMIUM", label: "Premium — 149 €/mois" },
+  { value: "ESSENTIEL", label: "Essentiel — 29 \u20ac/mois", desc: "2 pages, rotation basse" },
+  { value: "BUSINESS", label: "Business — 79 \u20ac/mois", desc: "Toutes pages + 1 article satellite/mois" },
+  { value: "ELITE", label: "Elite — 149 \u20ac/mois", desc: "Toutes pages, positions premium, 3 articles satellites/mois" },
+];
+
+const allPages = [
+  { value: "ACCUEIL", label: "Accueil" },
+  { value: "JOURNAL", label: "Journal (L'Afropeen)" },
+  { value: "OFFICIEL", label: "L'Officiel d'Afrique" },
+  { value: "MARKETPLACE", label: "Marketplace" },
+  { value: "EVENEMENTS", label: "Evenements" },
+];
+
+const allPlacements = [
+  { value: "HERO", label: "Hero Banner (Elite)" },
+  { value: "BANNER_TOP", label: "Banniere Top" },
+  { value: "INLINE", label: "Inline (entre sections)" },
+  { value: "SIDEBAR", label: "Sidebar" },
+  { value: "VIDEO_SLOT", label: "Video" },
+  { value: "IN_GRID", label: "In-grid (Marketplace)" },
+  { value: "INTERSTITIAL", label: "Interstitiel mobile (Elite)" },
 ];
 
 interface CampaignFormProps {
   initialData?: {
     id: string;
     title: string;
-    format: string;
+    supportType: string;
+    mediaFormat: string;
     plan: string;
+    placements: string[];
+    pages: string[];
     content: string;
     imageUrl: string | null;
     videoUrl: string | null;
     targetUrl: string;
+    ctaText: string | null;
+    advertiserName: string | null;
+    satelliteKeywords: string[];
+    satelliteTargetUrl: string | null;
     active: boolean;
   };
   defaultPlan?: string;
@@ -38,76 +70,88 @@ export default function CampaignForm({ initialData, defaultPlan }: CampaignFormP
 
   const [form, setForm] = useState({
     title: initialData?.title || "",
-    format: initialData?.format || "BANNER",
-    plan: initialData?.plan || defaultPlan || "STARTER",
+    supportType: initialData?.supportType || "IMAGE",
+    mediaFormat: initialData?.mediaFormat || "LANDSCAPE_1920",
+    plan: initialData?.plan || defaultPlan || "ESSENTIEL",
+    placements: initialData?.placements || ["INLINE"],
+    pages: initialData?.pages || ["ACCUEIL", "JOURNAL"],
     content: initialData?.content || "",
     imageUrl: initialData?.imageUrl || "",
     videoUrl: initialData?.videoUrl || "",
     targetUrl: initialData?.targetUrl || "",
+    ctaText: initialData?.ctaText || "",
+    advertiserName: initialData?.advertiserName || "",
+    satelliteKeywords: initialData?.satelliteKeywords?.join(", ") || "",
+    satelliteTargetUrl: initialData?.satelliteTargetUrl || "",
     active: initialData?.active ?? false,
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const toggleArray = (arr: string[], val: string) =>
+    arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
+    const payload = {
+      ...form,
+      imageUrl: form.imageUrl || null,
+      videoUrl: form.videoUrl || null,
+      ctaText: form.ctaText || null,
+      advertiserName: form.advertiserName || null,
+      satelliteKeywords: form.satelliteKeywords
+        ? form.satelliteKeywords.split(",").map((k) => k.trim()).filter(Boolean)
+        : [],
+      satelliteTargetUrl: form.satelliteTargetUrl || null,
+    };
+
     try {
       if (isEditing) {
-        // Update existing campaign
         const res = await fetch(`/api/ads/${initialData.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
+          body: JSON.stringify(payload),
         });
-
         if (!res.ok) {
           const data = await res.json();
           setError(data.error || "Une erreur est survenue.");
           setLoading(false);
           return;
         }
-
         router.push("/dashboard/ads");
         router.refresh();
       } else {
-        // Create campaign then redirect to checkout
         const createRes = await fetch("/api/ads", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
+          body: JSON.stringify(payload),
         });
-
         if (!createRes.ok) {
           const data = await createRes.json();
           setError(data.error || "Une erreur est survenue.");
           setLoading(false);
           return;
         }
-
         const campaign = await createRes.json();
-
-        // Redirect to Stripe checkout
         const checkoutRes = await fetch("/api/checkout/ads", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ plan: form.plan, campaignId: campaign.id }),
         });
-
         if (!checkoutRes.ok) {
           const data = await checkoutRes.json();
           setError(data.error || "Erreur lors du paiement.");
           setLoading(false);
           return;
         }
-
         const { url } = await checkoutRes.json();
         window.location.href = url;
       }
     } catch {
-      setError("Erreur réseau.");
+      setError("Erreur reseau.");
       setLoading(false);
     }
   };
@@ -123,6 +167,7 @@ export default function CampaignForm({ initialData, defaultPlan }: CampaignFormP
         </div>
       )}
 
+      {/* Title */}
       <div>
         <label className="mb-1.5 block text-sm font-medium text-dta-char">
           Titre de la campagne
@@ -132,19 +177,46 @@ export default function CampaignForm({ initialData, defaultPlan }: CampaignFormP
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
           className={inputClass}
-          placeholder="ex : Lancement collection été 2026"
+          placeholder="ex : Lancement collection ete 2026"
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      {/* Advertiser name */}
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-dta-char">
+          Nom de l&apos;annonceur
+        </label>
+        <input
+          value={form.advertiserName}
+          onChange={(e) => setForm({ ...form, advertiserName: e.target.value })}
+          className={inputClass}
+          placeholder="ex : Ma Marque"
+        />
+      </div>
+
+      {/* Support type + Media format + Plan */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-dta-char">Format</label>
+          <label className="mb-1.5 block text-sm font-medium text-dta-char">Support</label>
           <select
-            value={form.format}
-            onChange={(e) => setForm({ ...form, format: e.target.value })}
+            value={form.supportType}
+            onChange={(e) => setForm({ ...form, supportType: e.target.value })}
             className={inputClass}
           >
-            {formats.map((f) => (
+            {supportTypes.map((t) => (
+              <option key={t.value} value={t.value}>{t.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-dta-char">Format media</label>
+          <select
+            value={form.mediaFormat}
+            onChange={(e) => setForm({ ...form, mediaFormat: e.target.value })}
+            className={inputClass}
+          >
+            {mediaFormats.map((f) => (
               <option key={f.value} value={f.value}>{f.label}</option>
             ))}
           </select>
@@ -162,60 +234,155 @@ export default function CampaignForm({ initialData, defaultPlan }: CampaignFormP
                 <option key={p.value} value={p.value}>{p.label}</option>
               ))}
             </select>
+            <p className="mt-1 text-xs text-dta-taupe">
+              {plans.find((p) => p.value === form.plan)?.desc}
+            </p>
           </div>
         )}
       </div>
 
+      {/* Pages */}
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-dta-char">
+          Pages ciblees
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {allPages.map((p) => (
+            <button
+              key={p.value}
+              type="button"
+              onClick={() => setForm({ ...form, pages: toggleArray(form.pages, p.value) })}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                form.pages.includes(p.value)
+                  ? "bg-dta-accent text-white"
+                  : "bg-dta-sand text-dta-char"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Placements */}
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-dta-char">
+          Emplacements
+        </label>
+        <div className="flex flex-wrap gap-2">
+          {allPlacements.map((p) => (
+            <button
+              key={p.value}
+              type="button"
+              onClick={() => setForm({ ...form, placements: toggleArray(form.placements, p.value) })}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                form.placements.includes(p.value)
+                  ? "bg-dta-dark text-white"
+                  : "bg-dta-sand text-dta-char"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
       <div>
         <label className="mb-1.5 block text-sm font-medium text-dta-char">
           Contenu publicitaire
         </label>
         <textarea
           required
-          rows={6}
+          rows={4}
           value={form.content}
           onChange={(e) => setForm({ ...form, content: e.target.value })}
           className={inputClass}
-          placeholder="Le texte de votre publicité..."
+          placeholder="Le texte de votre publicite..."
         />
       </div>
 
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-dta-char">
-          URL cible <span className="text-dta-taupe">(lien vers votre site)</span>
-        </label>
-        <input
-          required
-          type="url"
-          value={form.targetUrl}
-          onChange={(e) => setForm({ ...form, targetUrl: e.target.value })}
-          className={inputClass}
-          placeholder="https://votre-site.com"
-        />
+      {/* Target URL + CTA */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-dta-char">
+            URL cible
+          </label>
+          <input
+            required
+            type="url"
+            value={form.targetUrl}
+            onChange={(e) => setForm({ ...form, targetUrl: e.target.value })}
+            className={inputClass}
+            placeholder="https://votre-site.com"
+          />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-dta-char">
+            Texte du bouton <span className="text-dta-taupe">(optionnel)</span>
+          </label>
+          <input
+            value={form.ctaText}
+            onChange={(e) => setForm({ ...form, ctaText: e.target.value })}
+            className={inputClass}
+            placeholder="ex : Decouvrir"
+          />
+        </div>
       </div>
 
+      {/* Image + Video */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <BunnyCdnInput
           value={form.imageUrl}
           onChange={(url) => setForm({ ...form, imageUrl: url })}
           label="Image"
         />
-
-        {form.format === "VIDEO" && (
+        {form.supportType === "VIDEO" && (
           <div>
             <label className="mb-1.5 block text-sm font-medium text-dta-char">
-              Vidéo <span className="text-dta-taupe">(URL, optionnel)</span>
+              Video URL
             </label>
             <input
               value={form.videoUrl}
               onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
               className={inputClass}
-              placeholder="https://youtube.com/..."
+              placeholder="https://cdn.example.com/video.mp4"
             />
           </div>
         )}
       </div>
 
+      {/* Satellite fields */}
+      {form.supportType === "SATELLITE" && (
+        <div className="rounded-[var(--radius-card)] border border-dta-sand bg-dta-beige/50 p-4 space-y-4">
+          <h4 className="text-sm font-semibold text-dta-dark">Options article satellite (SEO)</h4>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-dta-char">
+              Mots-cles cibles <span className="text-dta-taupe">(separes par des virgules)</span>
+            </label>
+            <input
+              value={form.satelliteKeywords}
+              onChange={(e) => setForm({ ...form, satelliteKeywords: e.target.value })}
+              className={inputClass}
+              placeholder="ex : mode africaine, wax, fashion paris"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-dta-char">
+              URL cible pour backlinks
+            </label>
+            <input
+              type="url"
+              value={form.satelliteTargetUrl}
+              onChange={(e) => setForm({ ...form, satelliteTargetUrl: e.target.value })}
+              className={inputClass}
+              placeholder="https://votre-site.com/page-cible"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Active toggle */}
       {isEditing && (
         <div className="flex items-center gap-3">
           <button
@@ -235,6 +402,7 @@ export default function CampaignForm({ initialData, defaultPlan }: CampaignFormP
         </div>
       )}
 
+      {/* Submit */}
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
@@ -242,7 +410,7 @@ export default function CampaignForm({ initialData, defaultPlan }: CampaignFormP
           className="flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white hover:bg-dta-accent-dark disabled:opacity-50"
         >
           {loading && <Loader2 size={16} className="animate-spin" />}
-          {isEditing ? "Enregistrer" : "Créer et payer"}
+          {isEditing ? "Enregistrer" : "Creer et payer"}
         </button>
         <button
           type="button"

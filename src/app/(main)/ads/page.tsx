@@ -1,81 +1,85 @@
 import Link from "next/link";
-import { Check, Megaphone, BarChart3, Zap } from "lucide-react";
+import { Check, ImageIcon, Video, FileText, Search, Megaphone } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
 export const metadata = {
-  title: "DTA Ads — Publicité",
-  description: "Boostez votre visibilité auprès de la communauté africaine de Paris avec DTA Ads.",
+  title: "DTA Ads — Publicite",
+  description: "Boostez votre visibilite aupres de la communaute africaine de Paris avec DTA Ads.",
 };
 
 const plans = [
   {
-    id: "STARTER",
-    name: "Starter",
+    id: "ESSENTIEL",
+    name: "Essentiel",
     price: 29,
     period: "/mois",
-    description: "Idéal pour débuter et tester votre visibilité",
+    description: "Ideal pour debuter et tester votre visibilite",
     features: [
-      "1 campagne active",
-      "Bannière publicitaire",
-      "1 000 impressions/mois",
-      "Tableau de bord basique",
-      "Support par email",
+      "2 pages au choix",
+      "Image / Banniere",
+      "Placements inline et sidebar",
+      "Rotation standard",
+      "Tableau de bord avec impressions & clics",
     ],
-    cta: "Choisir Starter",
+    cta: "Choisir Essentiel",
     highlight: false,
   },
   {
-    id: "PRO",
-    name: "Pro",
+    id: "BUSINESS",
+    name: "Business",
     price: 79,
     period: "/mois",
-    description: "Pour les professionnels qui veulent des résultats",
+    description: "Visibilite sur toutes les pages + SEO",
     features: [
-      "3 campagnes actives",
-      "Bannière + Article sponsorisé",
-      "5 000 impressions/mois",
-      "Tableau de bord avancé",
-      "Analytics détaillés",
+      "Toutes les pages (5 pages)",
+      "Image, Video, Article sponsorise",
+      "Banniere top + inline + sidebar",
+      "1 article satellite SEO / mois",
+      "Analytics detailles",
       "Support prioritaire",
     ],
-    cta: "Choisir Pro",
+    cta: "Choisir Business",
     highlight: true,
   },
   {
-    id: "PREMIUM",
-    name: "Premium",
+    id: "ELITE",
+    name: "Elite",
     price: 149,
     period: "/mois",
-    description: "Visibilité maximale avec tous les formats",
+    description: "Visibilite maximale avec positions premium",
     features: [
-      "Campagnes illimitées",
-      "Tous les formats (bannière, article, vidéo)",
-      "15 000 impressions/mois",
-      "Tableau de bord complet",
-      "Analytics temps réel",
-      "Account manager dédié",
-      "Placement prioritaire",
+      "Toutes les pages + positions premium",
+      "Tous les formats (image, video, article, satellite)",
+      "Hero banner + interstitiel mobile",
+      "3 articles satellites SEO / mois",
+      "Rotation x3 (priorite absolue)",
+      "Account manager dedie",
     ],
-    cta: "Choisir Premium",
+    cta: "Choisir Elite",
     highlight: false,
   },
 ];
 
-const formats = [
+const supports = [
   {
-    icon: Megaphone,
-    title: "Article sponsorisé",
-    description: "Votre contenu intégré dans le flux de L'Afropéen, identifié comme sponsorisé. Format natif à forte engagement.",
+    icon: ImageIcon,
+    title: "Image / Banniere",
+    description: "Visuel statique cliquable affiche en banniere, inline ou sidebar. Formats : 1080x1080, 1920x1080, 1080x1920.",
   },
   {
-    icon: BarChart3,
-    title: "Bannière publicitaire",
-    description: "Affichage visuel dans la marketplace et les pages événements. Formats desktop et mobile optimisés.",
+    icon: Video,
+    title: "Video",
+    description: "Clip autoplay muet avec CTA. Insere entre les sections de contenu editorial. Formats : 1920x1080, 1080x1920.",
   },
   {
-    icon: Zap,
-    title: "Publicité vidéo",
-    description: "Format vidéo premium affiché en position stratégique. Idéal pour les lancements de marque et produits.",
+    icon: FileText,
+    title: "Article sponsorise",
+    description: "Article integre au flux editorial avec badge 'Sponsorise'. Visible comme un contenu natif a forte engagement.",
+  },
+  {
+    icon: Search,
+    title: "Article satellite (SEO)",
+    description: "Article redige autour de vos mots-cles avec backlinks vers votre site. Boost de referencement organique.",
   },
 ];
 
@@ -88,30 +92,54 @@ export default function AdsPage() {
           DTA Ads
         </span>
         <h1 className="mt-4 font-serif text-4xl font-bold text-dta-dark sm:text-5xl">
-          Boostez votre visibilité
+          Boostez votre visibilite
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-dta-char/70">
-          Touchez la communauté africaine de Paris avec des formats publicitaires
-          natifs et performants.
+          Touchez la communaute africaine de Paris avec des formats publicitaires
+          natifs et performants sur 5 pages : Accueil, Journal, Officiel, Marketplace et Evenements.
         </p>
       </div>
 
-      {/* Formats */}
+      {/* Supports */}
       <section className="mb-20">
         <h2 className="mb-8 text-center font-serif text-2xl font-bold text-dta-dark">
-          3 formats publicitaires
+          4 supports publicitaires
         </h2>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {formats.map((format) => (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {supports.map((s) => (
             <div
-              key={format.title}
+              key={s.title}
               className="rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)]"
             >
               <div className="mb-4 inline-flex rounded-[var(--radius-button)] bg-dta-accent/10 p-3 text-dta-accent">
-                <format.icon size={24} />
+                <s.icon size={24} />
               </div>
-              <h3 className="font-serif text-lg font-semibold text-dta-dark">{format.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-dta-char/70">{format.description}</p>
+              <h3 className="font-serif text-lg font-semibold text-dta-dark">{s.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-dta-char/70">{s.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 3 formats */}
+      <section className="mb-20">
+        <h2 className="mb-8 text-center font-serif text-2xl font-bold text-dta-dark">
+          3 formats d&apos;image
+        </h2>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          {[
+            { name: "Carre", dim: "1080 x 1080", ratio: "1:1", use: "Sidebar, inline, feed mobile" },
+            { name: "Paysage", dim: "1920 x 1080", ratio: "16:9", use: "Hero, banniere top, video" },
+            { name: "Portrait", dim: "1080 x 1920", ratio: "9:16", use: "Sidebar grande, interstitiel mobile" },
+          ].map((f) => (
+            <div
+              key={f.name}
+              className="rounded-[var(--radius-card)] bg-white p-6 text-center shadow-[var(--shadow-card)]"
+            >
+              <h3 className="font-serif text-lg font-semibold text-dta-dark">{f.name}</h3>
+              <p className="mt-1 font-serif text-2xl font-bold text-dta-accent">{f.dim}</p>
+              <p className="mt-1 text-xs text-dta-taupe">Ratio {f.ratio}</p>
+              <p className="mt-3 text-sm text-dta-char/70">{f.use}</p>
             </div>
           ))}
         </div>
@@ -167,6 +195,20 @@ export default function AdsPage() {
               </Link>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Pages coverage */}
+      <section className="mt-20">
+        <div className="rounded-[var(--radius-card)] bg-dta-beige/50 p-8 text-center">
+          <Megaphone size={32} className="mx-auto text-dta-accent" />
+          <h3 className="mt-4 font-serif text-xl font-bold text-dta-dark">
+            Rotation sur 5 pages
+          </h3>
+          <p className="mx-auto mt-2 max-w-xl text-sm text-dta-char/70">
+            Vos publicites tournent automatiquement sur l&apos;Accueil, le Journal (L&apos;Afropeen),
+            L&apos;Officiel d&apos;Afrique, la Marketplace et les Evenements pour maximiser votre visibilite.
+          </p>
         </div>
       </section>
     </div>

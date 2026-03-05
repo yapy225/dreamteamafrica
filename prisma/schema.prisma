@@ -55,16 +55,41 @@ enum OrderStatus {
   CANCELLED
 }
 
-enum AdFormat {
-  SPONSORED_ARTICLE
-  BANNER
+enum AdSupportType {
+  IMAGE
   VIDEO
+  ARTICLE
+  SATELLITE
+}
+
+enum AdMediaFormat {
+  SQUARE_1080     // 1080×1080
+  LANDSCAPE_1920  // 1920×1080
+  PORTRAIT_1080   // 1080×1920
 }
 
 enum AdPlan {
-  STARTER   // 29€/month
-  PRO       // 79€/month
-  PREMIUM   // 149€/month
+  ESSENTIEL  // 29€/month  — 2 pages, rotation basse
+  BUSINESS   // 79€/month  — toutes pages, 1 article satellite/mois
+  ELITE      // 149€/month — toutes pages + premium, 3 articles satellites/mois
+}
+
+enum AdPlacement {
+  HERO
+  BANNER_TOP
+  INLINE
+  SIDEBAR
+  VIDEO_SLOT
+  IN_GRID
+  INTERSTITIAL
+}
+
+enum AdPage {
+  ACCUEIL
+  JOURNAL
+  OFFICIEL
+  MARKETPLACE
+  EVENEMENTS
 }
 
 enum ArticleStatus {
@@ -303,27 +328,39 @@ model Favorite {
 // ─── DTA ADS ────────────────────────────────────────────
 
 model AdCampaign {
-  id              String   @id @default(cuid())
+  id              String         @id @default(cuid())
   userId          String
   title           String
-  format          AdFormat
-  plan            AdPlan
-  content         String   @db.Text
+  supportType     AdSupportType  @default(IMAGE)
+  mediaFormat     AdMediaFormat  @default(LANDSCAPE_1920)
+  plan            AdPlan         @default(ESSENTIEL)
+  placements      AdPlacement[]
+  pages           AdPage[]
+  content         String         @db.Text
   imageUrl        String?
   videoUrl        String?
   targetUrl       String
-  impressions     Int      @default(0)
-  clicks          Int      @default(0)
-  active          Boolean  @default(true)
+  ctaText         String?
+  advertiserName  String?
+
+  // Satellite-specific fields
+  satelliteKeywords  String[]    @default([])
+  satelliteTargetUrl String?
+  satelliteArticlesLeft Int      @default(0)
+
+  impressions     Int            @default(0)
+  clicks          Int            @default(0)
+  active          Boolean        @default(true)
   stripeSubId     String?
-  startDate       DateTime @default(now())
+  startDate       DateTime       @default(now())
   endDate         DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   user User @relation(fields: [userId], references: [id])
 
-  @@index([format])
+  @@index([supportType])
+  @@index([plan])
   @@index([active])
 }
 

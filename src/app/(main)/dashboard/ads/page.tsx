@@ -9,16 +9,17 @@ import DeleteCampaignButton from "./DeleteCampaignButton";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Mes campagnes — DTA Ads" };
 
-const formatLabels: Record<string, string> = {
-  SPONSORED_ARTICLE: "Article sponsorisé",
-  BANNER: "Bannière",
-  VIDEO: "Vidéo",
+const supportLabels: Record<string, string> = {
+  IMAGE: "Image",
+  VIDEO: "Video",
+  ARTICLE: "Article sponsorise",
+  SATELLITE: "Article satellite",
 };
 
 const planColors: Record<string, string> = {
-  STARTER: "bg-blue-100 text-blue-700",
-  PRO: "bg-purple-100 text-purple-700",
-  PREMIUM: "bg-amber-100 text-amber-700",
+  ESSENTIEL: "bg-gray-100 text-gray-700",
+  BUSINESS: "bg-purple-100 text-purple-700",
+  ELITE: "bg-amber-100 text-amber-700",
 };
 
 export default async function DashboardAdsPage() {
@@ -87,7 +88,7 @@ export default async function DashboardAdsPage() {
                         {campaign.plan}
                       </span>
                       <span className="rounded-[var(--radius-full)] bg-dta-beige px-2 py-0.5 text-xs font-medium text-dta-char">
-                        {formatLabels[campaign.format] || campaign.format}
+                        {supportLabels[campaign.supportType] || campaign.supportType}
                       </span>
                       <span className={`rounded-[var(--radius-full)] px-2 py-0.5 text-xs font-medium ${
                         campaign.active

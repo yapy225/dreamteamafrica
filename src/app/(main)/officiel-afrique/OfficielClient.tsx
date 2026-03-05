@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import AdSlot from "@/components/ads/AdSlot";
 import s from "./officiel.module.css";
 
 // ─── DATA ─────────────────────────────────────────────────
@@ -453,6 +454,11 @@ export default function OfficielClient() {
         </div>
       </section>
 
+      {/* ═══ AD BANNER TOP ═══ */}
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "16px 16px 0" }}>
+        <AdSlot page="OFFICIEL" placement="BANNER_TOP" />
+      </div>
+
       {/* ═══ CATEGORIES ═══ */}
       <section className={`${s.sec} ${s.secCat}`} id="rubriques" ref={catSectionRef}>
         <div className={`${s.secHeader} ${s.reveal}`}>
@@ -480,6 +486,10 @@ export default function OfficielClient() {
         </div>
       </section>
 
+      {/* ═══ AD INLINE ═══ */}
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 16px" }}>
+        <AdSlot page="OFFICIEL" placement="INLINE" />
+      </div>
 
       {/* ═══ HOW ═══ */}
       <section className={`${s.sec} ${s.secHow}`}>
@@ -515,6 +525,10 @@ export default function OfficielClient() {
         </div>
       </section>
 
+      {/* ═══ AD VIDEO ═══ */}
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 16px" }}>
+        <AdSlot page="OFFICIEL" placement="VIDEO_SLOT" />
+      </div>
 
       {/* ═══ AVIS CLIENTS ═══ */}
       <section className={`${s.sec} ${s.secReviews}`}>

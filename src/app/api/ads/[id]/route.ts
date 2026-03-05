@@ -22,16 +22,39 @@ export async function PUT(
       return NextResponse.json({ error: "Accès refusé." }, { status: 403 });
     }
 
-    const { title, content, imageUrl, videoUrl, targetUrl, active } = await request.json();
+    const {
+      title,
+      supportType,
+      mediaFormat,
+      placements,
+      pages,
+      content,
+      imageUrl,
+      videoUrl,
+      targetUrl,
+      ctaText,
+      advertiserName,
+      satelliteKeywords,
+      satelliteTargetUrl,
+      active,
+    } = await request.json();
 
     const updated = await prisma.adCampaign.update({
       where: { id },
       data: {
         ...(title && { title }),
+        ...(supportType && { supportType }),
+        ...(mediaFormat && { mediaFormat }),
+        ...(placements && { placements }),
+        ...(pages && { pages }),
         ...(content && { content }),
         ...(imageUrl !== undefined && { imageUrl }),
         ...(videoUrl !== undefined && { videoUrl }),
         ...(targetUrl && { targetUrl }),
+        ...(ctaText !== undefined && { ctaText }),
+        ...(advertiserName !== undefined && { advertiserName }),
+        ...(satelliteKeywords !== undefined && { satelliteKeywords }),
+        ...(satelliteTargetUrl !== undefined && { satelliteTargetUrl }),
         ...(active !== undefined && { active }),
       },
     });

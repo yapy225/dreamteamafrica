@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import ArticleCard from "@/components/journal/ArticleCard";
 import Newsletter from "@/components/journal/Newsletter";
+import AdSlot from "@/components/ads/AdSlot";
 import styles from "./home.module.css";
 
 export const dynamic = "force-dynamic";
@@ -146,6 +147,9 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* ══ 1b. Ad Hero ══ */}
+      <AdSlot page="ACCUEIL" placement="HERO" />
 
       {/* ══ 2. Bandeau Saison ══ */}
       <section className="bg-dta-accent py-4">
@@ -291,6 +295,11 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* ══ 3b. Ad Inline ══ */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <AdSlot page="ACCUEIL" placement="INLINE" />
+      </div>
 
       {/* ══ 4. Citation Éditoriale ══ */}
       <section className="bg-dta-bg px-4 py-24">

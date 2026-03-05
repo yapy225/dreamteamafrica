@@ -7,20 +7,18 @@ export async function GET(request: Request) {
     const format = searchParams.get("format");
     const limit = parseInt(searchParams.get("limit") || "3");
 
-    const where: Record<string, unknown> = { active: true };
-    if (format) where.format = format;
-
     const campaigns = await prisma.adCampaign.findMany({
-      where,
+      where: { active: true },
       take: Math.min(limit, 10),
       orderBy: [
-        { plan: "desc" }, // Premium first
+        { plan: "desc" },
         { createdAt: "desc" },
       ],
       select: {
         id: true,
         title: true,
-        format: true,
+        supportType: true,
+        mediaFormat: true,
         content: true,
         imageUrl: true,
         videoUrl: true,
@@ -28,7 +26,13 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json(campaigns);
+    // Map to legacy format for backward compatibility
+    const mapped = campaigns.map((c) => ({
+      ...c,
+      format: format || c.supportType,
+    }));
+
+    return NextResponse.json(mapped);
   } catch (error) {
     console.error("Ad serve error:", error);
     return NextResponse.json([], { status: 500 });

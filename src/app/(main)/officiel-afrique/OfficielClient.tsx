@@ -237,18 +237,6 @@ export default function OfficielClient() {
       </div>
       <div className={s.kente} />
 
-      {/* Nav */}
-      <nav className={s.topnav}>
-        <div className={s.topnavLogo}>
-          L&apos;Officiel <span className={s.topnavLogoAccent}>d&apos;Afrique</span>
-        </div>
-        <div className={s.topnavLinks}>
-          <a href="#rubriques" className={`${s.topnavLink} ${s.topnavLinkHide}`}>Rubriques</a>
-          <a href="#faq" className={`${s.topnavLink} ${s.topnavLinkHide}`}>FAQ</a>
-          <button className={s.topnavCta} onClick={scrollToForm}>S&apos;inscrire gratuitement ✦</button>
-        </div>
-      </nav>
-
       {/* ═══ HERO ═══ */}
       <section className={s.hero} id="inscription">
         <div className={s.heroWrap}>

@@ -153,16 +153,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Normaliser les cles: "Title" → "title", "Secret key" → "secret_key", etc.
+    // Normaliser les cles: "Title" → "title", "Résumé RSS" → "resume_rss", etc.
     const normalized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(rawBody)) {
       const k = key
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
         .trim()
         .replace(/\s+/g, "_");
       normalized[k] = value;
     }
-    const body = normalized as unknown as WebhookPayload;
+
+    // Mapping des noms de champs Airtable francais → champs webhook
+    const FIELD_ALIASES: Record<string, string> = {
+      titre: "title",
+      resume_rss: "excerpt",
+      contenu_reecrit_ia: "content",
+      categorie_source: "category",
+      lien_original: "source_url",
+      image_originale_url: "image_url",
+      image_ia_url: "cover_image",
+      media_source: "source",
+      score_ia_pertinence: "_score",
+      statut_editorial: "_statut",
+      date_publication_source: "_date_source",
+      "publie_?": "_publie",
+      auteur_interne: "author_id",
+      notes_redaction: "_notes",
+    };
+
+    const mapped: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(normalized)) {
+      const alias = FIELD_ALIASES[k];
+      if (alias?.startsWith("_")) continue; // champs ignores
+      mapped[alias || k] = v;
+    }
+    const body = mapped as unknown as WebhookPayload;
 
     // 2. Verifier la cle secrete
     const SECRET = process.env.WEBHOOK_SECRET_KEY;

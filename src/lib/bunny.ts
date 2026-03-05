@@ -51,6 +51,28 @@ export async function uploadFile(
   return { url: getCdnUrl(filePath), path: filePath };
 }
 
+export async function uploadBuffer(
+  buffer: Buffer,
+  filePath: string,
+  contentType = "image/png",
+): Promise<{ url: string; path: string }> {
+  const res = await fetch(buildStorageUrl(filePath), {
+    method: "PUT",
+    headers: {
+      AccessKey: STORAGE_API_KEY,
+      "Content-Type": contentType,
+    },
+    body: new Uint8Array(buffer),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Bunny upload failed (${res.status}): ${text}`);
+  }
+
+  return { url: getCdnUrl(filePath), path: filePath };
+}
+
 export async function deleteFile(filePath: string): Promise<void> {
   const res = await fetch(buildStorageUrl(filePath), {
     method: "DELETE",

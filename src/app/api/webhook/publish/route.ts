@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { marked } from "marked";
+import { generateCoverImage } from "@/lib/generate-cover-image";
 
 // --- Types (accepte camelCase + snake_case) ---
 interface WebhookPayload {
@@ -210,6 +211,11 @@ export async function POST(request: NextRequest) {
     // 6. Preparer le slug (unique)
     let slug = body.slug ? generateSlug(body.slug) : generateSlug(body.title);
 
+    // 6b. Generer une image de couverture via DALL-E
+    // Si une image originale est fournie, DALL-E la reproduit ; sinon, genere depuis le titre
+    const originalImageUrl = coverImage || null;
+    const resolvedCoverImage = await generateCoverImage(body.title, category, slug, originalImageUrl);
+
     // Verifier collision et mettre a jour si existant
     const existingBySlug = await prisma.article.findUnique({
       where: { slug },
@@ -224,7 +230,7 @@ export async function POST(request: NextRequest) {
           excerpt: body.excerpt.trim(),
           content: sanitizeHtml(contentRaw),
           category: category as any,
-          coverImage: coverImage || undefined,
+          coverImage: resolvedCoverImage || undefined,
           altText: altText?.trim() || undefined,
           tags,
           metaTitle: metaTitle?.trim() || body.title.trim(),
@@ -279,7 +285,7 @@ export async function POST(request: NextRequest) {
         excerpt: body.excerpt.trim(),
         content: sanitizeHtml(contentRaw),
         category: category as any,
-        coverImage: coverImage || null,
+        coverImage: resolvedCoverImage || null,
         altText: altText?.trim() || null,
         tags,
         readingTimeMin: computeReadingTime(contentRaw),

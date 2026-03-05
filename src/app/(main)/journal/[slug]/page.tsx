@@ -107,7 +107,6 @@ export default async function ArticleDetailPage({
     .toUpperCase()
     .slice(0, 2);
 
-  const paragraphs = article.content.split("\n\n").filter(Boolean);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -242,18 +241,10 @@ export default async function ArticleDetailPage({
       {/* Article Body */}
       <article className="px-4 py-14 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-3xl">
-          {paragraphs.map((paragraph, i) => (
-            <p
-              key={i}
-              className={`mb-6 text-base leading-[1.9] text-dta-char/85 ${
-                i === 0
-                  ? "first-letter:float-left first-letter:mr-2 first-letter:font-serif first-letter:text-5xl first-letter:font-bold first-letter:leading-[0.8] first-letter:text-dta-accent"
-                  : ""
-              }`}
-            >
-              {paragraph}
-            </p>
-          ))}
+          <div
+            className="prose prose-lg max-w-none text-dta-char/85 prose-headings:text-dta-char prose-h1:text-2xl prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-p:mb-6 prose-p:leading-[1.9] prose-a:text-dta-accent prose-strong:text-dta-char first-letter:float-left first-letter:mr-2 first-letter:font-serif first-letter:text-5xl first-letter:font-bold first-letter:leading-[0.8] first-letter:text-dta-accent"
+            dangerouslySetInnerHTML={{ __html: article.content }}
+          />
         </div>
       </article>
 

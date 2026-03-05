@@ -162,33 +162,12 @@ export default function JournalNav() {
             <span className="font-serif text-xl font-bold text-dta-dark">
               L&apos;Afro<em className="text-dta-accent">p&eacute;en</em>
             </span>
-            <span className="hidden text-xs text-dta-taupe sm:inline">
-              | par DreamTeamAfrica
-            </span>
           </Link>
 
-          {/* Desktop category links */}
-          <div className="hidden items-center gap-5 lg:flex">
-            {categories.map((c) => (
-              <Link
-                key={c.cat}
-                href={`/journal?cat=${c.cat}`}
-                className="j-nav-link text-sm font-medium text-dta-char transition-colors hover:text-dta-accent"
-              >
-                {c.label}
-              </Link>
-            ))}
-            <Link
-              href="/journal/archives"
-              className="j-nav-link text-sm font-medium text-dta-char transition-colors hover:text-dta-accent"
-            >
-              Archives
-            </Link>
-          </div>
-
-          {/* Desktop search + subscribe */}
-          <div className="hidden items-center gap-3 lg:flex">
-            <div className="relative">
+          {/* Right side: search + subscribe + hamburger */}
+          <div className="flex items-center gap-2">
+            {/* Search (desktop only) */}
+            <div className="relative hidden sm:block">
               <Search
                 size={14}
                 className="absolute left-2.5 top-1/2 -translate-y-1/2 text-dta-taupe"
@@ -210,22 +189,6 @@ export default function JournalNav() {
                 />
               )}
             </div>
-            <Link
-              href="/journal#newsletter"
-              className="rounded-[var(--radius-button)] bg-dta-dark px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-dta-accent"
-            >
-              S&apos;abonner
-            </Link>
-          </div>
-
-          {/* Mobile: subscribe + hamburger */}
-          <div className="flex items-center gap-2 lg:hidden">
-            <Link
-              href="/journal#newsletter"
-              className="rounded-[var(--radius-button)] bg-dta-dark px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-dta-accent"
-            >
-              S&apos;abonner
-            </Link>
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-expanded={mobileOpen}
@@ -240,7 +203,7 @@ export default function JournalNav() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="border-t border-dta-sand/50 bg-white px-4 pb-4 pt-2 lg:hidden">
+        <div className="border-t border-dta-sand/50 bg-white px-4 pb-4 pt-2">
           {categories.map((c) => (
             <Link
               key={c.cat}

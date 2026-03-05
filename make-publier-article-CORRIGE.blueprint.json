@@ -1,0 +1,371 @@
+{
+    "name": "Publier Article - L'Afropeen",
+    "flow": [
+        {
+            "id": 4,
+            "module": "airtable:TriggerWatchRecords",
+            "version": 3,
+            "parameters": {
+                "__IMTCONN__": 3365072,
+                "base": "appNCUd47jdrQOFbc",
+                "useColumnId": false,
+                "table": "tblSiXhFEfUO7Ffe8",
+                "config": {
+                    "triggerField": "Date détection",
+                    "labelField": "Titre"
+                },
+                "maxRecords": 10,
+                "view": "",
+                "formula": "{Statut éditorial} = \"À publier\""
+            },
+            "mapper": {},
+            "metadata": {
+                "designer": {
+                    "x": 0,
+                    "y": 0
+                },
+                "restore": {
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "label": "CRM FestivalDuConteAfricain (User ID: usr713Q3U3cqzVRn7)",
+                            "data": {
+                                "scoped": "true",
+                                "connection": "airtable3"
+                            }
+                        },
+                        "base": {
+                            "label": "CRM Lafropéen"
+                        },
+                        "table": {
+                            "label": "Articles détectés"
+                        },
+                        "config": {
+                            "nested": {
+                                "triggerField": {
+                                    "label": "Date détection"
+                                },
+                                "labelField": {
+                                    "label": "Titre"
+                                }
+                            }
+                        },
+                        "view": {
+                            "label": "Empty"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:airtable3,airtable2",
+                        "label": "Connection",
+                        "required": true
+                    },
+                    {
+                        "name": "base",
+                        "type": "select",
+                        "label": "Base",
+                        "required": true
+                    },
+                    {
+                        "name": "useColumnId",
+                        "type": "boolean",
+                        "label": "Use Column ID",
+                        "required": true
+                    },
+                    {
+                        "name": "table",
+                        "type": "select",
+                        "label": "Table",
+                        "required": true
+                    },
+                    {
+                        "name": "config",
+                        "type": "collection",
+                        "label": "Trigger configuration",
+                        "spec": [
+                            {
+                                "name": "triggerField",
+                                "type": "select",
+                                "label": "Trigger field",
+                                "required": true
+                            },
+                            {
+                                "name": "labelField",
+                                "type": "select",
+                                "label": "Label field",
+                                "required": true
+                            }
+                        ]
+                    },
+                    {
+                        "name": "maxRecords",
+                        "type": "integer",
+                        "label": "Limit",
+                        "required": true
+                    },
+                    {
+                        "name": "view",
+                        "type": "select",
+                        "label": "View"
+                    },
+                    {
+                        "name": "formula",
+                        "type": "text",
+                        "label": "Formula"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2,
+            "module": "json:CreateJSON",
+            "version": 1,
+            "parameters": {
+                "type": "json",
+                "space": ""
+            },
+            "mapper": {
+                "secret_key": "afropeen_wh_1d1920442274941afe7d39407e32d49a844e764a811771ba1ffcae5a27209bcb",
+                "title": "{{4.Titre}}",
+                "excerpt": "{{4.Résumé RSS}}",
+                "content": "{{4.Contenu réécrit IA}}",
+                "category": "{{4.Catégorie source}}",
+                "metaTitle": "{{4.Titre}}",
+                "metaDescription": "{{4.Résumé RSS}}",
+                "source": "make_webhook",
+                "source_url": "{{4.Lien original}}",
+                "image_url": "{{4.Image IA URL}}"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 300,
+                    "y": 0
+                },
+                "restore": {},
+                "parameters": [
+                    {
+                        "name": "type",
+                        "type": "udt",
+                        "label": "Data structure",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "secret_key",
+                        "type": "text",
+                        "label": "secret_key",
+                        "required": true
+                    },
+                    {
+                        "name": "title",
+                        "type": "text",
+                        "label": "title",
+                        "required": true
+                    },
+                    {
+                        "name": "excerpt",
+                        "type": "text",
+                        "label": "excerpt",
+                        "required": true
+                    },
+                    {
+                        "name": "content",
+                        "type": "text",
+                        "label": "content",
+                        "required": true
+                    },
+                    {
+                        "name": "category",
+                        "type": "text",
+                        "label": "category",
+                        "required": true
+                    },
+                    {
+                        "name": "metaTitle",
+                        "type": "text",
+                        "label": "metaTitle"
+                    },
+                    {
+                        "name": "metaDescription",
+                        "type": "text",
+                        "label": "metaDescription"
+                    },
+                    {
+                        "name": "source",
+                        "type": "text",
+                        "label": "source"
+                    },
+                    {
+                        "name": "source_url",
+                        "type": "text",
+                        "label": "source_url"
+                    },
+                    {
+                        "name": "image_url",
+                        "type": "text",
+                        "label": "image_url"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 3,
+            "module": "http:ActionSendData",
+            "version": 3,
+            "parameters": {
+                "handleErrors": false,
+                "useNewZLibDeCompress": true
+            },
+            "mapper": {
+                "url": "https://dreamteamafrica.vercel.app/api/webhook/publish",
+                "serializeUrl": false,
+                "method": "post",
+                "headers": [],
+                "qs": [],
+                "bodyType": "raw",
+                "parseResponse": true,
+                "authUser": "",
+                "authPass": "",
+                "timeout": "30",
+                "shareCookies": false,
+                "ca": "",
+                "rejectUnauthorized": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "gzip": true,
+                "useMtls": false,
+                "contentType": "application/json",
+                "data": "{{2.json}}",
+                "followAllRedirects": false
+            },
+            "metadata": {
+                "designer": {
+                    "x": 600,
+                    "y": 0
+                },
+                "restore": {
+                    "expect": {
+                        "method": {
+                            "mode": "chose",
+                            "label": "POST"
+                        },
+                        "bodyType": {
+                            "label": "Raw"
+                        },
+                        "contentType": {
+                            "label": "JSON (application/json)"
+                        }
+                    }
+                },
+                "expect": [
+                    {
+                        "name": "url",
+                        "type": "url",
+                        "label": "URL",
+                        "required": true
+                    },
+                    {
+                        "name": "method",
+                        "type": "select",
+                        "label": "Method",
+                        "required": true,
+                        "validate": {
+                            "enum": ["get", "head", "post", "put", "patch", "delete", "options"]
+                        }
+                    },
+                    {
+                        "name": "bodyType",
+                        "type": "select",
+                        "label": "Body type"
+                    },
+                    {
+                        "name": "contentType",
+                        "type": "select",
+                        "label": "Content type"
+                    },
+                    {
+                        "name": "data",
+                        "type": "buffer",
+                        "label": "Request content"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 5,
+            "module": "airtable:ActionUpdateRecords",
+            "version": 3,
+            "parameters": {
+                "__IMTCONN__": 3365072
+            },
+            "mapper": {
+                "base": "appNCUd47jdrQOFbc",
+                "table": "tblSiXhFEfUO7Ffe8",
+                "id": "{{4.id}}",
+                "record": {
+                    "Statut éditorial": "Publié"
+                },
+                "useColumnId": false
+            },
+            "metadata": {
+                "designer": {
+                    "x": 900,
+                    "y": 0
+                },
+                "restore": {
+                    "expect": {
+                        "base": {
+                            "mode": "chose",
+                            "label": "CRM Lafropéen"
+                        },
+                        "table": {
+                            "mode": "chose",
+                            "label": "Articles détectés"
+                        },
+                        "useColumnId": {
+                            "mode": "chose"
+                        }
+                    },
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "data": {
+                                "scoped": "true",
+                                "connection": "airtable3"
+                            },
+                            "label": "CRM FestivalDuConteAfricain (User ID: usr713Q3U3cqzVRn7)"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:airtable3,airtable2",
+                        "label": "Connection",
+                        "required": true
+                    }
+                ]
+            }
+        }
+    ],
+    "metadata": {
+        "instant": false,
+        "version": 1,
+        "scenario": {
+            "roundtrips": 1,
+            "maxErrors": 3,
+            "autoCommit": true,
+            "autoCommitTriggerLast": true,
+            "sequential": false,
+            "slots": null,
+            "confidential": false,
+            "dataloss": false,
+            "dlq": false
+        },
+        "designer": {
+            "orphans": []
+        },
+        "zone": "eu1.make.com"
+    }
+}

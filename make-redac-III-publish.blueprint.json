@@ -1,0 +1,314 @@
+{
+    "name": "L'Afropéen : Rédac III Publier Article",
+    "flow": [
+        {
+            "id": 1,
+            "module": "airtable:TriggerWatchRecords",
+            "version": 3,
+            "parameters": {
+                "__IMTCONN__": 3365072
+            },
+            "mapper": {
+                "base": "appNCUd47jdrQOFbc",
+                "table": "tblJRc3yRwlyXHEJZ",
+                "formula": "{Statut éditorial} = \"À publier\"",
+                "maxRecords": "10",
+                "useColumnId": false
+            },
+            "metadata": {
+                "designer": {
+                    "x": 0,
+                    "y": 0
+                },
+                "restore": {
+                    "expect": {
+                        "base": {
+                            "mode": "chose",
+                            "label": "CRM Lafropéen"
+                        },
+                        "table": {
+                            "mode": "chose",
+                            "label": "Articles détectés"
+                        },
+                        "useColumnId": {
+                            "mode": "chose"
+                        }
+                    },
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "data": {
+                                "scoped": "true",
+                                "connection": "airtable2"
+                            },
+                            "label": "Airtable OAuth"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:airtable3",
+                        "label": "Connection",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        {
+            "id": 2,
+            "module": "json:CreateJSON",
+            "version": 1,
+            "parameters": {
+                "type": "json",
+                "space": ""
+            },
+            "mapper": {
+                "secret_key": "afropeen_wh_1d1920442274941afe7d39407e32d49a844e764a811771ba1ffcae5a27209bcb",
+                "title": "{{1.`Titre`}}",
+                "excerpt": "{{1.`Résumé RSS`}}",
+                "content": "{{1.`Contenu réécrit IA`}}",
+                "category": "{{1.`Catégorie source`}}",
+                "metaTitle": "{{1.`Titre`}}",
+                "metaDescription": "{{1.`Résumé RSS`}}",
+                "source": "make_webhook"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 300,
+                    "y": 0
+                },
+                "restore": {},
+                "parameters": [
+                    {
+                        "name": "type",
+                        "type": "udt",
+                        "label": "Data structure",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "secret_key",
+                        "type": "text",
+                        "label": "secret_key",
+                        "required": true
+                    },
+                    {
+                        "name": "title",
+                        "type": "text",
+                        "label": "title",
+                        "required": true
+                    },
+                    {
+                        "name": "excerpt",
+                        "type": "text",
+                        "label": "excerpt",
+                        "required": true
+                    },
+                    {
+                        "name": "content",
+                        "type": "text",
+                        "label": "content",
+                        "required": true
+                    },
+                    {
+                        "name": "category",
+                        "type": "text",
+                        "label": "category",
+                        "required": true
+                    },
+                    {
+                        "name": "metaTitle",
+                        "type": "text",
+                        "label": "metaTitle"
+                    },
+                    {
+                        "name": "metaDescription",
+                        "type": "text",
+                        "label": "metaDescription"
+                    },
+                    {
+                        "name": "source",
+                        "type": "text",
+                        "label": "source"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 3,
+            "module": "http:ActionSendData",
+            "version": 3,
+            "parameters": {
+                "handleErrors": false,
+                "useNewZLibDeCompress": true
+            },
+            "mapper": {
+                "url": "https://dreamteamafrica.vercel.app/api/webhook/publish",
+                "serializeUrl": false,
+                "method": "post",
+                "headers": [],
+                "qs": [],
+                "bodyType": "raw",
+                "parseResponse": true,
+                "authUser": "",
+                "authPass": "",
+                "timeout": "30",
+                "shareCookies": false,
+                "ca": "",
+                "rejectUnauthorized": true,
+                "followRedirect": true,
+                "useQuerystring": false,
+                "gzip": true,
+                "useMtls": false,
+                "contentType": "application/json",
+                "data": "{{2.json}}",
+                "followAllRedirects": false
+            },
+            "metadata": {
+                "designer": {
+                    "x": 600,
+                    "y": 0
+                },
+                "restore": {
+                    "expect": {
+                        "qs": {
+                            "mode": "chose"
+                        },
+                        "method": {
+                            "mode": "chose",
+                            "label": "POST"
+                        },
+                        "headers": {
+                            "mode": "chose"
+                        },
+                        "bodyType": {
+                            "label": "Raw"
+                        },
+                        "contentType": {
+                            "label": "JSON (application/json)"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "handleErrors",
+                        "type": "boolean",
+                        "label": "Evaluate all states as errors (except for 2xx and 3xx)",
+                        "required": true
+                    },
+                    {
+                        "name": "useNewZLibDeCompress",
+                        "type": "hidden"
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "url",
+                        "type": "url",
+                        "label": "URL",
+                        "required": true
+                    },
+                    {
+                        "name": "method",
+                        "type": "select",
+                        "label": "Method",
+                        "required": true,
+                        "validate": {
+                            "enum": ["get", "head", "post", "put", "patch", "delete", "options"]
+                        }
+                    },
+                    {
+                        "name": "bodyType",
+                        "type": "select",
+                        "label": "Body type"
+                    },
+                    {
+                        "name": "contentType",
+                        "type": "select",
+                        "label": "Content type"
+                    },
+                    {
+                        "name": "data",
+                        "type": "buffer",
+                        "label": "Request content"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 4,
+            "module": "airtable:ActionUpdateRecords",
+            "version": 3,
+            "parameters": {
+                "__IMTCONN__": 3365072
+            },
+            "mapper": {
+                "base": "appNCUd47jdrQOFbc",
+                "table": "tblJRc3yRwlyXHEJZ",
+                "id": "{{1.id}}",
+                "record": {
+                    "Statut éditorial": "Publié"
+                },
+                "useColumnId": false
+            },
+            "metadata": {
+                "designer": {
+                    "x": 900,
+                    "y": 0
+                },
+                "restore": {
+                    "expect": {
+                        "base": {
+                            "mode": "chose",
+                            "label": "CRM Lafropéen"
+                        },
+                        "table": {
+                            "mode": "chose",
+                            "label": "Articles détectés"
+                        },
+                        "useColumnId": {
+                            "mode": "chose"
+                        }
+                    },
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "data": {
+                                "scoped": "true",
+                                "connection": "airtable2"
+                            },
+                            "label": "Airtable OAuth"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:airtable3",
+                        "label": "Connection",
+                        "required": true
+                    }
+                ]
+            }
+        }
+    ],
+    "metadata": {
+        "instant": false,
+        "version": 1,
+        "scenario": {
+            "roundtrips": 1,
+            "maxErrors": 3,
+            "autoCommit": true,
+            "autoCommitTriggerLast": true,
+            "sequential": false,
+            "slots": null,
+            "confidential": false,
+            "dataloss": false,
+            "dlq": false
+        },
+        "designer": {
+            "orphans": []
+        },
+        "zone": "eu1.make.com"
+    }
+}

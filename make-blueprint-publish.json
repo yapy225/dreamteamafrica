@@ -1,0 +1,191 @@
+{
+    "subflows": [
+        {
+            "flow": [
+                {
+                    "id": 2,
+                    "module": "json:CreateJSON",
+                    "version": 1,
+                    "parameters": {
+                        "type": 1573,
+                        "space": ""
+                    },
+                    "mapper": {
+                        "secret_key": "afropeen_wh_1d1920442274941afe7d39407e32d49a844e764a811771ba1ffcae5a27209bcb",
+                        "title": "{{1.title}}",
+                        "excerpt": "{{1.excerpt}}",
+                        "content": "{{1.content_html}}",
+                        "category": "BUSINESS",
+                        "metaTitle": "{{1.title}}",
+                        "metaDescription": "{{1.excerpt}}",
+                        "source": "make_webhook"
+                    },
+                    "metadata": {
+                        "designer": {
+                            "x": 300,
+                            "y": 0
+                        },
+                        "restore": {},
+                        "parameters": [
+                            {
+                                "name": "type",
+                                "type": "udt",
+                                "label": "Data structure",
+                                "required": true
+                            }
+                        ],
+                        "expect": [
+                            {
+                                "name": "secret_key",
+                                "type": "text",
+                                "label": "secret_key",
+                                "required": true
+                            },
+                            {
+                                "name": "title",
+                                "type": "text",
+                                "label": "title",
+                                "required": true
+                            },
+                            {
+                                "name": "excerpt",
+                                "type": "text",
+                                "label": "excerpt",
+                                "required": true
+                            },
+                            {
+                                "name": "content",
+                                "type": "text",
+                                "label": "content",
+                                "required": true
+                            },
+                            {
+                                "name": "category",
+                                "type": "text",
+                                "label": "category",
+                                "required": true
+                            },
+                            {
+                                "name": "metaTitle",
+                                "type": "text",
+                                "label": "metaTitle"
+                            },
+                            {
+                                "name": "metaDescription",
+                                "type": "text",
+                                "label": "metaDescription"
+                            },
+                            {
+                                "name": "source",
+                                "type": "text",
+                                "label": "source"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "id": 3,
+                    "module": "http:ActionSendData",
+                    "version": 3,
+                    "parameters": {
+                        "handleErrors": false,
+                        "useNewZLibDeCompress": true
+                    },
+                    "mapper": {
+                        "url": "https://dreamteamafrica.vercel.app/api/webhook/publish",
+                        "serializeUrl": false,
+                        "method": "post",
+                        "headers": [],
+                        "qs": [],
+                        "bodyType": "raw",
+                        "parseResponse": true,
+                        "authUser": "",
+                        "authPass": "",
+                        "timeout": "30",
+                        "shareCookies": false,
+                        "ca": "",
+                        "rejectUnauthorized": true,
+                        "followRedirect": true,
+                        "useQuerystring": false,
+                        "gzip": true,
+                        "useMtls": false,
+                        "contentType": "application/json",
+                        "requestContent": "{{2.json}}"
+                    },
+                    "metadata": {
+                        "designer": {
+                            "x": 600,
+                            "y": 0
+                        },
+                        "restore": {
+                            "expect": {
+                                "method": {
+                                    "mode": "chose",
+                                    "label": "POST"
+                                },
+                                "bodyType": {
+                                    "label": "Raw"
+                                },
+                                "contentType": {
+                                    "label": "JSON (application/json)"
+                                }
+                            }
+                        },
+                        "expect": [
+                            {
+                                "name": "url",
+                                "type": "url",
+                                "label": "URL",
+                                "required": true
+                            },
+                            {
+                                "name": "method",
+                                "type": "select",
+                                "label": "Method",
+                                "required": true,
+                                "validate": {
+                                    "enum": ["get", "head", "post", "put", "patch", "delete", "options"]
+                                }
+                            },
+                            {
+                                "name": "headers",
+                                "type": "array",
+                                "label": "Headers",
+                                "spec": [
+                                    {
+                                        "name": "name",
+                                        "type": "text",
+                                        "label": "Name"
+                                    },
+                                    {
+                                        "name": "value",
+                                        "type": "text",
+                                        "label": "Value"
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "bodyType",
+                                "type": "select",
+                                "label": "Body type"
+                            },
+                            {
+                                "name": "contentType",
+                                "type": "select",
+                                "label": "Content type"
+                            },
+                            {
+                                "name": "requestContent",
+                                "type": "text",
+                                "label": "Request content"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "version": 1
+    }
+}

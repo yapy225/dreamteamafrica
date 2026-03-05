@@ -1,0 +1,115 @@
+{
+  "name": "Publier Article - L'Afropeen",
+  "flow": [
+    {
+      "id": 2,
+      "module": "json:CreateJSON",
+      "version": 1,
+      "parameters": {
+        "type": "json",
+        "space": ""
+      },
+      "mapper": {
+        "object": {
+          "secret_key": "afropeen_wh_1d1920442274941afe7d39407e32d49a844e764a811771ba1ffcae5a27209bcb",
+          "title": "{{1.title}}",
+          "excerpt": "{{1.excerpt}}",
+          "content": "{{1.content_html}}",
+          "category": "BUSINESS",
+          "tags": ["IA", "Tech"],
+          "metaTitle": "{{1.title}}",
+          "metaDescription": "{{1.excerpt}}",
+          "source": "make_webhook"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        },
+        "expect": [
+          {
+            "name": "object",
+            "type": "collection",
+            "label": "JSON string",
+            "spec": [
+              { "name": "secret_key", "type": "text", "label": "Secret Key" },
+              { "name": "title", "type": "text", "label": "Titre" },
+              { "name": "excerpt", "type": "text", "label": "Extrait" },
+              { "name": "content", "type": "text", "label": "Contenu HTML" },
+              { "name": "category", "type": "text", "label": "Categorie" },
+              { "name": "tags", "type": "array", "label": "Tags" },
+              { "name": "metaTitle", "type": "text", "label": "Meta Title" },
+              { "name": "metaDescription", "type": "text", "label": "Meta Description" },
+              { "name": "source", "type": "text", "label": "Source" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {
+        "handleErrors": false,
+        "useNewZLibDeCompress": true
+      },
+      "mapper": {
+        "url": "https://dreamteamafrica.vercel.app/api/webhook/publish",
+        "serializeUrl": false,
+        "method": "post",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "qs": [],
+        "bodyType": "raw",
+        "parseResponse": true,
+        "authUser": "",
+        "authPass": "",
+        "timeout": "30",
+        "shareCookies": false,
+        "ca": "",
+        "rejectUnauthorized": true,
+        "followRedirect": true,
+        "useQuerystring": false,
+        "gzip": true,
+        "useMtls": false,
+        "contentType": "application/json",
+        "requestContent": "{{2.json}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        },
+        "expect": [
+          { "name": "url", "type": "url", "label": "URL" },
+          { "name": "method", "type": "select", "label": "Method" },
+          { "name": "bodyType", "type": "select", "label": "Body type" },
+          { "name": "contentType", "type": "select", "label": "Content type" },
+          { "name": "requestContent", "type": "text", "label": "Request content" }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": {
+      "orphans": []
+    }
+  }
+}

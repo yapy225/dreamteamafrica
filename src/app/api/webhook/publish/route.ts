@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { marked } from "marked";
 
 // --- Types (accepte camelCase + snake_case) ---
 interface WebhookPayload {
@@ -169,7 +170,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Resoudre les aliases camelCase / snake_case
-    const contentRaw = resolve(body.content, body.content_html);
+    const contentInput = resolve(body.content, body.content_html);
+    // Convertir Markdown → HTML si le contenu commence par # ou contient des patterns Markdown
+    const contentRaw = contentInput && /^#{1,6}\s|^\*\*|^\-\s|\n#{1,6}\s/m.test(contentInput)
+      ? (marked.parse(contentInput) as string)
+      : contentInput;
     const coverImage = resolve(body.coverImage, body.cover_image) || body.image_url;
     const altText = resolve(body.altText, body.alt_text);
     const tags = body.tags || body.keywords || [];

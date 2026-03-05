@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Ticket, ShoppingBag, Newspaper, Megaphone, CalendarDays, BookOpen, BarChart3, Mail } from "lucide-react";
+import { Ticket, ShoppingBag, Newspaper, Megaphone, CalendarDays, BookOpen, BarChart3, Mail, Rss, Bot } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getRevenueData } from "@/lib/revenue";
@@ -92,6 +92,20 @@ export default async function DashboardPage() {
             label: "Newsletter",
             count: null,
             color: "bg-cyan-100 text-cyan-600",
+          },
+          {
+            href: "/dashboard/rss-feeds",
+            icon: Rss,
+            label: "Flux RSS",
+            count: null,
+            color: "bg-rose-100 text-rose-600",
+          },
+          {
+            href: "/dashboard/detected-articles",
+            icon: Bot,
+            label: "Articles detectes (IA)",
+            count: null,
+            color: "bg-violet-100 text-violet-600",
           },
         ]
       : []),

@@ -33,6 +33,7 @@ export async function PUT(
       isSponsored,
       sponsorName,
       status,
+      authorType,
     } = await request.json();
 
     const readingTimeMin = content
@@ -52,6 +53,7 @@ export async function PUT(
         ...(isSponsored !== undefined && { isSponsored }),
         ...(sponsorName !== undefined && { sponsorName }),
         ...(status && { status }),
+        ...(authorType && { authorType }),
         ...(readingTimeMin !== undefined && { readingTimeMin }),
       },
     });

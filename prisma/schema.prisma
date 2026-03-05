@@ -424,6 +424,67 @@ model Comment {
   @@index([createdAt])
 }
 
+// ─── RSS AUTOMATION ─────────────────────────────────────
+
+enum DetectedArticleStatus {
+  PENDING     // Detected, not yet scored
+  SCORED      // Scored by AI
+  REWRITING   // Being rewritten
+  REWRITTEN   // Rewritten, awaiting publication
+  PUBLISHED   // Published to journal
+  IGNORED     // Score too low or manually ignored
+  ERROR       // Processing error
+}
+
+model RssFeed {
+  id             String   @id @default(cuid())
+  name           String
+  url            String   @unique
+  website        String?
+  category       String   @default("ACTUALITE")
+  language       String   @default("fr")
+  region         String?
+  reliability    Int      @default(5)
+  active         Boolean  @default(true)
+  lastFetchedAt  DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  detectedArticles DetectedArticle[]
+
+  @@index([active])
+}
+
+model DetectedArticle {
+  id              String                 @id @default(cuid())
+  title           String
+  sourceUrl       String                 @unique
+  summary         String?                @db.Text
+  sourceCategory  String?
+  sourceName      String?
+  sourceImageUrl  String?
+  sourcePubDate   DateTime?
+  score           Int?
+  scoreReason     String?
+  rewrittenTitle  String?
+  rewrittenContent String?               @db.Text
+  rewrittenExcerpt String?
+  rewrittenMeta   String?
+  rewrittenKeywords String[]             @default([])
+  status          DetectedArticleStatus  @default(PENDING)
+  publishedArticleId String?
+  errorMessage    String?
+  feedId          String
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  feed RssFeed @relation(fields: [feedId], references: [id])
+
+  @@index([status])
+  @@index([feedId])
+  @@index([createdAt])
+}
+
 // ─── NEWSLETTER ─────────────────────────────────────────
 
 model NewsletterSubscriber {

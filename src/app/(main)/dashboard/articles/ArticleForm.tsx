@@ -36,6 +36,13 @@ const statusOptions = [
   { value: "ARCHIVED", label: "Archive" },
 ];
 
+const articleTypes = [
+  { value: "humain", label: "Article redaction" },
+  { value: "ia", label: "Article IA" },
+  { value: "sponsorise", label: "Article sponsorise" },
+  { value: "invite", label: "Article invite" },
+];
+
 interface ArticleFormProps {
   initialData?: {
     id: string;
@@ -49,6 +56,7 @@ interface ArticleFormProps {
     isSponsored: boolean;
     sponsorName: string | null;
     status: string;
+    authorType: string;
   };
 }
 
@@ -67,6 +75,7 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
     isSponsored: initialData?.isSponsored || false,
     sponsorName: initialData?.sponsorName || "",
     status: initialData?.status || "PUBLISHED",
+    authorType: initialData?.authorType || "humain",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -165,6 +174,30 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
             ))}
           </select>
         </div>
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-dta-char">
+          Type d&apos;article
+        </label>
+        <select
+          value={form.authorType}
+          onChange={(e) => {
+            const val = e.target.value;
+            setForm({
+              ...form,
+              authorType: val,
+              isSponsored: val === "sponsorise",
+            });
+          }}
+          className={inputClass}
+        >
+          {articleTypes.map((t) => (
+            <option key={t.value} value={t.value}>
+              {t.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>

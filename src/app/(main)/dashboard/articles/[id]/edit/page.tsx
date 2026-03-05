@@ -35,6 +35,7 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
             isSponsored: article.isSponsored,
             sponsorName: article.sponsorName,
             status: article.status,
+            authorType: article.authorType,
           }}
         />
       </div>

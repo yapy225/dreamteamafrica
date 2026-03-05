@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Plus, Pencil, Eye, Newspaper } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { formatDate } from "@/lib/utils";
+import { formatDateTime } from "@/lib/utils";
 import { getLifecycleDay, getZoneForDay, getZoneLabel, CATEGORY_CONFIG } from "@/lib/journal";
 import DeleteArticleButton from "./DeleteArticleButton";
 import ArticleStatusButton from "./ArticleStatusButton";
@@ -104,9 +104,19 @@ export default async function ArticlesPage() {
                     >
                       {statusLabels[article.status] || article.status}
                     </span>
-                    {article.isSponsored && (
+                    {article.authorType === "sponsorise" && (
                       <span className="rounded-[var(--radius-full)] bg-dta-accent/10 px-2 py-0.5 text-xs font-medium text-dta-accent">
                         Sponsorise
+                      </span>
+                    )}
+                    {article.authorType === "invite" && (
+                      <span className="rounded-[var(--radius-full)] bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700">
+                        Invite
+                      </span>
+                    )}
+                    {article.authorType === "ia" && (
+                      <span className="rounded-[var(--radius-full)] bg-cyan-100 px-2 py-0.5 text-xs font-medium text-cyan-700">
+                        IA
                       </span>
                     )}
                   </div>
@@ -121,7 +131,7 @@ export default async function ArticlesPage() {
                       {article.views !== 1 ? "s" : ""}
                     </span>
                     <span>&middot;</span>
-                    <span>{formatDate(article.publishedAt)}</span>
+                    <span>{formatDateTime(article.publishedAt)}</span>
                     {session.user.role === "ADMIN" && (
                       <>
                         <span>&middot;</span>

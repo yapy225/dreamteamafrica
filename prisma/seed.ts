@@ -29,12 +29,12 @@ async function main() {
 
   const admin = await prisma.user.create({
     data: {
-      name: "Yapy Mambo",
+      name: "M. Number Five",
       email: "admin@dreamteamafrica.com",
       password: hashedPassword,
       role: "ADMIN",
       bio: "Fondateur de Dream Team Africa",
-      country: "Côte d'Ivoire",
+      country: "Paris",
     },
   });
 

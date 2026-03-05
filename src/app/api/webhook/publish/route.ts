@@ -12,6 +12,9 @@ import { prisma } from "@/lib/db";
 import { marked } from "marked";
 import { generateCoverImage } from "@/lib/generate-cover-image";
 
+// Vercel Pro: timeout 60s pour laisser DALL-E generer l'image
+export const maxDuration = 60;
+
 // --- Types (accepte camelCase + snake_case) ---
 interface WebhookPayload {
   secret_key: string;

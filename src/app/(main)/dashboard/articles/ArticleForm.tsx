@@ -43,6 +43,10 @@ const articleTypes = [
   { value: "invite", label: "Article invite" },
 ];
 
+import { getAllKeywordsFlat } from "../seo/seo-keywords-data";
+
+const SEO_KEYWORDS_SUGGESTIONS = getAllKeywordsFlat();
+
 interface ArticleFormProps {
   initialData?: {
     id: string;
@@ -57,6 +61,7 @@ interface ArticleFormProps {
     sponsorName: string | null;
     status: string;
     authorType: string;
+    seoKeywords?: string[];
   };
 }
 
@@ -76,7 +81,9 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
     sponsorName: initialData?.sponsorName || "",
     status: initialData?.status || "PUBLISHED",
     authorType: initialData?.authorType || "humain",
+    seoKeywords: initialData?.seoKeywords || [] as string[],
   });
+  const [kwSearch, setKwSearch] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -98,6 +105,7 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
           ...form,
           gradientClass: form.gradientClass || null,
           sponsorName: form.sponsorName || null,
+          seoKeywords: form.seoKeywords,
         }),
       });
 
@@ -270,6 +278,80 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
             Gradient selectionne : {form.gradientClass}
           </p>
         )}
+      </div>
+
+      {/* SEO Keywords */}
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-dta-char">
+          Mots-cl&eacute;s SEO cibl&eacute;s
+        </label>
+        {form.seoKeywords.length > 0 && (
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            {form.seoKeywords.map((kw) => (
+              <span
+                key={kw}
+                className="inline-flex items-center gap-1 rounded-full bg-dta-accent/10 px-2.5 py-1 text-xs font-medium text-dta-accent"
+              >
+                {kw}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      seoKeywords: form.seoKeywords.filter((k) => k !== kw),
+                    })
+                  }
+                  className="ml-0.5 hover:text-red-500"
+                >
+                  &times;
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        <input
+          type="text"
+          value={kwSearch}
+          onChange={(e) => setKwSearch(e.target.value)}
+          placeholder="Rechercher ou taper un mot-cl&eacute;..."
+          className={inputClass}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && kwSearch.trim()) {
+              e.preventDefault();
+              const kw = kwSearch.trim().toLowerCase();
+              if (!form.seoKeywords.includes(kw)) {
+                setForm({ ...form, seoKeywords: [...form.seoKeywords, kw] });
+              }
+              setKwSearch("");
+            }
+          }}
+        />
+        {kwSearch.length >= 2 && (
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            {SEO_KEYWORDS_SUGGESTIONS.filter(
+              (s) =>
+                s.includes(kwSearch.toLowerCase()) &&
+                !form.seoKeywords.includes(s)
+            )
+              .slice(0, 8)
+              .map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => {
+                    setForm({ ...form, seoKeywords: [...form.seoKeywords, s] });
+                    setKwSearch("");
+                  }}
+                  className="rounded-full border border-dta-sand px-2.5 py-1 text-xs text-dta-char hover:bg-dta-beige"
+                >
+                  + {s}
+                </button>
+              ))}
+          </div>
+        )}
+        <p className="mt-1 text-xs text-dta-taupe">
+          Tapez Entr&eacute;e pour ajouter un mot-cl&eacute; libre, ou cliquez sur les suggestions.
+        </p>
       </div>
 
       {/* Toggles row */}

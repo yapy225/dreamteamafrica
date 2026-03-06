@@ -25,6 +25,7 @@ export async function POST(request: Request) {
       isSponsored,
       sponsorName,
       status,
+      seoKeywords,
     } = await request.json();
 
     if (!title || !excerpt || !content || !category) {
@@ -57,6 +58,7 @@ export async function POST(request: Request) {
         sponsorName: sponsorName || null,
         readingTimeMin,
         status: status || "PUBLISHED",
+        seoKeywords: Array.isArray(seoKeywords) ? seoKeywords : [],
         position: "UNE",
         dayCount: 1,
         publishedAt: new Date(),

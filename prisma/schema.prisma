@@ -197,6 +197,7 @@ model Article {
   // SEO
   metaTitle       String?
   metaDescription String?
+  seoKeywords     String[]        @default([])
 
   // Réseaux sociaux
   socialTwitter   String?
@@ -417,6 +418,35 @@ model OfficielContent {
 
   @@index([type])
   @@index([category])
+  @@index([published])
+}
+
+// ─── ANNUAIRE / DIRECTORY ────────────────────────────────
+
+model DirectoryEntry {
+  id            String   @id @default(cuid())
+  companyName   String?
+  contactName   String
+  category      String   // Exposant, Artiste, Mannequin, Média, etc.
+  city          String?
+  country       String?
+  phone         String?
+  email         String?
+  website       String?
+  facebook      String?
+  instagram     String?
+  tiktok        String?
+  whatsapp      String?
+  linkedin      String?
+  youtube       String?
+  description   String   @db.Text
+  event         String?  // Événement intéressé
+  published     Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([category])
+  @@index([country])
   @@index([published])
 }
 

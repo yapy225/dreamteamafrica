@@ -36,6 +36,7 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
             sponsorName: article.sponsorName,
             status: article.status,
             authorType: article.authorType,
+            seoKeywords: article.seoKeywords,
           }}
         />
       </div>

@@ -148,6 +148,7 @@ export default function InscriptionsAdmin() {
   // Action loading
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+
   /* ─── Fetch ──────────────────────────────────────────── */
 
   const fetchData = useCallback(async () => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import AdSlot from "@/components/ads/AdSlot";
 import s from "./officiel.module.css";
 
@@ -440,6 +441,22 @@ export default function OfficielClient() {
             <div className={s.fcardFooter}>🔒 Données protégées</div>
           </div>
         </div>
+      </section>
+
+      {/* ═══ ANNUAIRE LINK ═══ */}
+      <section style={{ maxWidth: "1280px", margin: "0 auto", padding: "24px 16px 0" }}>
+        <Link
+          href="/officiel-afrique/annuaire"
+          className="flex items-center justify-between rounded-xl border border-[#F0ECE7] bg-white px-6 py-4 transition-shadow hover:shadow-md"
+        >
+          <div>
+            <p className="text-lg font-bold text-[#2C2C2C]">Consulter l&apos;annuaire</p>
+            <p className="mt-0.5 text-sm text-[#6B6B6B]">58 fiches professionnelles — Exposants, Artistes, Mannequins et plus</p>
+          </div>
+          <span className="shrink-0 rounded-full bg-[#C4704B] px-4 py-2 text-sm font-semibold text-white">
+            Voir l&apos;annuaire →
+          </span>
+        </Link>
       </section>
 
       {/* ═══ AD BANNER TOP ═══ */}

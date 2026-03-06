@@ -44,14 +44,14 @@ export default function ArchivesGrid({
     const params = new URLSearchParams();
     params.set("page", String(page));
     if (category) params.set("cat", category);
-    return `/journal/archives?${params.toString()}`;
+    return `/lafropeen/archives?${params.toString()}`;
   }
 
   function categoryHref(cat?: string): string {
     const params = new URLSearchParams();
     params.set("page", "1");
     if (cat) params.set("cat", cat);
-    return `/journal/archives?${params.toString()}`;
+    return `/lafropeen/archives?${params.toString()}`;
   }
 
   /* Build visible page numbers */

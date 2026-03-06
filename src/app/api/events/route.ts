@@ -52,6 +52,7 @@ export async function POST(request: Request) {
         endDate: endDate ? new Date(endDate) : null,
         capacity: parseInt(capacity),
         showCapacity: body.showCapacity ?? true,
+        venues: body.venues ?? null,
         program: body.program ?? null,
         tiers: body.tiers ?? null,
         priceEarly: parseFloat(priceEarly) || 0,

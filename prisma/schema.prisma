@@ -55,42 +55,6 @@ enum OrderStatus {
   CANCELLED
 }
 
-enum AdSupportType {
-  IMAGE
-  VIDEO
-  ARTICLE
-  SATELLITE
-}
-
-enum AdMediaFormat {
-  SQUARE_1080     // 1080×1080
-  LANDSCAPE_1920  // 1920×1080
-  PORTRAIT_1080   // 1080×1920
-}
-
-enum AdPlan {
-  ESSENTIEL  // 29€/month  — 2 pages, rotation basse
-  BUSINESS   // 79€/month  — toutes pages, 1 article satellite/mois
-  ELITE      // 149€/month — toutes pages + premium, 3 articles satellites/mois
-}
-
-enum AdPlacement {
-  HERO
-  BANNER_TOP
-  INLINE
-  SIDEBAR
-  VIDEO_SLOT
-  IN_GRID
-  INTERSTITIAL
-}
-
-enum AdPage {
-  ACCUEIL
-  JOURNAL
-  OFFICIEL
-  MARKETPLACE
-  EVENEMENTS
-}
 
 enum ArticleStatus {
   DRAFT
@@ -111,12 +75,6 @@ enum BookingStatus {
   CANCELLED
 }
 
-enum JournalAdPlacement {
-  BANNER
-  INLINE
-  VIDEO
-  SIDEBAR
-}
 
 // ─── AUTH MODELS ─────────────────────────────────────────
 
@@ -141,7 +99,6 @@ model User {
   orders      Order[]
   tickets     Ticket[]
   favorites   Favorite[]
-  adCampaigns     AdCampaign[]
   officielContents OfficielContent[]
   exhibitorBookings ExhibitorBooking[]
 }
@@ -243,6 +200,7 @@ model Event {
   coverImage  String?
   venue       String
   address     String
+  venues      Json?      // [{name, address}] — multi-venue support
   date        DateTime
   endDate     DateTime?
   capacity     Int
@@ -341,45 +299,6 @@ model Favorite {
   @@unique([userId, productId])
 }
 
-// ─── DTA ADS ────────────────────────────────────────────
-
-model AdCampaign {
-  id              String         @id @default(cuid())
-  userId          String
-  title           String
-  supportType     AdSupportType  @default(IMAGE)
-  mediaFormat     AdMediaFormat  @default(LANDSCAPE_1920)
-  plan            AdPlan         @default(ESSENTIEL)
-  placements      AdPlacement[]
-  pages           AdPage[]
-  content         String         @db.Text
-  imageUrl        String?
-  videoUrl        String?
-  targetUrl       String
-  ctaText         String?
-  advertiserName  String?
-
-  // Satellite-specific fields
-  satelliteKeywords  String[]    @default([])
-  satelliteTargetUrl String?
-  satelliteArticlesLeft Int      @default(0)
-
-  impressions     Int            @default(0)
-  clicks          Int            @default(0)
-  active          Boolean        @default(true)
-  stripeSubId     String?
-  startDate       DateTime       @default(now())
-  endDate         DateTime?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-
-  user User @relation(fields: [userId], references: [id])
-
-  @@index([supportType])
-  @@index([plan])
-  @@index([active])
-}
-
 // ─── L'OFFICIEL D'AFRIQUE — INSCRIPTIONS ────────────────
 
 model Inscription {
@@ -463,33 +382,6 @@ model DirectoryEntry {
   @@index([category])
   @@index([country])
   @@index([published])
-}
-
-// ─── JOURNAL ADS (DTA ADS JOURNAL) ──────────────────────
-
-model JournalAd {
-  id             String              @id @default(cuid())
-  title          String
-  description    String              @db.Text
-  placement      JournalAdPlacement
-  ctaText        String?
-  ctaUrl         String
-  imageUrl       String?
-  gradientClass  String?
-  iconSvg        String?             @db.Text
-  price          String?
-  advertiserName String?
-  campaignStart  DateTime            @default(now())
-  campaignEnd    DateTime?
-  campaignWeeks  Int                 @default(4)
-  active         Boolean             @default(true)
-  impressions    Int                 @default(0)
-  clicks         Int                 @default(0)
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
-
-  @@index([placement])
-  @@index([active])
 }
 
 // ─── COMMENTS (AVIS PUBLICS) ──────────────────────────────
@@ -631,4 +523,23 @@ model ExhibitorBooking {
 
   @@index([userId])
   @@index([status])
+}
+
+// ─── MESSAGES DE CONTACT ──────────────────────────────
+
+model ContactMessage {
+  id         String   @id @default(cuid())
+  category   String   // EXPOSANT, MANNEQUIN, PRESTATAIRE, PARTENAIRE, INSTITUTION, MEDIA, ARTISTE
+  firstName  String
+  lastName   String
+  email      String
+  phone      String?
+  company    String?
+  message    String   @db.Text
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([category])
+  @@index([read])
+  @@index([createdAt])
 }

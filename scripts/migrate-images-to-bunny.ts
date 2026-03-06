@@ -107,18 +107,7 @@ async function main() {
     }
   }
 
-  // 5. AdCampaign
-  const ads = await prisma.adCampaign.findMany({ where: { imageUrl: { contains: VERCEL_BLOB_HOST } } });
-  if (ads.length) {
-    console.log(`\n[AdCampaign] ${ads.length} image(s) à migrer`);
-    for (const a of ads) {
-      if (!isVercelBlob(a.imageUrl)) continue;
-      const newUrl = await migrateToBunny(a.imageUrl!, "ads");
-      await prisma.adCampaign.update({ where: { id: a.id }, data: { imageUrl: newUrl } });
-    }
-  }
-
-  // 6. OfficielContent
+  // 5. OfficielContent
   const officielEntries = await prisma.officielContent.findMany({ where: { coverImage: { contains: VERCEL_BLOB_HOST } } });
   if (officielEntries.length) {
     console.log(`\n[OfficielContent] ${officielEntries.length} image(s) à migrer`);
@@ -126,17 +115,6 @@ async function main() {
       if (!isVercelBlob(o.coverImage)) continue;
       const newUrl = await migrateToBunny(o.coverImage!, "officiel-afrique");
       await prisma.officielContent.update({ where: { id: o.id }, data: { coverImage: newUrl } });
-    }
-  }
-
-  // 7. JournalAd
-  const journalAds = await prisma.journalAd.findMany({ where: { imageUrl: { contains: VERCEL_BLOB_HOST } } });
-  if (journalAds.length) {
-    console.log(`\n[JournalAd] ${journalAds.length} image(s) à migrer`);
-    for (const j of journalAds) {
-      if (!isVercelBlob(j.imageUrl)) continue;
-      const newUrl = await migrateToBunny(j.imageUrl!, "journal-ads");
-      await prisma.journalAd.update({ where: { id: j.id }, data: { imageUrl: newUrl } });
     }
   }
 

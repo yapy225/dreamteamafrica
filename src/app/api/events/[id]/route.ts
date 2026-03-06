@@ -57,6 +57,9 @@ export async function PUT(
         ...(body.showCapacity !== undefined && {
           showCapacity: body.showCapacity,
         }),
+        ...(body.venues !== undefined && {
+          venues: body.venues,
+        }),
         ...(body.program !== undefined && {
           program: body.program,
         }),

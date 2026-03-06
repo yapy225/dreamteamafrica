@@ -109,7 +109,7 @@ export default async function DashboardEventsPage() {
               {/* Actions */}
               <div className="flex flex-shrink-0 items-center gap-1">
                 <Link
-                  href={`/evenements/${event.slug}`}
+                  href={`/saison-culturelle-africaine/${event.slug}`}
                   className="rounded-[var(--radius-button)] p-2 text-dta-taupe hover:bg-dta-beige hover:text-dta-dark"
                   title="Voir"
                 >

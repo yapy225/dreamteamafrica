@@ -3,17 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { Menu, X, User, ShoppingBag } from "lucide-react";
+import { Menu, X, User, ShoppingBag, Heart, Mail } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { useCartStore } from "@/stores/cart";
-
-const navLinks = [
-  { href: "/evenements", label: "Événements" },
-  { href: "/marketplace", label: "Marketplace" },
-  { href: "/journal", label: "L'Afropéen" },
-  { href: "/ads", label: "DTA Ads" },
-  { href: "/officiel-afrique", label: "L'Officiel" },
-];
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -39,58 +31,62 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop nav */}
-          <div className="hidden items-center gap-8 md:flex">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm font-medium text-dta-char transition-colors duration-200 hover:text-dta-accent"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Desktop actions */}
-          <div className="hidden items-center gap-4 md:flex">
+          {/* Desktop — boutons + actions */}
+          <div className="hidden items-center gap-3 md:flex">
             <Link
-              href="/cart"
-              aria-label={`Panier${cartCount > 0 ? ` (${cartCount} article${cartCount > 1 ? "s" : ""})` : ""}`}
-              className="relative rounded-[var(--radius-button)] p-2 text-dta-char transition-colors hover:bg-dta-sand/50"
+              href="/nous-contacter"
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius-button)] border border-dta-accent px-4 py-2 text-sm font-semibold text-dta-accent transition-colors hover:bg-dta-accent hover:text-white"
             >
-              <ShoppingBag size={20} />
-              {cartCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-dta-accent text-[10px] font-bold text-white">
-                  {cartCount}
-                </span>
-              )}
+              <Mail size={14} />
+              Nous contacter
+            </Link>
+            <Link
+              href="/faire-un-don"
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius-button)] bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700"
+            >
+              <Heart size={14} />
+              Nous soutenir
             </Link>
 
-            {session ? (
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 rounded-[var(--radius-button)] px-4 py-2 text-sm font-medium text-dta-char transition-colors hover:bg-dta-sand/50"
-                >
-                  <User size={16} />
-                  {session.user?.name?.split(" ")[0] || "Mon compte"}
-                </Link>
-                <button
-                  onClick={() => signOut()}
-                  className="rounded-[var(--radius-button)] px-4 py-2 text-sm font-medium text-dta-taupe transition-colors hover:text-dta-accent"
-                >
-                  Déconnexion
-                </button>
-              </div>
-            ) : (
+            <div className="ml-2 flex items-center gap-2 border-l border-dta-sand/50 pl-4">
               <Link
-                href="/auth/signin"
-                className="rounded-[var(--radius-button)] bg-dta-accent px-5 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-dta-accent-dark"
+                href="/cart"
+                aria-label={`Panier${cartCount > 0 ? ` (${cartCount} article${cartCount > 1 ? "s" : ""})` : ""}`}
+                className="relative rounded-[var(--radius-button)] p-2 text-dta-char transition-colors hover:bg-dta-sand/50"
               >
-                Connexion
+                <ShoppingBag size={20} />
+                {cartCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-dta-accent text-[10px] font-bold text-white">
+                    {cartCount}
+                  </span>
+                )}
               </Link>
-            )}
+
+              {session ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center gap-2 rounded-[var(--radius-button)] px-3 py-2 text-sm font-medium text-dta-char transition-colors hover:bg-dta-sand/50"
+                  >
+                    <User size={16} />
+                    {session.user?.name?.split(" ")[0] || "Compte"}
+                  </Link>
+                  <button
+                    onClick={() => signOut()}
+                    className="rounded-[var(--radius-button)] px-3 py-2 text-sm font-medium text-dta-taupe transition-colors hover:text-dta-accent"
+                  >
+                    Déconnexion
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/auth/signin"
+                  className="rounded-[var(--radius-button)] bg-dta-accent px-5 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-dta-accent-dark"
+                >
+                  Connexion
+                </Link>
+              )}
+            </div>
           </div>
 
           {/* Mobile hamburger */}
@@ -108,16 +104,22 @@ export default function Navbar() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="border-t border-dta-sand/50 bg-dta-bg px-4 pb-4 pt-2 md:hidden">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileOpen(false)}
-              className="block rounded-[var(--radius-button)] px-3 py-3 text-sm font-medium text-dta-char transition-colors hover:bg-dta-sand/30"
-            >
-              {link.label}
-            </Link>
-          ))}
+          <Link
+            href="/nous-contacter"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-2 rounded-[var(--radius-button)] border border-dta-accent px-3 py-3 text-sm font-semibold text-dta-accent"
+          >
+            <Mail size={14} />
+            Nous contacter
+          </Link>
+          <Link
+            href="/faire-un-don"
+            onClick={() => setMobileOpen(false)}
+            className="mt-2 flex items-center gap-2 rounded-[var(--radius-button)] bg-red-600 px-3 py-3 text-sm font-semibold text-white"
+          >
+            <Heart size={14} />
+            Nous soutenir
+          </Link>
           <div className="mt-3 border-t border-dta-sand/50 pt-3">
             {session ? (
               <>

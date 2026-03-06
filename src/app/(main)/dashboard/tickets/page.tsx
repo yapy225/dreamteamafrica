@@ -46,7 +46,7 @@ export default async function TicketsPage() {
           </p>
         </div>
         <Link
-          href="/evenements"
+          href="/saison-culturelle-africaine"
           className="rounded-[var(--radius-button)] bg-dta-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-dta-accent-dark"
         >
           Voir les événements
@@ -63,7 +63,7 @@ export default async function TicketsPage() {
             Vous n&apos;avez pas encore acheté de billets. Découvrez nos événements culturels !
           </p>
           <Link
-            href="/evenements"
+            href="/saison-culturelle-africaine"
             className="mt-6 inline-flex items-center rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white hover:bg-dta-accent-dark"
           >
             Explorer les événements
@@ -139,7 +139,7 @@ function TicketCard({
         <div className="flex items-start justify-between">
           <div>
             <Link
-              href={`/evenements/${ticket.event.slug}`}
+              href={`/saison-culturelle-africaine/${ticket.event.slug}`}
               className="font-serif text-lg font-bold text-dta-dark hover:text-dta-accent"
             >
               {ticket.event.title}

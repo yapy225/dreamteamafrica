@@ -6,8 +6,6 @@ import type { MonthlyRevenue } from "@/lib/revenue";
 const SOURCES = [
   { key: "tickets" as const, title: "Billetterie", color: "#8B6F4E" },
   { key: "orders" as const, title: "Commandes Marketplace", color: "#6B8FA0" },
-  { key: "ads" as const, title: "DTA Ads", color: "#A08060" },
-  { key: "journal" as const, title: "Pubs Journal", color: "#7A8B7A" },
 ] as const;
 
 type RevenueBreakdownChartsProps = {

@@ -104,8 +104,8 @@ export async function POST(request: Request) {
         unitPrice: String(unitPrice),
         ...(sessionLabel && { sessionLabel }),
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/evenements/confirmation/{CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/evenements/${event.slug}`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/saison-culturelle-africaine/confirmation/{CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/saison-culturelle-africaine/${event.slug}`,
     });
 
     return NextResponse.json({ url: checkoutSession.url });

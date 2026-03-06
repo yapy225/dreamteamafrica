@@ -59,6 +59,11 @@ const defaultTiers: TierItem[] = [
   { id: "VIP", name: "Billetterie sur place", price: "0", description: "", features: "Accès à l'événement\nBillet nominatif\nProgramme officiel", highlight: false },
 ];
 
+interface VenueItem {
+  name: string;
+  address: string;
+}
+
 interface EventFormProps {
   initialData?: {
     id: string;
@@ -68,6 +73,7 @@ interface EventFormProps {
     coverImage: string | null;
     venue: string;
     address: string;
+    venues: VenueItem[] | null;
     date: string;
     endDate: string | null;
     capacity: number;
@@ -121,6 +127,9 @@ export default function EventForm({ initialData }: EventFormProps) {
             : (initialData?.priceVip?.toString() || "0"),
         })),
   );
+  const [venues, setVenues] = useState<VenueItem[]>(
+    initialData?.venues ?? [],
+  );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -142,6 +151,7 @@ export default function EventForm({ initialData }: EventFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          venues: venues.length > 0 ? venues : null,
           program: program.length > 0 ? program : null,
           tiers: tiers.map((t) => ({
             id: t.id,
@@ -228,7 +238,7 @@ export default function EventForm({ initialData }: EventFormProps) {
         )}
         {form.slug && SLUG_REGEX.test(form.slug) && (
           <p className="mt-1 text-xs text-dta-taupe">
-            Aperçu : <span className="font-mono text-dta-accent">/evenements/{form.slug}</span>
+            Aperçu : <span className="font-mono text-dta-accent">/saison-culturelle-africaine/{form.slug}</span>
           </p>
         )}
       </div>
@@ -298,6 +308,75 @@ export default function EventForm({ initialData }: EventFormProps) {
             placeholder="2 place de la Porte Maillot, 75017 Paris"
           />
         </div>
+      </div>
+
+      {/* Lieux additionnels */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="block text-sm font-medium text-dta-char">
+            Lieux suppl&eacute;mentaires
+          </label>
+          <button
+            type="button"
+            onClick={() => setVenues([...venues, { name: "", address: "" }])}
+            className="flex items-center gap-1.5 rounded-[var(--radius-button)] border border-dta-sand px-3 py-2 text-xs font-medium text-dta-char hover:bg-dta-beige"
+          >
+            <Plus size={14} />
+            Ajouter un lieu
+          </button>
+        </div>
+        {venues.length === 0 && (
+          <p className="text-xs text-dta-taupe">
+            Ajoutez des lieux si l&apos;&eacute;v&eacute;nement se d&eacute;roule sur plusieurs sites.
+          </p>
+        )}
+        {venues.map((v, idx) => (
+          <div
+            key={idx}
+            className="relative rounded-[var(--radius-card)] border border-dta-sand bg-dta-bg p-4"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-dta-accent">
+                Lieu {idx + 2}
+              </span>
+              <button
+                type="button"
+                onClick={() => setVenues(venues.filter((_, i) => i !== idx))}
+                className="text-red-400 hover:text-red-600"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">Nom du lieu</label>
+                <input
+                  value={v.name}
+                  onChange={(e) => {
+                    const updated = [...venues];
+                    updated[idx] = { ...v, name: e.target.value };
+                    setVenues(updated);
+                  }}
+                  className={inputClass}
+                  placeholder="Ex: Centre Culturel"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">Adresse</label>
+                <input
+                  value={v.address}
+                  onChange={(e) => {
+                    const updated = [...venues];
+                    updated[idx] = { ...v, address: e.target.value };
+                    setVenues(updated);
+                  }}
+                  className={inputClass}
+                  placeholder="12 rue Example, 75000 Paris"
+                />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       <div>

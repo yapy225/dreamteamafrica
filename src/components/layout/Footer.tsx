@@ -5,17 +5,18 @@ const footerSections = [
   {
     title: "Découvrir",
     links: [
-      { href: "/evenements", label: "Événements" },
-      { href: "/marketplace", label: "Marketplace" },
-      { href: "/journal", label: "L'Afropéen" },
-      { href: "/officiel-afrique", label: "L'Officiel d'Afrique" },
+      { href: "/saison-culturelle-africaine", label: "Événements" },
+      { href: "/made-in-africa", label: "Marketplace" },
+      { href: "/lafropeen", label: "L'Afropéen" },
+      { href: "/lofficiel-dafrique", label: "L'Officiel d'Afrique" },
     ],
   },
   {
     title: "Informations",
     links: [
       { href: "/a-propos", label: "À propos" },
-      { href: "/contact", label: "Contact" },
+      { href: "/nous-contacter", label: "Nous contacter" },
+      { href: "/faire-un-don", label: "Nous soutenir" },
       { href: "/mentions-legales", label: "Mentions légales" },
     ],
   },
@@ -33,7 +34,6 @@ const footerSections = [
     links: [
       { href: "/exposants", label: "Tous les packs exposants" },
       { href: "/auth/signup?role=artisan", label: "Devenir artisan" },
-      { href: "/ads", label: "DTA Ads" },
       { href: "/dashboard", label: "Espace pro" },
     ],
   },

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Ticket, ShoppingBag, Newspaper, Megaphone, CalendarDays, BookOpen, BarChart3, Rss, Bot, Search, Store, ClipboardList } from "lucide-react";
+import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getRevenueData } from "@/lib/revenue";
@@ -57,13 +57,6 @@ export default async function DashboardPage() {
         ]
       : []),
     {
-      href: "/dashboard/ads",
-      icon: Megaphone,
-      label: "DTA Ads",
-      count: null,
-      color: "bg-red-100 text-red-600",
-    },
-    {
       href: "/dashboard/events",
       icon: CalendarDays,
       label: "Gestion événements",
@@ -78,13 +71,6 @@ export default async function DashboardPage() {
             label: "Officiel d'Afrique",
             count: null,
             color: "bg-indigo-100 text-indigo-600",
-          },
-          {
-            href: "/dashboard/journal-ads",
-            icon: BarChart3,
-            label: "Pubs Journal",
-            count: null,
-            color: "bg-orange-100 text-orange-600",
           },
           {
             href: "/dashboard/rss-feeds",
@@ -113,6 +99,13 @@ export default async function DashboardPage() {
             label: "Réservations gratuites",
             count: null,
             color: "bg-lime-100 text-lime-600",
+          },
+          {
+            href: "/dashboard/contacts",
+            icon: Mail,
+            label: "Messages de contact",
+            count: null,
+            color: "bg-pink-100 text-pink-600",
           },
           {
             href: "/dashboard/seo",

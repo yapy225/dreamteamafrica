@@ -53,7 +53,7 @@ export default function CartPage() {
         <h1 className="mt-4 font-serif text-3xl font-bold text-dta-dark">Panier vide</h1>
         <p className="mt-2 text-dta-char/70">Explorez notre marketplace pour trouver des pièces uniques.</p>
         <Link
-          href="/marketplace"
+          href="/made-in-africa"
           className="mt-8 inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white hover:bg-dta-accent-dark"
         >
           <ArrowLeft size={16} />
@@ -143,7 +143,7 @@ export default function CartPage() {
         </button>
 
         <div className="mt-3 flex justify-between">
-          <Link href="/marketplace" className="text-sm text-dta-taupe hover:text-dta-accent">
+          <Link href="/made-in-africa" className="text-sm text-dta-taupe hover:text-dta-accent">
             &larr; Continuer mes achats
           </Link>
           <button

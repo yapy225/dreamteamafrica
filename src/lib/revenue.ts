@@ -1,11 +1,5 @@
 import { prisma } from "@/lib/db";
 
-const AD_PLAN_PRICES: Record<string, number> = {
-  ESSENTIEL: 29,
-  BUSINESS: 79,
-  ELITE: 149,
-};
-
 const MONTH_LABELS = [
   "janv.",
   "févr.",
@@ -25,8 +19,6 @@ export type MonthlyRevenue = {
   month: string;
   tickets: number;
   orders: number;
-  ads: number;
-  journal: number;
   total: number;
 };
 
@@ -35,8 +27,6 @@ export type RevenueSummary = {
   totals: {
     tickets: number;
     orders: number;
-    ads: number;
-    journal: number;
     total: number;
   };
 };
@@ -56,17 +46,11 @@ function buildMonthBuckets(months: number): { label: string; start: Date; end: D
   return buckets;
 }
 
-function parsePrice(priceStr: string | null | undefined): number {
-  if (!priceStr) return 0;
-  const cleaned = priceStr.replace(/[^\d.,]/g, "").replace(",", ".");
-  return parseFloat(cleaned) || 0;
-}
-
 export async function getRevenueData(months = 12): Promise<RevenueSummary> {
   const buckets = buildMonthBuckets(months);
   const since = buckets[0].start;
 
-  const [tickets, orders, adCampaigns, journalAds] = await Promise.all([
+  const [tickets, orders] = await Promise.all([
     prisma.ticket.findMany({
       where: { purchasedAt: { gte: since } },
       select: { price: true, purchasedAt: true },
@@ -77,20 +61,6 @@ export async function getRevenueData(months = 12): Promise<RevenueSummary> {
         status: { in: ["PAID", "SHIPPED", "DELIVERED"] },
       },
       select: { total: true, createdAt: true },
-    }),
-    prisma.adCampaign.findMany({
-      where: {
-        OR: [
-          { endDate: null },
-          { endDate: { gte: since } },
-        ],
-        startDate: { lte: buckets[buckets.length - 1].end },
-      },
-      select: { plan: true, startDate: true, endDate: true },
-    }),
-    prisma.journalAd.findMany({
-      where: { campaignStart: { gte: since } },
-      select: { price: true, campaignStart: true },
     }),
   ]);
 
@@ -103,26 +73,11 @@ export async function getRevenueData(months = 12): Promise<RevenueSummary> {
       .filter((o) => o.createdAt >= bucket.start && o.createdAt < bucket.end)
       .reduce((sum, o) => sum + o.total, 0);
 
-    const adRev = adCampaigns
-      .filter((a) => {
-        const start = a.startDate;
-        const end = a.endDate ?? bucket.end;
-        return start < bucket.end && end >= bucket.start;
-      })
-      .reduce((sum, a) => sum + (AD_PLAN_PRICES[a.plan] ?? 0), 0);
-
-    const journalRev = journalAds
-      .filter((j) => j.campaignStart >= bucket.start && j.campaignStart < bucket.end)
-      .reduce((sum, j) => sum + parsePrice(j.price), 0);
-
     return {
       month: bucket.label,
       tickets: Math.round(ticketRev * 100) / 100,
       orders: Math.round(orderRev * 100) / 100,
-      ads: Math.round(adRev * 100) / 100,
-      journal: Math.round(journalRev * 100) / 100,
-      total:
-        Math.round((ticketRev + orderRev + adRev + journalRev) * 100) / 100,
+      total: Math.round((ticketRev + orderRev) * 100) / 100,
     };
   });
 
@@ -130,11 +85,9 @@ export async function getRevenueData(months = 12): Promise<RevenueSummary> {
     (acc, m) => ({
       tickets: acc.tickets + m.tickets,
       orders: acc.orders + m.orders,
-      ads: acc.ads + m.ads,
-      journal: acc.journal + m.journal,
       total: acc.total + m.total,
     }),
-    { tickets: 0, orders: 0, ads: 0, journal: 0, total: 0 },
+    { tickets: 0, orders: 0, total: 0 },
   );
 
   return { monthly, totals };

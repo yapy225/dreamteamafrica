@@ -36,7 +36,7 @@ export default async function FavoritesPage() {
             Parcourez la marketplace et sauvegardez vos coups de c&oelig;ur.
           </p>
           <Link
-            href="/marketplace"
+            href="/made-in-africa"
             className="mt-6 inline-flex items-center rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white hover:bg-dta-accent-dark"
           >
             Explorer la marketplace
@@ -47,7 +47,7 @@ export default async function FavoritesPage() {
           {favorites.map((fav) => (
             <Link
               key={fav.id}
-              href={`/marketplace/${fav.product.slug}`}
+              href={`/made-in-africa/${fav.product.slug}`}
               className="group rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-1"
             >
               <div className="aspect-square rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-sand to-dta-beige" />

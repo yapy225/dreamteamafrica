@@ -34,8 +34,6 @@ export async function POST(request: Request) {
       await handleTicketPurchase(session);
     } else if (metadata?.type === "order") {
       await handleOrderPurchase(session);
-    } else if (metadata?.type === "ad_subscription") {
-      await handleAdSubscription(session);
     } else if (metadata?.type === "exhibitor") {
       await handleExhibitorBooking(session);
     }
@@ -123,25 +121,6 @@ async function handleOrderPurchase(session: Stripe.Checkout.Session) {
   );
 
   console.log(`Created order ${order.id} for user ${userId}, total: ${total}€`);
-}
-
-async function handleAdSubscription(session: Stripe.Checkout.Session) {
-  const { campaignId } = session.metadata!;
-
-  if (!campaignId) {
-    console.error("Ad subscription webhook: missing campaignId");
-    return;
-  }
-
-  await prisma.adCampaign.update({
-    where: { id: campaignId },
-    data: {
-      active: true,
-      stripeSubId: session.subscription as string,
-    },
-  });
-
-  console.log(`Activated ad campaign ${campaignId}, subscription: ${session.subscription}`);
 }
 
 async function handleExhibitorBooking(session: Stripe.Checkout.Session) {

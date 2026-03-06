@@ -438,116 +438,6 @@ const evenementsKeywords: KeywordCategory[] = [
   },
 ];
 
-// ─── DTA ADS ─────────────────────────────────────────────
-
-const adsKeywords: KeywordCategory[] = [
-  {
-    name: "Publicité & Visibilité",
-    keywords: [
-      { term: "publicité diaspora africaine", volume: "moyen", intent: "inscription" },
-      { term: "annonce communauté africaine France", volume: "moyen", intent: "inscription" },
-      { term: "visibilité entreprise africaine", volume: "moyen", intent: "inscription" },
-      { term: "publicité ciblée afro France", volume: "niche", intent: "inscription" },
-      { term: "promouvoir marque africaine France", volume: "niche", intent: "inscription" },
-      { term: "régie publicitaire afro", volume: "niche", intent: "inscription" },
-      { term: "publicité en ligne Afrique France", volume: "niche", intent: "inscription" },
-    ],
-  },
-  {
-    name: "Communication",
-    keywords: [
-      { term: "agence communication africaine Paris", volume: "moyen", intent: "partenariat" },
-      { term: "marketing digital diaspora", volume: "niche", intent: "partenariat" },
-      { term: "community manager afro", volume: "niche", intent: "partenariat" },
-      { term: "stratégie communication Afrique", volume: "niche", intent: "partenariat" },
-      { term: "branding marque africaine", volume: "niche", intent: "partenariat" },
-      { term: "campagne publicitaire afro", volume: "niche", intent: "inscription" },
-    ],
-  },
-  {
-    name: "Salon de coiffure afro",
-    keywords: [
-      { term: "salon de coiffure afro Paris", volume: "fort", intent: "inscription" },
-      { term: "salon de coiffure afro", volume: "fort", intent: "visiteur" },
-      { term: "coiffeur afro Paris", volume: "fort", intent: "visiteur" },
-      { term: "salon coiffure africaine Paris", volume: "fort", intent: "visiteur" },
-      { term: "salon de coiffure afro Lyon", volume: "moyen", intent: "inscription" },
-      { term: "salon de coiffure afro Marseille", volume: "moyen", intent: "inscription" },
-      { term: "salon de coiffure afro Toulouse", volume: "moyen", intent: "inscription" },
-      { term: "salon de coiffure afro Bordeaux", volume: "moyen", intent: "inscription" },
-      { term: "salon de coiffure afro Nantes", volume: "moyen", intent: "inscription" },
-      { term: "salon de coiffure afro Lille", volume: "moyen", intent: "inscription" },
-      { term: "salon de coiffure afro Strasbourg", volume: "niche", intent: "inscription" },
-      { term: "salon de coiffure afro Montpellier", volume: "niche", intent: "inscription" },
-      { term: "salon de coiffure afro Rennes", volume: "niche", intent: "inscription" },
-      { term: "salon de coiffure afro Nice", volume: "niche", intent: "inscription" },
-    ],
-  },
-  {
-    name: "Tresses & Coiffures africaines",
-    keywords: [
-      { term: "tresse africaine", volume: "fort", intent: "visiteur" },
-      { term: "tresse afro", volume: "fort", intent: "visiteur" },
-      { term: "tresse plaquée", volume: "fort", intent: "visiteur" },
-      { term: "coiffure afro", volume: "fort", intent: "visiteur" },
-      { term: "coiffure africaine femme", volume: "fort", intent: "visiteur" },
-      { term: "coiffure afro homme", volume: "moyen", intent: "visiteur" },
-      { term: "tresse africaine femme", volume: "fort", intent: "visiteur" },
-      { term: "tresse africaine homme", volume: "moyen", intent: "visiteur" },
-      { term: "tresse africaine enfant", volume: "moyen", intent: "visiteur" },
-      { term: "tresse africaine avec mèches", volume: "moyen", intent: "visiteur" },
-      { term: "tresse collée", volume: "moyen", intent: "visiteur" },
-      { term: "nattes africaines", volume: "moyen", intent: "visiteur" },
-      { term: "coiffure tresse africaine mariage", volume: "moyen", intent: "visiteur" },
-      { term: "box braids", volume: "fort", intent: "visiteur" },
-      { term: "fulani braids", volume: "moyen", intent: "visiteur" },
-      { term: "cornrows", volume: "fort", intent: "visiteur" },
-    ],
-  },
-  {
-    name: "Restaurant africain (villes)",
-    keywords: [
-      { term: "restaurant africain Paris", volume: "fort", intent: "inscription" },
-      { term: "restaurant africain Lyon", volume: "moyen", intent: "inscription" },
-      { term: "restaurant africain Marseille", volume: "moyen", intent: "inscription" },
-      { term: "restaurant africain Toulouse", volume: "moyen", intent: "inscription" },
-      { term: "restaurant africain Bordeaux", volume: "moyen", intent: "inscription" },
-      { term: "restaurant africain Nantes", volume: "moyen", intent: "inscription" },
-      { term: "restaurant africain Lille", volume: "moyen", intent: "inscription" },
-      { term: "restaurant africain Strasbourg", volume: "niche", intent: "inscription" },
-      { term: "restaurant africain Montpellier", volume: "niche", intent: "inscription" },
-      { term: "meilleur restaurant africain Paris", volume: "moyen", intent: "visiteur" },
-      { term: "restaurant sénégalais Paris", volume: "moyen", intent: "visiteur" },
-      { term: "restaurant camerounais Paris", volume: "moyen", intent: "visiteur" },
-      { term: "restaurant ivoirien Paris", volume: "moyen", intent: "visiteur" },
-      { term: "restaurant congolais Paris", volume: "moyen", intent: "visiteur" },
-      { term: "restaurant malien Paris", volume: "niche", intent: "visiteur" },
-      { term: "restaurant éthiopien Paris", volume: "moyen", intent: "visiteur" },
-    ],
-  },
-  {
-    name: "Sponsoring & Partenariats",
-    keywords: [
-      { term: "sponsor événement africain Paris", volume: "niche", intent: "inscription" },
-      { term: "sponsoring diaspora africaine", volume: "niche", intent: "inscription" },
-      { term: "partenariat média afro France", volume: "niche", intent: "partenariat" },
-      { term: "publicité magazine africain France", volume: "niche", intent: "inscription" },
-      { term: "annonceur média diaspora", volume: "niche", intent: "inscription" },
-    ],
-  },
-  {
-    name: "Immobilier & Services",
-    keywords: [
-      { term: "investir immobilier Afrique", volume: "fort", intent: "inscription" },
-      { term: "transfert argent Afrique", volume: "fort", intent: "inscription" },
-      { term: "immobilier Afrique diaspora", volume: "moyen", intent: "inscription" },
-      { term: "agence immobilière africaine Paris", volume: "niche", intent: "inscription" },
-      { term: "services diaspora africaine France", volume: "niche", intent: "inscription" },
-      { term: "assurance diaspora africaine", volume: "niche", intent: "inscription" },
-    ],
-  },
-];
-
 // ─── SECTIONS ────────────────────────────────────────────
 
 export const SEO_SECTIONS: SeoSection[] = [
@@ -574,14 +464,6 @@ export const SEO_SECTIONS: SeoSection[] = [
     path: "/dashboard/seo/evenements",
     color: "#1565C0",
     keywords: evenementsKeywords,
-  },
-  {
-    id: "ads",
-    title: "DTA ADS",
-    description: "Publicité, coiffure afro, restauration africaine et services locaux",
-    path: "/dashboard/seo/ads",
-    color: "#7B1FA2",
-    keywords: adsKeywords,
   },
 ];
 

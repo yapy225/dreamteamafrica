@@ -6,13 +6,11 @@ import {
   Calendar,
   ShoppingBag,
   Newspaper,
-  Megaphone,
   MapPin,
   ArrowRight,
 } from "lucide-react";
 import ArticleCard from "@/components/journal/ArticleCard";
 import Newsletter from "@/components/journal/Newsletter";
-import AdSlot from "@/components/ads/AdSlot";
 import styles from "./home.module.css";
 
 export const dynamic = "force-dynamic";
@@ -96,14 +94,14 @@ export default async function Home() {
               </p>
               <div className="mag-fade-up mag-d4 mt-10 flex flex-col gap-4 sm:flex-row">
                 <Link
-                  href="/evenements"
+                  href="/saison-culturelle-africaine"
                   className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-dta-accent-dark hover:shadow-lg"
                 >
                   Découvrir les événements
                   <ArrowRight size={16} />
                 </Link>
                 <Link
-                  href="/marketplace"
+                  href="/made-in-africa"
                   className="inline-flex items-center justify-center rounded-[var(--radius-button)] border border-white/30 px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:border-white hover:bg-white/5"
                 >
                   Explorer la marketplace
@@ -148,9 +146,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ══ 1b. Ad Hero ══ */}
-      <AdSlot page="ACCUEIL" placement="HERO" />
-
       {/* ══ 2. Bandeau Saison ══ */}
       <section className="bg-dta-accent py-4">
         <p className="text-center text-sm font-semibold tracking-wide text-white">
@@ -178,7 +173,7 @@ export default async function Home() {
                 </p>
               </div>
               <Link
-                href="/evenements"
+                href="/saison-culturelle-africaine"
                 className="hidden items-center gap-1 text-sm font-medium text-dta-accent transition-colors hover:text-dta-accent-dark sm:flex"
               >
                 Tout voir <ArrowRight size={14} />
@@ -191,7 +186,7 @@ export default async function Home() {
               {/* Featured event — immersive card */}
               {featuredEvent && (
                 <Link
-                  href={`/evenements/${featuredEvent.slug}`}
+                  href={`/saison-culturelle-africaine/${featuredEvent.slug}`}
                   className="group relative col-span-1 min-h-[360px] overflow-hidden rounded-[var(--radius-card)] sm:min-h-[480px] lg:col-span-7"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-dta-accent/30 to-dta-sand">
@@ -238,7 +233,7 @@ export default async function Home() {
                 {otherEvents.map((event) => (
                   <Link
                     key={event.id}
-                    href={`/evenements/${event.slug}`}
+                    href={`/saison-culturelle-africaine/${event.slug}`}
                     className="group flex items-start gap-4 rounded-[var(--radius-card)] bg-white p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)]"
                   >
                     {/* Thumbnail */}
@@ -287,7 +282,7 @@ export default async function Home() {
 
           <div className="mt-8 text-center sm:hidden">
             <Link
-              href="/evenements"
+              href="/saison-culturelle-africaine"
               className="text-sm font-medium text-dta-accent"
             >
               Voir tous les événements &rarr;
@@ -295,11 +290,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      {/* ══ 3b. Ad Inline ══ */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <AdSlot page="ACCUEIL" placement="INLINE" />
-      </div>
 
       {/* ══ 4. Citation Éditoriale ══ */}
       <section className="bg-dta-bg px-4 py-24">
@@ -320,7 +310,7 @@ export default async function Home() {
           {/* Icon links */}
           <div className="mt-10 flex items-center justify-center gap-8">
             <Link
-              href="/evenements"
+              href="/saison-culturelle-africaine"
               className="flex flex-col items-center gap-2 text-dta-taupe transition-colors hover:text-dta-accent"
             >
               <Calendar size={22} />
@@ -329,7 +319,7 @@ export default async function Home() {
               </span>
             </Link>
             <Link
-              href="/marketplace"
+              href="/made-in-africa"
               className="flex flex-col items-center gap-2 text-dta-taupe transition-colors hover:text-dta-accent"
             >
               <ShoppingBag size={22} />
@@ -338,7 +328,7 @@ export default async function Home() {
               </span>
             </Link>
             <Link
-              href="/journal"
+              href="/lafropeen"
               className="flex flex-col items-center gap-2 text-dta-taupe transition-colors hover:text-dta-accent"
             >
               <Newspaper size={22} />
@@ -346,21 +336,9 @@ export default async function Home() {
                 Journal
               </span>
             </Link>
-            <Link
-              href="/ads"
-              className="flex flex-col items-center gap-2 text-dta-taupe transition-colors hover:text-dta-accent"
-            >
-              <Megaphone size={22} />
-              <span className="text-[10px] uppercase tracking-wider">
-                Publicité
-              </span>
-            </Link>
           </div>
         </div>
       </section>
-
-      {/* ══ 4b. Ad Banner ══ */}
-      <AdSlot page="ACCUEIL" placement="BANNER_TOP" />
 
       {/* ══ 5. Marketplace ══ */}
       <section className="bg-dta-dark px-4 py-20 sm:py-28">
@@ -381,7 +359,7 @@ export default async function Home() {
                 </p>
               </div>
               <Link
-                href="/marketplace"
+                href="/made-in-africa"
                 className="hidden items-center gap-1 text-sm font-medium text-dta-accent transition-colors hover:text-dta-accent-light sm:flex"
               >
                 Explorer <ArrowRight size={14} />
@@ -394,7 +372,7 @@ export default async function Home() {
               {/* P1: portrait */}
               {products[0] && (
                 <Link
-                  href={`/marketplace/${products[0].slug}`}
+                  href={`/made-in-africa/${products[0].slug}`}
                   className="group relative col-span-1 overflow-hidden rounded-[var(--radius-card)] sm:col-span-1 lg:col-span-5 lg:row-span-2"
                 >
                   <div className="relative aspect-[3/4] sm:aspect-[16/10] lg:aspect-auto lg:h-full">
@@ -428,7 +406,7 @@ export default async function Home() {
               {/* P2: landscape */}
               {products[1] && (
                 <Link
-                  href={`/marketplace/${products[1].slug}`}
+                  href={`/made-in-africa/${products[1].slug}`}
                   className="group relative col-span-1 overflow-hidden rounded-[var(--radius-card)] sm:col-span-1 lg:col-span-7"
                 >
                   <div className="relative aspect-[16/10]">
@@ -462,7 +440,7 @@ export default async function Home() {
               {/* P3: landscape */}
               {products[2] && (
                 <Link
-                  href={`/marketplace/${products[2].slug}`}
+                  href={`/made-in-africa/${products[2].slug}`}
                   className="group relative col-span-1 overflow-hidden rounded-[var(--radius-card)] sm:col-span-2 lg:col-span-7"
                 >
                   <div className="relative aspect-[16/10]">
@@ -496,7 +474,7 @@ export default async function Home() {
               {/* P4: full-width landscape banner */}
               {products[3] && (
                 <Link
-                  href={`/marketplace/${products[3].slug}`}
+                  href={`/made-in-africa/${products[3].slug}`}
                   className="group relative col-span-1 overflow-hidden rounded-[var(--radius-card)] sm:col-span-2 lg:col-span-12"
                 >
                   <div className="relative aspect-[16/10] lg:aspect-[21/9]">
@@ -535,7 +513,7 @@ export default async function Home() {
 
           <div className="mt-8 text-center sm:hidden">
             <Link
-              href="/marketplace"
+              href="/made-in-africa"
               className="text-sm font-medium text-dta-accent"
             >
               Explorer la marketplace &rarr;
@@ -563,7 +541,7 @@ export default async function Home() {
                 </p>
               </div>
               <Link
-                href="/journal"
+                href="/lafropeen"
                 className="hidden items-center gap-1 text-sm font-medium text-dta-accent transition-colors hover:text-dta-accent-dark sm:flex"
               >
                 Lire le journal <ArrowRight size={14} />
@@ -584,7 +562,7 @@ export default async function Home() {
                 </div>
               )}
 
-              {/* Side articles + sidebar ad */}
+              {/* Side articles */}
               <div className="flex flex-col gap-4 lg:col-span-2">
                 {sideArticles.map((article) => (
                   <ArticleCard
@@ -594,7 +572,6 @@ export default async function Home() {
                     showLifecycleDay
                   />
                 ))}
-                <AdSlot page="ACCUEIL" placement="SIDEBAR" />
               </div>
             </div>
           ) : (
@@ -605,7 +582,7 @@ export default async function Home() {
 
           <div className="mt-8 text-center sm:hidden">
             <Link
-              href="/journal"
+              href="/lafropeen"
               className="text-sm font-medium text-dta-accent"
             >
               Lire le journal &rarr;
@@ -632,7 +609,7 @@ export default async function Home() {
                 milliers de professionnels et particuliers.
               </p>
               <Link
-                href="/officiel-afrique"
+                href="/lofficiel-dafrique"
                 className="mt-8 inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-dta-accent-dark hover:shadow-lg"
               >
                 Inscrire mon entreprise

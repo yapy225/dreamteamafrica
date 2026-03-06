@@ -143,7 +143,7 @@ export default async function ArticlesPage() {
 
                 <div className="flex flex-shrink-0 items-center gap-1">
                   <Link
-                    href={`/journal/${article.slug}`}
+                    href={`/lafropeen/${article.slug}`}
                     className="rounded-[var(--radius-button)] p-2 text-dta-taupe hover:bg-dta-beige hover:text-dta-dark"
                     title="Voir"
                   >

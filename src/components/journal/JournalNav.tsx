@@ -85,7 +85,7 @@ function SearchDropdown({
         onClose();
       } else if (e.key === "Enter" && results.length > 0) {
         e.preventDefault();
-        router.push(`/journal/${results[0].slug}`);
+        router.push(`/lafropeen/${results[0].slug}`);
         onClose();
       }
     },
@@ -115,7 +115,7 @@ function SearchDropdown({
       {results.map((r) => (
         <Link
           key={r.slug}
-          href={`/journal/${r.slug}`}
+          href={`/lafropeen/${r.slug}`}
           onClick={onClose}
           className="block border-b border-dta-sand/30 px-4 py-3 transition-colors last:border-0 hover:bg-dta-beige"
         >
@@ -158,7 +158,7 @@ export default function JournalNav() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between gap-4">
           {/* Logo */}
-          <Link href="/journal" className="flex items-center gap-2 shrink-0">
+          <Link href="/lafropeen" className="flex items-center gap-2 shrink-0">
             <span className="font-serif text-xl font-bold text-dta-dark">
               L&apos;Afro<em className="text-dta-accent">p&eacute;en</em>
             </span>
@@ -215,7 +215,7 @@ export default function JournalNav() {
             </Link>
           ))}
           <Link
-            href="/journal/archives"
+            href="/lafropeen/archives"
             onClick={() => setMobileOpen(false)}
             className="block rounded-[var(--radius-button)] px-3 py-2.5 text-sm font-medium text-dta-char transition-colors hover:bg-dta-sand/30"
           >

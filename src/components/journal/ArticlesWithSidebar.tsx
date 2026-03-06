@@ -1,5 +1,4 @@
 import ArticleRow from "./ArticleRow";
-import AdSlot from "@/components/ads/AdSlot";
 
 /* ─── Types ─────────────────────────────────────────────── */
 
@@ -33,18 +32,5 @@ export default function ArticlesWithSidebar({
   articles,
   zoneName,
 }: ArticlesWithSidebarProps) {
-  return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_280px]">
-      {/* Main content */}
-      <ArticleRow articles={articles} zoneName={zoneName} />
-
-      {/* Sidebar ads */}
-      <aside className="mt-8 border-t border-dta-sand/50 pt-6 lg:mt-0 lg:border-t-0 lg:pt-0">
-        <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-dta-taupe">
-          Publicit&eacute;s
-        </h3>
-        <AdSlot page="JOURNAL" placement="SIDEBAR" />
-      </aside>
-    </div>
-  );
+  return <ArticleRow articles={articles} zoneName={zoneName} />;
 }

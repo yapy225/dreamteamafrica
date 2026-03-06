@@ -23,13 +23,7 @@ export default function JournalFooter() {
             Mentions l&eacute;gales
           </Link>
           <Link
-            href="/ads"
-            className="text-xs text-dta-sand transition-colors hover:text-white"
-          >
-            Publicit&eacute; (DTA ADS)
-          </Link>
-          <Link
-            href="/contact"
+            href="/nous-contacter"
             className="text-xs text-dta-sand transition-colors hover:text-white"
           >
             Contact

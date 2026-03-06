@@ -52,7 +52,7 @@ export default async function OrdersPage() {
             Vos commandes de la marketplace apparaîtront ici.
           </p>
           <Link
-            href="/marketplace"
+            href="/made-in-africa"
             className="mt-6 inline-flex items-center rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white hover:bg-dta-accent-dark"
           >
             Explorer la marketplace
@@ -90,7 +90,7 @@ export default async function OrdersPage() {
                     <div className="h-12 w-12 flex-shrink-0 rounded-[var(--radius-input)] bg-gradient-to-br from-dta-sand to-dta-beige" />
                     <div className="flex-1 min-w-0">
                       <Link
-                        href={`/marketplace/${item.product.slug}`}
+                        href={`/made-in-africa/${item.product.slug}`}
                         className="truncate text-sm font-medium text-dta-dark hover:text-dta-accent"
                       >
                         {item.product.name}

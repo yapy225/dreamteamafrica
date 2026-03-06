@@ -93,7 +93,7 @@ export default async function ArtisanProductsPage() {
               {/* Actions */}
               <div className="flex flex-shrink-0 items-center gap-1">
                 <Link
-                  href={`/marketplace/${product.slug}`}
+                  href={`/made-in-africa/${product.slug}`}
                   className="rounded-[var(--radius-button)] p-2 text-dta-taupe hover:bg-dta-beige hover:text-dta-dark"
                   title="Voir"
                 >

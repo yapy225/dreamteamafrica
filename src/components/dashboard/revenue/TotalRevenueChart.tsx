@@ -16,8 +16,6 @@ import type { MonthlyRevenue } from "@/lib/revenue";
 const SOURCES = [
   { key: "tickets", label: "Billetterie", color: "#8B6F4E" },
   { key: "orders", label: "Commandes", color: "#6B8FA0" },
-  { key: "ads", label: "DTA Ads", color: "#A08060" },
-  { key: "journal", label: "Pubs Journal", color: "#7A8B7A" },
 ] as const;
 
 type TotalRevenueChartProps = {

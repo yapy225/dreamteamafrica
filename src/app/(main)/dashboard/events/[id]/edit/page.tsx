@@ -34,6 +34,7 @@ export default async function EditEventPage({
             coverImage: event.coverImage,
             venue: event.venue,
             address: event.address,
+            venues: (event.venues as Array<{name:string;address:string}>) ?? null,
             date: event.date.toISOString().slice(0, 16),
             endDate: event.endDate
               ? event.endDate.toISOString().slice(0, 16)

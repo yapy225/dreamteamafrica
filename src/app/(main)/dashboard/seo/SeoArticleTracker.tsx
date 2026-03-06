@@ -135,7 +135,7 @@ export default function SeoArticleTracker({
                       <Link href={`/dashboard/articles/${a.id}/edit`} className="rounded p-1.5 text-[#999] hover:bg-[#F5F0EB] hover:text-[#2C2C2C]">
                         <FileText size={15} />
                       </Link>
-                      <Link href={`/journal/${a.slug}`} target="_blank" className="rounded p-1.5 text-[#999] hover:bg-blue-50 hover:text-blue-600">
+                      <Link href={`/lafropeen/${a.slug}`} target="_blank" className="rounded p-1.5 text-[#999] hover:bg-blue-50 hover:text-blue-600">
                         <ExternalLink size={15} />
                       </Link>
                     </div>

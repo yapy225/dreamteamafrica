@@ -57,7 +57,7 @@ export default function ArticleCard({
   if (variant === "hero") {
     return (
       <Link
-        href={`/journal/${article.slug}`}
+        href={`/lafropeen/${article.slug}`}
         className="group relative flex min-h-[400px] flex-col justify-end overflow-hidden rounded-[var(--radius-card)] shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)]"
       >
         {/* Background */}
@@ -124,7 +124,7 @@ export default function ArticleCard({
   if (variant === "side") {
     return (
       <Link
-        href={`/journal/${article.slug}`}
+        href={`/lafropeen/${article.slug}`}
         className="group relative flex min-h-[128px] items-end overflow-hidden rounded-[var(--radius-card)] shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)]"
       >
         {article.coverImage ? (
@@ -177,7 +177,7 @@ export default function ArticleCard({
   if (variant === "row") {
     return (
       <Link
-        href={`/journal/${article.slug}`}
+        href={`/lafropeen/${article.slug}`}
         className="group grid grid-cols-1 gap-0 overflow-hidden rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)] sm:grid-cols-[160px_1fr] sm:gap-4"
       >
         {/* Image */}
@@ -239,7 +239,7 @@ export default function ArticleCard({
   /* ---------- archive ---------- */
   return (
     <Link
-      href={`/journal/${article.slug}`}
+      href={`/lafropeen/${article.slug}`}
       className="j-archive-card group block overflow-hidden rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)]"
     >
       {/* Image */}

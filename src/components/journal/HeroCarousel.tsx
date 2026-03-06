@@ -109,7 +109,7 @@ export default function HeroCarousel({
             return (
               <Link
                 key={article.id}
-                href={`/journal/${article.slug}`}
+                href={`/lafropeen/${article.slug}`}
                 className={`group absolute inset-0 flex flex-col justify-end transition-all duration-500 ${
                   i === activeSlide
                     ? "z-10 scale-100 opacity-100"
@@ -199,7 +199,7 @@ export default function HeroCarousel({
             return (
               <Link
                 key={article.id}
-                href={`/journal/${article.slug}`}
+                href={`/lafropeen/${article.slug}`}
                 className="group relative flex min-h-[160px] flex-1 items-end overflow-hidden rounded-[var(--radius-card)] shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)]"
               >
                 {article.coverImage ? (

@@ -3,16 +3,14 @@ import { groupArticlesByZone, getZoneLabel } from "@/lib/journal";
 import type { JournalZone } from "@/lib/journal";
 
 import JournalNav from "@/components/journal/JournalNav";
-import AdBanner from "@/components/journal/AdBanner";
 import HeroCarousel from "@/components/journal/HeroCarousel";
 import LifecycleBar from "@/components/journal/LifecycleBar";
 import ArticleRow from "@/components/journal/ArticleRow";
-import AdInline from "@/components/journal/AdInline";
-import AdVideo from "@/components/journal/AdVideo";
 import ArticlesWithSidebar from "@/components/journal/ArticlesWithSidebar";
 import ArchivesGrid from "@/components/journal/ArchivesGrid";
 import Newsletter from "@/components/journal/Newsletter";
 import JournalFooter from "@/components/journal/JournalFooter";
+import AdSlot from "@/components/ads/AdSlot";
 
 export const dynamic = "force-dynamic";
 
@@ -62,14 +60,19 @@ export default async function JournalPage() {
   return (
     <>
       <JournalNav />
-      <AdBanner />
+
+      {/* ── Banner Top — rotation publicitaire ── */}
+      <AdSlot page="JOURNAL" placement="BANNER_TOP" />
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 py-8 sm:px-6 lg:px-8">
-        {/* Hero: UNE + FACE_UNE (fallback si UNE vide) */}
+        {/* Hero: UNE + FACE_UNE */}
         <HeroCarousel
           uneArticles={zones.UNE.length > 0 ? zones.UNE : zones.FACE_UNE}
           faceUneArticles={zones.UNE.length > 0 ? zones.FACE_UNE : zones.PAGES_4_5}
         />
+
+        {/* ── Pub Une — après le hero ── */}
+        <AdSlot page="JOURNAL" placement="HERO" />
 
         {/* Lifecycle Bar */}
         <LifecycleBar activeZone={firstActiveZone} />
@@ -82,8 +85,8 @@ export default async function JournalPage() {
           />
         )}
 
-        {/* Ad Inline */}
-        <AdInline />
+        {/* ── Pub J4 — après pages 4-5 ── */}
+        <AdSlot page="JOURNAL" placement="INLINE" />
 
         {/* Pages 6-7 */}
         {zones.PAGES_6_7.length > 0 && (
@@ -101,17 +104,16 @@ export default async function JournalPage() {
           />
         )}
 
-        {/* Ad Video */}
-        <AdVideo />
-
-        {/* Pages 10-11 (faded) */}
+        {/* Pages 10-11 */}
         {zones.PAGES_10_11.length > 0 && (
           <ArticleRow
             articles={zones.PAGES_10_11}
             zoneName={getZoneLabel("PAGES_10_11")}
-            fadedStyle
           />
         )}
+
+        {/* ── Pub J10 — après pages 10-11 ── */}
+        <AdSlot page="JOURNAL" placement="VIDEO_SLOT" />
 
         {/* Pages 12-13 */}
         {zones.PAGES_12_13.length > 0 && (
@@ -134,11 +136,22 @@ export default async function JournalPage() {
             </h2>
             <div className="h-px flex-1 bg-dta-sand" />
           </div>
+
+          {/* ── Pub J14 — en tête des archives ── */}
+          <div className="mb-8">
+            <AdSlot page="JOURNAL" placement="IN_GRID" />
+          </div>
+
           <ArchivesGrid
             articles={archivePreview}
             totalPages={archiveTotalPages}
             currentPage={1}
           />
+
+          {/* ── Pub J20 — fin des archives ── */}
+          <div className="mt-8">
+            <AdSlot page="JOURNAL" placement="SIDEBAR" className="lg:flex-row" />
+          </div>
         </div>
       )}
 

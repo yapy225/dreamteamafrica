@@ -1,3 +1,4 @@
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, MapPin, Users, Ticket, ArrowRight } from "lucide-react";
@@ -41,9 +42,6 @@ export default async function EvenementsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      {/* ── Ad Banner Top ── */}
-      <AdSlot page="EVENEMENTS" placement="BANNER_TOP" />
-
       {/* ── A. Page Header ─────────────────────────────── */}
       <div className="mb-14 text-center">
         <h1 className="font-serif text-4xl font-bold text-dta-dark sm:text-5xl">
@@ -62,105 +60,115 @@ export default async function EvenementsPage() {
         </p>
       </div>
 
-      {/* ── B. Featured Event Hero ─────────────────────── */}
+      {/* ── Ad Banner Top (entre header et hero) ── */}
+      <AdSlot page="EVENEMENTS" placement="BANNER_TOP" className="mb-10" />
+
+      {/* ── B. Featured Event Hero + Sidebar ─────────────── */}
       {featuredEvent && (
-        <Link
-          href={`/evenements/${featuredEvent.slug}`}
-          className="group mb-14 block rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)]"
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-2">
-            {/* Image */}
-            <div className="relative aspect-square overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-accent/20 to-dta-sand lg:aspect-auto lg:min-h-[400px] lg:rounded-l-[var(--radius-card)] lg:rounded-tr-none">
-              {featuredEvent.coverImage && (
-                <Image
-                  src={featuredEvent.coverImage}
-                  alt={featuredEvent.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  priority
-                />
-              )}
-            </div>
-
-            {/* Details */}
-            <div className="flex flex-col justify-center p-8">
-              {/* Date badge */}
-              <div className="mb-4 flex items-center gap-3">
-                <span className="rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
-                  Prochain événement
-                </span>
-                <span className="rounded-[var(--radius-button)] bg-dta-accent/10 px-3 py-2 text-center">
-                  <span className="block text-xs font-semibold uppercase text-dta-accent">
-                    {new Date(featuredEvent.date).toLocaleDateString("fr-FR", {
-                      month: "short",
-                    })}
-                  </span>
-                  <span className="block font-serif text-2xl font-bold text-dta-dark">
-                    {new Date(featuredEvent.date).getDate()}
-                  </span>
-                </span>
+        <div className="mb-14 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
+          <Link
+            href={`/evenements/${featuredEvent.slug}`}
+            className="group block rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)]"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              {/* Image */}
+              <div className="relative aspect-square overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-accent/20 to-dta-sand md:aspect-auto md:min-h-[400px] md:rounded-l-[var(--radius-card)] md:rounded-tr-none">
+                {featuredEvent.coverImage && (
+                  <Image
+                    src={featuredEvent.coverImage}
+                    alt={featuredEvent.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    priority
+                  />
+                )}
               </div>
 
-              <h2 className="font-serif text-2xl font-bold leading-tight text-dta-dark transition-colors group-hover:text-dta-accent sm:text-3xl">
-                {featuredEvent.title}
-              </h2>
-
-              <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-dta-char/70">
-                {featuredEvent.description}
-              </p>
-
-              {/* Metadata */}
-              <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-dta-taupe">
-                <span className="flex items-center gap-1.5">
-                  <MapPin size={15} />
-                  {featuredEvent.venue}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Calendar size={15} />
-                  {formatDate(featuredEvent.date)}
-                </span>
-              </div>
-
-              {/* Price */}
-              <p className="mt-5 text-sm text-dta-char/70">
-                À partir de{" "}
-                <span className="font-serif text-lg font-bold text-dta-accent">
-                  {formatPrice(lowestPrice(featuredEvent))}
-                </span>
-              </p>
-
-              {/* Capacity bar */}
-              {featuredEvent.showCapacity && featuredEvent.capacity > 0 && (
-                <div className="mt-4">
-                  <div className="mb-1.5 flex items-center justify-between text-xs text-dta-taupe">
-                    <span className="flex items-center gap-1">
-                      <Users size={13} />
-                      {remainingPlaces(featuredEvent)} places restantes
+              {/* Details */}
+              <div className="flex flex-col justify-center p-8">
+                {/* Date badge */}
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
+                    Prochain événement
+                  </span>
+                  <span className="rounded-[var(--radius-button)] bg-dta-accent/10 px-3 py-2 text-center">
+                    <span className="block text-xs font-semibold uppercase text-dta-accent">
+                      {new Date(featuredEvent.date).toLocaleDateString("fr-FR", {
+                        month: "short",
+                      })}
                     </span>
-                    <span>{capacityPercent(featuredEvent)}% réservé</span>
-                  </div>
-                  <div className="h-2 w-full overflow-hidden rounded-[var(--radius-full)] bg-dta-beige">
-                    <div
-                      className="h-full rounded-[var(--radius-full)] bg-dta-accent transition-all"
-                      style={{
-                        width: `${Math.min(capacityPercent(featuredEvent), 100)}%`,
-                      }}
-                    />
-                  </div>
+                    <span className="block font-serif text-2xl font-bold text-dta-dark">
+                      {new Date(featuredEvent.date).getDate()}
+                    </span>
+                  </span>
                 </div>
-              )}
 
-              {/* CTA */}
-              <div className="mt-6">
-                <span className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors group-hover:bg-dta-accent-dark">
-                  Réserver
-                  <ArrowRight size={16} />
-                </span>
+                <h2 className="font-serif text-2xl font-bold leading-tight text-dta-dark transition-colors group-hover:text-dta-accent sm:text-3xl">
+                  {featuredEvent.title}
+                </h2>
+
+                <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-dta-char/70">
+                  {featuredEvent.description}
+                </p>
+
+                {/* Metadata */}
+                <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-dta-taupe">
+                  <span className="flex items-center gap-1.5">
+                    <MapPin size={15} />
+                    {featuredEvent.venue}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Calendar size={15} />
+                    {formatDate(featuredEvent.date)}
+                  </span>
+                </div>
+
+                {/* Price */}
+                <p className="mt-5 text-sm text-dta-char/70">
+                  À partir de{" "}
+                  <span className="font-serif text-lg font-bold text-dta-accent">
+                    {formatPrice(lowestPrice(featuredEvent))}
+                  </span>
+                </p>
+
+                {/* Capacity bar */}
+                {featuredEvent.showCapacity && featuredEvent.capacity > 0 && (
+                  <div className="mt-4">
+                    <div className="mb-1.5 flex items-center justify-between text-xs text-dta-taupe">
+                      <span className="flex items-center gap-1">
+                        <Users size={13} />
+                        {remainingPlaces(featuredEvent)} places restantes
+                      </span>
+                      <span>{capacityPercent(featuredEvent)}% réservé</span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-[var(--radius-full)] bg-dta-beige">
+                      <div
+                        className="h-full rounded-[var(--radius-full)] bg-dta-accent transition-all"
+                        style={{
+                          width: `${Math.min(capacityPercent(featuredEvent), 100)}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* CTA */}
+                <div className="mt-6">
+                  <span className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors group-hover:bg-dta-accent-dark">
+                    Réserver
+                    <ArrowRight size={16} />
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        </Link>
+          </Link>
+
+          {/* Sidebar ads */}
+          <aside className="hidden lg:block">
+            <AdSlot page="EVENEMENTS" placement="SIDEBAR" />
+          </aside>
+        </div>
       )}
 
       {/* ── C. Upcoming Events Grid ────────────────────── */}
@@ -170,9 +178,13 @@ export default async function EvenementsPage() {
             Prochains événements
           </h3>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {upcomingEvents.map((event) => (
+            {upcomingEvents.map((event, index) => (
+              <React.Fragment key={event.id}>
+                {/* Ad card inserted at position 3 */}
+                {index === 2 && (
+                  <AdSlot page="EVENEMENTS" placement="IN_GRID" />
+                )}
               <Link
-                key={event.id}
                 href={`/evenements/${event.slug}`}
                 className="group rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card-hover)]"
               >
@@ -249,15 +261,14 @@ export default async function EvenementsPage() {
                   )}
                 </div>
               </Link>
+              </React.Fragment>
             ))}
           </div>
         </>
       )}
 
-      {/* ── Ad Inline ── */}
-      <div className="mt-10">
-        <AdSlot page="EVENEMENTS" placement="INLINE" />
-      </div>
+      {/* ── Ad Inline (entre grille et stats) ── */}
+      <AdSlot page="EVENEMENTS" placement="INLINE" className="mt-10" />
 
       {/* ── D. Info Strip ──────────────────────────────── */}
       <div className="mt-16 grid grid-cols-1 gap-4 rounded-[var(--radius-card)] bg-dta-beige/50 p-6 sm:grid-cols-3 sm:gap-6 sm:p-8">

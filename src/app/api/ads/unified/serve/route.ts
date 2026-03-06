@@ -11,6 +11,8 @@ export async function GET(request: Request) {
     const page = searchParams.get("page") as AdPage | null;
     const placement = searchParams.get("placement") as AdPlacement | null;
     const limit = parseInt(searchParams.get("limit") || "3");
+    const exclude = searchParams.get("exclude");
+    const excludeIds = exclude ? exclude.split(",").filter(Boolean) : [];
 
     if (!page || !VALID_PAGES.includes(page)) {
       return NextResponse.json({ error: "Page invalide." }, { status: 400 });
@@ -19,7 +21,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Placement invalide." }, { status: 400 });
     }
 
-    const ads = await serveAds(page, placement, Math.min(limit, 10));
+    const ads = await serveAds(page, placement, Math.min(limit, 10), excludeIds);
     return NextResponse.json(ads);
   } catch (error) {
     console.error("Unified ad serve error:", error);

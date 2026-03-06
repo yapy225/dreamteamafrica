@@ -61,11 +61,18 @@ export default async function MarketplacePage({
           ? { stock: "asc" }
           : { createdAt: "desc" };
 
-  const products = await prisma.product.findMany({
-    where,
-    include: { artisan: { select: { name: true, country: true } } },
-    orderBy,
-  });
+  const [products, featuredProduct] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      include: { artisan: { select: { name: true, country: true } } },
+      orderBy,
+    }),
+    prisma.product.findFirst({
+      where: { published: true },
+      include: { artisan: { select: { name: true, country: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
 
   /* ── Distinct values for filter pills ── */
   const allProducts = await prisma.product.findMany({
@@ -89,27 +96,52 @@ export default async function MarketplacePage({
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]">
-      {/* ── Hero Banner ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#FAFAF7] via-[#F5EDE4] to-[#E8D5C4] px-4 py-16 sm:py-24">
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C4704B' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }} />
-        <div className="relative mx-auto max-w-4xl text-center">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-[#C4704B]">
-            Dream Team Africa
-          </p>
-          <h1 className="mt-4 font-serif text-4xl font-bold text-[#2C2C2C] sm:text-5xl lg:text-6xl">
-            La Boutique Artisanale
-          </h1>
-          <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-[#6B6B6B]">
-            Des cr&eacute;ations uniques fa&ccedil;onn&eacute;es par les meilleurs artisans
-            africains&nbsp;&mdash; cosm&eacute;tiques naturels, accessoires, textiles et bien
-            plus.
-          </p>
-        </div>
-      </section>
+      {/* ── Featured Product Hero (2-column) ── */}
+      {featuredProduct && (
+        <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
+          <Link
+            href={`/marketplace/${featuredProduct.slug}`}
+            className="group block overflow-hidden rounded-2xl"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-[1.2fr_1fr]">
+              {/* Product image */}
+              <div className="relative min-h-[280px] overflow-hidden bg-[#F5F0EB] sm:min-h-[400px]">
+                {featuredProduct.images[0] && (
+                  <Image
+                    src={featuredProduct.images[0]}
+                    alt={featuredProduct.name}
+                    fill
+                    className="object-contain transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 640px) 100vw, 60vw"
+                    priority
+                  />
+                )}
+              </div>
+              {/* Product info */}
+              <div className="flex flex-col justify-center bg-[#2C2C2C] p-8 sm:p-12">
+                <span className="inline-block w-fit rounded bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/80">
+                  {featuredProduct.category}
+                </span>
+                <h2 className="mt-5 font-serif text-2xl font-bold leading-tight text-white sm:text-3xl lg:text-4xl">
+                  {featuredProduct.name}
+                </h2>
+                <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-white/70">
+                  {featuredProduct.description}
+                </p>
+                <div className="mt-6">
+                  <span className="inline-flex items-center rounded-full border border-white/30 px-7 py-3 text-sm font-medium text-white transition-colors group-hover:border-white group-hover:bg-white group-hover:text-[#2C2C2C]">
+                    D&eacute;couvrir
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </section>
+      )}
 
-      {/* ── Ad Banner Top ── */}
-      <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
-        <AdSlot page="MARKETPLACE" placement="BANNER_TOP" />
+      {/* ── 4-card Ad Grid ── */}
+      <div className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8">
+        <AdSlot page="MARKETPLACE" placement="IN_GRID" />
       </div>
 
       {/* ── Filters ── */}
@@ -147,12 +179,9 @@ export default async function MarketplacePage({
         ) : (
           <>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {products.map((product, idx) => {
+            {products.map((product) => {
               const badge = getBadge(product);
               return (<React.Fragment key={product.id}>
-                {idx === 4 && (
-                  <AdSlot page="MARKETPLACE" placement="IN_GRID" />
-                )}
                 <Link
                   href={`/marketplace/${product.slug}`}
                   className="group rounded-2xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
@@ -211,9 +240,9 @@ export default async function MarketplacePage({
             })}
           </div>
 
-          {/* Inline ad between products and footer */}
+          {/* Inline ad after products */}
           {products.length > 4 && (
-            <div className="mt-8">
+            <div className="mt-10">
               <AdSlot page="MARKETPLACE" placement="INLINE" />
             </div>
           )}

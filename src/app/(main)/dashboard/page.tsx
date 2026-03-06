@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Ticket, ShoppingBag, Newspaper, Megaphone, CalendarDays, BookOpen, BarChart3, Mail, Rss, Bot } from "lucide-react";
+import { Ticket, ShoppingBag, Newspaper, Megaphone, CalendarDays, BookOpen, BarChart3, Rss, Bot } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getRevenueData } from "@/lib/revenue";
@@ -85,13 +85,6 @@ export default async function DashboardPage() {
             label: "Pubs Journal",
             count: null,
             color: "bg-orange-100 text-orange-600",
-          },
-          {
-            href: "/dashboard/newsletter",
-            icon: Mail,
-            label: "Newsletter",
-            count: null,
-            color: "bg-cyan-100 text-cyan-600",
           },
           {
             href: "/dashboard/rss-feeds",

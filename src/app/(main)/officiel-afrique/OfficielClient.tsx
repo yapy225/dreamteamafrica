@@ -75,13 +75,6 @@ const HOW_STEPS = [
 ];
 
 
-const FAQ_ITEMS = [
-  { q: "L\u2019inscription est-elle vraiment gratuite ?", a: "Oui, l\u2019inscription de base est 100% gratuite et sans engagement. Votre entreprise sera visible dans l\u2019annuaire digital 2026. Des options de mise en avant premium (encart publicitaire, interview, logo\u2026) sont disponibles en option." },
-  { q: "Qui peut s\u2019inscrire dans l\u2019annuaire ?", a: "Toute entreprise, association, artiste, club sportif ou professionnel li\u00e9 \u00e0 la diaspora africaine : musique, restauration, mode, sport, ambassades, \u00e9v\u00e9nementiel, coop\u00e9ration, m\u00e9dias, services\u2026" },
-  { q: "Comment les particuliers trouvent-ils mon entreprise ?", a: "L\u2019annuaire est organis\u00e9 par cat\u00e9gories avec un moteur de recherche int\u00e9gr\u00e9. Les particuliers peuvent chercher par ville, cat\u00e9gorie, mot-cl\u00e9 ou nom d\u2019entreprise. Votre fiche compl\u00e8te s\u2019affiche avec toutes vos coordonn\u00e9es et r\u00e9seaux sociaux." },
-  { q: "Combien de temps pour la validation ?", a: "Notre \u00e9quipe \u00e9ditoriale v\u00e9rifie chaque inscription sous 48h ouvr\u00e9es. Vous recevez un email de confirmation d\u00e8s que votre fiche est active." },
-  { q: "Puis-je modifier mes informations apr\u00e8s ?", a: "Absolument ! Vous pouvez mettre \u00e0 jour vos coordonn\u00e9es, description, r\u00e9seaux sociaux et informations \u00e0 tout moment en nous contactant par email." },
-];
 
 // ─── HOOKS ────────────────────────────────────────────────
 
@@ -113,11 +106,6 @@ export default function OfficielClient() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [shaking, setShaking] = useState(false);
-  const [comments, setComments] = useState<{ name: string; text: string; date: string }[]>([]);
-  const [commentForm, setCommentForm] = useState({ name: "", email: "", text: "" });
-  const [nlEmail, setNlEmail] = useState("");
-  const [nlDone, setNlDone] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [heroSearch, setHeroSearch] = useState("");
 
   const [form, setForm] = useState({
@@ -511,6 +499,11 @@ export default function OfficielClient() {
         </div>
       </section>
 
+      {/* ═══ AD SIDEBAR ═══ */}
+      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 16px" }}>
+        <AdSlot page="OFFICIEL" placement="SIDEBAR" />
+      </div>
+
       {/* ═══ SOCIAL PROOF ═══ */}
       <section className={`${s.sec} ${s.secProof}`}>
         <div className={s.reveal}>
@@ -530,194 +523,6 @@ export default function OfficielClient() {
         <AdSlot page="OFFICIEL" placement="VIDEO_SLOT" />
       </div>
 
-      {/* ═══ AVIS CLIENTS ═══ */}
-      <section className={`${s.sec} ${s.secReviews}`}>
-        <div className={`${s.secHeader} ${s.reveal}`}>
-          <div className={s.secLabel}>Témoignages</div>
-          <h2 className={s.secTitle}>Ce qu&apos;ils disent de <span className={s.gold}>L&apos;Officiel</span></h2>
-        </div>
-        <div className={s.reviewGrid}>
-          {[
-            {
-              title: "Un outil révolutionnaire",
-              text: "L'Officiel d'Afrique comble un vide immense. Enfin un annuaire dédié à notre diaspora, pensé par et pour nous. L'interface digitale est moderne et l'accès aux contacts est d'une simplicité remarquable. C'est une vraie innovation !",
-              name: "Aminata Diallo",
-              role: "Directrice artistique — Label Wari Music",
-              stars: 5,
-            },
-            {
-              title: "Félicitations pour cet outil incroyable",
-              text: "Bravo à toute l'équipe ! Ce guide est exactement ce dont la communauté avait besoin. J'ai déjà pu connecter avec 3 nouveaux partenaires pour mes événements. L'annuaire est complet, bien organisé et très professionnel.",
-              name: "Ibrahima Koné",
-              role: "Organisateur d'événements — Sabar Events",
-              stars: 5,
-            },
-            {
-              title: "Y aura-t-il une version print ?",
-              text: "L'outil digital est fantastique, je l'utilise au quotidien pour trouver des contacts. Ma seule question : est-ce qu'une version papier est prévue ? Ce serait parfait à avoir sur mon bureau et à distribuer lors des salons professionnels.",
-              name: "Fatou Ndiaye",
-              role: "Chef de produit — Teranga Consulting",
-              stars: 4,
-            },
-          ].map((r, i) => (
-            <div key={i} className={`${s.reviewCard} ${s.reveal}`}>
-              <div className={s.reviewStars}>
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <span key={j} className={j < r.stars ? s.starFull : s.starEmpty}>★</span>
-                ))}
-              </div>
-              <h3 className={s.reviewTitle}>{r.title}</h3>
-              <p className={s.reviewText}>&ldquo;{r.text}&rdquo;</p>
-              <div className={s.reviewAuthor}>
-                <div className={s.reviewAvatar}>{r.name.charAt(0)}</div>
-                <div>
-                  <div className={s.reviewName}>{r.name}</div>
-                  <div className={s.reviewRole}>{r.role}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══ FAQ ═══ */}
-      <section className={`${s.sec} ${s.secFaq}`} id="faq">
-        <div className={`${s.secHeader} ${s.reveal}`}>
-          <div className={s.secLabel}>Questions fréquentes</div>
-          <h2 className={s.secTitle}>Tout savoir sur <span className={s.gold}>l&apos;inscription</span></h2>
-        </div>
-        <div className={s.faqList}>
-          {FAQ_ITEMS.map((item, i) => (
-            <div key={i} className={s.faqItem}>
-              <button className={s.faqQ} onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                {item.q}
-                <span className={`${s.faqArrow} ${openFaq === i ? s.faqArrowOpen : ""}`}>+</span>
-              </button>
-              <div className={`${s.faqA} ${openFaq === i ? s.faqAOpen : ""}`}>
-                <p>{item.a}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══ COMMENTAIRES ═══ */}
-      <section className={`${s.sec} ${s.secComments}`}>
-        <div className={`${s.secHeader} ${s.reveal}`}>
-          <div className={s.secLabel}>Votre avis compte</div>
-          <h2 className={s.secTitle}>Laissez un <span className={s.gold}>commentaire</span></h2>
-        </div>
-        <div className={s.commentWrap}>
-          <div className={`${s.commentFormCard} ${s.reveal}`}>
-            <div className={s.frow}>
-              <div className={s.fg}>
-                <label className={s.fgLabel}>Nom *</label>
-                <input
-                  className={s.fgInput}
-                  type="text"
-                  placeholder="Votre nom"
-                  value={commentForm.name}
-                  onChange={(e) => setCommentForm((p) => ({ ...p, name: e.target.value }))}
-                />
-              </div>
-              <div className={s.fg}>
-                <label className={s.fgLabel}>Email *</label>
-                <input
-                  className={s.fgInput}
-                  type="email"
-                  placeholder="votre@email.com"
-                  value={commentForm.email}
-                  onChange={(e) => setCommentForm((p) => ({ ...p, email: e.target.value }))}
-                />
-              </div>
-            </div>
-            <div className={s.fg}>
-              <label className={s.fgLabel}>Commentaire *</label>
-              <textarea
-                className={s.fgTextarea}
-                rows={4}
-                placeholder="Partagez votre avis sur L'Officiel d'Afrique…"
-                value={commentForm.text}
-                onChange={(e) => setCommentForm((p) => ({ ...p, text: e.target.value }))}
-              />
-            </div>
-            <button
-              className={s.btnGold}
-              onClick={() => {
-                if (!commentForm.name.trim() || !commentForm.email.trim() || !commentForm.text.trim()) return;
-                setComments((prev) => [
-                  {
-                    name: commentForm.name,
-                    text: commentForm.text,
-                    date: new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }),
-                  },
-                  ...prev,
-                ]);
-                setCommentForm({ name: "", email: "", text: "" });
-              }}
-            >
-              Publier mon commentaire
-            </button>
-          </div>
-
-          {comments.length > 0 && (
-            <div className={s.commentList}>
-              {comments.map((c, i) => (
-                <div key={i} className={s.commentItem}>
-                  <div className={s.commentHead}>
-                    <div className={s.reviewAvatar}>{c.name.charAt(0)}</div>
-                    <div>
-                      <div className={s.commentAuthorName}>{c.name}</div>
-                      <div className={s.commentDate}>{c.date}</div>
-                    </div>
-                  </div>
-                  <p className={s.commentBody}>{c.text}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ═══ NEWSLETTER ═══ */}
-      <section className={`${s.sec} ${s.secNewsletter}`}>
-        <div className={s.reveal}>
-          <div className={s.nlInner}>
-            <h2 className={s.nlTitle}>Restez informé</h2>
-            <p className={s.nlSub}>
-              Recevez les actualités de L&apos;Officiel d&apos;Afrique et les nouveautés de l&apos;édition 2026
-            </p>
-            {!nlDone ? (
-              <>
-                <div className={s.nlRow}>
-                  <input
-                    className={s.nlInput}
-                    type="email"
-                    placeholder="Votre adresse email"
-                    value={nlEmail}
-                    onChange={(e) => setNlEmail(e.target.value)}
-                  />
-                  <button
-                    className={s.nlBtn}
-                    onClick={() => {
-                      if (nlEmail.includes("@")) setNlDone(true);
-                    }}
-                  >
-                    S&apos;inscrire
-                  </button>
-                </div>
-                <p className={s.nlRgpd}>
-                  En vous inscrivant, vous acceptez de recevoir nos communications. Vous pouvez vous désabonner à tout moment. Conformément au RGPD, vos données sont traitées de manière sécurisée et ne sont jamais partagées avec des tiers.
-                </p>
-              </>
-            ) : (
-              <div className={s.nlSuccess}>
-                ✓ Inscription confirmée ! Vous recevrez nos prochaines actualités.
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* ═══ CTA FINAL ═══ */}
       <section className={s.secCta}>

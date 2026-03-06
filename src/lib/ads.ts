@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import type { AdPage, AdPlacement, AdPlan } from "@prisma/client";
 
-/** Priority multiplier per plan — ELITE gets 3× more impressions */
+/** Priority multiplier per plan — ELITE gets 3x more impressions */
 const PLAN_WEIGHT: Record<AdPlan, number> = {
   ELITE: 3,
   BUSINESS: 1,
@@ -35,13 +35,14 @@ export interface ServedAd {
 /**
  * Serve ads for a given page + placement.
  * - Filters by active, date range, matching page & placement
- * - Sorts by plan priority (ELITE first)
- * - Applies weighted rotation for fairness
+ * - Sorts by plan priority (ELITE first) with weighted rotation
+ * - Excludes specified campaign IDs (to avoid showing same ad in multiple slots)
  */
 export async function serveAds(
   page: AdPage,
   placement: AdPlacement,
-  limit = 3
+  limit = 3,
+  excludeIds: string[] = []
 ): Promise<ServedAd[]> {
   const now = new Date();
 
@@ -52,6 +53,7 @@ export async function serveAds(
       placements: { has: placement },
       startDate: { lte: now },
       OR: [{ endDate: null }, { endDate: { gte: now } }],
+      ...(excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {}),
     },
     select: {
       id: true,
@@ -65,6 +67,7 @@ export async function serveAds(
       targetUrl: true,
       ctaText: true,
       advertiserName: true,
+      impressions: true,
     },
     orderBy: { createdAt: "desc" },
   });
@@ -74,17 +77,24 @@ export async function serveAds(
     ? campaigns.filter((c) => c.plan === "ELITE")
     : campaigns;
 
-  // Weighted shuffle: each campaign gets weight based on plan
-  const weighted = filtered.map((c) => ({
-    ...c,
-    weight: PLAN_WEIGHT[c.plan] * (1 + Math.random()),
-    priority: PLAN_PRIORITY[c.plan],
-  }));
+  // Weighted shuffle: plan weight + inverse impression count for fairness
+  const maxImpressions = Math.max(1, ...filtered.map((c) => c.impressions));
+  const weighted = filtered.map((c) => {
+    const planW = PLAN_WEIGHT[c.plan];
+    // Less-seen ads get a boost (0.5 to 1.5 range)
+    const freshness = 1.5 - (c.impressions / maxImpressions);
+    const randomFactor = 0.8 + Math.random() * 0.4;
+    return {
+      ...c,
+      score: planW * freshness * randomFactor,
+      priority: PLAN_PRIORITY[c.plan],
+    };
+  });
 
-  // Sort by priority desc, then by weight desc
-  weighted.sort((a, b) => b.priority - a.priority || b.weight - a.weight);
+  // Sort by priority desc, then by score desc
+  weighted.sort((a, b) => b.priority - a.priority || b.score - a.score);
 
-  return weighted.slice(0, limit).map(({ weight: _w, priority: _p, ...ad }) => ad);
+  return weighted.slice(0, limit).map(({ score: _s, priority: _p, impressions: _i, ...ad }) => ad);
 }
 
 /**

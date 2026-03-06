@@ -359,6 +359,9 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ══ 4b. Ad Banner ══ */}
+      <AdSlot page="ACCUEIL" placement="BANNER_TOP" />
+
       {/* ══ 5. Marketplace ══ */}
       <section className="bg-dta-dark px-4 py-20 sm:py-28">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -581,7 +584,7 @@ export default async function Home() {
                 </div>
               )}
 
-              {/* Side articles */}
+              {/* Side articles + sidebar ad */}
               <div className="flex flex-col gap-4 lg:col-span-2">
                 {sideArticles.map((article) => (
                   <ArticleCard
@@ -591,6 +594,7 @@ export default async function Home() {
                     showLifecycleDay
                   />
                 ))}
+                <AdSlot page="ACCUEIL" placement="SIDEBAR" />
               </div>
             </div>
           ) : (

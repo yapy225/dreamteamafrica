@@ -7,6 +7,7 @@ import { formatDate, formatPrice } from "@/lib/utils";
 import TicketSelector from "./TicketSelector";
 import TicketSectionClient from "./TicketSectionClient";
 import ShareButton from "./ShareButton";
+import AdSlot from "@/components/ads/AdSlot";
 
 export const dynamic = "force-dynamic";
 
@@ -108,6 +109,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           <ShareButton />
         </div>
       </div>
+
+      {/* Ad — Banner Top */}
+      <AdSlot page="EVENEMENTS" placement="BANNER_TOP" />
 
       {/* B — Immersive Hero */}
       <div className="relative flex min-h-[70vh] items-end bg-dta-dark">
@@ -232,8 +236,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
             </div>
           </div>
 
-          {/* Right — Venue */}
-          <div className="lg:col-span-2">
+          {/* Right — Venue + Sidebar Ads */}
+          <div className="space-y-6 lg:col-span-2">
             <div className="rounded-[var(--radius-card)] bg-white p-8 shadow-[var(--shadow-card)]">
               <h2 className="font-serif text-2xl font-bold text-dta-dark">Lieu</h2>
               <div className="mt-4">
@@ -250,6 +254,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                 </a>
               </div>
             </div>
+            <AdSlot page="EVENEMENTS" placement="SIDEBAR" />
           </div>
         </div>
       </div>
@@ -374,6 +379,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           </div>
         );
       })()}
+
+      {/* Ad — Inline */}
+      <AdSlot page="EVENEMENTS" placement="INLINE" />
 
       {/* E — Tickets Section */}
       <div className="bg-dta-beige py-16">

@@ -1,14 +1,16 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight, MapPin, ArrowRight } from "lucide-react";
+import { ChevronRight, Truck, ShieldCheck, ShoppingCart } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { formatPrice } from "@/lib/utils";
 import AddToCartButton from "./AddToCartButton";
 import FavoriteButton from "./FavoriteButton";
-import ShareButton from "./ShareButton";
+import ImageGallery from "./ImageGallery";
 import ProductTabs from "./ProductTabs";
+import ShareButton from "./ShareButton";
+import AdSlot from "@/components/ads/AdSlot";
 
 export const dynamic = "force-dynamic";
 
@@ -69,31 +71,35 @@ export default async function ProductDetailPage({
     isFavorited = !!fav;
   }
 
-  const related = await prisma.product.findMany({
-    where: {
-      category: product.category,
-      published: true,
-      id: { not: product.id },
-    },
+  const relatedSelect = {
+    id: true,
+    slug: true,
+    name: true,
+    price: true,
+    images: true,
+    stock: true,
+    createdAt: true,
+    artisan: { select: { name: true, country: true } },
+  } as const;
+
+  // Same category first, then fill with other products to always have at least 4
+  const sameCategory = await prisma.product.findMany({
+    where: { category: product.category, published: true, id: { not: product.id } },
     take: 4,
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      price: true,
-      images: true,
-      stock: true,
-      createdAt: true,
-      artisan: { select: { name: true, country: true } },
-    },
+    select: relatedSelect,
   });
 
-  const initials = (product.artisan.name || "A")
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+  let related = sameCategory;
+  if (related.length < 4) {
+    const ids = [product.id, ...related.map((p) => p.id)];
+    const others = await prisma.product.findMany({
+      where: { published: true, id: { notIn: ids } },
+      take: 4 - related.length,
+      orderBy: { createdAt: "desc" },
+      select: relatedSelect,
+    });
+    related = [...related, ...others];
+  }
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -155,81 +161,131 @@ export default async function ProductDetailPage({
       </nav>
 
       {/* ── Product Hero — 2 columns ── */}
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-14">
-          {/* Left — Image */}
-          <div className="relative aspect-square overflow-hidden rounded-2xl bg-[#F5F0EB]">
-            {product.images[0] && (
-              <Image
-                src={product.images[0]}
-                alt={product.name}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                priority
-              />
-            )}
-            {/* Badge */}
-            {isNew && (
-              <span className="absolute left-4 top-4 rounded-full bg-[#5A7A62] px-4 py-1.5 text-xs font-semibold text-white shadow">
-                Nouveau
-              </span>
-            )}
-            {isBestseller && (
-              <span className="absolute left-4 top-4 rounded-full bg-[#C4704B] px-4 py-1.5 text-xs font-semibold text-white shadow">
-                Meilleures ventes
-              </span>
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px] lg:gap-12">
+          {/* Left — Image Gallery + Favorite + Recommandé */}
+          <div>
+            <div className="relative">
+              <ImageGallery images={product.images} name={product.name} category={product.category} />
+              {/* Favorite button */}
+              <div className="absolute right-4 top-4 z-10">
+                <FavoriteButton
+                  productId={product.id}
+                  initialFavorited={isFavorited}
+                  isLoggedIn={!!session}
+                />
+              </div>
+            </div>
+
+            {/* ── Recommandé pour vous ── */}
+            {related.length > 0 && (
+              <div className="mt-8">
+                <h2 className="text-base font-semibold text-[#2C2C2C]">
+                  Recommand&eacute; pour vous
+                </h2>
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  {related.slice(0, 2).map((p) => {
+                    const isRelNew =
+                      Date.now() - new Date(p.createdAt).getTime() <
+                      30 * 24 * 60 * 60 * 1000;
+                    return (
+                      <Link
+                        key={p.id}
+                        href={`/marketplace/${p.slug}`}
+                        className="group overflow-hidden rounded-xl border border-[#F0ECE7] bg-white transition-shadow hover:shadow-md"
+                      >
+                        <div className="relative aspect-[5/2] overflow-hidden bg-[#F5F0EB]">
+                          {p.images[0] && (
+                            <Image
+                              src={p.images[0]}
+                              alt={p.name}
+                              fill
+                              className="object-cover transition-transform duration-300 group-hover:scale-105"
+                              sizes="(max-width: 1024px) 45vw, 25vw"
+                            />
+                          )}
+                          {isRelNew && (
+                            <span className="absolute left-2 top-2 rounded bg-[#C4704B] px-1.5 py-0.5 text-[9px] font-bold uppercase text-white">
+                              Nouveau !
+                            </span>
+                          )}
+                        </div>
+                        <div className="p-3">
+                          <h3 className="line-clamp-2 text-sm font-medium leading-snug text-[#2C2C2C] transition-colors group-hover:text-[#C4704B]">
+                            {p.name}
+                          </h3>
+                          <p className="mt-1 text-xs text-[#999]">
+                            par {p.artisan.name}
+                          </p>
+                          <div className="mt-2 flex items-center justify-between">
+                            <p className="font-serif text-base font-bold text-[#2C2C2C]">
+                              {formatPrice(p.price)}
+                            </p>
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2C2C2C] text-white transition-colors hover:bg-[#C4704B]">
+                              <ShoppingCart size={14} />
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </div>
 
-          {/* Right — Details */}
-          <div className="flex flex-col justify-center">
-            {/* Category pill */}
-            <span className="inline-block w-fit rounded-full bg-[#F5F0EB] px-4 py-1.5 text-xs font-medium text-[#6B6B6B]">
-              {product.category}
-            </span>
+          {/* Right — Details (sticky) */}
+          <div className="flex flex-col lg:sticky lg:top-8 lg:self-start">
+            {/* Badge */}
+            {isNew && (
+              <span className="inline-block w-fit rounded border border-[#2C2C2C] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-[#2C2C2C]">
+                Nouveau !
+              </span>
+            )}
+            {isBestseller && (
+              <span className="inline-block w-fit rounded border border-[#C4704B] px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-[#C4704B]">
+                Meilleures ventes
+              </span>
+            )}
 
-            <h1 className="mt-4 font-serif text-3xl font-bold leading-tight text-[#2C2C2C] sm:text-4xl">
+            {/* Title */}
+            <h1 className={`text-[28px] font-extrabold leading-[1.2] text-[#2C2C2C] sm:text-[34px] ${isNew || isBestseller ? "mt-3" : ""}`}>
               {product.name}
             </h1>
 
-            {/* Artisan */}
-            <p className="mt-3 flex items-center gap-1.5 text-sm text-[#999]">
-              <MapPin size={14} />
-              par {product.artisan.name} &mdash; {product.artisan.country}
-            </p>
+            {/* Feature headline + bullet tags */}
+            <div className="mt-5">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-[#C4704B] underline underline-offset-4 decoration-[#C4704B]/30">
+                {product.category}
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-x-1 text-[11px] uppercase tracking-wider text-[#6B6B6B]">
+                <span>&bull; {product.artisan.name}</span>
+                {product.artisan.country && (
+                  <span>&nbsp;&nbsp;&bull; {product.artisan.country}</span>
+                )}
+              </div>
+            </div>
 
-            {/* Price */}
-            <p className="mt-6 font-serif text-3xl font-bold text-[#C4704B]">
-              {formatPrice(product.price)}
-            </p>
-
-            {/* Stock */}
-            <div className="mt-3">
-              {product.stock > 0 ? (
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[#5A7A62]">
-                  <span className="h-2 w-2 rounded-full bg-[#5A7A62]" />
-                  En stock ({product.stock} disponible
-                  {product.stock > 1 ? "s" : ""})
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-red-500">
-                  <span className="h-2 w-2 rounded-full bg-red-500" />
-                  Rupture de stock
-                </span>
+            {/* Description + Lire plus */}
+            <div className="mt-5">
+              <p className="text-[14px] leading-[1.75] text-[#4a4a4a]">
+                {product.description.length > 220
+                  ? product.description.slice(0, 220) + "..."
+                  : product.description}
+              </p>
+              {product.description.length > 220 && (
+                <p className="mt-1 cursor-pointer text-[14px] font-bold text-[#2C2C2C] hover:underline">
+                  Lire plus
+                </p>
               )}
             </div>
 
-            {/* Short description */}
-            <div className="mt-6 text-sm leading-relaxed text-[#6B6B6B]">
-              {product.description.length > 200
-                ? product.description.slice(0, 200) + "..."
-                : product.description}
-            </div>
+            {/* Separator */}
+            <div className="mt-6 border-t border-[#F0ECE7]" />
 
-            {/* Actions */}
-            <div className="mt-8 flex items-center gap-3">
-              {product.stock > 0 && (
+            {/* Add to Cart (quantity + price + button) */}
+            {product.stock > 0 ? (
+              <div className="mt-5">
                 <AddToCartButton
                   product={{
                     productId: product.id,
@@ -240,137 +296,120 @@ export default async function ProductDetailPage({
                     maxStock: product.stock,
                   }}
                 />
-              )}
-              <FavoriteButton
-                productId={product.id}
-                initialFavorited={isFavorited}
-                isLoggedIn={!!session}
-              />
+
+                {/* Stock info */}
+                <p className="mt-3 text-xs text-[#999]">
+                  {product.stock} article{product.stock > 1 ? "s" : ""} disponible{product.stock > 1 ? "s" : ""}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-5">
+                <p className="font-serif text-3xl font-bold text-[#2C2C2C]">
+                  {formatPrice(product.price)}
+                </p>
+                <p className="mt-2 text-sm font-medium text-red-500">
+                  Rupture de stock
+                </p>
+              </div>
+            )}
+
+            {/* Info box */}
+            <div className="mt-5 space-y-3 rounded-xl border border-[#F0ECE7] bg-[#FAFAF7] p-5">
+              <div className="flex items-start gap-3 text-sm text-[#6B6B6B]">
+                <Truck size={18} className="mt-0.5 shrink-0 text-[#999]" />
+                <p>
+                  Plus que <strong className="text-[#2C2C2C]">40&nbsp;&euro;</strong> pour b&eacute;n&eacute;ficier de la livraison gratuite !
+                </p>
+              </div>
+              <div className="flex items-start gap-3 text-sm text-[#6B6B6B]">
+                <ShieldCheck size={18} className="mt-0.5 shrink-0 text-[#999]" />
+                <p>
+                  Paiement <strong className="text-[#2C2C2C]">100% s&eacute;curis&eacute;</strong> CB, Visa, Mastercard, PayPal, Apple Pay, Google Pay
+                </p>
+              </div>
+            </div>
+
+            {/* Share */}
+            <div className="mt-4">
               <ShareButton />
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* ── Tabs Section ── */}
+      {/* ── Tabs + FAQ ── */}
       <section className="border-t border-[#F0ECE7]">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <ProductTabs description={product.description} />
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <ProductTabs
+            description={product.description}
+            category={product.category}
+            artisanName={product.artisan.name || ""}
+            artisanCountry={product.artisan.country}
+          />
         </div>
       </section>
 
-      {/* ── Artisan Card ── */}
-      <section className="bg-white px-4 py-14">
-        <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <h2 className="font-serif text-2xl font-bold text-[#2C2C2C]">
-            L&apos;artisan
-          </h2>
-          <div className="mt-6 rounded-2xl border border-[#F0ECE7] bg-[#FAFAF7] p-6 sm:p-8">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-[#C4704B] text-lg font-bold text-white">
-                {initials}
-              </div>
-              <div>
-                <p className="font-serif text-xl font-bold text-[#2C2C2C]">
-                  {product.artisan.name}
-                </p>
-                <p className="flex items-center gap-1 text-sm text-[#999]">
-                  <MapPin size={13} />
-                  {product.artisan.country}
-                </p>
-              </div>
-            </div>
-            {product.artisan.bio && (
-              <p className="mt-4 text-sm leading-relaxed text-[#6B6B6B]">
-                {product.artisan.bio}
-              </p>
-            )}
-            <Link
-              href={`/marketplace?country=${encodeURIComponent(product.artisan.country || "")}`}
-              className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-[#C4704B] transition-colors hover:text-[#A85D3B]"
-            >
-              Voir tous ses produits <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Related Products ── */}
+      {/* ── Produits associés ── */}
       {related.length > 0 && (
-        <section className="border-t border-[#F0ECE7] px-4 py-14">
+        <section className="border-t border-[#F0ECE7] bg-white px-4 py-12">
           <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between">
-              <h2 className="font-serif text-2xl font-bold text-[#2C2C2C] sm:text-3xl">
-                Vous aimerez aussi
-              </h2>
-              <Link
-                href="/marketplace"
-                className="hidden items-center gap-1 text-sm font-medium text-[#C4704B] transition-colors hover:text-[#A85D3B] sm:flex"
-              >
-                Tout voir <ArrowRight size={14} />
-              </Link>
-            </div>
-
-            <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-              {related.map((p) => {
+            <h2 className="text-2xl font-extrabold text-[#2C2C2C]">
+              Produits associ&eacute;s
+            </h2>
+            <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {related.slice(0, 4).map((p) => {
                 const isRelNew =
                   Date.now() - new Date(p.createdAt).getTime() <
                   30 * 24 * 60 * 60 * 1000;
-                const isRelBest = !isRelNew && p.stock <= 5 && p.stock > 0;
                 return (
                   <Link
                     key={p.id}
                     href={`/marketplace/${p.slug}`}
-                    className="group rounded-2xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                    className="group overflow-hidden rounded-xl border border-[#F0ECE7] bg-[#FAFAF7] transition-shadow hover:shadow-md"
                   >
-                    <div className="relative aspect-square overflow-hidden rounded-t-2xl bg-[#F5F0EB]">
+                    <div className="relative aspect-square overflow-hidden bg-[#F5F0EB]">
                       {p.images[0] && (
                         <Image
                           src={p.images[0]}
                           alt={p.name}
                           fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          sizes="(max-width: 640px) 50vw, 25vw"
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         />
                       )}
                       {isRelNew && (
-                        <span className="absolute left-2 top-2 rounded-full bg-[#5A7A62] px-2.5 py-0.5 text-[10px] font-semibold text-white">
-                          Nouveau
-                        </span>
-                      )}
-                      {isRelBest && (
-                        <span className="absolute left-2 top-2 rounded-full bg-[#C4704B] px-2.5 py-0.5 text-[10px] font-semibold text-white">
-                          Best-seller
+                        <span className="absolute left-2 top-2 rounded bg-[#C4704B] px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+                          Nouveau !
                         </span>
                       )}
                     </div>
-                    <div className="p-4">
-                      <h3 className="truncate font-serif text-sm font-semibold text-[#2C2C2C] transition-colors group-hover:text-[#C4704B]">
+                    <div className="p-3">
+                      <h3 className="line-clamp-2 text-sm font-medium leading-snug text-[#2C2C2C] transition-colors group-hover:text-[#C4704B]">
                         {p.name}
                       </h3>
                       <p className="mt-1 text-xs text-[#999]">
-                        par {p.artisan.name} &mdash; {p.artisan.country}
+                        par {p.artisan.name}
                       </p>
-                      <p className="mt-2 font-serif text-base font-bold text-[#C4704B]">
-                        {formatPrice(p.price)}
-                      </p>
+                      <div className="mt-2 flex items-center justify-between">
+                        <p className="font-serif text-base font-bold text-[#2C2C2C]">
+                          {formatPrice(p.price)}
+                        </p>
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2C2C2C] text-white transition-colors hover:bg-[#C4704B]">
+                          <ShoppingCart size={14} />
+                        </span>
+                      </div>
                     </div>
                   </Link>
                 );
               })}
             </div>
-
-            <div className="mt-6 text-center sm:hidden">
-              <Link
-                href="/marketplace"
-                className="text-sm font-medium text-[#C4704B]"
-              >
-                Voir toute la marketplace &rarr;
-              </Link>
-            </div>
           </div>
         </section>
       )}
+
+      {/* ── Ad Inline ── */}
+      <AdSlot page="MARKETPLACE" placement="INLINE" />
 
       {/* ── Footer CTA ── */}
       <section className="border-t border-[#F0ECE7] bg-white px-4 py-10">

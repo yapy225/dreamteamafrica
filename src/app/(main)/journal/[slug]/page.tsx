@@ -15,6 +15,7 @@ import ShareButton from "./ShareButton";
 import JournalNav from "@/components/journal/JournalNav";
 import Newsletter from "@/components/journal/Newsletter";
 import JournalFooter from "@/components/journal/JournalFooter";
+import AdSlot from "@/components/ads/AdSlot";
 
 export const dynamic = "force-dynamic";
 
@@ -100,6 +101,24 @@ export default async function ArticleDetailPage({
     include: { author: { select: { name: true } } },
   });
 
+  // Split content after the 2nd </p> to insert an inline ad between paragraphs
+  const contentHtml = article.content;
+  let contentPart1 = contentHtml;
+  let contentPart2 = "";
+  {
+    const closingTag = "</p>";
+    let idx = -1;
+    for (let i = 0; i < 2; i++) {
+      idx = contentHtml.indexOf(closingTag, idx + 1);
+      if (idx === -1) break;
+    }
+    if (idx !== -1) {
+      const splitAt = idx + closingTag.length;
+      contentPart1 = contentHtml.slice(0, splitAt);
+      contentPart2 = contentHtml.slice(splitAt);
+    }
+  }
+
   const initials = (article.author.name || "A")
     .split(" ")
     .map((w) => w[0])
@@ -145,6 +164,9 @@ export default async function ArticleDetailPage({
 
       {/* Journal Nav */}
       <JournalNav />
+
+      {/* Ad Banner Top */}
+      <AdSlot page="JOURNAL" placement="BANNER_TOP" />
 
       {/* Article Hero */}
       <section className="relative min-h-[50vh] overflow-hidden bg-dta-dark">
@@ -238,13 +260,41 @@ export default async function ArticleDetailPage({
         </div>
       </section>
 
-      {/* Article Body */}
+      {/* Article Body + Portrait Sidebar Ad */}
       <article className="px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-3xl">
-          <div
-            className="prose prose-lg max-w-none text-dta-char/85 prose-headings:text-dta-char prose-h1:text-2xl prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-p:mb-6 prose-p:leading-[1.9] prose-a:text-dta-accent prose-strong:text-dta-char first-letter:float-left first-letter:mr-2 first-letter:font-serif first-letter:text-5xl first-letter:font-bold first-letter:leading-[0.8] first-letter:text-dta-accent"
-            dangerouslySetInnerHTML={{ __html: article.content }}
-          />
+        <div className="mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_300px]">
+            {/* Article content */}
+            <div className="mx-auto w-full max-w-3xl lg:mx-0">
+              {/* First 2 paragraphs */}
+              <div
+                className="prose prose-lg max-w-none text-dta-char/85 prose-headings:text-dta-char prose-h1:text-2xl prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-p:mb-6 prose-p:leading-[1.9] prose-a:text-dta-accent prose-strong:text-dta-char first-letter:float-left first-letter:mr-2 first-letter:font-serif first-letter:text-5xl first-letter:font-bold first-letter:leading-[0.8] first-letter:text-dta-accent"
+                dangerouslySetInnerHTML={{ __html: contentPart1 }}
+              />
+
+              {/* Inline ad between paragraphs */}
+              {contentPart2 && (
+                <div className="my-8">
+                  <AdSlot page="JOURNAL" placement="INLINE" />
+                </div>
+              )}
+
+              {/* Remaining paragraphs */}
+              {contentPart2 && (
+                <div
+                  className="prose prose-lg max-w-none text-dta-char/85 prose-headings:text-dta-char prose-h1:text-2xl prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-p:mb-6 prose-p:leading-[1.9] prose-a:text-dta-accent prose-strong:text-dta-char"
+                  dangerouslySetInnerHTML={{ __html: contentPart2 }}
+                />
+              )}
+            </div>
+
+            {/* Portrait sidebar ad (9:16 — 1080×1920) */}
+            <aside className="hidden lg:block">
+              <div className="sticky top-8">
+                <AdSlot page="JOURNAL" placement="SIDEBAR" />
+              </div>
+            </aside>
+          </div>
         </div>
       </article>
 
@@ -280,7 +330,7 @@ export default async function ArticleDetailPage({
       {/* Newsletter */}
       <Newsletter />
 
-      {/* Related Articles */}
+      {/* Related Articles + Sidebar Ad */}
       {related.length > 0 && (
         <section className="px-4 py-16">
           <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -335,6 +385,11 @@ export default async function ArticleDetailPage({
                   </Link>
                 );
               })}
+            </div>
+
+            {/* Single ad after related articles */}
+            <div className="mt-8">
+              <AdSlot page="JOURNAL" placement="IN_GRID" />
             </div>
 
             <div className="mt-6 text-center sm:hidden">

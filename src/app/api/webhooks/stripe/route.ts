@@ -36,7 +36,14 @@ export async function POST(request: Request) {
       await handleOrderPurchase(session);
     } else if (metadata?.type === "ad_subscription") {
       await handleAdSubscription(session);
+    } else if (metadata?.type === "exhibitor") {
+      await handleExhibitorBooking(session);
     }
+  }
+
+  if (event.type === "invoice.paid") {
+    const invoice = event.data.object as Stripe.Invoice;
+    await handleExhibitorInstallment(invoice);
   }
 
   return NextResponse.json({ received: true });
@@ -135,4 +142,53 @@ async function handleAdSubscription(session: Stripe.Checkout.Session) {
   });
 
   console.log(`Activated ad campaign ${campaignId}, subscription: ${session.subscription}`);
+}
+
+async function handleExhibitorBooking(session: Stripe.Checkout.Session) {
+  const { bookingId, installments } = session.metadata!;
+  if (!bookingId) return;
+
+  const isOneTime = installments === "1";
+
+  await prisma.exhibitorBooking.update({
+    where: { id: bookingId },
+    data: {
+      stripeSessionId: session.id,
+      stripeSubscriptionId: isOneTime ? null : (session.subscription as string),
+      paidInstallments: 1,
+      status: isOneTime ? "CONFIRMED" : "PARTIAL",
+    },
+  });
+
+  console.log(
+    `Exhibitor booking ${bookingId}: ${isOneTime ? "CONFIRMED (1x)" : "PARTIAL (1/" + installments + ")"}`
+  );
+}
+
+async function handleExhibitorInstallment(invoice: Stripe.Invoice) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const subscription = (invoice as any).subscription as string | null;
+  if (!subscription) return;
+
+  // Find booking by subscription ID
+  const booking = await prisma.exhibitorBooking.findFirst({
+    where: { stripeSubscriptionId: subscription },
+  });
+
+  if (!booking) return;
+
+  const newPaid = booking.paidInstallments + 1;
+  const isComplete = newPaid >= booking.installments;
+
+  await prisma.exhibitorBooking.update({
+    where: { id: booking.id },
+    data: {
+      paidInstallments: newPaid,
+      status: isComplete ? "CONFIRMED" : "PARTIAL",
+    },
+  });
+
+  console.log(
+    `Exhibitor installment ${booking.id}: ${newPaid}/${booking.installments} ${isComplete ? "→ CONFIRMED" : ""}`
+  );
 }

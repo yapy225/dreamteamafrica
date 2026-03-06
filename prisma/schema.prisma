@@ -98,6 +98,19 @@ enum ArticleStatus {
   ARCHIVED
 }
 
+enum ExhibitorPack {
+  ENTREPRENEUR
+  RESTAURATION
+  SAISON
+}
+
+enum BookingStatus {
+  PENDING
+  PARTIAL
+  CONFIRMED
+  CANCELLED
+}
+
 enum JournalAdPlacement {
   BANNER
   INLINE
@@ -130,6 +143,7 @@ model User {
   favorites   Favorite[]
   adCampaigns     AdCampaign[]
   officielContents OfficielContent[]
+  exhibitorBookings ExhibitorBooking[]
 }
 
 model Account {
@@ -242,7 +256,8 @@ model Event {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  tickets Ticket[]
+  tickets      Ticket[]
+  reservations EventReservation[]
 
   @@index([date])
 }
@@ -559,4 +574,61 @@ model NewsletterSubscriber {
   email        String   @unique
   isActive     Boolean  @default(true)
   subscribedAt DateTime @default(now())
+}
+
+// ─── RÉSERVATIONS GRATUITES ─────────────────────────────
+
+model EventReservation {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
+  firstName   String
+  lastName    String
+  email       String
+  phone       String
+  guests      Int      @default(1)
+  status      String   @default("CONFIRMED") // CONFIRMED | CANCELLED
+  createdAt   DateTime @default(now())
+
+  @@index([eventId])
+  @@index([email])
+}
+
+// ─── BILLETTERIE EXPOSANTS ─────────────────────────────
+
+model ExhibitorBooking {
+  id                   String         @id @default(cuid())
+  userId               String
+  user                 User           @relation(fields: [userId], references: [id])
+
+  // Infos exposant
+  companyName          String
+  contactName          String
+  email                String
+  phone                String
+  sector               String
+
+  // Réservation
+  pack                 ExhibitorPack
+  events               String[]       // ["foire-afrique", "juste-une-danse", ...]
+  totalDays            Int
+  totalPrice           Float
+
+  // Paiement fractionné
+  installments         Int            @default(1)  // 1 à 5
+  installmentAmount    Float
+  paidInstallments     Int            @default(0)
+
+  // Stripe
+  stripeSessionId      String?
+  stripeSubscriptionId String?
+
+  // Statut
+  status               BookingStatus  @default(PENDING)
+
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([status])
 }

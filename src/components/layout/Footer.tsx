@@ -20,8 +20,18 @@ const footerSections = [
     ],
   },
   {
+    title: "Devenir Exposant",
+    links: [
+      { href: "/resa-exposants/foire-afrique", label: "Foire d'Afrique Paris" },
+      { href: "/resa-exposants/juste-une-danse", label: "Juste Une Danse" },
+      { href: "/resa-exposants/festival-conte-africain", label: "Festival du Conte Africain" },
+      { href: "/resa-exposants/salon-made-in-africa", label: "Salon Made In Africa" },
+    ],
+  },
+  {
     title: "Professionnels",
     links: [
+      { href: "/exposants", label: "Tous les packs exposants" },
       { href: "/auth/signup?role=artisan", label: "Devenir artisan" },
       { href: "/ads", label: "DTA Ads" },
       { href: "/dashboard", label: "Espace pro" },
@@ -33,7 +43,7 @@ export default function Footer() {
   return (
     <footer aria-label="Pied de page" className="border-t border-dta-sand/50 bg-dta-beige">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand */}
           <div>
             <Link href="/" className="inline-block">

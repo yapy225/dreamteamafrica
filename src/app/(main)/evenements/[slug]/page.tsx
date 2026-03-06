@@ -6,8 +6,14 @@ import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
 import TicketSelector from "./TicketSelector";
 import TicketSectionClient from "./TicketSectionClient";
+import FreeReservationForm from "@/components/events/FreeReservationForm";
 import ShareButton from "./ShareButton";
 import AdSlot from "@/components/ads/AdSlot";
+
+const FREE_EVENT_IDS = [
+  "cmm767c1m0008ti7933a7kqoq", // Festival de l'Autre Culture
+  "cmm767c1m0007ti79g90z3vdf", // FICA
+];
 
 export const dynamic = "force-dynamic";
 
@@ -39,13 +45,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   const event = await prisma.event.findUnique({
     where: { slug },
     include: {
-      _count: { select: { tickets: true } },
+      _count: { select: { tickets: true, reservations: true } },
     },
   });
 
   if (!event) notFound();
 
-  const soldCount = event._count.tickets;
+  const isFreeEvent = FREE_EVENT_IDS.includes(event.id);
+  const soldCount = isFreeEvent ? event._count.reservations : event._count.tickets;
   const remaining = event.capacity - soldCount;
   const soldOut = remaining <= 0;
   const progressPercent = Math.min(100, Math.round((soldCount / event.capacity) * 100));
@@ -83,13 +90,20 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
       address: { "@type": "PostalAddress", streetAddress: event.address },
     },
     ...(event.coverImage && { image: event.coverImage }),
-    offers: {
-      "@type": "AggregateOffer",
-      lowPrice: Math.min(event.priceEarly, event.priceStd, event.priceVip),
-      highPrice: Math.max(event.priceEarly, event.priceStd, event.priceVip),
-      priceCurrency: "EUR",
-      availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
-    },
+    offers: isFreeEvent
+      ? {
+          "@type": "Offer",
+          price: 0,
+          priceCurrency: "EUR",
+          availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+        }
+      : {
+          "@type": "AggregateOffer",
+          lowPrice: Math.min(event.priceEarly, event.priceStd, event.priceVip),
+          highPrice: Math.max(event.priceEarly, event.priceStd, event.priceVip),
+          priceCurrency: "EUR",
+          availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+        },
     organizer: { "@type": "Organization", name: "Dream Team Africa" },
   };
 
@@ -383,100 +397,144 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
       {/* Ad — Inline */}
       <AdSlot page="EVENEMENTS" placement="INLINE" />
 
-      {/* E — Tickets Section */}
+      {/* E — Tickets / Reservation Section */}
       <div className="bg-dta-beige py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="font-serif text-3xl font-bold text-dta-dark">Billetterie</h2>
-            <p className="mt-2 text-sm text-dta-char/70">
-              {Array.isArray(event.program) && event.program.length > 0
-                ? "Choisissez votre séance puis votre formule"
-                : "Choisissez votre formule et réservez vos places"}
-            </p>
-          </div>
-
-          {/* Capacity progress bar */}
-          {event.showCapacity && (
-            <div className="mx-auto mt-8 max-w-md">
-              <div className="flex items-center justify-between text-xs text-dta-taupe">
-                <span>{soldCount} vendus</span>
-                <span>{event.capacity} places</span>
+          {isFreeEvent ? (
+            <>
+              <div className="text-center">
+                <h2 className="font-serif text-3xl font-bold text-dta-dark">R&eacute;servation</h2>
+                <p className="mt-2 text-sm text-dta-char/70">
+                  Entr&eacute;e gratuite sur r&eacute;servation — places limit&eacute;es
+                </p>
               </div>
-              <div className="mt-1.5 h-2 overflow-hidden rounded-[var(--radius-full)] bg-dta-sand">
-                <div
-                  className="h-full rounded-[var(--radius-full)] bg-dta-accent transition-all duration-500"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-              <p className="mt-1.5 text-center text-xs font-medium text-dta-char/60">
-                {remaining > 0
-                  ? `${remaining} places restantes`
-                  : "Complet"}
-              </p>
-            </div>
-          )}
 
-          {/* Ticket tiers — with or without session selector */}
-          {Array.isArray(event.program) && event.program.length > 0 ? (
-            <TicketSectionClient
-              eventId={event.id}
-              eventSlug={event.slug}
-              tiers={tiers}
-              soldOut={soldOut}
-              sessions={(event.program as Array<{date:string;time:string;venue:string;address:string;title:string;type:string;pricing:string}>)}
-            />
-          ) : (
-            <div className="mt-10">
-              {soldOut ? (
-                <div className="mx-auto max-w-md rounded-[var(--radius-card)] bg-white p-8 text-center shadow-[var(--shadow-card)]">
-                  <p className="font-serif text-2xl font-bold text-dta-dark">Complet</p>
-                  <p className="mt-3 text-sm text-dta-char/70">
-                    Cet événement affiche complet. Inscrivez-vous pour être notifié en cas de désistement.
+              {event.showCapacity && (
+                <div className="mx-auto mt-8 max-w-md">
+                  <div className="flex items-center justify-between text-xs text-dta-taupe">
+                    <span>{soldCount} r&eacute;serv&eacute;es</span>
+                    <span>{event.capacity} places</span>
+                  </div>
+                  <div className="mt-1.5 h-2 overflow-hidden rounded-[var(--radius-full)] bg-dta-sand">
+                    <div
+                      className="h-full rounded-[var(--radius-full)] bg-dta-accent transition-all duration-500"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                  <p className="mt-1.5 text-center text-xs font-medium text-dta-char/60">
+                    {remaining > 0
+                      ? `${remaining} places restantes`
+                      : "Complet"}
                   </p>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                  {tiers.map((tier) => (
+              )}
+
+              <div className="mx-auto mt-10 max-w-lg">
+                {soldOut ? (
+                  <div className="rounded-[var(--radius-card)] bg-white p-8 text-center shadow-[var(--shadow-card)]">
+                    <p className="font-serif text-2xl font-bold text-dta-dark">Complet</p>
+                    <p className="mt-3 text-sm text-dta-char/70">
+                      Toutes les places ont &eacute;t&eacute; r&eacute;serv&eacute;es.
+                    </p>
+                  </div>
+                ) : (
+                  <FreeReservationForm eventId={event.id} eventTitle={event.title} />
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-center">
+                <h2 className="font-serif text-3xl font-bold text-dta-dark">Billetterie</h2>
+                <p className="mt-2 text-sm text-dta-char/70">
+                  {Array.isArray(event.program) && event.program.length > 0
+                    ? "Choisissez votre séance puis votre formule"
+                    : "Choisissez votre formule et réservez vos places"}
+                </p>
+              </div>
+
+              {event.showCapacity && (
+                <div className="mx-auto mt-8 max-w-md">
+                  <div className="flex items-center justify-between text-xs text-dta-taupe">
+                    <span>{soldCount} vendus</span>
+                    <span>{event.capacity} places</span>
+                  </div>
+                  <div className="mt-1.5 h-2 overflow-hidden rounded-[var(--radius-full)] bg-dta-sand">
                     <div
-                      key={tier.id}
-                      className={`rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-200 ${
-                        tier.highlight
-                          ? "ring-2 ring-dta-accent md:scale-105"
-                          : ""
-                      }`}
-                    >
-                      {tier.highlight && (
-                        <span className="mb-3 inline-block rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
-                          Populaire
-                        </span>
-                      )}
-                      <div className="flex items-baseline justify-between">
-                        <h3 className="font-serif text-lg font-bold text-dta-dark">{tier.name}</h3>
-                        <span className="font-serif text-2xl font-bold text-dta-accent">
-                          {formatPrice(tier.price)}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-xs text-dta-char/60">{tier.description}</p>
-                      <ul className="mt-4 space-y-2">
-                        {tier.features.map((f) => (
-                          <li key={f} className="flex items-center gap-2 text-xs text-dta-char/70">
-                            <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-dta-accent" />
-                            {f}
-                          </li>
-                        ))}
-                      </ul>
-                      <TicketSelector
-                        eventId={event.id}
-                        eventSlug={event.slug}
-                        tier={tier.id}
-                        price={tier.price}
-                        highlight={tier.highlight}
-                      />
-                    </div>
-                  ))}
+                      className="h-full rounded-[var(--radius-full)] bg-dta-accent transition-all duration-500"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                  <p className="mt-1.5 text-center text-xs font-medium text-dta-char/60">
+                    {remaining > 0
+                      ? `${remaining} places restantes`
+                      : "Complet"}
+                  </p>
                 </div>
               )}
-            </div>
+
+              {Array.isArray(event.program) && event.program.length > 0 ? (
+                <TicketSectionClient
+                  eventId={event.id}
+                  eventSlug={event.slug}
+                  tiers={tiers}
+                  soldOut={soldOut}
+                  sessions={(event.program as Array<{date:string;time:string;venue:string;address:string;title:string;type:string;pricing:string}>)}
+                />
+              ) : (
+                <div className="mt-10">
+                  {soldOut ? (
+                    <div className="mx-auto max-w-md rounded-[var(--radius-card)] bg-white p-8 text-center shadow-[var(--shadow-card)]">
+                      <p className="font-serif text-2xl font-bold text-dta-dark">Complet</p>
+                      <p className="mt-3 text-sm text-dta-char/70">
+                        Cet événement affiche complet. Inscrivez-vous pour être notifié en cas de désistement.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                      {tiers.map((tier) => (
+                        <div
+                          key={tier.id}
+                          className={`rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-200 ${
+                            tier.highlight
+                              ? "ring-2 ring-dta-accent md:scale-105"
+                              : ""
+                          }`}
+                        >
+                          {tier.highlight && (
+                            <span className="mb-3 inline-block rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
+                              Populaire
+                            </span>
+                          )}
+                          <div className="flex items-baseline justify-between">
+                            <h3 className="font-serif text-lg font-bold text-dta-dark">{tier.name}</h3>
+                            <span className="font-serif text-2xl font-bold text-dta-accent">
+                              {formatPrice(tier.price)}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-dta-char/60">{tier.description}</p>
+                          <ul className="mt-4 space-y-2">
+                            {tier.features.map((f) => (
+                              <li key={f} className="flex items-center gap-2 text-xs text-dta-char/70">
+                                <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-dta-accent" />
+                                {f}
+                              </li>
+                            ))}
+                          </ul>
+                          <TicketSelector
+                            eventId={event.id}
+                            eventSlug={event.slug}
+                            tier={tier.id}
+                            price={tier.price}
+                            highlight={tier.highlight}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

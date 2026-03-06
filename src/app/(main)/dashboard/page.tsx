@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Ticket, ShoppingBag, Newspaper, Megaphone, CalendarDays, BookOpen, BarChart3, Rss, Bot, Search } from "lucide-react";
+import { Ticket, ShoppingBag, Newspaper, Megaphone, CalendarDays, BookOpen, BarChart3, Rss, Bot, Search, Store, ClipboardList } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getRevenueData } from "@/lib/revenue";
@@ -99,6 +99,20 @@ export default async function DashboardPage() {
             label: "Articles detectes (IA)",
             count: null,
             color: "bg-violet-100 text-violet-600",
+          },
+          {
+            href: "/dashboard/exposants",
+            icon: Store,
+            label: "Billetterie Exposants",
+            count: null,
+            color: "bg-emerald-100 text-emerald-600",
+          },
+          {
+            href: "/dashboard/reservations",
+            icon: ClipboardList,
+            label: "Réservations gratuites",
+            count: null,
+            color: "bg-lime-100 text-lime-600",
           },
           {
             href: "/dashboard/seo",

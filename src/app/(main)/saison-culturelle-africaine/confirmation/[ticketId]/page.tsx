@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Script from "next/script";
 import { CheckCircle, Calendar, MapPin, Download } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
@@ -67,8 +68,30 @@ export default async function ConfirmationPage({
   }
 
   const event = finalTickets[0].event;
+  const totalAmount = finalTickets.reduce((sum, t) => sum + t.price, 0);
 
   return (
+    <>
+      <Script id="ticket-conversion" strategy="afterInteractive">{`
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: 'purchase',
+          ecommerce: {
+            transaction_id: '${ticketId}',
+            value: ${totalAmount},
+            currency: 'EUR',
+            items: [{
+              item_name: '${event.title.replace(/'/g, "\\'")}',
+              item_category: 'Billet',
+              price: ${finalTickets[0].price},
+              quantity: ${finalTickets.length}
+            }]
+          }
+        });
+        if(typeof fbq==='function'){
+          fbq('track','Purchase',{value:${totalAmount},currency:'EUR',content_name:'${event.title.replace(/'/g, "\\'")}',content_type:'product'});
+        }
+      `}</Script>
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
       {/* Success header */}
       <div className="mb-8 text-center">
@@ -159,5 +182,6 @@ export default async function ConfirmationPage({
         </Link>
       </div>
     </div>
+    </>
   );
 }

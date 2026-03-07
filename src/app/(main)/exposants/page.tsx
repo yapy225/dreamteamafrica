@@ -150,7 +150,7 @@ export default function ExposantsPage() {
                 </div>
 
                 <Link
-                  href={pack.id === "SAISON" ? "/exposants/reservation?pack=SAISON" : `/resa-exposants/foire-afrique?pack=${pack.id}`}
+                  href={pack.id === "SAISON" ? "/exposants/reservation?pack=SAISON" : `/resa-exposants/foire-dafrique-paris?pack=${pack.id}`}
                   className={`mt-6 block w-full rounded-[var(--radius-button)] px-4 py-3 text-center text-sm font-semibold transition-all ${
                     pack.highlight
                       ? "bg-dta-accent text-white hover:bg-dta-accent-dark"

@@ -88,17 +88,50 @@ export default async function ArticleDetailPage({
     ? { background: GRADIENT_MAP[article.gradientClass] }
     : undefined;
 
-  // Related articles
-  const related = await prisma.article.findMany({
+  // Related articles: first by shared tags, then by category
+  const tagRelated = article.tags.length > 0
+    ? await prisma.article.findMany({
+        where: {
+          id: { not: article.id },
+          status: "PUBLISHED",
+          tags: { hasSome: article.tags },
+        },
+        take: 3,
+        orderBy: { views: "desc" },
+        include: { author: { select: { name: true } } },
+      })
+    : [];
+
+  const categoryRelated = await prisma.article.findMany({
     where: {
       category: article.category,
-      id: { not: article.id },
+      id: { notIn: [article.id, ...tagRelated.map((a) => a.id)] },
       status: "PUBLISHED",
     },
-    take: 3,
+    take: Math.max(0, 3 - tagRelated.length),
     orderBy: { publishedAt: "desc" },
     include: { author: { select: { name: true } } },
   });
+
+  const related = [...tagRelated, ...categoryRelated].slice(0, 3);
+
+  // Cross-link: upcoming events for internal linking
+  const upcomingEvents = await prisma.event.findMany({
+    where: { published: true, date: { gte: new Date() } },
+    select: { title: true, slug: true, date: true },
+    orderBy: { date: "asc" },
+    take: 3,
+  });
+
+  // Category slug mapping for breadcrumb
+  const categorySlugMap: Record<string, string> = {
+    ACTUALITE: "actualite",
+    CULTURE: "culture",
+    DIASPORA: "diaspora",
+    BUSINESS: "business",
+    LIFESTYLE: "lifestyle",
+    OPINION: "opinion",
+  };
 
   const contentHtml = article.content;
 
@@ -147,6 +180,43 @@ export default async function ArticleDetailPage({
 
       {/* Journal Nav */}
       <JournalNav />
+
+      {/* Breadcrumb with Schema.org */}
+      <nav aria-label="Fil d'Ariane" className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+        <ol className="flex flex-wrap items-center gap-1.5 text-xs text-dta-sand/70 sm:text-sm" itemScope itemType="https://schema.org/BreadcrumbList">
+          <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+            <Link href="/" itemProp="item" className="hover:text-dta-accent">
+              <span itemProp="name">Accueil</span>
+            </Link>
+            <meta itemProp="position" content="1" />
+          </li>
+          <li className="text-dta-sand/40">/</li>
+          <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+            <Link href="/lafropeen" itemProp="item" className="hover:text-dta-accent">
+              <span itemProp="name">L&apos;Afropeen</span>
+            </Link>
+            <meta itemProp="position" content="2" />
+          </li>
+          {catConfig && (
+            <>
+              <li className="text-dta-sand/40">/</li>
+              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+                <Link href={`/lafropeen/categorie/${categorySlugMap[article.category]}`} itemProp="item" className="hover:text-dta-accent">
+                  <span itemProp="name">{catConfig.label}</span>
+                </Link>
+                <meta itemProp="position" content="3" />
+              </li>
+            </>
+          )}
+          <li className="text-dta-sand/40">/</li>
+          <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+            <span itemProp="name" className="line-clamp-1 max-w-[200px] text-white/90">
+              {article.title}
+            </span>
+            <meta itemProp="position" content={catConfig ? "4" : "3"} />
+          </li>
+        </ol>
+      </nav>
 
       {/* Article Hero */}
       <section className="relative min-h-[50vh] overflow-hidden bg-dta-dark">
@@ -249,6 +319,67 @@ export default async function ArticleDetailPage({
           />
         </div>
       </article>
+
+      {/* Tags + Category link */}
+      {(article.tags.length > 0 || catConfig) && (
+        <div className="border-t border-dta-sand/30 px-4 py-8 sm:px-6">
+          <div className="mx-auto max-w-3xl">
+            {catConfig && (
+              <div className="mb-4">
+                <Link
+                  href={`/lafropeen/categorie/${categorySlugMap[article.category]}`}
+                  className={`inline-block rounded-[var(--radius-full)] px-3 py-1 text-sm font-medium transition-all hover:scale-105 ${catConfig.badge}`}
+                >
+                  Tous les articles {catConfig.label}
+                </Link>
+              </div>
+            )}
+            {article.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {article.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-[var(--radius-full)] bg-dta-bg px-3 py-1 text-xs text-dta-taupe"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Cross-links to upcoming events */}
+      {upcomingEvents.length > 0 && (
+        <section className="bg-dta-accent/5 px-4 py-10">
+          <div className="mx-auto max-w-3xl">
+            <h2 className="font-serif text-lg font-bold text-dta-dark">
+              Nos prochains &eacute;v&eacute;nements
+            </h2>
+            <div className="mt-4 space-y-3">
+              {upcomingEvents.map((evt) => (
+                <Link
+                  key={evt.slug}
+                  href={`/saison-culturelle-africaine/${evt.slug}`}
+                  className="flex items-center justify-between rounded-[var(--radius-card)] bg-white px-5 py-3 shadow-sm transition-all hover:shadow-[var(--shadow-card)] hover:-translate-y-0.5"
+                >
+                  <span className="font-medium text-dta-dark">{evt.title}</span>
+                  <span className="shrink-0 text-sm text-dta-taupe">
+                    {new Date(evt.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <Link
+              href="/saison-culturelle-africaine"
+              className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-dta-accent hover:text-dta-accent-dark"
+            >
+              Voir tous les &eacute;v&eacute;nements <ArrowRight size={14} />
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* Author Card */}
       <section className="bg-dta-beige px-4 py-14">

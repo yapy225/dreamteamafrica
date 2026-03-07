@@ -9,7 +9,7 @@ import {
   formatDate,
 } from "@/lib/exhibitor-events";
 
-const INSTALLMENT_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+const INSTALLMENT_OPTIONS = [1, 2, 3] as const;
 
 const inputClass =
   "w-full rounded-[var(--radius-input)] border border-dta-sand bg-dta-bg px-4 py-2.5 text-sm text-dta-dark placeholder:text-dta-taupe focus:border-dta-accent focus:outline-none focus:ring-1 focus:ring-dta-accent";
@@ -30,7 +30,8 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const totalPrice = event.days * pack.pricePerDay;
+  const effectiveDays = pack.id === "ENTREPRENEUR_1J" ? 1 : event.days;
+  const totalPrice = effectiveDays * pack.pricePerDay;
   const installmentAmount = Math.ceil((totalPrice / installments) * 100) / 100;
 
   const canSubmit =
@@ -44,6 +45,28 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
     e.preventDefault();
     if (!canSubmit) return;
     setError("");
+
+    // Facebook Pixel + GTM tracking
+    if (typeof window !== "undefined") {
+      if (typeof (window as any).fbq === "function") {
+        (window as any).fbq("track", "InitiateCheckout", {
+          value: totalPrice,
+          currency: "EUR",
+          content_name: `Stand Exposant — ${pack.name}`,
+          content_type: "product",
+        });
+      }
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({
+        event: "begin_checkout",
+        ecommerce: {
+          value: totalPrice,
+          currency: "EUR",
+          items: [{ item_name: pack.name, item_category: "Stand Exposant", price: totalPrice, quantity: 1 }],
+        },
+      });
+    }
+
     setLoading(true);
 
     try {
@@ -116,7 +139,8 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
         </legend>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {SINGLE_PACKS.map((p) => {
-            const price = event.days * p.pricePerDay;
+            const days = p.id === "ENTREPRENEUR_1J" ? 1 : event.days;
+            const price = days * p.pricePerDay;
             const selected = pack.id === p.id;
             return (
               <button
@@ -152,7 +176,7 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
                     {formatter.format(price)}
                   </span>
                   <span className="text-xs text-dta-taupe">
-                    ({p.pricePerDay} &euro;/jour &times; {event.days}j)
+                    ({p.pricePerDay} &euro;/jour &times; {days}j)
                   </span>
                 </div>
 

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Calendar, MapPin, Users, Ticket, ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
-import DiscoverMore from "@/components/sections/DiscoverMore";
 
 export const dynamic = "force-dynamic";
 
@@ -306,7 +305,6 @@ export default async function EvenementsPage() {
         </p>
       </div>
 
-      <DiscoverMore exclude="evenements" />
     </div>
   );
 }

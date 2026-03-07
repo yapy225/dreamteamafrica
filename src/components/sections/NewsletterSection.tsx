@@ -72,7 +72,7 @@ export default function NewsletterSection() {
           <Mail className="h-6 w-6 text-dta-accent-light" />
         </div>
         <h2 className="font-serif text-3xl font-bold text-white sm:text-4xl">
-          Restez informé de nos prochaines croisières
+          Restez informé de nos prochains événements
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-white/50">
           Recevez en avant-première nos dates de balades, offres spéciales et

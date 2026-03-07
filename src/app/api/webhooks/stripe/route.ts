@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { getStripe, Stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import QRCode from "qrcode";
+import { sendThankYouEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -142,6 +143,23 @@ async function handleExhibitorBooking(session: Stripe.Checkout.Session) {
   console.log(
     `Exhibitor booking ${bookingId}: ${isOneTime ? "CONFIRMED (1x)" : "PARTIAL (1/" + installments + ")"}`
   );
+
+  // Send thank you email
+  const booking = await prisma.exhibitorBooking.findUnique({ where: { id: bookingId } });
+  if (booking) {
+    try {
+      await sendThankYouEmail({
+        to: booking.email,
+        contactName: booking.contactName,
+        companyName: booking.companyName,
+        totalPrice: booking.totalPrice,
+        installments: booking.installments,
+        isFullyPaid: isOneTime,
+      });
+    } catch (emailErr) {
+      console.error("Thank you email failed:", emailErr);
+    }
+  }
 }
 
 async function handleExhibitorInstallment(invoice: Stripe.Invoice) {

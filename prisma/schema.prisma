@@ -63,6 +63,7 @@ enum ArticleStatus {
 }
 
 enum ExhibitorPack {
+  ENTREPRENEUR_1J
   ENTREPRENEUR
   RESTAURATION
   SAISON

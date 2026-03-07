@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import { notFound } from "next/navigation";
 import { Calendar, MapPin, Users, Clock, ArrowLeft, ExternalLink, Film, Music, Mic2 } from "lucide-react";
 import { prisma } from "@/lib/db";
@@ -114,6 +115,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   };
 
   return (
+    <>
+      <Script id="fb-viewcontent" strategy="afterInteractive">{`
+        if(typeof fbq==='function'){
+          fbq('track','ViewContent',{content_name:'${event.title.replace(/'/g, "\\'")}',content_type:'product',content_ids:['${event.id}'],value:${event.priceEarly},currency:'EUR'});
+        }
+        window.dataLayer=window.dataLayer||[];
+        window.dataLayer.push({event:'view_item',ecommerce:{items:[{item_name:'${event.title.replace(/'/g, "\\'")}',item_category:'Evenement',price:${event.priceEarly}}]}});
+      `}</Script>
     <div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* A — Navigation Bar */}
@@ -602,5 +611,6 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
         </div>
       </div>
     </div>
+    </>
   );
 }

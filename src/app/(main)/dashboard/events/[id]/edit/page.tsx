@@ -6,6 +6,17 @@ import EventForm from "../../EventForm";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Modifier l'événement" };
 
+function toParisDatetimeString(date: Date): string {
+  const parts = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "Europe/Paris",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}`;
+}
+
 export default async function EditEventPage({
   params,
 }: {
@@ -35,9 +46,9 @@ export default async function EditEventPage({
             venue: event.venue,
             address: event.address,
             venues: (event.venues as Array<{name:string;address:string}>) ?? null,
-            date: event.date.toISOString().slice(0, 16),
+            date: toParisDatetimeString(event.date),
             endDate: event.endDate
-              ? event.endDate.toISOString().slice(0, 16)
+              ? toParisDatetimeString(event.endDate)
               : null,
             capacity: event.capacity,
             showCapacity: event.showCapacity,

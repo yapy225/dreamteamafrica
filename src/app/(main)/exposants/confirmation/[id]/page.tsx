@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Script from "next/script";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { CheckCircle, CalendarDays, Building2, CreditCard } from "lucide-react";
@@ -36,6 +37,28 @@ export default async function ConfirmationPage({
   });
 
   return (
+    <>
+      <Script id="conversion-tracking" strategy="afterInteractive">{`
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: 'purchase',
+          ecommerce: {
+            transaction_id: '${booking.id}',
+            value: ${booking.totalPrice},
+            currency: 'EUR',
+            items: [{
+              item_name: '${pack?.name ?? booking.pack}',
+              item_category: 'Stand Exposant',
+              price: ${booking.totalPrice},
+              quantity: 1
+            }]
+          }
+        });
+        if(typeof fbq==='function'){
+          fbq('track','Purchase',{value:${booking.totalPrice},currency:'EUR',content_name:'Stand Exposant',content_type:'product'});
+        }
+      `}</Script>
     <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
       <div className="text-center">
         <CheckCircle size={48} className="mx-auto text-green-500" />
@@ -181,5 +204,6 @@ export default async function ConfirmationPage({
         </Link>
       </div>
     </div>
+    </>
   );
 }

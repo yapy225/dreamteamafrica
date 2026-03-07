@@ -7,6 +7,7 @@ import {
   EXHIBITOR_PACKS,
   calculatePrice,
 } from "@/lib/exhibitor-events";
+import { sendQuoteEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
 
     // Validate installments
     const nbInstallments = Number(installments);
-    if (nbInstallments < 1 || nbInstallments > 10) {
+    if (nbInstallments < 1 || nbInstallments > 3) {
       return NextResponse.json(
         { error: "Nombre d'échéances invalide." },
         { status: 400 }
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
         email: email.trim(),
         phone: phone.trim(),
         sector: sector.trim(),
-        pack: pack as "ENTREPRENEUR" | "RESTAURATION" | "SAISON",
+        pack: pack as "ENTREPRENEUR_1J" | "ENTREPRENEUR" | "RESTAURATION" | "SAISON",
         events: eventIds,
         totalDays,
         totalPrice,
@@ -90,6 +91,24 @@ export async function POST(request: Request) {
         status: "PENDING",
       },
     });
+
+    // Send quote email instantly
+    try {
+      await sendQuoteEmail({
+        to: email.trim(),
+        contactName: contactName.trim(),
+        companyName: companyName.trim(),
+        eventTitle: eventNames,
+        packName: selectedPack.name,
+        totalDays,
+        totalPrice,
+        installments: nbInstallments,
+        installmentAmount,
+        bookingId: booking.id,
+      });
+    } catch (emailErr) {
+      console.error("Quote email failed (non-blocking):", emailErr);
+    }
 
     const stripe = getStripe();
 

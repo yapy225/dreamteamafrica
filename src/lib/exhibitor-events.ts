@@ -11,13 +11,13 @@ export interface ExhibitorEvent {
 
 export const EXHIBITOR_EVENTS: ExhibitorEvent[] = [
   {
-    id: "foire-afrique",
+    id: "foire-dafrique-paris",
     title: "Foire d'Afrique Paris 2026",
     date: "2026-05-01",
     endDate: "2026-05-02",
     days: 2,
     venue: "Espace MAS",
-    address: "Paris 13e",
+    address: "10 rue des terres au curé, Paris 13e",
     hours: "12h – 22h",
   },
   {
@@ -51,7 +51,7 @@ export const EXHIBITOR_EVENTS: ExhibitorEvent[] = [
 ];
 
 export interface ExhibitorPackInfo {
-  id: "ENTREPRENEUR" | "RESTAURATION" | "SAISON";
+  id: "ENTREPRENEUR_1J" | "ENTREPRENEUR" | "RESTAURATION" | "SAISON";
   name: string;
   pricePerDay: number;
   description: string;
@@ -61,8 +61,19 @@ export interface ExhibitorPackInfo {
 
 export const EXHIBITOR_PACKS: ExhibitorPackInfo[] = [
   {
+    id: "ENTREPRENEUR_1J",
+    name: "Pack Entrepreneur 1 jour",
+    pricePerDay: 190,
+    description: "Stand exposant 2 m² pour 1 journée — idéal pour tester",
+    kit: [
+      "1 table (1,50 m x 0,60 m)",
+      "2 chaises",
+      "2 badges exposants",
+    ],
+  },
+  {
     id: "ENTREPRENEUR",
-    name: "Pack Entrepreneur",
+    name: "Pack Entrepreneur 2 jours",
     pricePerDay: 160,
     description: "Stand exposant 2 m² — idéal pour présenter vos produits et services",
     kit: [
@@ -73,7 +84,7 @@ export const EXHIBITOR_PACKS: ExhibitorPackInfo[] = [
   },
   {
     id: "RESTAURATION",
-    name: "Pack Restauration",
+    name: "Pack Restauration 2 jours",
     pricePerDay: 500,
     description: "Espace restauration — pour les traiteurs et food entrepreneurs",
     kit: [
@@ -110,7 +121,10 @@ export function calculatePrice(
   }
 
   const selectedEvents = EXHIBITOR_EVENTS.filter((e) => eventIds.includes(e.id));
-  const totalDays = selectedEvents.reduce((sum, e) => sum + e.days, 0);
+  // Pack 1 jour = 1 jour par événement, sinon tous les jours de l'événement
+  const totalDays = packId === "ENTREPRENEUR_1J"
+    ? selectedEvents.length
+    : selectedEvents.reduce((sum, e) => sum + e.days, 0);
   return { totalDays, totalPrice: totalDays * pack.pricePerDay };
 }
 

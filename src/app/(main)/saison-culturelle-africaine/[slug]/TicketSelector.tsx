@@ -26,6 +26,27 @@ export default function TicketSelector({ eventId, tier, price, highlight, sessio
       return;
     }
 
+    // Facebook Pixel + GTM tracking
+    if (typeof window !== "undefined") {
+      if (typeof (window as any).fbq === "function") {
+        (window as any).fbq("track", "InitiateCheckout", {
+          value: price * quantity,
+          currency: "EUR",
+          content_type: "product",
+          num_items: quantity,
+        });
+      }
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({
+        event: "begin_checkout",
+        ecommerce: {
+          value: price * quantity,
+          currency: "EUR",
+          items: [{ item_category: "Billet", price, quantity }],
+        },
+      });
+    }
+
     setLoading(true);
     try {
       const res = await fetch("/api/checkout/tickets", {

@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db";
 import { groupArticlesByZone, getZoneLabel } from "@/lib/journal";
 import type { JournalZone } from "@/lib/journal";
 
+import Link from "next/link";
+import { CATEGORY_CONFIG } from "@/lib/journal";
 import JournalNav from "@/components/journal/JournalNav";
 import HeroCarousel from "@/components/journal/HeroCarousel";
 import LifecycleBar from "@/components/journal/LifecycleBar";
@@ -11,6 +13,15 @@ import ArchivesGrid from "@/components/journal/ArchivesGrid";
 import Newsletter from "@/components/journal/Newsletter";
 import JournalFooter from "@/components/journal/JournalFooter";
 import DiscoverMore from "@/components/sections/DiscoverMore";
+
+const CATEGORY_SLUGS = [
+  { slug: "actualite", key: "ACTUALITE" },
+  { slug: "culture", key: "CULTURE" },
+  { slug: "diaspora", key: "DIASPORA" },
+  { slug: "business", key: "BUSINESS" },
+  { slug: "lifestyle", key: "LIFESTYLE" },
+  { slug: "opinion", key: "OPINION" },
+];
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +78,22 @@ export default async function JournalPage() {
           uneArticles={zones.UNE.length > 0 ? zones.UNE : zones.FACE_UNE}
           faceUneArticles={zones.UNE.length > 0 ? zones.FACE_UNE : zones.PAGES_4_5}
         />
+
+        {/* Category Navigation — Internal Linking */}
+        <nav className="flex flex-wrap justify-center gap-2" aria-label="Rubriques">
+          {CATEGORY_SLUGS.map(({ slug, key }) => {
+            const config = CATEGORY_CONFIG[key];
+            return (
+              <Link
+                key={slug}
+                href={`/lafropeen/categorie/${slug}`}
+                className={`rounded-[var(--radius-full)] px-4 py-1.5 text-sm font-medium transition-all hover:scale-105 ${config?.badge ?? "bg-gray-100 text-gray-700"}`}
+              >
+                {config?.label ?? slug}
+              </Link>
+            );
+          })}
+        </nav>
 
         {/* Lifecycle Bar */}
         <LifecycleBar activeZone={firstActiveZone} />

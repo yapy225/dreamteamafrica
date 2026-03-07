@@ -36,6 +36,23 @@ export default function FreeReservationForm({
     e.preventDefault();
     if (!canSubmit) return;
     setError("");
+
+    // Facebook Pixel + GTM tracking
+    if (typeof window !== "undefined") {
+      if (typeof (window as any).fbq === "function") {
+        (window as any).fbq("track", "Lead", {
+          content_name: eventTitle,
+          content_category: "Réservation gratuite",
+        });
+      }
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({
+        event: "generate_lead",
+        event_name: eventTitle,
+        num_guests: guests,
+      });
+    }
+
     setLoading(true);
 
     try {

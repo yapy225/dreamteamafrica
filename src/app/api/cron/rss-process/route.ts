@@ -15,7 +15,9 @@ import { generateCoverImage } from "@/lib/generate-cover-image";
 
 export const maxDuration = 300;
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+function getOpenAI() {
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
 
 const SCORE_SYSTEM_PROMPT = `Role : Analyste de tendances pour le media "L'Afropeen".
 Mission : Evaluer le POTENTIEL THEMATIQUE d'un sujet a partir d'un signal faible (resume RSS).
@@ -135,7 +137,7 @@ export async function GET(request: Request) {
           data: { status: "SCORED" },
         });
 
-        const scoreResponse = await openai.chat.completions.create({
+        const scoreResponse = await getOpenAI().chat.completions.create({
           model: "gpt-4o-mini",
           messages: [
             { role: "system", content: SCORE_SYSTEM_PROMPT },
@@ -188,7 +190,7 @@ Reponds uniquement sous ce format exact :
           data: { score, scoreReason, status: "REWRITING" },
         });
 
-        const rewriteResponse = await openai.chat.completions.create({
+        const rewriteResponse = await getOpenAI().chat.completions.create({
           model: "gpt-4o-mini",
           messages: [
             {

@@ -1,14 +1,16 @@
 import OpenAI from "openai";
 import { uploadBuffer } from "./bunny";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+function getOpenAI() {
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
 
 /**
  * Use GPT-4 Vision to describe the original image,
  * then build a DALL-E prompt from that description.
  */
 async function describeImage(imageUrl: string, title: string): Promise<string> {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: "gpt-4o",
     messages: [
       {
@@ -82,7 +84,7 @@ export async function generateCoverImage(
       prompt = buildFallbackPrompt(title, category);
     }
 
-    const response = await openai.images.generate({
+    const response = await getOpenAI().images.generate({
       model: "dall-e-3",
       prompt,
       n: 1,

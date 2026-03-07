@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 const FROM_EMAIL = process.env.EMAIL_FROM ?? "Dream Team Africa <onboarding@resend.dev>";
 
@@ -82,7 +84,7 @@ export async function sendQuoteEmail(opts: {
 </body>
 </html>`;
 
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM_EMAIL,
     to: opts.to,
     subject: `Devis Exposant — ${opts.packName} — ${opts.eventTitle}`,
@@ -147,7 +149,7 @@ export async function sendThankYouEmail(opts: {
 </body>
 </html>`;
 
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM_EMAIL,
     to: opts.to,
     subject: opts.isFullyPaid

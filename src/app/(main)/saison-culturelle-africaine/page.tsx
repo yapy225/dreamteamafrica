@@ -1,16 +1,42 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, MapPin, Users, Ticket, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, Users, Ticket, ArrowRight, Newspaper, ShoppingBag, Store } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
+
 export const metadata = {
-  title: "Événements",
+  title: "Saison Culturelle Africaine 2026 — Événements à Paris",
   description:
-    "Découvrez les événements culturels africains à Paris — Saison 2026",
+    "7 événements culturels africains à Paris d'avril à décembre 2026 : festivals, foires, salons. Cinéma, danse, conte, artisanat, gastronomie. Réservez vos places.",
+  keywords: [
+    "événements africains Paris",
+    "saison culturelle africaine 2026",
+    "festival africain Paris",
+    "foire Afrique Paris",
+    "culture africaine",
+    "billetterie événements africains",
+    "diaspora africaine Paris",
+  ],
+  openGraph: {
+    title: "Saison Culturelle Africaine 2026 — Paris",
+    description: "7 rendez-vous exceptionnels célébrant la culture africaine à Paris. Festivals, foires, salons — d'avril à décembre 2026.",
+    type: "website",
+    url: `${siteUrl}/saison-culturelle-africaine`,
+    images: [{ url: `${siteUrl}/logo-dta.png`, width: 800, height: 800, alt: "Dream Team Africa" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Saison Culturelle Africaine 2026 — Paris",
+    description: "7 événements culturels africains à Paris. Réservez vos places.",
+  },
+  alternates: {
+    canonical: `${siteUrl}/saison-culturelle-africaine`,
+  },
 };
 
 export default async function EvenementsPage() {
@@ -39,8 +65,67 @@ export default async function EvenementsPage() {
     return Math.max(0, e.capacity - e._count.tickets);
   }
 
+  // Schema.org EventSeries JSON-LD
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "EventSeries",
+    name: "Saison Culturelle Africaine 2026",
+    description: "7 événements culturels africains à Paris d'avril à décembre 2026",
+    organizer: { "@type": "Organization", name: "Dream Team Africa", url: siteUrl },
+    location: { "@type": "City", name: "Paris", addressCountry: "FR" },
+    startDate: events[0]?.date.toISOString(),
+    endDate: events[events.length - 1]?.date.toISOString(),
+    subEvent: events.map((e) => ({
+      "@type": "Event",
+      name: e.title,
+      startDate: e.date.toISOString(),
+      url: `${siteUrl}/saison-culturelle-africaine/${e.slug}`,
+      location: { "@type": "Place", name: e.venue, address: e.address },
+      ...(e.coverImage && { image: e.coverImage }),
+      offers: {
+        "@type": "AggregateOffer",
+        lowPrice: lowestPrice(e),
+        priceCurrency: "EUR",
+        availability: remaining(e) > 0 ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
+      },
+    })),
+  };
+
+  // Recent articles for cross-linking
+  const recentArticles = await prisma.article.findMany({
+    where: { status: "PUBLISHED" },
+    select: { title: true, slug: true, category: true },
+    orderBy: { publishedAt: "desc" },
+    take: 4,
+  });
+
+  function remaining(e: (typeof events)[number]) {
+    if (!e.capacity) return e.capacity;
+    return Math.max(0, e.capacity - e._count.tickets);
+  }
+
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      {/* Breadcrumb */}
+      <nav aria-label="Fil d'Ariane" className="mb-8">
+        <ol className="flex flex-wrap items-center gap-1.5 text-sm text-dta-taupe" itemScope itemType="https://schema.org/BreadcrumbList">
+          <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+            <Link href="/" itemProp="item" className="hover:text-dta-accent">
+              <span itemProp="name">Accueil</span>
+            </Link>
+            <meta itemProp="position" content="1" />
+          </li>
+          <li className="text-dta-sand">/</li>
+          <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+            <span itemProp="name" className="font-medium text-dta-dark">Saison Culturelle Africaine</span>
+            <meta itemProp="position" content="2" />
+          </li>
+        </ol>
+      </nav>
+
       {/* ── A. Page Header ─────────────────────────────── */}
       <div className="mb-14 text-center">
         <h1 className="font-serif text-4xl font-bold text-dta-dark sm:text-5xl">
@@ -292,7 +377,75 @@ export default async function EvenementsPage() {
         </div>
       </div>
 
-      {/* ── E. Footer CTA ─────────────────────────────── */}
+      {/* ── E. Cross-links — Maillage interne ────────── */}
+      <div className="mt-16 border-t border-dta-sand pt-12">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+          {/* Link to journal */}
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <Newspaper size={18} className="text-dta-accent" />
+              <h3 className="font-serif text-lg font-bold text-dta-dark">L&apos;Afropeen</h3>
+            </div>
+            <p className="mb-3 text-sm text-dta-char/70">
+              Suivez l&apos;actualit&eacute; de la culture africaine dans notre journal.
+            </p>
+            <ul className="space-y-1.5">
+              {recentArticles.map((a) => (
+                <li key={a.slug}>
+                  <Link
+                    href={`/lafropeen/${a.slug}`}
+                    className="line-clamp-1 text-sm text-dta-char/80 transition-colors hover:text-dta-accent"
+                  >
+                    {a.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/lafropeen"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-dta-accent hover:text-dta-accent-dark"
+            >
+              Tous les articles <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          {/* Link to marketplace */}
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <ShoppingBag size={18} className="text-dta-accent" />
+              <h3 className="font-serif text-lg font-bold text-dta-dark">Made in Africa</h3>
+            </div>
+            <p className="mb-3 text-sm text-dta-char/70">
+              D&eacute;couvrez notre s&eacute;lection d&apos;artisanat africain authentique.
+            </p>
+            <Link
+              href="/made-in-africa"
+              className="inline-flex items-center gap-1 text-sm font-medium text-dta-accent hover:text-dta-accent-dark"
+            >
+              Explorer la marketplace <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          {/* Link to exposants */}
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <Store size={18} className="text-dta-accent" />
+              <h3 className="font-serif text-lg font-bold text-dta-dark">Devenir exposant</h3>
+            </div>
+            <p className="mb-3 text-sm text-dta-char/70">
+              R&eacute;servez votre stand pour la Foire d&apos;Afrique Paris et les salons de la saison.
+            </p>
+            <Link
+              href="/exposants"
+              className="inline-flex items-center gap-1 text-sm font-medium text-dta-accent hover:text-dta-accent-dark"
+            >
+              En savoir plus <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* ── F. Footer CTA ─────────────────────────────── */}
       <div className="mt-12 text-center">
         <p className="text-sm text-dta-char/70">
           Des questions ?{" "}
@@ -306,5 +459,6 @@ export default async function EvenementsPage() {
       </div>
 
     </div>
+    </>
   );
 }

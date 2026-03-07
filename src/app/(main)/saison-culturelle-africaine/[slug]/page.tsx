@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
 import { notFound } from "next/navigation";
-import { Calendar, MapPin, Users, Clock, ArrowLeft, ExternalLink, Film, Music, Mic2 } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, ArrowLeft, ArrowRight, ExternalLink, Film, Music, Mic2, Newspaper, Store } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
 import TicketSelector from "./TicketSelector";
@@ -17,18 +17,22 @@ const FREE_EVENT_IDS = [
 
 export const dynamic = "force-dynamic";
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const event = await prisma.event.findUnique({ where: { slug } });
   if (!event) return { title: "Événement introuvable" };
   const description = event.description.slice(0, 160);
   return {
-    title: event.title,
+    title: `${event.title} — Saison Culturelle Africaine 2026`,
     description,
+    keywords: [event.title, "événement africain Paris", event.venue, "saison culturelle africaine 2026", "billetterie"],
     openGraph: {
       title: event.title,
       description,
       type: "website",
+      url: `${siteUrl}/saison-culturelle-africaine/${slug}`,
       ...(event.coverImage && { images: [{ url: event.coverImage, width: 1200, height: 630, alt: event.title }] }),
     },
     twitter: {
@@ -36,6 +40,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title: event.title,
       description,
       ...(event.coverImage && { images: [event.coverImage] }),
+    },
+    alternates: {
+      canonical: `${siteUrl}/saison-culturelle-africaine/${slug}`,
     },
   };
 }
@@ -77,6 +84,22 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   const endDate = event.endDate ? new Date(event.endDate) : null;
   const multiVenues = event.venues as Array<{ name: string; address: string }> | null;
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venue + " " + event.address)}`;
+
+  // Other events for internal linking
+  const otherEvents = await prisma.event.findMany({
+    where: { published: true, id: { not: event.id } },
+    select: { title: true, slug: true, date: true, venue: true, coverImage: true, priceEarly: true, priceStd: true, priceVip: true },
+    orderBy: { date: "asc" },
+    take: 4,
+  });
+
+  // Related articles for cross-linking
+  const relatedArticles = await prisma.article.findMany({
+    where: { status: "PUBLISHED" },
+    select: { title: true, slug: true },
+    orderBy: { views: "desc" },
+    take: 3,
+  });
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -138,6 +161,32 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           <ShareButton />
         </div>
       </div>
+
+      {/* Breadcrumb */}
+      <nav aria-label="Fil d'Ariane" className="mx-auto max-w-7xl px-4 pt-3 sm:px-6 lg:px-8">
+        <ol className="flex flex-wrap items-center gap-1.5 text-xs text-dta-taupe" itemScope itemType="https://schema.org/BreadcrumbList">
+          <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+            <Link href="/" itemProp="item" className="hover:text-dta-accent">
+              <span itemProp="name">Accueil</span>
+            </Link>
+            <meta itemProp="position" content="1" />
+          </li>
+          <li className="text-dta-sand">/</li>
+          <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+            <Link href="/saison-culturelle-africaine" itemProp="item" className="hover:text-dta-accent">
+              <span itemProp="name">Saison Culturelle</span>
+            </Link>
+            <meta itemProp="position" content="2" />
+          </li>
+          <li className="text-dta-sand">/</li>
+          <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+            <span itemProp="name" className="line-clamp-1 max-w-[200px] font-medium text-dta-dark">
+              {event.title}
+            </span>
+            <meta itemProp="position" content="3" />
+          </li>
+        </ol>
+      </nav>
 
       {/* B — Immersive Hero */}
       <div className="relative flex min-h-[70vh] items-end bg-dta-dark">
@@ -592,22 +641,121 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
         </div>
       </div>
 
-      {/* F — Final CTA */}
+      {/* F — Autres événements (maillage interne) */}
+      {otherEvents.length > 0 && (
+        <div className="bg-dta-bg py-14">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h2 className="font-serif text-2xl font-bold text-dta-dark">
+              Autres &eacute;v&eacute;nements de la saison
+            </h2>
+            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {otherEvents.map((evt) => (
+                <Link
+                  key={evt.slug}
+                  href={`/saison-culturelle-africaine/${evt.slug}`}
+                  className="group overflow-hidden rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card-hover)]"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-dta-accent/15 to-dta-sand">
+                    {evt.coverImage && (
+                      <Image
+                        src={evt.coverImage}
+                        alt={evt.title}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
+                    )}
+                    <div className="absolute left-2 top-2 rounded-[var(--radius-button)] bg-white/90 px-2 py-1 text-center backdrop-blur-sm">
+                      <span className="block text-[10px] font-bold uppercase text-dta-accent">
+                        {new Date(evt.date).toLocaleDateString("fr-FR", { month: "short" })}
+                      </span>
+                      <span className="block font-serif text-lg font-bold text-dta-dark">
+                        {new Date(evt.date).getDate()}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="line-clamp-2 text-sm font-semibold text-dta-dark transition-colors group-hover:text-dta-accent">
+                      {evt.title}
+                    </h3>
+                    <p className="mt-1.5 flex items-center gap-1 text-xs text-dta-taupe">
+                      <MapPin size={11} />
+                      {evt.venue}
+                    </p>
+                    <p className="mt-1 text-xs font-medium text-dta-accent">
+                      {Math.min(evt.priceEarly, evt.priceStd, evt.priceVip) === 0
+                        ? "Gratuit"
+                        : `Dès ${formatPrice(Math.min(evt.priceEarly, evt.priceStd, evt.priceVip))}`}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* G — Cross-links */}
       <div className="bg-white py-12">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="text-sm text-dta-char/60">
-            Des questions ?{" "}
-            <Link href="/nous-contacter" className="font-medium text-dta-accent hover:text-dta-accent-dark">
-              Contactez-nous
-            </Link>
-          </p>
-          <Link
-            href="/saison-culturelle-africaine"
-            className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-dta-char/50 transition-colors hover:text-dta-accent"
-          >
-            <ArrowLeft size={14} />
-            Voir tous les événements
-          </Link>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {/* Journal */}
+            <div className="rounded-[var(--radius-card)] border border-dta-sand/50 p-5">
+              <div className="mb-2 flex items-center gap-2">
+                <Newspaper size={16} className="text-dta-accent" />
+                <h3 className="text-sm font-bold text-dta-dark">L&apos;Afropeen</h3>
+              </div>
+              <ul className="space-y-1">
+                {relatedArticles.map((a) => (
+                  <li key={a.slug}>
+                    <Link href={`/lafropeen/${a.slug}`} className="line-clamp-1 text-xs text-dta-char/70 hover:text-dta-accent">
+                      {a.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/lafropeen" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-dta-accent">
+                Lire le journal <ArrowRight size={12} />
+              </Link>
+            </div>
+
+            {/* Exposants */}
+            <div className="rounded-[var(--radius-card)] border border-dta-sand/50 p-5">
+              <div className="mb-2 flex items-center gap-2">
+                <Store size={16} className="text-dta-accent" />
+                <h3 className="text-sm font-bold text-dta-dark">Devenir exposant</h3>
+              </div>
+              <p className="text-xs text-dta-char/70">
+                R&eacute;servez un stand pour pr&eacute;senter vos produits lors de nos &eacute;v&eacute;nements.
+              </p>
+              <Link href="/exposants" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-dta-accent">
+                R&eacute;server un stand <ArrowRight size={12} />
+              </Link>
+            </div>
+
+            {/* Contact */}
+            <div className="rounded-[var(--radius-card)] border border-dta-sand/50 p-5">
+              <div className="mb-2 flex items-center gap-2">
+                <Calendar size={16} className="text-dta-accent" />
+                <h3 className="text-sm font-bold text-dta-dark">Toute la saison</h3>
+              </div>
+              <p className="text-xs text-dta-char/70">
+                D&eacute;couvrez les 7 &eacute;v&eacute;nements de la Saison Culturelle Africaine 2026.
+              </p>
+              <Link href="/saison-culturelle-africaine" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-dta-accent">
+                Voir le programme <ArrowRight size={12} />
+              </Link>
+            </div>
+          </div>
+
+          <div className="mt-8 text-center">
+            <p className="text-sm text-dta-char/60">
+              Des questions ?{" "}
+              <Link href="/nous-contacter" className="font-medium text-dta-accent hover:text-dta-accent-dark">
+                Contactez-nous
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

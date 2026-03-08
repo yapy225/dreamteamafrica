@@ -127,6 +127,9 @@ export default async function ArticleDetailPage({
   const categorySlugMap: Record<string, string> = {
     ACTUALITE: "actualite",
     CULTURE: "culture",
+    CINEMA: "cinema",
+    MUSIQUE: "musique",
+    SPORT: "sport",
     DIASPORA: "diaspora",
     BUSINESS: "business",
     LIFESTYLE: "lifestyle",

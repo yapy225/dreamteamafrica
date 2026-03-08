@@ -90,6 +90,21 @@ export const CATEGORY_CONFIG: Record<
     badge: "bg-purple-100 text-purple-700",
     badgeHero: "bg-purple-500/20 text-purple-200 backdrop-blur-sm",
   },
+  CINEMA: {
+    label: "Cinéma",
+    badge: "bg-indigo-100 text-indigo-700",
+    badgeHero: "bg-indigo-500/20 text-indigo-200 backdrop-blur-sm",
+  },
+  MUSIQUE: {
+    label: "Musique",
+    badge: "bg-violet-100 text-violet-700",
+    badgeHero: "bg-violet-500/20 text-violet-200 backdrop-blur-sm",
+  },
+  SPORT: {
+    label: "Sport",
+    badge: "bg-emerald-100 text-emerald-700",
+    badgeHero: "bg-emerald-500/20 text-emerald-200 backdrop-blur-sm",
+  },
   DIASPORA: {
     label: "Diaspora",
     badge: "bg-green-100 text-green-700",
@@ -113,9 +128,9 @@ export const CATEGORY_CONFIG: Record<
 };
 
 
-/** Group published articles by computed lifecycle zone */
+/** Group published articles by their position field from database */
 export function groupArticlesByZone<
-  T extends { publishedAt: Date; isSponsored: boolean },
+  T extends { position: string; publishedAt: Date; isSponsored: boolean },
 >(articles: T[]): Record<JournalZone, T[]> {
   const groups: Record<JournalZone, T[]> = {
     UNE: [],
@@ -129,8 +144,7 @@ export function groupArticlesByZone<
   };
 
   for (const article of articles) {
-    const day = getLifecycleDay(article.publishedAt);
-    const zone = getZoneForDay(day);
+    const zone = (groups[article.position as JournalZone] ? article.position : "ARCHIVES") as JournalZone;
     groups[zone].push(article);
   }
 

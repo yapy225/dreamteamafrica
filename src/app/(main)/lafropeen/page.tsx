@@ -17,6 +17,9 @@ import DiscoverMore from "@/components/sections/DiscoverMore";
 const CATEGORY_SLUGS = [
   { slug: "actualite", key: "ACTUALITE" },
   { slug: "culture", key: "CULTURE" },
+  { slug: "cinema", key: "CINEMA" },
+  { slug: "musique", key: "MUSIQUE" },
+  { slug: "sport", key: "SPORT" },
   { slug: "diaspora", key: "DIASPORA" },
   { slug: "business", key: "BUSINESS" },
   { slug: "lifestyle", key: "LIFESTYLE" },
@@ -75,8 +78,12 @@ export default async function JournalPage() {
       <div className="mx-auto max-w-7xl space-y-12 px-4 py-8 sm:px-6 lg:px-8">
         {/* Hero: UNE + FACE_UNE */}
         <HeroCarousel
-          uneArticles={zones.UNE.length > 0 ? zones.UNE : zones.FACE_UNE}
-          faceUneArticles={zones.UNE.length > 0 ? zones.FACE_UNE : zones.PAGES_4_5}
+          uneArticles={(zones.UNE.length > 0 ? zones.UNE : zones.FACE_UNE).slice(0, 3)}
+          faceUneArticles={[
+            ...(zones.UNE.length > 3 ? zones.UNE.slice(3) : []),
+            ...zones.FACE_UNE,
+            ...(zones.UNE.length === 0 ? zones.PAGES_4_5 : []),
+          ].slice(0, 3)}
         />
 
         {/* Category Navigation — Internal Linking */}

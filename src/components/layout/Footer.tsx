@@ -18,6 +18,10 @@ const footerSections = [
       { href: "/nous-contacter", label: "Nous contacter" },
       { href: "/faire-un-don", label: "Nous soutenir" },
       { href: "/mentions-legales", label: "Mentions légales" },
+      { href: "/conditions-generales", label: "CGV" },
+      { href: "/conditions-utilisation", label: "CGU" },
+      { href: "/politique-cookies", label: "Cookies" },
+      { href: "/politique-annulation", label: "Annulation & remboursement" },
     ],
   },
   {

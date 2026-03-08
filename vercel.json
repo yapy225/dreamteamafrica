@@ -1,20 +1,12 @@
 {
   "crons": [
     {
-      "path": "/api/cron/advance-articles",
+      "path": "/api/cron/journal-daily",
       "schedule": "0 3 * * *"
     },
     {
-      "path": "/api/cron/rss-detect",
+      "path": "/api/cron/journal-rss",
       "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/rss-process",
-      "schedule": "30 6 * * *"
-    },
-    {
-      "path": "/api/cron/boost-views",
-      "schedule": "0 12 * * *"
     }
   ]
 }

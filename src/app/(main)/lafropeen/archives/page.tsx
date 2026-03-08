@@ -31,6 +31,7 @@ export default async function ArchivesPage({
   const where: Record<string, unknown> = {
     OR: [
       { status: "PUBLISHED", publishedAt: { lte: archiveCutoff } },
+      { status: "PUBLISHED", position: "ARCHIVES" },
       { status: "ARCHIVED" },
     ],
   };

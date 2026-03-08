@@ -15,6 +15,9 @@ export const dynamic = "force-dynamic";
 const VALID_CATEGORIES: Record<string, ArticleCategory> = {
   actualite: "ACTUALITE",
   culture: "CULTURE",
+  cinema: "CINEMA",
+  musique: "MUSIQUE",
+  sport: "SPORT",
   diaspora: "DIASPORA",
   business: "BUSINESS",
   lifestyle: "LIFESTYLE",
@@ -23,7 +26,10 @@ const VALID_CATEGORIES: Record<string, ArticleCategory> = {
 
 const CATEGORY_DESCRIPTIONS: Record<string, string> = {
   ACTUALITE: "L'actualite du continent africain et de sa diaspora. Politique, societe, economie.",
-  CULTURE: "Arts, musique, cinema, litterature, spectacles et patrimoine culturel africain.",
+  CULTURE: "Arts, litterature, spectacles et patrimoine culturel africain.",
+  CINEMA: "Actualites du cinema africain et de la diaspora. Films, festivals, realisateurs.",
+  MUSIQUE: "Afrobeats, rumba, mbalax, jazz africain. Artistes, albums, concerts et festivals.",
+  SPORT: "Football, athletisme, NBA et tous les sports africains. Resultats, transferts, analyses.",
   DIASPORA: "Vie et actualites de la diaspora africaine en Europe et dans le monde.",
   BUSINESS: "Entrepreneuriat, economie, investissements et innovations en Afrique.",
   LIFESTYLE: "Mode, gastronomie, bien-etre et art de vivre africain.",

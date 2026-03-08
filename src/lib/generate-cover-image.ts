@@ -42,12 +42,7 @@ async function describeImage(imageUrl: string, title: string): Promise<string> {
 }
 
 function buildPrompt(description: string): string {
-  return [
-    `Reproduce this exact scene as a realistic photograph: ${description}`,
-    "Ultra-realistic, indistinguishable from a real photo taken by a professional photographer.",
-    "Natural imperfections: skin texture, fabric wrinkles, real shadows.",
-    "No artistic filters, no illustration, no painting, no digital art, no text, no watermarks.",
-  ].join(" ");
+  return `Reproduce this exact scene as a realistic photograph: ${description}. Ultra-realistic and natural.`;
 }
 
 function buildFallbackPrompt(title: string, category: string): string {

@@ -72,6 +72,9 @@ function resolve<T>(camel: T | undefined, snake: T | undefined): T | undefined {
 const VALID_CATEGORIES = [
   "ACTUALITE",
   "CULTURE",
+  "CINEMA",
+  "MUSIQUE",
+  "SPORT",
   "DIASPORA",
   "BUSINESS",
   "LIFESTYLE",
@@ -87,8 +90,11 @@ const CATEGORY_MAP: Record<string, string> = {
   "DIASPORA & CULTURE": "CULTURE",
   "INSTITUTIONNEL": "ACTUALITE",
   "TECHNOLOGIE": "BUSINESS",
-  "SPORT": "LIFESTYLE",
-  "MUSIQUE": "CULTURE",
+  "SPORT": "SPORT",
+  "FOOTBALL": "SPORT",
+  "MUSIQUE": "MUSIQUE",
+  "CINEMA": "CINEMA",
+  "FILM": "CINEMA",
   "MODE": "LIFESTYLE",
   "POLITIQUE": "ACTUALITE",
 };

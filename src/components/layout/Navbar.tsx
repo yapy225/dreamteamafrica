@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { Menu, X, User, ShoppingBag, Heart, Mail } from "lucide-react";
+import { Menu, X, User, ShoppingBag, Heart, Mail, Phone } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { useCartStore } from "@/stores/cart";
 
@@ -33,6 +33,13 @@ export default function Navbar() {
 
           {/* Desktop — boutons + actions */}
           <div className="hidden items-center gap-3 md:flex">
+            <a
+              href="tel:+33753444804"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-dta-char transition-colors hover:text-dta-accent"
+            >
+              <Phone size={14} />
+              +33 7 53 44 48 04
+            </a>
             <Link
               href="/nous-contacter"
               className="inline-flex items-center gap-1.5 rounded-[var(--radius-button)] border border-dta-accent px-4 py-2 text-sm font-semibold text-dta-accent transition-colors hover:bg-dta-accent hover:text-white"
@@ -104,6 +111,13 @@ export default function Navbar() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="border-t border-dta-sand/50 bg-dta-bg px-4 pb-4 pt-2 md:hidden">
+          <a
+            href="tel:+33753444804"
+            className="flex items-center gap-2 rounded-[var(--radius-button)] px-3 py-3 text-sm font-medium text-dta-char"
+          >
+            <Phone size={14} />
+            +33 7 53 44 48 04
+          </a>
           <Link
             href="/nous-contacter"
             onClick={() => setMobileOpen(false)}

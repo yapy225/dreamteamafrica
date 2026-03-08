@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import sharp from "sharp";
 import { uploadBuffer } from "./bunny";
 
 function getOpenAI() {
@@ -93,10 +94,16 @@ export async function generateCoverImage(
     const imgRes = await fetch(imageUrl);
     if (!imgRes.ok) return null;
 
-    const buffer = Buffer.from(await imgRes.arrayBuffer());
-    const filePath = `articles/${slug}.png`;
+    const rawBuffer = Buffer.from(await imgRes.arrayBuffer());
 
-    const { url } = await uploadBuffer(buffer, filePath, "image/png");
+    // Convert to WebP (80% quality) + resize to 1200px wide → ~80-120 KB vs ~670 KB PNG
+    const webpBuffer = await sharp(rawBuffer)
+      .resize(1200, undefined, { withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toBuffer();
+
+    const filePath = `articles/${slug}.webp`;
+    const { url } = await uploadBuffer(Buffer.from(webpBuffer), filePath, "image/webp");
 
     console.log(`[COVER IMAGE] Generated and uploaded: ${url}`);
     return url;

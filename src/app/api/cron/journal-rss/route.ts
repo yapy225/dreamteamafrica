@@ -9,9 +9,9 @@ import { generateCoverImage } from "@/lib/generate-cover-image";
 import { publishToSocialMedia } from "@/lib/social-media";
 
 /**
- * CRON: Journal RSS — runs once per day at 6 AM
+ * CRON: Journal RSS — runs 3x/day (7h, 13h, 19h)
  * Combines: rss-detect + rss-process (score, rewrite, publish)
- * Processes up to 5 new articles per run.
+ * Processes 1 article per run → 3 articles/day, spaced naturally.
  */
 
 export const maxDuration = 300;
@@ -200,7 +200,7 @@ export async function GET(request: Request) {
     const pending = await prisma.detectedArticle.findMany({
       where: { status: "PENDING" },
       orderBy: { createdAt: "asc" },
-      take: 5,
+      take: 1,
     });
 
     let scored = 0;

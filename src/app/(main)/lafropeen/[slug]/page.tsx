@@ -15,6 +15,8 @@ import ShareButton from "./ShareButton";
 import JournalNav from "@/components/journal/JournalNav";
 import Newsletter from "@/components/journal/Newsletter";
 import JournalFooter from "@/components/journal/JournalFooter";
+import EventPromoCard from "@/components/journal/EventPromoCard";
+import OfficielPromoCard from "@/components/journal/OfficielPromoCard";
 
 export const dynamic = "force-dynamic";
 
@@ -136,7 +138,84 @@ export default async function ArticleDetailPage({
     OPINION: "opinion",
   };
 
-  const contentHtml = article.content;
+  // ── Match article to its linked event (explicit) or by keywords (fallback) ──
+  const eventSelect = {
+    title: true, slug: true, date: true, endDate: true,
+    venue: true, coverImage: true, capacity: true, description: true,
+  } as const;
+
+  const matchedEvent = await (async () => {
+    // 1. Explicit link via eventId — always correct
+    if (article.eventId) {
+      const linked = await prisma.event.findUnique({
+        where: { id: article.eventId },
+        select: eventSelect,
+      });
+      if (linked) return linked;
+    }
+
+    // 2. Fallback: keyword matching for non-linked articles
+    const articleWords = [
+      article.title.toLowerCase(),
+      ...article.tags.map((t) => t.toLowerCase()),
+      ...(article.seoKeywords || []).map((k: string) => k.toLowerCase()),
+    ].join(" ");
+
+    const publishedEvents = await prisma.event.findMany({
+      where: { published: true, date: { gte: new Date() } },
+      select: eventSelect,
+      orderBy: { date: "asc" },
+    });
+
+    let bestEvent: (typeof publishedEvents)[0] | null = null;
+    let bestScore = 0;
+
+    for (const evt of publishedEvents) {
+      const evtWords = evt.title.toLowerCase().split(/\s+/);
+      let score = 0;
+      for (const word of evtWords) {
+        if (word.length > 3 && articleWords.includes(word)) score++;
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        bestEvent = evt;
+      }
+    }
+
+    if (bestScore >= 2) return bestEvent;
+    return publishedEvents[0] || null;
+  })();
+
+  // Determine which promo card to show
+  const isOfficielArticle = article.source === "seo-officiel";
+  const showEventCard = !isOfficielArticle && !!matchedEvent;
+  const showOfficielCard = isOfficielArticle;
+
+  // Get directory entry count for Officiel card
+  const officielEntryCount = showOfficielCard
+    ? await prisma.inscription.count({ where: { status: "VALIDATED" } })
+    : 0;
+
+  // Split content at 2nd paragraph to inject promo card
+  let contentBefore = article.content;
+  let contentAfter = "";
+  if (showEventCard || showOfficielCard) {
+    let pCount = 0;
+    let splitIndex = -1;
+    const pCloseRegex = /<\/p>/gi;
+    let match;
+    while ((match = pCloseRegex.exec(article.content)) !== null) {
+      pCount++;
+      if (pCount === 2) {
+        splitIndex = match.index + match[0].length;
+        break;
+      }
+    }
+    if (splitIndex > -1) {
+      contentBefore = article.content.slice(0, splitIndex);
+      contentAfter = article.content.slice(splitIndex);
+    }
+  }
 
   const initials = (article.author.name || "A")
     .split(" ")
@@ -318,8 +397,35 @@ export default async function ArticleDetailPage({
         <div className="mx-auto max-w-3xl">
           <div
             className="prose prose-lg max-w-none text-dta-char/85 prose-headings:text-dta-char prose-h1:text-2xl prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-p:mb-6 prose-p:leading-[1.9] prose-a:text-dta-accent prose-strong:text-dta-char first-letter:float-left first-letter:mr-2 first-letter:font-serif first-letter:text-5xl first-letter:font-bold first-letter:leading-[0.8] first-letter:text-dta-accent"
-            dangerouslySetInnerHTML={{ __html: contentHtml }}
+            dangerouslySetInnerHTML={{ __html: contentBefore }}
           />
+
+          {/* Promo Card — inserted mid-article */}
+          {showOfficielCard && (
+            <OfficielPromoCard
+              variant={article.seoKeywords?.some((k: string) => k.includes("annuaire")) ? "annuaire" : "inscription"}
+              entryCount={officielEntryCount}
+            />
+          )}
+          {showEventCard && matchedEvent && (
+            <EventPromoCard
+              title={matchedEvent.title}
+              slug={matchedEvent.slug}
+              date={matchedEvent.date}
+              endDate={matchedEvent.endDate}
+              venue={matchedEvent.venue}
+              coverImage={matchedEvent.coverImage}
+              capacity={matchedEvent.capacity}
+              description={matchedEvent.description}
+            />
+          )}
+
+          {contentAfter && (
+            <div
+              className="prose prose-lg max-w-none text-dta-char/85 prose-headings:text-dta-char prose-h1:text-2xl prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-p:mb-6 prose-p:leading-[1.9] prose-a:text-dta-accent prose-strong:text-dta-char"
+              dangerouslySetInnerHTML={{ __html: contentAfter }}
+            />
+          )}
         </div>
       </article>
 

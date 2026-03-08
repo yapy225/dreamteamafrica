@@ -588,5 +588,16 @@ export async function publishToSocialMedia(article: ArticleForSocial): Promise<{
     },
   });
 
+  // 5. Générer des brouillons d'engagement (non-bloquant)
+  if (posted > 0) {
+    try {
+      const { generateEngagementDrafts } = await import("@/lib/social-drafts");
+      await generateEngagementDrafts(article.id);
+      console.log(`[SOCIAL] Brouillons d'engagement générés pour ${article.id}`);
+    } catch (err: any) {
+      console.error("[SOCIAL] Erreur génération brouillons:", err.message);
+    }
+  }
+
   return { generated: 1, posted, failed, details };
 }

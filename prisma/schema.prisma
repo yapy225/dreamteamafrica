@@ -184,17 +184,21 @@ model Article {
   socialTiktok    String?
 
   authorId    String
+  eventId     String?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
-  author      User         @relation(fields: [authorId], references: [id])
-  socialPosts SocialPost[]
+  author       User          @relation(fields: [authorId], references: [id])
+  event        Event?        @relation(fields: [eventId], references: [id])
+  socialPosts  SocialPost[]
+  socialDrafts SocialDraft[]
 
   @@index([slug])
   @@index([status])
   @@index([position])
   @@index([category])
   @@index([publishedAt])
+  @@index([eventId])
 }
 
 // ─── EVENTS + TICKETING ─────────────────────────────────
@@ -223,6 +227,7 @@ model Event {
 
   tickets      Ticket[]
   reservations EventReservation[]
+  articles     Article[]
 
   @@index([date])
 }
@@ -588,6 +593,54 @@ model SocialPost {
   @@index([articleId])
   @@index([platform])
   @@index([status])
+}
+
+// ─── SOCIAL DRAFTS (BROUILLONS ENGAGEMENT) ──────────────
+
+enum SocialDraftType {
+  COMMENT       // Commentaire sur un post existant
+  REPLY         // Réponse à un commentaire
+  PROMO         // Post promotionnel autonome (L'Officiel, Marketplace, etc.)
+  ENGAGEMENT    // Like + commentaire d'engagement
+}
+
+enum SocialDraftStatus {
+  DRAFT         // Brouillon généré par IA
+  APPROVED      // Validé par l'admin
+  REJECTED      // Rejeté par l'admin
+  POSTED        // Publié sur la plateforme
+  FAILED        // Échec de publication
+}
+
+model SocialDraft {
+  id            String            @id @default(cuid())
+  platform      SocialPlatform
+  type          SocialDraftType   @default(COMMENT)
+  status        SocialDraftStatus @default(DRAFT)
+  content       String            @db.Text
+  editedContent String?           @db.Text    // Contenu modifié par l'admin
+  imageUrl      String?
+  targetPostId  String?           // ID du post social cible (pour commentaire/reply)
+  targetPostUrl String?           // URL du post social cible
+  articleId     String?           // Article lié (optionnel)
+  section       String?           // "lafropeen", "officiel", "marketplace", "saison-culturelle"
+  postId        String?           // ID renvoyé après publication
+  postUrl       String?           // URL du commentaire publié
+  reviewedBy    String?           // Admin qui a validé
+  reviewedAt    DateTime?
+  postedAt      DateTime?
+  errorMessage  String?
+  scheduledFor  DateTime?         // Publication programmée
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  article       Article?          @relation(fields: [articleId], references: [id])
+
+  @@index([status])
+  @@index([platform])
+  @@index([type])
+  @@index([section])
+  @@index([createdAt])
 }
 
 model SocialCredential {

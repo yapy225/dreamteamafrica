@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail, ScanLine } from "lucide-react";
+import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail, ScanLine, MessageSquare } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getRevenueData } from "@/lib/revenue";
@@ -113,6 +113,13 @@ export default async function DashboardPage() {
             label: "Messages de contact",
             count: null,
             color: "bg-pink-100 text-pink-600",
+          },
+          {
+            href: "/dashboard/social-drafts",
+            icon: MessageSquare,
+            label: "Social & Engagement",
+            count: null,
+            color: "bg-sky-100 text-sky-600",
           },
           {
             href: "/dashboard/seo",

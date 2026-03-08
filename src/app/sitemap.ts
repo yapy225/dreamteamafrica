@@ -56,7 +56,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
     prisma.article.findMany({
       where: { status: "PUBLISHED" },
-      select: { slug: true, updatedAt: true, publishedAt: true },
+      select: { slug: true, updatedAt: true, publishedAt: true, source: true, eventId: true },
     }),
   ]);
 
@@ -74,14 +74,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // Articles: higher priority for recent ones (< 7 days)
+  // Articles: higher priority for SEO event articles and recent ones
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const articlePages: MetadataRoute.Sitemap = articles.map((a) => ({
-    url: `${baseUrl}/lafropeen/${a.slug}`,
-    lastModified: a.updatedAt,
-    changeFrequency: a.publishedAt > sevenDaysAgo ? "daily" : "weekly",
-    priority: a.publishedAt > sevenDaysAgo ? 0.9 : 0.7,
-  }));
+  const articlePages: MetadataRoute.Sitemap = articles.map((a) => {
+    const isSeoArticle = a.source === "seo" || a.eventId;
+    const isRecent = a.publishedAt > sevenDaysAgo;
+    return {
+      url: `${baseUrl}/lafropeen/${a.slug}`,
+      lastModified: a.updatedAt,
+      changeFrequency: isSeoArticle || isRecent ? "daily" : "weekly",
+      priority: isSeoArticle ? 0.9 : isRecent ? 0.85 : 0.7,
+    };
+  });
 
   // ── Exhibitor reservation pages ───────────────────────────
   const exhibitorPages: MetadataRoute.Sitemap = events

@@ -187,7 +187,8 @@ model Article {
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
-  author User @relation(fields: [authorId], references: [id])
+  author      User         @relation(fields: [authorId], references: [id])
+  socialPosts SocialPost[]
 
   @@index([slug])
   @@index([status])
@@ -550,4 +551,53 @@ model ContactMessage {
   @@index([category])
   @@index([read])
   @@index([createdAt])
+}
+
+// ─── PUBLICATIONS RÉSEAUX SOCIAUX ────────────────────────
+
+enum SocialPlatform {
+  TWITTER
+  FACEBOOK
+  INSTAGRAM
+  LINKEDIN
+  TIKTOK
+}
+
+enum SocialPostStatus {
+  PENDING
+  POSTED
+  FAILED
+}
+
+model SocialPost {
+  id          String           @id @default(cuid())
+  articleId   String
+  platform    SocialPlatform
+  status      SocialPostStatus @default(PENDING)
+  postId      String?          // ID renvoyé par la plateforme
+  postUrl     String?          // URL du post publié
+  content     String           @db.Text
+  hashtags    String[]         @default([])
+  imageUrl    String?
+  errorMessage String?
+  postedAt    DateTime?
+  createdAt   DateTime         @default(now())
+
+  article Article @relation(fields: [articleId], references: [id])
+
+  @@index([articleId])
+  @@index([platform])
+  @@index([status])
+}
+
+model SocialCredential {
+  id           String         @id @default(cuid())
+  platform     SocialPlatform @unique
+  accessToken  String         @db.Text
+  refreshToken String?        @db.Text
+  expiresAt    DateTime?
+  memberId     String?        // LinkedIn member ID, etc.
+  metadata     Json?          // Extra platform-specific data
+  updatedAt    DateTime       @updatedAt
+  createdAt    DateTime       @default(now())
 }

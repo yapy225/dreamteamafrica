@@ -6,6 +6,7 @@ import Parser from "rss-parser";
 import OpenAI from "openai";
 import { marked } from "marked";
 import { generateCoverImage } from "@/lib/generate-cover-image";
+import { publishToSocialMedia } from "@/lib/social-media";
 
 /**
  * CRON: Journal RSS — runs once per day at 6 AM
@@ -361,6 +362,23 @@ Reponds uniquement sous ce format exact :
           where: { id: article.id },
           data: { status: "PUBLISHED", publishedArticleId: publishedArticle.id },
         });
+
+        // Publication automatique sur les réseaux sociaux
+        try {
+          const socialResult = await publishToSocialMedia({
+            id: publishedArticle.id,
+            title: publishedArticle.title,
+            slug: publishedArticle.slug,
+            excerpt: publishedArticle.excerpt,
+            category: publishedArticle.category,
+            coverImage: publishedArticle.coverImage,
+            tags: keywords,
+            seoKeywords: keywords,
+          });
+          console.log(`[journal-rss] Social: ${socialResult.posted} posted, ${socialResult.failed} failed`);
+        } catch (socialErr: any) {
+          console.error(`[journal-rss] Social error (non-blocking):`, socialErr.message);
+        }
 
         published++;
       } catch (articleError: any) {

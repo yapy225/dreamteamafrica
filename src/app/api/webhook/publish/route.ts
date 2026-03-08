@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { marked } from "marked";
 import { generateCoverImage } from "@/lib/generate-cover-image";
+import { publishToSocialMedia } from "@/lib/social-media";
 
 // Vercel Pro: timeout 60s pour laisser DALL-E generer l'image
 export const maxDuration = 60;
@@ -344,13 +345,30 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 9. Reponse succes
+    // 9. Publication automatique sur les réseaux sociaux
+    let socialResult = null;
+    try {
+      socialResult = await publishToSocialMedia({
+        id: article.id,
+        title: article.title,
+        slug: article.slug,
+        excerpt: article.excerpt,
+        category: article.category,
+        coverImage: article.coverImage,
+        tags: article.tags,
+      });
+    } catch (socialErr: any) {
+      console.error("[WEBHOOK] Social error (non-blocking):", socialErr.message);
+    }
+
+    // 10. Reponse succes
     return NextResponse.json(
       {
         success: true,
         message: "Article publie avec succes",
         article_id: article.id,
         slug: article.slug,
+        social: socialResult,
       },
       { status: 201 }
     );

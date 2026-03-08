@@ -93,9 +93,26 @@ export async function GET(request: Request) {
       }
     }
 
+    // Vérifier expiration des tokens sociaux
+    const socialAlerts: string[] = [];
+    const linkedinCred = await prisma.socialCredential.findUnique({ where: { platform: "LINKEDIN" } });
+    if (linkedinCred?.expiresAt) {
+      const daysLeft = Math.floor((linkedinCred.expiresAt.getTime() - Date.now()) / 86400000);
+      if (daysLeft < 0) {
+        socialAlerts.push(`LinkedIn token EXPIRÉ ! Renouveler: /api/admin/social/linkedin/authorize`);
+      } else if (daysLeft < 7) {
+        socialAlerts.push(`LinkedIn token expire dans ${daysLeft} jours`);
+      }
+    }
+
+    if (socialAlerts.length > 0) {
+      console.warn("[CRON journal-daily] ⚠️ SOCIAL ALERTS:", socialAlerts);
+    }
+
     const result = {
       lifecycle: { processed: activeArticles.length, advanced, archived },
       views: { articles: allPublished.length, boosted },
+      socialAlerts,
       timestamp: new Date().toISOString(),
     };
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 /**
- * CRON: Social Drafts — runs Mon & Thu at 10 AM
+ * CRON: Social Drafts — runs every day at 10 AM
  * Generates promotional drafts for L'Officiel d'Afrique + publishes approved drafts.
  */
 

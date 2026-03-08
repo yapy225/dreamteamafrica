@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -7,6 +8,9 @@ import MarketplaceFilters from "./MarketplaceFilters";
 import DiscoverMore from "@/components/sections/DiscoverMore";
 
 export const dynamic = "force-dynamic";
+
+// Marketplace masquée — rediriger vers l'accueil
+const MARKETPLACE_ENABLED = false;
 
 export const metadata = {
   title: "La Boutique Artisanale | Marketplace",
@@ -28,6 +32,7 @@ export default async function MarketplacePage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  if (!MARKETPLACE_ENABLED) redirect("/");
   const params = await searchParams;
 
   /* ── Build Prisma query ── */

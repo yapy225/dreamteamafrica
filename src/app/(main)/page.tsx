@@ -100,12 +100,14 @@ export default async function Home() {
                   Découvrir les événements
                   <ArrowRight size={16} />
                 </Link>
+                {/* Marketplace masquée — réactiver quand prête
                 <Link
                   href="/made-in-africa"
                   className="inline-flex items-center justify-center rounded-[var(--radius-button)] border border-white/30 px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:border-white hover:bg-white/5"
                 >
                   Explorer la marketplace
                 </Link>
+                */}
               </div>
             </div>
           </div>
@@ -318,6 +320,7 @@ export default async function Home() {
                 Agenda
               </span>
             </Link>
+            {/* Marketplace masquée — réactiver quand prête
             <Link
               href="/made-in-africa"
               className="flex flex-col items-center gap-2 text-dta-taupe transition-colors hover:text-dta-accent"
@@ -327,6 +330,7 @@ export default async function Home() {
                 Boutique
               </span>
             </Link>
+            */}
             <Link
               href="/lafropeen"
               className="flex flex-col items-center gap-2 text-dta-taupe transition-colors hover:text-dta-accent"
@@ -340,8 +344,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ══ 5. Marketplace ══ */}
-      <section className="bg-dta-dark px-4 py-20 sm:py-28">
+      {/* ══ 5. Marketplace — masquée, réactiver quand prête ══ */}
+      <section className="hidden bg-dta-dark px-4 py-20 sm:py-28">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
           {/* Editorial header — white */}
           <div className="mb-12">

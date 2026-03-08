@@ -45,7 +45,7 @@ export default function DiscoverMore({
   exclude,
   title = "Découvrir aussi",
 }: DiscoverMoreProps) {
-  const projects = allProjects.filter((p) => p.id !== exclude);
+  const projects = allProjects.filter((p) => p.id !== exclude && p.id !== "marketplace");
 
   return (
     <div className="bg-dta-bg py-16">

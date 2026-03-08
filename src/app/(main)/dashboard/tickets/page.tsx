@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Calendar, MapPin, Ticket } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -17,10 +18,23 @@ const tierLabels: Record<string, string> = {
   VIP: "VIP",
 };
 
-const tierColors: Record<string, string> = {
-  EARLY_BIRD: "bg-blue-100 text-blue-700",
-  STANDARD: "bg-dta-accent/10 text-dta-accent",
-  VIP: "bg-amber-100 text-amber-700",
+const tierBadgeColors: Record<string, string> = {
+  EARLY_BIRD: "bg-blue-500",
+  STANDARD: "bg-dta-accent",
+  VIP: "bg-amber-500",
+};
+
+function resolveTierLabel(tierId: string, eventTiers: unknown): string {
+  if (tierLabels[tierId]) return tierLabels[tierId];
+  const tiers = eventTiers as Array<{ id: string; name: string }> | null;
+  const match = Array.isArray(tiers) ? tiers.find((t) => t.id === tierId) : null;
+  return match?.name || tierId;
+}
+
+const tierGradients: Record<string, string> = {
+  EARLY_BIRD: "from-blue-600 to-blue-800",
+  STANDARD: "from-dta-accent to-dta-accent-dark",
+  VIP: "from-amber-500 to-amber-700",
 };
 
 export default async function TicketsPage() {
@@ -74,12 +88,12 @@ export default async function TicketsPage() {
           {/* Upcoming */}
           {upcoming.length > 0 && (
             <section className="mb-10">
-              <h2 className="mb-4 font-serif text-xl font-bold text-dta-dark">
+              <h2 className="mb-5 font-serif text-xl font-bold text-dta-dark">
                 À venir ({upcoming.length})
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {upcoming.map((ticket) => (
-                  <TicketCard key={ticket.id} ticket={ticket} />
+                  <VisualTicketCard key={ticket.id} ticket={ticket} />
                 ))}
               </div>
             </section>
@@ -88,12 +102,12 @@ export default async function TicketsPage() {
           {/* Past */}
           {past.length > 0 && (
             <section>
-              <h2 className="mb-4 font-serif text-xl font-bold text-dta-dark">
+              <h2 className="mb-5 font-serif text-xl font-bold text-dta-dark">
                 Passés ({past.length})
               </h2>
-              <div className="space-y-4 opacity-70">
+              <div className="space-y-6 opacity-60">
                 {past.map((ticket) => (
-                  <TicketCard key={ticket.id} ticket={ticket} />
+                  <VisualTicketCard key={ticket.id} ticket={ticket} />
                 ))}
               </div>
             </section>
@@ -104,7 +118,7 @@ export default async function TicketsPage() {
   );
 }
 
-function TicketCard({
+function VisualTicketCard({
   ticket,
 }: {
   ticket: {
@@ -118,68 +132,123 @@ function TicketCard({
       slug: string;
       venue: string;
       date: Date;
+      coverImage: string | null;
+      tiers: unknown;
     };
   };
 }) {
-  return (
-    <div className="flex items-start gap-4 rounded-[var(--radius-card)] bg-white p-5 shadow-[var(--shadow-card)]">
-      {/* QR */}
-      {ticket.qrCode && (
-        <div className="hidden flex-shrink-0 sm:block">
-          <img
-            src={ticket.qrCode}
-            alt="QR Code"
-            className="h-20 w-20 rounded-[var(--radius-input)]"
-          />
-        </div>
-      )}
+  const eventDate = new Date(ticket.event.date);
 
-      {/* Details */}
-      <div className="flex-1">
-        <div className="flex items-start justify-between">
-          <div>
-            <Link
-              href={`/saison-culturelle-africaine/${ticket.event.slug}`}
-              className="font-serif text-lg font-bold text-dta-dark hover:text-dta-accent"
-            >
+  return (
+    <Link
+      href={`/saison-culturelle-africaine/${ticket.event.slug}`}
+      className="group block overflow-hidden rounded-2xl bg-dta-dark shadow-lg transition-shadow hover:shadow-xl"
+    >
+      {/* Top: Cover image + event info */}
+      <div className="relative flex">
+        {/* Cover image — left side */}
+        <div className="relative hidden w-40 flex-shrink-0 sm:block">
+          {ticket.event.coverImage ? (
+            <Image
+              src={ticket.event.coverImage}
+              alt={ticket.event.title}
+              fill
+              className="object-cover"
+              sizes="160px"
+            />
+          ) : (
+            <div className={`h-full w-full bg-gradient-to-br ${tierGradients[ticket.tier] || tierGradients.STANDARD}`} />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-dta-dark/60" />
+        </div>
+
+        {/* Mobile: cover as background */}
+        <div className="absolute inset-0 sm:hidden">
+          {ticket.event.coverImage ? (
+            <Image
+              src={ticket.event.coverImage}
+              alt=""
+              fill
+              className="object-cover"
+              sizes="100vw"
+            />
+          ) : (
+            <div className={`h-full w-full bg-gradient-to-br ${tierGradients[ticket.tier] || tierGradients.STANDARD}`} />
+          )}
+          <div className="absolute inset-0 bg-dta-dark/75" />
+        </div>
+
+        {/* Event details */}
+        <div className="relative flex flex-1 items-center justify-between gap-4 p-4 sm:p-5">
+          <div className="min-w-0 flex-1">
+            {/* Tier badge */}
+            <span className={`inline-block rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white ${tierBadgeColors[ticket.tier] || tierBadgeColors.STANDARD}`}>
+              {resolveTierLabel(ticket.tier, ticket.event.tiers)}
+            </span>
+
+            <h3 className="mt-2 font-serif text-lg font-bold leading-snug text-white transition-colors group-hover:text-dta-accent sm:text-xl">
               {ticket.event.title}
-            </Link>
-            <div className="mt-1 flex items-center gap-2">
-              <span className={`rounded-[var(--radius-full)] px-2.5 py-0.5 text-xs font-semibold ${tierColors[ticket.tier] || ""}`}>
-                {tierLabels[ticket.tier]}
+            </h3>
+
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-white/60">
+              <span className="flex items-center gap-1">
+                <Calendar size={12} />
+                {formatDate(ticket.event.date)}
               </span>
-              <span className="text-xs text-dta-taupe">
-                {formatPrice(ticket.price)}
+              <span className="flex items-center gap-1">
+                <MapPin size={12} />
+                {ticket.event.venue}
               </span>
             </div>
           </div>
 
           {/* Date badge */}
-          <div className="flex-shrink-0 rounded-[var(--radius-button)] bg-dta-beige px-3 py-1.5 text-center">
-            <span className="block text-xs font-bold uppercase text-dta-accent">
-              {new Date(ticket.event.date).toLocaleDateString("fr-FR", { month: "short" })}
+          <div className="flex-shrink-0 rounded-xl bg-white/10 px-3 py-2 text-center backdrop-blur-sm">
+            <span className="block text-[10px] font-bold uppercase text-dta-accent">
+              {eventDate.toLocaleDateString("fr-FR", { month: "short" })}
             </span>
-            <span className="block font-serif text-lg font-bold text-dta-dark">
-              {new Date(ticket.event.date).getDate()}
+            <span className="block font-serif text-2xl font-bold text-white">
+              {eventDate.getDate()}
             </span>
           </div>
         </div>
+      </div>
 
-        <div className="mt-2 flex flex-wrap gap-3 text-xs text-dta-taupe">
-          <span className="flex items-center gap-1">
-            <Calendar size={12} />
-            {formatDate(ticket.event.date)}
-          </span>
-          <span className="flex items-center gap-1">
-            <MapPin size={12} />
-            {ticket.event.venue}
+      {/* Perforated divider */}
+      <div className="relative flex items-center">
+        <div className="absolute -left-3 h-5 w-5 rounded-full bg-dta-bg" />
+        <div className="w-full border-t-2 border-dashed border-white/10" />
+        <div className="absolute -right-3 h-5 w-5 rounded-full bg-dta-bg" />
+      </div>
+
+      {/* Bottom: QR + details */}
+      <div className="flex items-center gap-4 px-4 py-3 sm:px-5">
+        {/* QR Code — visible on ALL screen sizes */}
+        {ticket.qrCode && (
+          <div className="flex-shrink-0 rounded-lg bg-white p-1.5">
+            <img
+              src={ticket.qrCode}
+              alt="QR Code"
+              className="h-16 w-16 sm:h-20 sm:w-20"
+            />
+          </div>
+        )}
+
+        <div className="flex flex-1 items-center justify-between gap-2">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-white/40">Prix</span>
+              <span className="text-sm font-semibold text-white">{formatPrice(ticket.price)}</span>
+            </div>
+            <p className="font-mono text-[10px] text-white/30">
+              Réf : {ticket.id.slice(0, 8).toUpperCase()}
+            </p>
+          </div>
+          <span className="text-[10px] uppercase tracking-widest text-white/20">
+            DTA 2026
           </span>
         </div>
-
-        <p className="mt-2 font-mono text-xs text-dta-taupe">
-          Réf : {ticket.id.slice(0, 8).toUpperCase()}
-        </p>
       </div>
-    </div>
+    </Link>
   );
 }

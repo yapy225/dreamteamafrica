@@ -20,14 +20,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const validTiers = ["EARLY_BIRD", "STANDARD", "VIP"];
-    if (!validTiers.includes(tier)) {
-      return NextResponse.json(
-        { error: "Tier invalide." },
-        { status: 400 },
-      );
-    }
-
     const event = await prisma.event.findUnique({
       where: { id: eventId },
       include: { _count: { select: { tickets: true } } },
@@ -40,14 +32,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const remaining = event.capacity - event._count.tickets;
-    if (remaining < quantity) {
-      return NextResponse.json(
-        { error: `Seulement ${remaining} place(s) restante(s).` },
-        { status: 400 },
-      );
-    }
-
     // Resolve price: custom tiers JSON > legacy price fields
     let unitPrice: number;
     let tierName: string;
@@ -57,10 +41,12 @@ export async function POST(request: Request) {
       ? customTiers.find((t) => t.id === tier)
       : null;
 
+    const legacyTiers = ["EARLY_BIRD", "STANDARD", "VIP"];
+
     if (matchedTier) {
       unitPrice = matchedTier.price;
       tierName = matchedTier.name;
-    } else {
+    } else if (legacyTiers.includes(tier)) {
       const priceMap: Record<string, number> = {
         EARLY_BIRD: event.priceEarly,
         STANDARD: event.priceStd,
@@ -73,6 +59,19 @@ export async function POST(request: Request) {
       };
       unitPrice = priceMap[tier];
       tierName = labelMap[tier];
+    } else {
+      return NextResponse.json(
+        { error: "Tier invalide." },
+        { status: 400 },
+      );
+    }
+
+    const remaining = event.capacity - event._count.tickets;
+    if (remaining < quantity) {
+      return NextResponse.json(
+        { error: `Seulement ${remaining} place(s) restante(s).` },
+        { status: 400 },
+      );
     }
 
     const productName = `${event.title} — ${tierName}`;

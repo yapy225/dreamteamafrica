@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail } from "lucide-react";
+import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail, ScanLine } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getRevenueData } from "@/lib/revenue";
@@ -85,6 +85,13 @@ export default async function DashboardPage() {
             label: "Articles detectes (IA)",
             count: null,
             color: "bg-violet-100 text-violet-600",
+          },
+          {
+            href: "/dashboard/scanner",
+            icon: ScanLine,
+            label: "Scanner billets",
+            count: null,
+            color: "bg-orange-100 text-orange-600",
           },
           {
             href: "/dashboard/exposants",

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import QRCode from "qrcode";
+import { uploadBuffer } from "@/lib/bunny";
+import { sendFreeTicketEmail } from "@/lib/email";
 
 // IDs des événements gratuits
 const FREE_EVENT_IDS = [
@@ -40,6 +43,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Fetch event details
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: { title: true, venue: true, address: true, date: true, coverImage: true },
+    });
+
+    if (!event) {
+      return NextResponse.json(
+        { error: "Événement introuvable." },
+        { status: 404 }
+      );
+    }
+
     const reservation = await prisma.eventReservation.create({
       data: {
         eventId,
@@ -51,8 +67,61 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Generate QR code — simple URL for reliable scanning
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://dreamteamafrica.com";
+    const qrData = `${baseUrl}/check/${reservation.id}`;
+
+    // Generate QR as data URL (for frontend display)
+    const qrCodeDataUrl = await QRCode.toDataURL(qrData, {
+      width: 600,
+      margin: 3,
+      errorCorrectionLevel: "H",
+      color: { dark: "#000000", light: "#FFFFFF" },
+    });
+
+    // Generate QR as PNG buffer and upload to Bunny CDN (for email)
+    const qrBuffer = await QRCode.toBuffer(qrData, {
+      width: 600,
+      margin: 3,
+      errorCorrectionLevel: "H",
+      color: { dark: "#000000", light: "#FFFFFF" },
+    });
+
+    let qrCdnUrl: string | null = null;
+    try {
+      const { url } = await uploadBuffer(
+        Buffer.from(qrBuffer),
+        `qrcodes/reservations/${reservation.id}.png`,
+      );
+      qrCdnUrl = url;
+    } catch (uploadErr) {
+      console.error("QR upload to Bunny failed:", uploadErr);
+    }
+
+    // Send confirmation email with ticket
+    try {
+      await sendFreeTicketEmail({
+        to: email.trim().toLowerCase(),
+        guestName: `${firstName.trim()} ${lastName.trim()}`,
+        eventTitle: event.title,
+        eventVenue: event.venue,
+        eventAddress: event.address,
+        eventDate: event.date,
+        eventCoverImage: event.coverImage,
+        guests: nbGuests,
+        reservationId: reservation.id,
+        qrCodeUrl: qrCdnUrl || qrCodeDataUrl,
+      });
+    } catch (emailErr) {
+      console.error("Free ticket email failed:", emailErr);
+    }
+
     return NextResponse.json(
-      { id: reservation.id, message: "Réservation confirmée" },
+      {
+        id: reservation.id,
+        message: "Réservation confirmée",
+        qrCode: qrCodeDataUrl,
+      },
       { status: 201 }
     );
   } catch (error) {

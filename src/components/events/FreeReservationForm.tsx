@@ -25,6 +25,7 @@ export default function FreeReservationForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
 
   const canSubmit =
     form.firstName.trim() &&
@@ -69,6 +70,7 @@ export default function FreeReservationForm({
         return;
       }
 
+      if (data.qrCode) setQrCode(data.qrCode);
       setSuccess(true);
     } catch {
       setError("Erreur réseau. Veuillez réessayer.");
@@ -87,9 +89,28 @@ export default function FreeReservationForm({
           {guests} place{guests > 1 ? "s" : ""} r&eacute;serv&eacute;e
           {guests > 1 ? "s" : ""} pour <strong>{eventTitle}</strong>.
         </p>
-        <p className="mt-1 text-sm text-dta-char/70">
-          Un r&eacute;capitulatif sera envoy&eacute; &agrave;{" "}
-          <strong>{form.email}</strong>.
+
+        {/* QR Code ticket */}
+        {qrCode && (
+          <div className="mx-auto mt-5 inline-block rounded-xl bg-dta-dark p-5 shadow-lg">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-dta-accent">
+              Votre billet
+            </p>
+            <div className="mx-auto inline-block rounded-lg bg-white p-2">
+              <img src={qrCode} alt="QR Code — Billet" className="h-36 w-36" />
+            </div>
+            <p className="mt-2 text-xs text-white/50">
+              Pr&eacute;sentez ce code &agrave; l&apos;entr&eacute;e
+            </p>
+          </div>
+        )}
+
+        <p className="mt-4 text-sm text-dta-char/70">
+          Votre billet a &eacute;t&eacute; envoy&eacute; &agrave;{" "}
+          <strong>{form.email}</strong>
+        </p>
+        <p className="mt-1 text-xs text-dta-taupe">
+          Conservez cet email, il fait office de billet d&apos;entr&eacute;e.
         </p>
       </div>
     );

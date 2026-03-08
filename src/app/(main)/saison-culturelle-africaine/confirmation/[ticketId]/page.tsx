@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import Script from "next/script";
-import { CheckCircle, Calendar, MapPin, Download } from "lucide-react";
+import { CheckCircle, Calendar, MapPin, Download, ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { formatDate, formatPrice } from "@/lib/utils";
@@ -18,6 +19,25 @@ const tierLabels: Record<string, string> = {
   VIP: "VIP",
 };
 
+const tierColors: Record<string, string> = {
+  EARLY_BIRD: "from-blue-600 to-blue-800",
+  STANDARD: "from-dta-accent to-dta-accent-dark",
+  VIP: "from-amber-500 to-amber-700",
+};
+
+const tierBadgeColors: Record<string, string> = {
+  EARLY_BIRD: "bg-blue-500",
+  STANDARD: "bg-dta-accent",
+  VIP: "bg-amber-500",
+};
+
+function resolveTierLabel(tierId: string, eventTiers: unknown): string {
+  if (tierLabels[tierId]) return tierLabels[tierId];
+  const tiers = eventTiers as Array<{ id: string; name: string }> | null;
+  const match = Array.isArray(tiers) ? tiers.find((t) => t.id === tierId) : null;
+  return match?.name || tierId;
+}
+
 export default async function ConfirmationPage({
   params,
 }: {
@@ -28,21 +48,18 @@ export default async function ConfirmationPage({
 
   const { ticketId } = await params;
 
-  // ticketId here is actually the Stripe checkout session ID from the success_url
   const tickets = await prisma.ticket.findMany({
     where: { stripeSessionId: ticketId, userId: session.user.id },
     include: { event: true },
   });
 
-  // If no tickets found via session ID, try direct ticket ID lookup
   const finalTickets =
     tickets.length > 0
       ? tickets
-      : await prisma.ticket
-          .findMany({
-            where: { id: ticketId, userId: session.user.id },
-            include: { event: true },
-          });
+      : await prisma.ticket.findMany({
+          where: { id: ticketId, userId: session.user.id },
+          include: { event: true },
+        });
 
   if (finalTickets.length === 0) {
     return (
@@ -69,6 +86,7 @@ export default async function ConfirmationPage({
 
   const event = finalTickets[0].event;
   const totalAmount = finalTickets.reduce((sum, t) => sum + t.price, 0);
+  const eventDate = new Date(event.date);
 
   return (
     <>
@@ -92,96 +110,177 @@ export default async function ConfirmationPage({
           fbq('track','Purchase',{value:${totalAmount},currency:'EUR',content_name:'${event.title.replace(/'/g, "\\'")}',content_type:'product'});
         }
       `}</Script>
-    <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
-      {/* Success header */}
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 inline-flex rounded-full bg-green-100 p-3">
-          <CheckCircle size={32} className="text-green-600" />
+
+      <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+        {/* Success header */}
+        <div className="mb-10 text-center">
+          <div className="mx-auto mb-4 inline-flex rounded-full bg-green-100 p-3">
+            <CheckCircle size={32} className="text-green-600" />
+          </div>
+          <h1 className="font-serif text-3xl font-bold text-dta-dark">
+            Réservation confirmée !
+          </h1>
+          <p className="mt-2 text-dta-char/70">
+            {finalTickets.length > 1
+              ? `Vos ${finalTickets.length} billets sont prêts`
+              : "Votre billet est prêt"}
+          </p>
         </div>
-        <h1 className="font-serif text-3xl font-bold text-dta-dark">
-          Réservation confirmée !
-        </h1>
-        <p className="mt-2 text-dta-char/70">
-          {finalTickets.length > 1
-            ? `Vos ${finalTickets.length} billets sont prêts`
-            : "Votre billet est prêt"}
-        </p>
-      </div>
 
-      {/* Event summary */}
-      <div className="mb-8 rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)]">
-        <h2 className="font-serif text-xl font-bold text-dta-dark">{event.title}</h2>
-        <div className="mt-3 flex flex-wrap gap-4 text-sm text-dta-char/70">
-          <span className="flex items-center gap-1.5">
-            <Calendar size={14} className="text-dta-accent" />
-            {formatDate(event.date)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <MapPin size={14} className="text-dta-accent" />
-            {event.venue}
-          </span>
-        </div>
-      </div>
+        {/* Visual Tickets */}
+        <div className="space-y-8">
+          {finalTickets.map((ticket, i) => (
+            <div
+              key={ticket.id}
+              className="overflow-hidden rounded-2xl bg-dta-dark shadow-xl"
+            >
+              {/* Event cover header */}
+              <div className="relative h-48 sm:h-56">
+                {event.coverImage ? (
+                  <Image
+                    src={event.coverImage}
+                    alt={event.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, 580px"
+                  />
+                ) : (
+                  <div className={`h-full w-full bg-gradient-to-br ${tierColors[ticket.tier] || tierColors.STANDARD}`} />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-dta-dark via-dta-dark/40 to-transparent" />
 
-      {/* Tickets */}
-      <div className="space-y-4">
-        {finalTickets.map((ticket, i) => (
-          <div
-            key={ticket.id}
-            className="rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)]"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="rounded-[var(--radius-full)] bg-dta-accent/10 px-3 py-1 text-xs font-semibold text-dta-accent">
-                    {tierLabels[ticket.tier]}
-                  </span>
-                  {finalTickets.length > 1 && (
-                    <span className="text-xs text-dta-taupe">
-                      Billet {i + 1}/{finalTickets.length}
-                    </span>
-                  )}
-                </div>
-                <p className="mt-2 text-sm text-dta-char/70">
-                  Prix : {formatPrice(ticket.price)}
-                </p>
-                <p className="mt-1 font-mono text-xs text-dta-taupe">
-                  Réf : {ticket.id.slice(0, 8).toUpperCase()}
-                </p>
-              </div>
-
-              {/* QR Code */}
-              {ticket.qrCode && (
-                <div className="flex-shrink-0">
-                  <img
-                    src={ticket.qrCode}
-                    alt={`QR Code — Billet ${i + 1}`}
-                    className="h-24 w-24 rounded-[var(--radius-input)]"
+                {/* Logo watermark */}
+                <div className="absolute left-5 top-5">
+                  <Image
+                    src="/logo-dta.png"
+                    alt="DTA"
+                    width={28}
+                    height={28}
+                    className="opacity-80"
                   />
                 </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
 
-      {/* Actions */}
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <Link
-          href="/dashboard/tickets"
-          className="flex flex-1 items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white hover:bg-dta-accent-dark"
-        >
-          <Download size={16} />
-          Voir tous mes billets
-        </Link>
-        <Link
-          href="/saison-culturelle-africaine"
-          className="flex flex-1 items-center justify-center rounded-[var(--radius-button)] border border-dta-sand px-6 py-3 text-sm font-semibold text-dta-char hover:bg-dta-beige"
-        >
-          Retour aux événements
-        </Link>
+                {/* Tier badge */}
+                <div className="absolute right-5 top-5">
+                  <span className={`rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white ${tierBadgeColors[ticket.tier] || tierBadgeColors.STANDARD}`}>
+                    {resolveTierLabel(ticket.tier, event.tiers)}
+                  </span>
+                </div>
+
+                {/* Event title overlay */}
+                <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+                  <h2 className="font-serif text-2xl font-bold leading-tight text-white sm:text-3xl">
+                    {event.title}
+                  </h2>
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-white/80">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar size={14} />
+                      {formatDate(event.date)}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <MapPin size={14} />
+                      {event.venue}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Perforated divider */}
+              <div className="relative flex items-center">
+                <div className="absolute -left-3 h-6 w-6 rounded-full bg-dta-bg" />
+                <div className="w-full border-t-2 border-dashed border-white/20" />
+                <div className="absolute -right-3 h-6 w-6 rounded-full bg-dta-bg" />
+              </div>
+
+              {/* Ticket info + QR */}
+              <div className="flex items-center justify-between gap-4 p-5 sm:p-6">
+                <div className="min-w-0 flex-1">
+                  {/* Date large */}
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-serif text-4xl font-bold text-white">
+                      {eventDate.getDate()}
+                    </span>
+                    <div>
+                      <span className="block text-sm font-semibold uppercase text-dta-accent">
+                        {eventDate.toLocaleDateString("fr-FR", { month: "long" })}
+                      </span>
+                      <span className="block text-xs text-white/50">
+                        {eventDate.toLocaleDateString("fr-FR", { weekday: "long" })} &middot; {eventDate.getFullYear()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Details */}
+                  <div className="mt-4 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs uppercase tracking-wider text-white/40">Prix</span>
+                      <span className="font-semibold text-white">{formatPrice(ticket.price)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs uppercase tracking-wider text-white/40">Catégorie</span>
+                      <span className="font-semibold text-dta-accent">{resolveTierLabel(ticket.tier, event.tiers)}</span>
+                    </div>
+                    {finalTickets.length > 1 && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs uppercase tracking-wider text-white/40">Billet</span>
+                        <span className="font-semibold text-white">{i + 1} / {finalTickets.length}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs uppercase tracking-wider text-white/40">Réf.</span>
+                      <span className="font-mono text-xs text-white/60">{ticket.id.slice(0, 8).toUpperCase()}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* QR Code */}
+                {ticket.qrCode && (
+                  <div className="flex-shrink-0">
+                    <div className="rounded-xl bg-white p-2">
+                      <img
+                        src={ticket.qrCode}
+                        alt={`QR Code — Billet ${i + 1}`}
+                        className="h-28 w-28 sm:h-32 sm:w-32"
+                      />
+                    </div>
+                    <p className="mt-1.5 text-center text-[10px] text-white/30">
+                      Présentez ce code à l&apos;entrée
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer bar */}
+              <div className="flex items-center justify-between bg-white/5 px-5 py-3 sm:px-6">
+                <span className="text-[10px] uppercase tracking-widest text-white/30">
+                  Dream Team Africa &mdash; Saison 2026
+                </span>
+                <span className="text-[10px] text-white/30">
+                  {session.user.name || session.user.email}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Actions */}
+        <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/dashboard/tickets"
+            className="flex flex-1 items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white hover:bg-dta-accent-dark"
+          >
+            <Download size={16} />
+            Voir tous mes billets
+          </Link>
+          <Link
+            href="/saison-culturelle-africaine"
+            className="flex flex-1 items-center justify-center gap-2 rounded-[var(--radius-button)] border border-dta-sand px-6 py-3 text-sm font-semibold text-dta-char hover:bg-dta-beige"
+          >
+            <ArrowLeft size={16} />
+            Retour aux événements
+          </Link>
+        </div>
       </div>
-    </div>
     </>
   );
 }

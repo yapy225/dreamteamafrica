@@ -55,19 +55,14 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
 
   const ticketPromises = Array.from({ length: qty }, async (_, i) => {
     const ticketId = crypto.randomUUID();
-    const qrData = JSON.stringify({
-      ticketId,
-      eventId,
-      userId,
-      tier,
-      sessionId: session.id,
-      seq: i + 1,
-    });
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://dreamteamafrica.com";
+    const qrData = `${baseUrl}/check/${ticketId}`;
 
     const qrCode = await QRCode.toDataURL(qrData, {
-      width: 300,
-      margin: 2,
-      color: { dark: "#1A1A1A", light: "#FBF8F4" },
+      width: 600,
+      margin: 3,
+      errorCorrectionLevel: "H",
+      color: { dark: "#000000", light: "#FFFFFF" },
     });
 
     return prisma.ticket.create({
@@ -75,7 +70,7 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
         id: ticketId,
         eventId,
         userId,
-        tier: tier as "EARLY_BIRD" | "STANDARD" | "VIP",
+        tier,
         price,
         qrCode,
         stripeSessionId: session.id,

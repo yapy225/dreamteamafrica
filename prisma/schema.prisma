@@ -41,6 +41,8 @@ enum InscriptionStatus {
   REJECTED
 }
 
+// Legacy enum kept for reference — tier is now a free String on Ticket
+// Allows custom tiers like PROMO_100, JOUR1_DAHOMEY, etc.
 enum TicketTier {
   EARLY_BIRD
   STANDARD
@@ -225,11 +227,12 @@ model Ticket {
   id              String     @id @default(cuid())
   eventId         String
   userId          String
-  tier            TicketTier
+  tier            String
   price           Float
   qrCode          String?
   stripeSessionId String?
   purchasedAt     DateTime   @default(now())
+  checkedInAt     DateTime?
 
   event Event @relation(fields: [eventId], references: [id])
   user  User  @relation(fields: [userId], references: [id])
@@ -481,6 +484,7 @@ model EventReservation {
   phone       String
   guests      Int      @default(1)
   status      String   @default("CONFIRMED") // CONFIRMED | CANCELLED
+  checkedInAt DateTime?
   createdAt   DateTime @default(now())
 
   @@index([eventId])

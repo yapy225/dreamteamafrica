@@ -102,8 +102,8 @@ const articles: EventArticle[] = [
   // ─── 2. FOIRE D'AFRIQUE PARIS ────────────────────────────
   {
     eventId: "cmm767c1m0005ti794z61tzux",
-    slug: "foire-afrique-paris-2026-salon-africain",
-    eventSlug: "foire-afrique-paris",
+    slug: "foire-dafrique-paris-2026-salon-africain",
+    eventSlug: "foire-dafrique-paris",
     title: "Foire d'Afrique Paris 2026 : le plus grand salon africain les 1er et 2 mai",
     excerpt:
       "La Foire d'Afrique Paris 2026 revient les 1er et 2 mai à l'Espace Mas. Exposants, gastronomie, artisanat et spectacles : deux jours pour célébrer l'Afrique au cœur de Paris.",
@@ -129,7 +129,7 @@ const articles: EventArticle[] = [
     altText: "Foire d'Afrique Paris 2026 à l'Espace Mas",
     readingTimeMin: 6,
     content: `
-<p>La <strong>Foire d'Afrique Paris 2026</strong> est de retour pour une édition exceptionnelle les <strong>1er et 2 mai 2026</strong> à l'<strong>Espace Mas</strong>. Ce <strong>salon africain Paris 2026</strong> est le rendez-vous incontournable de tous ceux qui souhaitent découvrir, célébrer et soutenir la richesse du continent africain. Artisanat, gastronomie, mode, cosmétiques, spectacles vivants : la <a href="/saison-culturelle-africaine/foire-afrique-paris">Foire d'Afrique Paris</a> promet deux jours d'immersion totale dans les cultures africaines.</p>
+<p>La <strong>Foire d'Afrique Paris 2026</strong> est de retour pour une édition exceptionnelle les <strong>1er et 2 mai 2026</strong> à l'<strong>Espace Mas</strong>. Ce <strong>salon africain Paris 2026</strong> est le rendez-vous incontournable de tous ceux qui souhaitent découvrir, célébrer et soutenir la richesse du continent africain. Artisanat, gastronomie, mode, cosmétiques, spectacles vivants : la <a href="/saison-culturelle-africaine/foire-dafrique-paris">Foire d'Afrique Paris</a> promet deux jours d'immersion totale dans les cultures africaines.</p>
 
 <h2>La Foire d'Afrique Paris : un événement unique en son genre</h2>
 
@@ -163,7 +163,7 @@ const articles: EventArticle[] = [
 
 <p>Les <strong>foire d'Afrique billet</strong>s sont disponibles en ligne. Plusieurs formules sont proposées : entrée journée, pass deux jours et tarifs réduits pour les familles. La prévente en ligne vous garantit un accès prioritaire et un tarif avantageux par rapport à la billetterie sur place.</p>
 
-<p><a href="/saison-culturelle-africaine/foire-afrique-paris">Réservez dès maintenant vos billets pour la Foire d'Afrique Paris 2026</a> et bénéficiez du tarif early bird.</p>
+<p><a href="/saison-culturelle-africaine/foire-dafrique-paris">Réservez dès maintenant vos billets pour la Foire d'Afrique Paris 2026</a> et bénéficiez du tarif early bird.</p>
 
 <h2>L'Espace Mas : un lieu au cœur de l'action</h2>
 
@@ -179,7 +179,7 @@ const articles: EventArticle[] = [
   <li><strong>Dates :</strong> 1er et 2 mai 2026</li>
   <li><strong>Lieu :</strong> Espace Mas, Paris</li>
   <li><strong>Horaires :</strong> 10h – 20h</li>
-  <li><strong>Billetterie :</strong> <a href="/saison-culturelle-africaine/foire-afrique-paris">Réserver en ligne</a></li>
+  <li><strong>Billetterie :</strong> <a href="/saison-culturelle-africaine/foire-dafrique-paris">Réserver en ligne</a></li>
 </ul>
 `,
   },

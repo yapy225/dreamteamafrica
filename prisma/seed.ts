@@ -87,7 +87,7 @@ async function main() {
     prisma.event.create({
       data: {
         title: "Foire D'Afrique Paris",
-        slug: "foire-afrique-paris-2026",
+        slug: "foire-dafrique-paris-2026",
         description:
           "Le plus grand salon de la culture africaine à Paris. Artisanat, gastronomie, musique et conférences.",
         coverImage:

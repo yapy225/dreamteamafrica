@@ -51,12 +51,13 @@ interface TierItem {
   description: string;
   features: string;
   highlight: boolean;
+  quota: string;
 }
 
 const defaultTiers: TierItem[] = [
-  { id: "EARLY_BIRD", name: "Early Bird", price: "0", description: "Accès général — Tarif réduit pour les premiers acheteurs", features: "Accès à l'événement\nBillet nominatif\nProgramme officiel", highlight: false },
-  { id: "STANDARD", name: "Standard", price: "0", description: "Billetterie en ligne — Accès complet à l'événement", features: "Accès à l'événement\nBillet nominatif\nProgramme officiel", highlight: true },
-  { id: "VIP", name: "Billetterie sur place", price: "0", description: "", features: "Accès à l'événement\nBillet nominatif\nProgramme officiel", highlight: false },
+  { id: "EARLY_BIRD", name: "Early Bird", price: "0", description: "Accès général — Tarif réduit pour les premiers acheteurs", features: "Accès à l'événement\nBillet nominatif\nProgramme officiel", highlight: false, quota: "" },
+  { id: "STANDARD", name: "Standard", price: "0", description: "Billetterie en ligne — Accès complet à l'événement", features: "Accès à l'événement\nBillet nominatif\nProgramme officiel", highlight: true, quota: "" },
+  { id: "VIP", name: "Billetterie sur place", price: "0", description: "", features: "Accès à l'événement\nBillet nominatif\nProgramme officiel", highlight: false, quota: "" },
 ];
 
 interface VenueItem {
@@ -79,7 +80,7 @@ interface EventFormProps {
     capacity: number;
     showCapacity: boolean;
     program: ProgramItem[] | null;
-    tiers: Array<{ id: string; name: string; price: number; description: string; features: string[]; highlight: boolean }> | null;
+    tiers: Array<{ id: string; name: string; price: number; description: string; features: string[]; highlight: boolean; quota?: number }> | null;
     priceEarly: number;
     priceStd: number;
     priceVip: number;
@@ -119,12 +120,14 @@ export default function EventForm({ initialData }: EventFormProps) {
           description: t.description,
           features: t.features.join("\n"),
           highlight: t.highlight,
+          quota: t.quota != null ? String(t.quota) : "",
         }))
       : defaultTiers.map((t) => ({
           ...t,
           price: t.id === "EARLY_BIRD" ? (initialData?.priceEarly?.toString() || "0")
             : t.id === "STANDARD" ? (initialData?.priceStd?.toString() || "0")
             : (initialData?.priceVip?.toString() || "0"),
+          quota: "",
         })),
   );
   const [venues, setVenues] = useState<VenueItem[]>(
@@ -160,6 +163,7 @@ export default function EventForm({ initialData }: EventFormProps) {
             description: t.description,
             features: t.features.split("\n").map((f) => f.trim()).filter(Boolean),
             highlight: t.highlight,
+            ...(t.quota !== "" && { quota: Number(t.quota) }),
           })),
         }),
       });
@@ -442,7 +446,7 @@ export default function EventForm({ initialData }: EventFormProps) {
                 Populaire
               </label>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div>
                 <label className="mb-1 block text-xs text-dta-taupe">Nom du billet</label>
                 <input
@@ -470,6 +474,22 @@ export default function EventForm({ initialData }: EventFormProps) {
                   }}
                   className={inputClass}
                 />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-dta-taupe">Quota de places</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={tier.quota}
+                  onChange={(e) => {
+                    const updated = [...tiers];
+                    updated[idx] = { ...tier, quota: e.target.value };
+                    setTiers(updated);
+                  }}
+                  className={inputClass}
+                  placeholder="Illimité"
+                />
+                <p className="mt-0.5 text-[10px] text-dta-taupe">Vide = pas de limite</p>
               </div>
             </div>
             <div>

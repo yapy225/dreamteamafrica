@@ -12,9 +12,10 @@ interface TicketSelectorProps {
   price: number;
   highlight: boolean;
   sessionLabel?: string;
+  maxQuantity?: number;
 }
 
-export default function TicketSelector({ eventId, tier, price, highlight, sessionLabel }: TicketSelectorProps) {
+export default function TicketSelector({ eventId, tier, price, highlight, sessionLabel, maxQuantity = 10 }: TicketSelectorProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
@@ -87,9 +88,9 @@ export default function TicketSelector({ eventId, tier, price, highlight, sessio
           </button>
           <span className="w-10 text-center text-sm font-medium text-dta-dark">{quantity}</span>
           <button
-            onClick={() => setQuantity(Math.min(10, quantity + 1))}
+            onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
             className="px-3 py-2 text-dta-char/50 transition-colors hover:text-dta-dark"
-            disabled={quantity >= 10}
+            disabled={quantity >= maxQuantity}
           >
             <Plus size={14} />
           </button>

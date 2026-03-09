@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     let unitPrice: number;
     let tierName: string;
 
-    const customTiers = event.tiers as Array<{ id: string; name: string; price: number }> | null;
+    const customTiers = event.tiers as Array<{ id: string; name: string; price: number; quota?: number }> | null;
     const matchedTier = Array.isArray(customTiers)
       ? customTiers.find((t) => t.id === tier)
       : null;
@@ -46,6 +46,22 @@ export async function POST(request: Request) {
     if (matchedTier) {
       unitPrice = matchedTier.price;
       tierName = matchedTier.name;
+
+      // Check tier-level quota
+      if (matchedTier.quota != null) {
+        const tierSold = await prisma.ticket.count({
+          where: { eventId: event.id, tier },
+        });
+        const tierRemaining = matchedTier.quota - tierSold;
+        if (tierRemaining < quantity) {
+          return NextResponse.json(
+            { error: tierRemaining <= 0
+              ? `Plus de places disponibles pour "${tierName}".`
+              : `Seulement ${tierRemaining} place(s) restante(s) pour "${tierName}".` },
+            { status: 400 },
+          );
+        }
+      }
     } else if (legacyTiers.includes(tier)) {
       const priceMap: Record<string, number> = {
         EARLY_BIRD: event.priceEarly,

@@ -21,6 +21,8 @@ interface Tier {
   description: string;
   features: string[];
   highlight: boolean;
+  quota: number | null;
+  sold: number;
 }
 
 interface TicketSectionClientProps {
@@ -168,20 +170,36 @@ export default function TicketSectionClient({
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {tiers.map((tier) => (
+            {tiers.map((tier) => {
+              const tierRemaining = tier.quota != null ? tier.quota - tier.sold : null;
+              const tierSoldOut = tierRemaining != null && tierRemaining <= 0;
+
+              return (
               <div
                 key={tier.id}
                 className={`rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-200 ${
-                  tier.highlight
+                  tier.highlight && !tierSoldOut
                     ? "ring-2 ring-dta-accent md:scale-105"
                     : ""
-                }`}
+                } ${tierSoldOut ? "opacity-60" : ""}`}
               >
-                {tier.highlight && (
-                  <span className="mb-3 inline-block rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
-                    Populaire
-                  </span>
-                )}
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  {tier.highlight && !tierSoldOut && (
+                    <span className="inline-block rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
+                      Populaire
+                    </span>
+                  )}
+                  {tierSoldOut && (
+                    <span className="inline-block rounded-[var(--radius-full)] bg-red-100 px-3 py-1 text-xs font-semibold text-red-600">
+                      Épuisé
+                    </span>
+                  )}
+                  {tierRemaining != null && tierRemaining > 0 && tierRemaining <= 20 && (
+                    <span className="inline-block rounded-[var(--radius-full)] bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+                      Plus que {tierRemaining} place{tierRemaining > 1 ? "s" : ""}
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-baseline justify-between">
                   <h3 className="font-serif text-lg font-bold text-dta-dark">
                     {tier.name}
@@ -204,16 +222,24 @@ export default function TicketSectionClient({
                     </li>
                   ))}
                 </ul>
-                <TicketSelector
-                  eventId={eventId}
-                  eventSlug={eventSlug}
-                  tier={tier.id}
-                  price={tier.price}
-                  highlight={tier.highlight}
-                  sessionLabel={sessionLabel}
-                />
+                {tierSoldOut ? (
+                  <div className="mt-4 rounded-[var(--radius-button)] bg-gray-100 py-3 text-center text-sm font-medium text-gray-500">
+                    Places épuisées
+                  </div>
+                ) : (
+                  <TicketSelector
+                    eventId={eventId}
+                    eventSlug={eventSlug}
+                    tier={tier.id}
+                    price={tier.price}
+                    highlight={tier.highlight}
+                    sessionLabel={sessionLabel}
+                    maxQuantity={tierRemaining != null ? Math.min(10, tierRemaining) : 10}
+                  />
+                )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

@@ -72,7 +72,7 @@ const articles: OfficielArticle[] = [
 <p>Les <strong>artisans africains en France</strong> perpétuent des savoir-faire ancestraux tout en les adaptant aux goûts contemporains. Couturiers, bijoutiers, ébénistes, décorateurs : l'annuaire recense des centaines de créateurs talentueux qui proposent des pièces uniques inspirées du patrimoine africain. Retrouvez ces talents lors de la <a href="/saison-culturelle-africaine">Saison Culturelle Africaine</a>, notamment au <a href="/lafropeen/salon-made-in-africa-paris-2026-artisanat-noel">Salon Made In Africa</a> où nombre d'entre eux exposent chaque année.</p>
 
 <h3>Commerce et distribution</h3>
-<p>Les <strong>commerçants africains</strong> occupent une place essentielle dans le tissu économique français. Épiceries spécialisées, boutiques de cosmétiques naturels, magasins de tissus et de prêt-à-porter : l'annuaire vous aide à trouver les commerces africains près de chez vous. La <a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique Paris</a> est d'ailleurs l'occasion idéale de découvrir de nouveaux commerçants et de tisser des liens commerciaux.</p>
+<p>Les <strong>commerçants africains</strong> occupent une place essentielle dans le tissu économique français. Épiceries spécialisées, boutiques de cosmétiques naturels, magasins de tissus et de prêt-à-porter : l'annuaire vous aide à trouver les commerces africains près de chez vous. La <a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique Paris</a> est d'ailleurs l'occasion idéale de découvrir de nouveaux commerçants et de tisser des liens commerciaux.</p>
 
 <h3>Services professionnels</h3>
 <p>Avocats spécialisés en droit des affaires internationales, experts-comptables, consultants en import-export, traducteurs : les professionnels africains en France couvrent tous les domaines du conseil et de l'accompagnement. L'<strong>annuaire entrepreneurs africains Paris</strong> facilite l'accès à ces compétences spécifiques.</p>
@@ -197,7 +197,7 @@ const articles: OfficielArticle[] = [
 
 <h2>Les événements incontournables pour développer son réseau</h2>
 
-<p>La <a href="/saison-culturelle-africaine">Saison Culturelle Africaine</a> organisée par Dream Team Africa est bien plus qu'une programmation culturelle : c'est un véritable espace de networking pour les entrepreneurs. La <a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique Paris</a> permet aux exposants de tester leurs produits auprès d'un large public, tandis que le <a href="/lafropeen/salon-made-in-africa-paris-2026-artisanat-noel">Salon Made In Africa</a> offre une vitrine exceptionnelle en fin d'année.</p>
+<p>La <a href="/saison-culturelle-africaine">Saison Culturelle Africaine</a> organisée par Dream Team Africa est bien plus qu'une programmation culturelle : c'est un véritable espace de networking pour les entrepreneurs. La <a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique Paris</a> permet aux exposants de tester leurs produits auprès d'un large public, tandis que le <a href="/lafropeen/salon-made-in-africa-paris-2026-artisanat-noel">Salon Made In Africa</a> offre une vitrine exceptionnelle en fin d'année.</p>
 
 <p>Ces événements sont aussi l'occasion de nouer des <a href="/lafropeen/partenariat-commercial-afrique-france-import-export">partenariats commerciaux Afrique-France</a> et de rencontrer des partenaires potentiels dans un cadre convivial et professionnel. Consultez <a href="/lafropeen">L'Afropéen</a> pour suivre l'actualité de ces rendez-vous.</p>
 
@@ -282,7 +282,7 @@ const articles: OfficielArticle[] = [
 <p>La <a href="/saison-culturelle-africaine">Saison Culturelle Africaine</a> organisée par Dream Team Africa offre de multiples opportunités de partenariat tout au long de l'année :</p>
 
 <ul>
-  <li><strong><a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique Paris</a></strong> : le plus grand salon africain de la région parisienne, avec des milliers de visiteurs sur deux jours. Idéal pour le sponsoring et la présence de marque.</li>
+  <li><strong><a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique Paris</a></strong> : le plus grand salon africain de la région parisienne, avec des milliers de visiteurs sur deux jours. Idéal pour le sponsoring et la présence de marque.</li>
   <li><strong><a href="/lafropeen/salon-made-in-africa-paris-2026-artisanat-noel">Salon Made In Africa</a></strong> : un marché de Noël haut de gamme mettant en valeur l'artisanat africain, parfait pour les partenariats commerciaux.</li>
   <li><strong><a href="/lafropeen/festival-international-cinema-africain-paris-2026-fica">FICA</a></strong> et <strong><a href="/lafropeen/festival-autre-culture-paris-2026-interculturel">Festival Autre Culture</a></strong> : des événements culturels à fort impact médiatique pour les stratégies de <strong>mécénat culture africaine en France</strong>.</li>
 </ul>
@@ -401,7 +401,7 @@ const articles: OfficielArticle[] = [
 
 <p>La <a href="/saison-culturelle-africaine">Saison Culturelle Africaine</a> fait la part belle à la littérature et aux médias africains. Le <a href="/lafropeen/festival-conte-africain-sous-arbre-a-palabre-paris-2026">Festival du Conte Africain – Sous l'Arbre à Palabre</a> célèbre la tradition orale africaine et offre une passerelle entre l'oralité et l'écriture. Conteurs, poètes et écrivains s'y retrouvent pour partager la richesse des récits du continent.</p>
 
-<p>Les salons et foires organisés par Dream Team Africa, comme la <a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique Paris</a>, accueillent également des stands dédiés aux éditeurs et librairies africaines, offrant une visibilité précieuse aux auteurs et à leurs œuvres. Inscrivez-vous sur <a href="/lofficiel-dafrique">L'Officiel d'Afrique</a> pour ne manquer aucun de ces rendez-vous.</p>
+<p>Les salons et foires organisés par Dream Team Africa, comme la <a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique Paris</a>, accueillent également des stands dédiés aux éditeurs et librairies africaines, offrant une visibilité précieuse aux auteurs et à leurs œuvres. Inscrivez-vous sur <a href="/lofficiel-dafrique">L'Officiel d'Afrique</a> pour ne manquer aucun de ces rendez-vous.</p>
 
 <h2>Soutenir l'écosystème médiatique et éditorial africain en France</h2>
 

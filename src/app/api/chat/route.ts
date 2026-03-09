@@ -33,7 +33,7 @@ Email : contact@dreamteamafrica.com
    - Horaires : 12h – 22h (2 jours)
    - Le plus grand salon de la culture africaine à Paris
    - Tarifs visiteurs : Early Bird 5 €, Standard 10 €, VIP 15 €
-   - Billetterie : dreamteamafrica.com/saison-culturelle-africaine/foire-dafrique-paris-2026
+   - Billetterie : dreamteamafrica.com/saison-culturelle-africaine/foire-dafrique-paris
 
 3. **Évasion Paris** — 13 juin 2026
    - Lieu : La Seine, Paris

@@ -102,7 +102,7 @@ const articles: EventArticle[] = [
   // ─── 2. FOIRE D'AFRIQUE PARIS ────────────────────────────
   {
     eventId: "cmm767c1m0005ti794z61tzux",
-    slug: "foire-dafrique-paris-2026-salon-africain",
+    slug: "foire-dafrique-paris-salon-africain",
     eventSlug: "foire-dafrique-paris",
     title: "Foire d'Afrique Paris 2026 : le plus grand salon africain les 1er et 2 mai",
     excerpt:

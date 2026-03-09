@@ -53,7 +53,7 @@ const articles: ArticleUpdate[] = [
 
 <h2>Un festival ancré dans la Saison Culturelle Africaine</h2>
 
-<p>Le FICA inaugure la <a href="/saison-culturelle-africaine">Saison Culturelle Africaine 2026</a>, une série de sept événements majeurs organisés tout au long de l'année par Dream Team Africa. Du cinéma à la danse, de l'artisanat au conte, cette saison célèbre la diversité et la vitalité de la culture africaine en France. Après les deux jours de cinéma au Kosmos, la saison se poursuit avec la <a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique Paris</a> les 1er et 2 mai, le plus grand salon africain de la région parisienne.</p>
+<p>Le FICA inaugure la <a href="/saison-culturelle-africaine">Saison Culturelle Africaine 2026</a>, une série de sept événements majeurs organisés tout au long de l'année par Dream Team Africa. Du cinéma à la danse, de l'artisanat au conte, cette saison célèbre la diversité et la vitalité de la culture africaine en France. Après les deux jours de cinéma au Kosmos, la saison se poursuit avec la <a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique Paris</a> les 1er et 2 mai, le plus grand salon africain de la région parisienne.</p>
 
 <p>Les amateurs de sorties festives pourront ensuite retrouver la saison dès le 13 juin avec <a href="/lafropeen/evasion-paris-soiree-africaine-2026">Évasion Paris</a>, la soirée afro incontournable de l'été parisien en bord de Seine.</p>
 
@@ -84,7 +84,7 @@ const articles: ArticleUpdate[] = [
 <p>Le FICA n'est que le début d'une année riche en événements culturels africains à Paris. Retrouvez tous les rendez-vous de la <a href="/saison-culturelle-africaine">Saison Culturelle Africaine</a> :</p>
 
 <ul>
-  <li><a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique Paris</a> — 1er et 2 mai 2026</li>
+  <li><a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique Paris</a> — 1er et 2 mai 2026</li>
   <li><a href="/lafropeen/evasion-paris-soiree-africaine-2026">Évasion Paris</a> — 13 juin 2026</li>
   <li><a href="/lafropeen/festival-autre-culture-paris-2026-interculturel">Festival de l'Autre Culture</a> — 27 juin 2026</li>
   <li><a href="/lafropeen/juste-une-danse-festival-danses-africaines-paris-2026">Juste Une Danse</a> — 31 octobre 2026</li>
@@ -96,7 +96,7 @@ const articles: ArticleUpdate[] = [
 
   // ─── 2. FOIRE D'AFRIQUE PARIS ────────────────────────────
   {
-    slug: "foire-dafrique-paris-2026-salon-africain",
+    slug: "foire-dafrique-paris-salon-africain",
     eventSlug: "foire-dafrique-paris",
     title: "Foire d'Afrique Paris 2026 : le salon africain les 1er et 2 mai",
     excerpt:
@@ -211,7 +211,7 @@ const articles: ArticleUpdate[] = [
 
 <h2>Évasion Paris dans la Saison Culturelle Africaine 2026</h2>
 
-<p>Évasion Paris est le troisième événement de la <a href="/saison-culturelle-africaine">Saison Culturelle Africaine 2026</a>. Après le <a href="/lafropeen/festival-international-cinema-africain-paris-2026-fica">FICA</a> les 3 et 4 avril et la <a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique</a> les 1er et 2 mai, cette soirée marque le début de l'été avec une célébration festive et musicale. La saison se poursuit deux semaines plus tard avec le <a href="/lafropeen/festival-autre-culture-paris-2026-interculturel">Festival de l'Autre Culture</a> le 27 juin, un festival interculturel en plein air au Parc des Épivans.</p>
+<p>Évasion Paris est le troisième événement de la <a href="/saison-culturelle-africaine">Saison Culturelle Africaine 2026</a>. Après le <a href="/lafropeen/festival-international-cinema-africain-paris-2026-fica">FICA</a> les 3 et 4 avril et la <a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique</a> les 1er et 2 mai, cette soirée marque le début de l'été avec une célébration festive et musicale. La saison se poursuit deux semaines plus tard avec le <a href="/lafropeen/festival-autre-culture-paris-2026-interculturel">Festival de l'Autre Culture</a> le 27 juin, un festival interculturel en plein air au Parc des Épivans.</p>
 
 <h2>Pourquoi choisir Évasion Paris ?</h2>
 
@@ -239,7 +239,7 @@ const articles: ArticleUpdate[] = [
 
 <ul>
   <li><a href="/lafropeen/festival-international-cinema-africain-paris-2026-fica">FICA – Festival du Cinéma Africain</a> — 3 et 4 avril 2026</li>
-  <li><a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique Paris</a> — 1er et 2 mai 2026</li>
+  <li><a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique Paris</a> — 1er et 2 mai 2026</li>
   <li><a href="/lafropeen/festival-autre-culture-paris-2026-interculturel">Festival de l'Autre Culture</a> — 27 juin 2026</li>
   <li><a href="/lafropeen/juste-une-danse-festival-danses-africaines-paris-2026">Juste Une Danse</a> — 31 octobre 2026</li>
   <li><a href="/lafropeen/festival-conte-africain-sous-arbre-a-palabre-paris-2026">Festival du Conte Africain</a> — 11 novembre 2026</li>
@@ -282,7 +282,7 @@ const articles: ArticleUpdate[] = [
 <p>Un espace gastronomique réunira des restaurateurs et traiteurs proposant les meilleures spécialités culinaires du continent : grillades, plats mijotés, jus naturels, pâtisseries et douceurs africaines.</p>
 
 <h3>Marché artisanal</h3>
-<p>Des artisans et créateurs exposeront leurs œuvres et produits : bijoux, vêtements, objets de décoration, cosmétiques naturels, livres et bien plus encore. Le marché artisanal est une invitation à soutenir la création africaine. Les amateurs d'artisanat retrouveront aussi la <a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique Paris</a> et le <a href="/lafropeen/salon-made-in-africa-paris-2026-artisanat-noel">Salon Made In Africa</a> dans la même saison.</p>
+<p>Des artisans et créateurs exposeront leurs œuvres et produits : bijoux, vêtements, objets de décoration, cosmétiques naturels, livres et bien plus encore. Le marché artisanal est une invitation à soutenir la création africaine. Les amateurs d'artisanat retrouveront aussi la <a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique Paris</a> et le <a href="/lafropeen/salon-made-in-africa-paris-2026-artisanat-noel">Salon Made In Africa</a> dans la même saison.</p>
 
 <h2>Un événement familial et intergénérationnel</h2>
 
@@ -292,7 +292,7 @@ const articles: ArticleUpdate[] = [
 
 <h2>Le Festival de l'Autre Culture dans la Saison Culturelle Africaine</h2>
 
-<p>Quatrième événement de la <a href="/saison-culturelle-africaine">Saison Culturelle Africaine 2026</a>, le Festival de l'Autre Culture clôture en beauté le premier semestre. Après le <a href="/lafropeen/festival-international-cinema-africain-paris-2026-fica">FICA</a> en avril, la <a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique</a> en mai et <a href="/lafropeen/evasion-paris-soiree-africaine-2026">Évasion Paris</a> le 13 juin, ce festival en plein air apporte une touche verte et familiale à une saison résolument tournée vers la célébration des cultures africaines.</p>
+<p>Quatrième événement de la <a href="/saison-culturelle-africaine">Saison Culturelle Africaine 2026</a>, le Festival de l'Autre Culture clôture en beauté le premier semestre. Après le <a href="/lafropeen/festival-international-cinema-africain-paris-2026-fica">FICA</a> en avril, la <a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique</a> en mai et <a href="/lafropeen/evasion-paris-soiree-africaine-2026">Évasion Paris</a> le 13 juin, ce festival en plein air apporte une touche verte et familiale à une saison résolument tournée vers la célébration des cultures africaines.</p>
 
 <h2>Informations pratiques</h2>
 
@@ -309,7 +309,7 @@ const articles: ArticleUpdate[] = [
 
 <ul>
   <li><a href="/lafropeen/festival-international-cinema-africain-paris-2026-fica">FICA – Festival du Cinéma Africain</a> — 3 et 4 avril 2026</li>
-  <li><a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique Paris</a> — 1er et 2 mai 2026</li>
+  <li><a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique Paris</a> — 1er et 2 mai 2026</li>
   <li><a href="/lafropeen/evasion-paris-soiree-africaine-2026">Évasion Paris</a> — 13 juin 2026</li>
   <li><a href="/lafropeen/juste-une-danse-festival-danses-africaines-paris-2026">Juste Une Danse</a> — 31 octobre 2026</li>
   <li><a href="/lafropeen/festival-conte-africain-sous-arbre-a-palabre-paris-2026">Festival du Conte Africain</a> — 11 novembre 2026</li>
@@ -369,7 +369,7 @@ const articles: ArticleUpdate[] = [
 
 <h2>Juste Une Danse dans la Saison Culturelle Africaine</h2>
 
-<p>Cinquième événement de la <a href="/saison-culturelle-africaine">Saison Culturelle Africaine 2026</a>, Juste Une Danse marque la rentrée culturelle de l'automne. Après un premier semestre riche en événements — le <a href="/lafropeen/festival-international-cinema-africain-paris-2026-fica">FICA</a> en avril, la <a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique</a> en mai, <a href="/lafropeen/evasion-paris-soiree-africaine-2026">Évasion Paris</a> et le <a href="/lafropeen/festival-autre-culture-paris-2026-interculturel">Festival de l'Autre Culture</a> en juin —, ce festival de danse relance la saison avec une énergie contagieuse. Le mois suivant, la parole prend le relais avec le <a href="/lafropeen/festival-conte-africain-sous-arbre-a-palabre-paris-2026">Festival du Conte Africain</a> le 11 novembre.</p>
+<p>Cinquième événement de la <a href="/saison-culturelle-africaine">Saison Culturelle Africaine 2026</a>, Juste Une Danse marque la rentrée culturelle de l'automne. Après un premier semestre riche en événements — le <a href="/lafropeen/festival-international-cinema-africain-paris-2026-fica">FICA</a> en avril, la <a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique</a> en mai, <a href="/lafropeen/evasion-paris-soiree-africaine-2026">Évasion Paris</a> et le <a href="/lafropeen/festival-autre-culture-paris-2026-interculturel">Festival de l'Autre Culture</a> en juin —, ce festival de danse relance la saison avec une énergie contagieuse. Le mois suivant, la parole prend le relais avec le <a href="/lafropeen/festival-conte-africain-sous-arbre-a-palabre-paris-2026">Festival du Conte Africain</a> le 11 novembre.</p>
 
 <h2>Informations pratiques</h2>
 
@@ -386,7 +386,7 @@ const articles: ArticleUpdate[] = [
 
 <ul>
   <li><a href="/lafropeen/festival-international-cinema-africain-paris-2026-fica">FICA – Festival du Cinéma Africain</a> — 3 et 4 avril 2026</li>
-  <li><a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique Paris</a> — 1er et 2 mai 2026</li>
+  <li><a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique Paris</a> — 1er et 2 mai 2026</li>
   <li><a href="/lafropeen/evasion-paris-soiree-africaine-2026">Évasion Paris</a> — 13 juin 2026</li>
   <li><a href="/lafropeen/festival-autre-culture-paris-2026-interculturel">Festival de l'Autre Culture</a> — 27 juin 2026</li>
   <li><a href="/lafropeen/festival-conte-africain-sous-arbre-a-palabre-paris-2026">Festival du Conte Africain</a> — 11 novembre 2026</li>
@@ -454,7 +454,7 @@ const articles: ArticleUpdate[] = [
 
 <ul>
   <li><a href="/lafropeen/festival-international-cinema-africain-paris-2026-fica">FICA – Festival du Cinéma Africain</a> — 3 et 4 avril 2026</li>
-  <li><a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique Paris</a> — 1er et 2 mai 2026</li>
+  <li><a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique Paris</a> — 1er et 2 mai 2026</li>
   <li><a href="/lafropeen/evasion-paris-soiree-africaine-2026">Évasion Paris</a> — 13 juin 2026</li>
   <li><a href="/lafropeen/festival-autre-culture-paris-2026-interculturel">Festival de l'Autre Culture</a> — 27 juin 2026</li>
   <li><a href="/lafropeen/juste-une-danse-festival-danses-africaines-paris-2026">Juste Une Danse</a> — 31 octobre 2026</li>
@@ -481,7 +481,7 @@ const articles: ArticleUpdate[] = [
 
 <p>Le <strong>Salon Made In Africa</strong> est le plus grand salon d'artisanat africain de Paris dédié au savoir-faire du continent. Depuis sa création, il s'est imposé comme un événement incontournable pour tous ceux qui cherchent des produits authentiques, fabriqués avec passion par des artisans et créateurs africains. Retrouvez toute l'actualité de cet événement et de la saison sur <a href="/lafropeen">L'Afropéen</a>.</p>
 
-<p>L'édition 2026 réunira plus de cinquante exposants sélectionnés pour la qualité de leurs produits et leur engagement en faveur d'un artisanat durable et éthique. Mode, bijoux, décoration, cosmétiques, alimentation, édition : tous les secteurs de la création africaine seront représentés. Les habitués de la <a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique Paris</a> retrouveront certains exposants dans un format plus intimiste et festif, idéal pour la période des fêtes.</p>
+<p>L'édition 2026 réunira plus de cinquante exposants sélectionnés pour la qualité de leurs produits et leur engagement en faveur d'un artisanat durable et éthique. Mode, bijoux, décoration, cosmétiques, alimentation, édition : tous les secteurs de la création africaine seront représentés. Les habitués de la <a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique Paris</a> retrouveront certains exposants dans un format plus intimiste et festif, idéal pour la période des fêtes.</p>
 
 <h2>Pourquoi choisir le Salon Made In Africa pour vos cadeaux de Noël ?</h2>
 
@@ -541,7 +541,7 @@ const articles: ArticleUpdate[] = [
 
 <ul>
   <li><a href="/lafropeen/festival-international-cinema-africain-paris-2026-fica">FICA – Festival du Cinéma Africain</a> — 3 et 4 avril 2026</li>
-  <li><a href="/lafropeen/foire-dafrique-paris-2026-salon-africain">Foire d'Afrique Paris</a> — 1er et 2 mai 2026</li>
+  <li><a href="/lafropeen/foire-dafrique-paris-salon-africain">Foire d'Afrique Paris</a> — 1er et 2 mai 2026</li>
   <li><a href="/lafropeen/evasion-paris-soiree-africaine-2026">Évasion Paris</a> — 13 juin 2026</li>
   <li><a href="/lafropeen/festival-autre-culture-paris-2026-interculturel">Festival de l'Autre Culture</a> — 27 juin 2026</li>
   <li><a href="/lafropeen/juste-une-danse-festival-danses-africaines-paris-2026">Juste Une Danse</a> — 31 octobre 2026</li>

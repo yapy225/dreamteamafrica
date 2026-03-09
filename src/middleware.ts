@@ -10,8 +10,8 @@ const DOMAIN_REDIRECTS: Record<string, string> = {
   "www.lafropeen.com": "/lafropeen",
   "saisonculturelleafricaine.fr": "/saison-culturelle-africaine",
   "www.saisonculturelleafricaine.fr": "/saison-culturelle-africaine",
-  "foiredafrique.fr": "/saison-culturelle-africaine/foire-dafrique-paris-2026",
-  "www.foiredafrique.fr": "/saison-culturelle-africaine/foire-dafrique-paris-2026",
+  "foiredafrique.fr": "/saison-culturelle-africaine/foire-dafrique-paris",
+  "www.foiredafrique.fr": "/saison-culturelle-africaine/foire-dafrique-paris",
   "evasionaparis.fr": "/saison-culturelle-africaine/evasion-paris-2026",
   "www.evasionaparis.fr": "/saison-culturelle-africaine/evasion-paris-2026",
   "fashionweekafrica.fr": "/saison-culturelle-africaine/festival-autre-culture-2026",
@@ -29,8 +29,8 @@ const PRIMARY_DOMAIN = "dreamteamafrica.com";
  * Keeps Facebook Pixel retargeting & ad links working.
  */
 const PATH_REDIRECTS: Record<string, string> = {
-  "/foire-dafrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris-2026",
-  "/foire-afrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris-2026",
+  "/foire-dafrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
+  "/foire-afrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
 };
 
 export function middleware(request: NextRequest) {

@@ -24,12 +24,30 @@ const DOMAIN_REDIRECTS: Record<string, string> = {
 
 const PRIMARY_DOMAIN = "dreamteamafrica.com";
 
+/**
+ * Path → path redirections (old URLs → new URLs).
+ * Keeps Facebook Pixel retargeting & ad links working.
+ */
+const PATH_REDIRECTS: Record<string, string> = {
+  "/foire-dafrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris-2026",
+  "/foire-afrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris-2026",
+};
+
 export function middleware(request: NextRequest) {
   const host = request.headers.get("host")?.replace(/:\d+$/, "") ?? "";
-  const redirectPath = DOMAIN_REDIRECTS[host];
 
-  if (redirectPath) {
-    const url = new URL(redirectPath, `https://${PRIMARY_DOMAIN}`);
+  // Domain-level redirects
+  const domainRedirect = DOMAIN_REDIRECTS[host];
+  if (domainRedirect) {
+    const url = new URL(domainRedirect, `https://${PRIMARY_DOMAIN}`);
+    return NextResponse.redirect(url, 301);
+  }
+
+  // Path-level redirects (old campaign URLs)
+  const pathname = request.nextUrl.pathname;
+  const pathRedirect = PATH_REDIRECTS[pathname];
+  if (pathRedirect) {
+    const url = new URL(pathRedirect, request.url);
     return NextResponse.redirect(url, 301);
   }
 

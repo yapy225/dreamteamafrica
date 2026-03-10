@@ -558,6 +558,25 @@ model ContactMessage {
   @@index([createdAt])
 }
 
+// ─── LEADS (Facebook Ads) ────────────────────────────────
+
+model Lead {
+  id         String   @id @default(cuid())
+  name       String
+  email      String
+  phone      String
+  source     String   // facebook_leads, manual, etc.
+  profile    String   @default("Visiteur") // Visiteur, Exposant, Artiste, Média, Autre
+  formId     String?
+  fbLeadId   String?  @unique
+  converted  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([source])
+  @@index([converted])
+  @@index([createdAt])
+}
+
 // ─── PUBLICATIONS RÉSEAUX SOCIAUX ────────────────────────
 
 enum SocialPlatform {

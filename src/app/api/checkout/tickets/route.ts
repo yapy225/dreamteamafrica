@@ -125,7 +125,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error) {
-    console.error("Checkout error:", error);
-    return NextResponse.json({ error: "Erreur interne." }, { status: 500 });
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Checkout error:", message, error);
+    return NextResponse.json(
+      { error: `Erreur: ${message}` },
+      { status: 500 },
+    );
   }
 }

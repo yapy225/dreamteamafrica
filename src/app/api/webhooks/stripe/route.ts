@@ -4,6 +4,7 @@ import { getStripe, Stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import QRCode from "qrcode";
 import { sendThankYouEmail } from "@/lib/email";
+import { sendTicketConfirmationWhatsApp } from "@/lib/whatsapp";
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -80,6 +81,26 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
 
   await Promise.all(ticketPromises);
   console.log(`Created ${qty} ticket(s) for event ${eventId}, user ${userId}`);
+
+  // Send WhatsApp confirmation if user has a phone number
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, phone: true } });
+    const event = await prisma.event.findUnique({ where: { id: eventId }, select: { title: true, date: true, venue: true } });
+    if (user?.phone && event) {
+      await sendTicketConfirmationWhatsApp({
+        phone: user.phone,
+        customerName: user.name ?? "Client",
+        eventTitle: event.title,
+        tier,
+        quantity: qty,
+        totalPrice: price * qty,
+        eventDate: new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(event.date),
+        eventVenue: event.venue,
+      });
+    }
+  } catch (waErr) {
+    console.error("WhatsApp ticket confirmation failed:", waErr);
+  }
 }
 
 async function handleOrderPurchase(session: Stripe.Checkout.Session) {

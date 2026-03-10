@@ -31,6 +31,7 @@ const PRIMARY_DOMAIN = "dreamteamafrica.com";
 const PATH_REDIRECTS: Record<string, string> = {
   "/foire-dafrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
   "/foire-afrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
+  "/saison-culturelle-africaine/foire-afrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
 };
 
 export function middleware(request: NextRequest) {

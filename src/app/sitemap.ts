@@ -23,6 +23,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/lofficiel-dafrique/annuaire`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
     { url: `${baseUrl}/auth/signin`, changeFrequency: "yearly", priority: 0.2 },
     { url: `${baseUrl}/auth/signup`, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${baseUrl}/mentions-legales`, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/conditions-generales`, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/conditions-utilisation`, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/politique-de-confidentialite`, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/politique-cookies`, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/politique-annulation`, changeFrequency: "yearly", priority: 0.3 },
   ];
 
   // ── Journal category pages ────────────────────────────────

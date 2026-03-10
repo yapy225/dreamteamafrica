@@ -18,9 +18,17 @@ export const metadata = {
     "saison culturelle africaine 2026",
     "festival africain Paris",
     "foire Afrique Paris",
-    "culture africaine",
+    "foire d'Afrique Paris 2026",
+    "culture africaine Paris",
     "billetterie événements africains",
     "diaspora africaine Paris",
+    "sortir à Paris",
+    "salon africain Paris",
+    "artisanat africain Paris",
+    "gastronomie africaine Paris",
+    "mode africaine Paris",
+    "cinéma africain Paris",
+    "festival culturel Paris 2026",
   ],
   openGraph: {
     title: "Saison Culturelle Africaine 2026 — Paris",
@@ -444,6 +452,66 @@ export default async function EvenementsPage() {
           </div>
         </div>
       </div>
+
+      {/* ── E2. FAQ — Schema.org FAQPage ──────────────── */}
+      {(() => {
+        const faqItems = [
+          {
+            question: "Qu'est-ce que la Saison Culturelle Africaine ?",
+            answer: "La Saison Culturelle Africaine est un programme de 7 événements culturels organisés à Paris par Dream Team Africa, d'avril à décembre 2026. Foires, festivals, salons : cinéma, danse, conte, artisanat, gastronomie et mode africaine.",
+          },
+          {
+            question: "Où se déroulent les événements de la Saison Culturelle Africaine ?",
+            answer: "Les événements se déroulent dans différents lieux emblématiques de Paris et sa région : Espace MAS (Paris 13e), et d'autres salles parisiennes. Chaque événement a son propre lieu.",
+          },
+          {
+            question: "Comment acheter des billets pour les événements ?",
+            answer: "Vous pouvez acheter vos billets directement sur dreamteamafrica.com. Le paiement est sécurisé par Stripe. Vous recevrez une confirmation par e-mail et WhatsApp avec un QR code à présenter à l'entrée.",
+          },
+          {
+            question: "Y a-t-il des événements gratuits ?",
+            answer: "Oui, certains événements de la Saison Culturelle Africaine sont gratuits sur réservation. Consultez la page de chaque événement pour connaître les tarifs et réserver votre place.",
+          },
+          {
+            question: "Comment devenir exposant ?",
+            answer: "Les artisans, créateurs et marques peuvent réserver un stand lors de la Foire d'Afrique Paris ou du Salon Made In Africa. Rendez-vous sur la page Exposants de dreamteamafrica.com pour découvrir les offres.",
+          },
+          {
+            question: "Comment contacter Dream Team Africa ?",
+            answer: "Vous pouvez nous contacter par e-mail à hello@dreamteamafrica.com, par téléphone au +33 7 82 80 18 52, ou via la page Contact de notre site.",
+          },
+        ];
+
+        const faqJsonLd = {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqItems.map((item) => ({
+            "@type": "Question",
+            name: item.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: item.answer,
+            },
+          })),
+        };
+
+        return (
+          <div className="mt-16">
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+            <h3 className="mb-6 font-serif text-2xl font-bold text-dta-dark">
+              Questions fréquentes
+            </h3>
+            <dl className="space-y-4">
+              {faqItems.map((item, idx) => (
+                <div key={idx} className="rounded-[var(--radius-card)] bg-white p-5 shadow-[var(--shadow-card)]">
+                  <dt className="text-sm font-semibold text-dta-dark">{item.question}</dt>
+                  <dd className="mt-2 text-sm leading-relaxed text-dta-char/70">{item.answer}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        );
+      })()}
 
       {/* ── F. Footer CTA ─────────────────────────────── */}
       <div className="mt-12 text-center">

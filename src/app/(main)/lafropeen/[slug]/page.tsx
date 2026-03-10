@@ -591,6 +591,36 @@ export default async function ArticleDetailPage({
         </section>
       )}
 
+      {/* Cross-links — Maillage interne saison + marketplace */}
+      <section className="border-t border-dta-sand/50 bg-white px-4 py-12">
+        <div className="mx-auto grid max-w-3xl grid-cols-1 gap-6 sm:grid-cols-3">
+          <Link
+            href="/saison-culturelle-africaine"
+            className="rounded-[var(--radius-card)] border border-dta-sand/50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
+          >
+            <Calendar size={18} className="mb-2 text-dta-accent" />
+            <h3 className="text-sm font-bold text-dta-dark">Saison Culturelle 2026</h3>
+            <p className="mt-1 text-xs text-dta-char/60">7 événements africains à Paris</p>
+          </Link>
+          <Link
+            href="/made-in-africa"
+            className="rounded-[var(--radius-card)] border border-dta-sand/50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
+          >
+            <span className="mb-2 block text-lg">🛍️</span>
+            <h3 className="text-sm font-bold text-dta-dark">Made in Africa</h3>
+            <p className="mt-1 text-xs text-dta-char/60">Artisanat africain authentique</p>
+          </Link>
+          <Link
+            href="/exposants"
+            className="rounded-[var(--radius-card)] border border-dta-sand/50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
+          >
+            <span className="mb-2 block text-lg">🏪</span>
+            <h3 className="text-sm font-bold text-dta-dark">Devenir exposant</h3>
+            <p className="mt-1 text-xs text-dta-char/60">Réservez votre stand</p>
+          </Link>
+        </div>
+      </section>
+
       <JournalFooter />
     </>
   );

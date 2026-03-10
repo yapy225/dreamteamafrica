@@ -772,6 +772,77 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           </div>
         </div>
       </div>
+
+      {/* H — FAQ Section with Schema.org */}
+      {(() => {
+        const faqItems = [
+          {
+            question: `Quand a lieu ${event.title} ?`,
+            answer: `${event.title} se tiendra le ${formatDate(event.date)}${endDate ? ` au ${formatDate(endDate)}` : ""} à ${event.venue}, ${event.address}.`,
+          },
+          {
+            question: `Comment se rendre à ${event.venue} ?`,
+            answer: `${event.venue} se situe au ${event.address}. Consultez Google Maps pour l'itinéraire.`,
+          },
+          ...(isFreeEvent
+            ? [
+                {
+                  question: `${event.title} est-il gratuit ?`,
+                  answer: `Oui, l'entrée à ${event.title} est gratuite sur réservation. Les places sont limitées, pensez à réserver en avance sur dreamteamafrica.com.`,
+                },
+              ]
+            : [
+                {
+                  question: `Quel est le prix des billets pour ${event.title} ?`,
+                  answer: `Les billets pour ${event.title} sont disponibles à partir de ${formatPrice(Math.min(event.priceEarly, event.priceStd, event.priceVip))}. Plusieurs formules sont proposées : Early Bird, Standard et VIP.`,
+                },
+                {
+                  question: `Comment acheter des billets pour ${event.title} ?`,
+                  answer: `Vous pouvez acheter vos billets directement en ligne sur dreamteamafrica.com. Le paiement est sécurisé par Stripe. Vous recevrez votre billet par e-mail et WhatsApp avec un QR code à présenter à l'entrée.`,
+                },
+              ]),
+          {
+            question: "Qui organise la Saison Culturelle Africaine ?",
+            answer: "La Saison Culturelle Africaine est organisée par Dream Team Africa, association loi 1901 dédiée à la promotion de la culture africaine à Paris. 7 événements sont programmés d'avril à décembre 2026.",
+          },
+          {
+            question: "Puis-je devenir exposant ?",
+            answer: "Oui ! Vous pouvez réserver un stand pour présenter vos produits, votre artisanat ou votre marque lors de nos événements. Rendez-vous sur la page Exposants de dreamteamafrica.com.",
+          },
+        ];
+
+        const faqJsonLd = {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqItems.map((item) => ({
+            "@type": "Question",
+            name: item.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: item.answer,
+            },
+          })),
+        };
+
+        return (
+          <div className="bg-dta-bg py-14">
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+            <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+              <h2 className="text-center font-serif text-2xl font-bold text-dta-dark">
+                Questions fréquentes
+              </h2>
+              <dl className="mt-8 space-y-4">
+                {faqItems.map((item, idx) => (
+                  <div key={idx} className="rounded-[var(--radius-card)] bg-white p-5 shadow-[var(--shadow-card)]">
+                    <dt className="text-sm font-semibold text-dta-dark">{item.question}</dt>
+                    <dd className="mt-2 text-sm leading-relaxed text-dta-char/70">{item.answer}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </div>
+        );
+      })()}
     </div>
     </>
   );

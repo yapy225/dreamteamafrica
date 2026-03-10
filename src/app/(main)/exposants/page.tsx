@@ -2,15 +2,48 @@ import Link from "next/link";
 import { CalendarDays, MapPin, Clock, Check, Star } from "lucide-react";
 import { EXHIBITOR_EVENTS, EXHIBITOR_PACKS, formatDate } from "@/lib/exhibitor-events";
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
+
 export const metadata = {
-  title: "Devenir Exposant — Saison Culturelle 2026 | Dream Team Africa",
+  title: "Devenir Exposant — Foire d'Afrique Paris & Salons 2026",
   description:
-    "Réservez votre stand exposant pour la Foire d'Afrique, Juste Une Danse, Festival du Conte Africain et Salon Made In Africa. Paiement jusqu'en 5 fois sans frais.",
+    "Réservez votre stand exposant pour la Foire d'Afrique Paris, Salon Made In Africa et 4 autres événements. À partir de 350€, paiement en 5 fois sans frais.",
+  keywords: [
+    "exposer salon africain Paris",
+    "devenir exposant salon africain",
+    "stand exposition africaine Paris",
+    "exposant foire d'Afrique Paris",
+    "inscription salon africain Paris",
+    "salon artisanat africain Paris",
+  ],
+  openGraph: {
+    title: "Devenir Exposant — Saison Culturelle Africaine 2026",
+    description: "Réservez votre stand pour la Foire d'Afrique Paris et les salons de la Saison Culturelle Africaine 2026.",
+    type: "website",
+    url: `${siteUrl}/exposants`,
+  },
+  alternates: {
+    canonical: `${siteUrl}/exposants`,
+  },
+};
+
+const exposantJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Devenir Exposant — Saison Culturelle Africaine 2026",
+  description: "Réservez votre stand exposant pour la Foire d'Afrique Paris et les salons africains à Paris.",
+  url: `${siteUrl}/exposants`,
+  provider: {
+    "@type": "Organization",
+    name: "Dream Team Africa",
+    url: siteUrl,
+  },
 };
 
 export default function ExposantsPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(exposantJsonLd) }} />
       {/* Hero */}
       <section className="mb-16 text-center">
         <h1 className="font-serif text-4xl font-bold text-dta-dark sm:text-5xl">

@@ -12,10 +12,30 @@ export const dynamic = "force-dynamic";
 // Marketplace masquée — rediriger vers l'accueil
 const MARKETPLACE_ENABLED = false;
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
+
 export const metadata = {
-  title: "La Boutique Artisanale | Marketplace",
+  title: "Made in Africa — Marketplace Artisanat Africain en Ligne",
   description:
-    "Découvrez les créations uniques d'artisans africains — cosmétiques, accessoires, textiles et bien plus.",
+    "Achetez des produits naturels africains en ligne : beurre de karité, huile de chébé, savon noir, artisanat, cosmétiques bio. Livraison en France.",
+  keywords: [
+    "produits naturels africains",
+    "artisanat africain en ligne",
+    "beurre de karité pur africain",
+    "huile de chébé",
+    "savon noir africain",
+    "cosmétiques naturels africains",
+    "boutique produits africains en ligne",
+  ],
+  openGraph: {
+    title: "Made in Africa — Artisanat & Cosmétiques Africains",
+    description: "Produits naturels africains authentiques : karité, chébé, savon noir, art africain. Marketplace Dream Team Africa.",
+    type: "website",
+    url: `${siteUrl}/made-in-africa`,
+  },
+  alternates: {
+    canonical: `${siteUrl}/made-in-africa`,
+  },
 };
 
 interface SearchParams {

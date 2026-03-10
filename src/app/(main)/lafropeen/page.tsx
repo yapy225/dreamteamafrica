@@ -28,10 +28,28 @@ const CATEGORY_SLUGS = [
 
 export const dynamic = "force-dynamic";
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
+
 export const metadata = {
-  title: "L'Afropeen - Le Journal de la Diaspora Africaine",
+  title: "L'Afropéen — Journal de la Diaspora Africaine à Paris",
   description:
-    "Le journal de la diaspora africaine en Europe. Actualites, culture, business, diaspora et lifestyle. Un article par jour, cycle de vie 21 jours.",
+    "Le journal de la diaspora africaine en Europe. Actualités, culture africaine, cinéma, musique, business, diaspora et lifestyle. Articles quotidiens.",
+  keywords: [
+    "diaspora africaine Paris",
+    "actualité africaine France",
+    "culture africaine Paris",
+    "journal diaspora africaine",
+    "média diaspora africaine",
+  ],
+  openGraph: {
+    title: "L'Afropéen — Journal Diaspora Africaine",
+    description: "Actualités, culture, business et lifestyle de la diaspora africaine en Europe.",
+    type: "website",
+    url: `${siteUrl}/lafropeen`,
+  },
+  alternates: {
+    canonical: `${siteUrl}/lafropeen`,
+  },
 };
 
 export default async function JournalPage() {

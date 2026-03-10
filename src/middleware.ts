@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 
 /**
  * Domain → path redirections.
- * Each external domain redirects to the corresponding page on dreamteamafrica.com.
  */
 const DOMAIN_REDIRECTS: Record<string, string> = {
   "lafropeen.com": "/lafropeen",
@@ -25,27 +24,45 @@ const DOMAIN_REDIRECTS: Record<string, string> = {
 const PRIMARY_DOMAIN = "dreamteamafrica.com";
 
 /**
- * Path → path redirections (old URLs → new URLs).
- * Keeps Facebook Pixel retargeting & ad links working.
+ * Path → path exact redirections (old WordPress URLs → new Next.js URLs).
+ * Captures ~8000+ clicks/month from old indexed pages.
  */
 const PATH_REDIRECTS: Record<string, string> = {
-  // Foire d'Afrique
+  // ── Foire d'Afrique (2834 clicks) ──
   "/foire-dafrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
   "/foire-afrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
   "/saison-culturelle-africaine/foire-afrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
-  // Old event pages (WordPress-era URLs still getting Google traffic)
+
+  // ── Fashion Week Africa (994 clicks) ──
   "/fashion-week-africa-paris": "/saison-culturelle-africaine",
   "/fashion-week-africa-paris/": "/saison-culturelle-africaine",
+
+  // ── Festival du Conte (528+ clicks) ──
   "/festival-du-conte-africain": "/saison-culturelle-africaine",
   "/festival-du-conte-africain/": "/saison-culturelle-africaine",
   "/festival-du-conte-africain-paris-2025": "/saison-culturelle-africaine",
+  "/festival-du-conte-africain-paris-2025/": "/saison-culturelle-africaine",
+  "/festival-du-conte-africain-paris": "/saison-culturelle-africaine",
+  "/festival-du-conte-africain-paris/": "/saison-culturelle-africaine",
+
+  // ── Salon Made in Africa (300 clicks) ──
+  "/salon-made-in-africa": "/saison-culturelle-africaine",
+  "/salon-made-in-africa/": "/saison-culturelle-africaine",
+  "/salon-made-in-africa-paris": "/saison-culturelle-africaine",
+  "/salon-made-in-africa-paris/": "/saison-culturelle-africaine",
+
+  // ── Juste Une Danse ──
   "/juste-une-danse": "/saison-culturelle-africaine",
   "/juste-une-danse/": "/saison-culturelle-africaine",
-  "/salon-made-in-africa": "/saison-culturelle-africaine",
-  "/evenements": "/saison-culturelle-africaine",
-  "/evenements/": "/saison-culturelle-africaine",
-  "/events": "/saison-culturelle-africaine",
-  "/events/": "/saison-culturelle-africaine",
+
+  // ── FICA ──
+  "/festival-international-du-cin%C3%A9ma-africain": "/saison-culturelle-africaine",
+  "/festival-international-du-cinema-africain-fontenay-sous-bois-2026": "/saison-culturelle-africaine",
+  "/festival-international-du-cinema-africain-fontenay-sous-bois-2026/": "/saison-culturelle-africaine",
+
+  // ── Old /event/* pages (304+ clicks) ──
+  "/event/festival-du-conte-africain": "/saison-culturelle-africaine",
+  "/event/festival-du-conte-africain/": "/saison-culturelle-africaine",
   "/event/fashion-week-africa-paris": "/saison-culturelle-africaine",
   "/event/fashion-week-africa-paris/": "/saison-culturelle-africaine",
   "/event/foire-dafrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
@@ -54,18 +71,110 @@ const PATH_REDIRECTS: Record<string, string> = {
   "/event/billets-salon-made-in-africa/": "/saison-culturelle-africaine",
   "/event/billets-le-grand-defile-zulu": "/saison-culturelle-africaine",
   "/event/billets-le-grand-defile-zulu/": "/saison-culturelle-africaine",
-  "/event/festival-du-conte-africain": "/saison-culturelle-africaine",
-  "/event/festival-du-conte-africain/": "/saison-culturelle-africaine",
   "/event/salon-made-in-africa-paris-2025": "/saison-culturelle-africaine",
   "/event/salon-made-in-africa-paris-2025/": "/saison-culturelle-africaine",
-  // Old legal pages
+  "/event/marche-de-noel-salon-paris-2025-2%E1%B5%89-edition": "/saison-culturelle-africaine",
+  "/event/marche-de-noel-salon-paris-2025-2%E1%B5%89-edition/": "/saison-culturelle-africaine",
+
+  // ── Old /page/* (377 clicks) ──
+  "/page/saison-culturelle-africaine-paris-2025": "/saison-culturelle-africaine",
+  "/page/edito-de-la-presidente": "/",
+  "/page/coach-hamond-chic": "/",
+
+  // ── Old /post/* (99+ clicks) ──
+  "/post/saison-culturelle-africaine-paris-2025-dream-team-africa": "/saison-culturelle-africaine",
+  "/post/activites-pour-les-familles-au-salon-made-in-africa-paris": "/saison-culturelle-africaine",
+  "/post/casting-fashion-week-africa-paris": "/saison-culturelle-africaine",
+
+  // ── Old /events/* ──
+  "/evenements": "/saison-culturelle-africaine",
+  "/evenements/": "/saison-culturelle-africaine",
+  "/events": "/saison-culturelle-africaine",
+  "/events/": "/saison-culturelle-africaine",
+  "/events/categorie/africa": "/saison-culturelle-africaine",
+  "/events/categorie/africa/": "/saison-culturelle-africaine",
+  "/events/categorie/africa/liste": "/saison-culturelle-africaine",
+  "/events/categorie/africa/liste/": "/saison-culturelle-africaine",
+
+  // ── Old /billetterie-en-ligne/* (33+ clicks) ──
+  "/billetterie-en-ligne": "/saison-culturelle-africaine",
+  "/billetterie-en-ligne/": "/saison-culturelle-africaine",
+
+  // ── Old /sortir-a-paris/* (49+ clicks) ──
+  "/sortir-a-paris": "/saison-culturelle-africaine",
+
+  // ── Elections / Awards / Other events ──
+  "/election-miss-diaspora-paris": "/saison-culturelle-africaine",
+  "/racine-les-awards-de-la-diaspora-africaine": "/saison-culturelle-africaine",
+  "/salon-de-la-seduction-africaine": "/saison-culturelle-africaine",
+  "/africa-bbq-fontenay-sous-bois-2026": "/saison-culturelle-africaine",
+  "/africa-bbq-fontenay-sous-bois-2026/": "/saison-culturelle-africaine",
+
+  // ── Old commerce pages ──
+  "/commande-de-stands": "/exposants",
+  "/shop": "/made-in-africa",
+  "/shop/": "/made-in-africa",
+  "/blog": "/lafropeen",
+  "/blog/": "/lafropeen",
+  "/nos-activites-planifiees": "/saison-culturelle-africaine",
+  "/recuperer-mon-billet": "/saison-culturelle-africaine",
+  "/tickets-checkout": "/saison-culturelle-africaine",
+  "/tickets-checkout/": "/saison-culturelle-africaine",
+  "/tickets-order": "/saison-culturelle-africaine",
+  "/tickets-order/": "/saison-culturelle-africaine",
+  "/merci": "/",
+  "/merci/": "/",
+  "/login": "/auth/signin",
+  "/hello-world": "/",
+  "/hello-world/": "/",
+
+  // ── Old legal pages ──
   "/conditions-generales-de-ventes": "/conditions-generales",
   "/conditions-generales-de-ventes/": "/conditions-generales",
   "/conditions-generales-dutilisation": "/conditions-utilisation",
   "/conditions-generales-dutilisation/": "/conditions-utilisation",
+  "/politique-dannulation-et-remboursement": "/politique-annulation",
+  "/politique-dannulation-et-remboursement/": "/politique-annulation",
   "/contact": "/nous-contacter",
   "/contact/": "/nous-contacter",
+  "/contactez-nous": "/nous-contacter",
 };
+
+/**
+ * Prefix-based redirections for old WordPress sections with subpages.
+ * Handles hundreds of old /section/slug URLs.
+ */
+const PREFIX_REDIRECTS: Array<[string, string]> = [
+  // Product/blog pages → marketplace or lafropeen
+  ["/beurre-de-vache/", "/lafropeen"],
+  ["/beurre-de-cacao/", "/lafropeen"],
+  ["/beurre-de-karite/", "/lafropeen"],
+  ["/huile-de-coco/", "/lafropeen"],
+  ["/huile-de-chebe/", "/lafropeen"],
+  ["/cosmetique-afrique/", "/lafropeen"],
+  ["/art-africain/", "/lafropeen"],
+  ["/balade-sur-la-seine/", "/saison-culturelle-africaine"],
+  // Old content sections
+  ["/posts/", "/lafropeen"],
+  ["/post/", "/lafropeen"],
+  ["/sortir-a-paris/", "/saison-culturelle-africaine"],
+  ["/dream-team-africa/", "/lafropeen"],
+  ["/salon-made-in-africa/", "/saison-culturelle-africaine"],
+  ["/foire-dafrique-paris/", "/saison-culturelle-africaine/foire-dafrique-paris"],
+  ["/fashion-week-africa-paris/", "/saison-culturelle-africaine"],
+  ["/juste-une-danse/", "/saison-culturelle-africaine"],
+  ["/evasion-paris-lusury/", "/saison-culturelle-africaine"],
+  ["/foire-de-paris/", "/saison-culturelle-africaine"],
+  ["/paiement-carte-fashion-week-africa/", "/saison-culturelle-africaine"],
+  ["/billetterie-en-ligne/", "/saison-culturelle-africaine"],
+  ["/africa-bbq/", "/saison-culturelle-africaine"],
+  ["/activite/", "/saison-culturelle-africaine"],
+  ["/page/", "/"],
+  ["/layouts/", "/"],
+  ["/tf_header_footer/", "/"],
+  ["/wp-content/", "/"],
+  ["/category/", "/lafropeen"],
+];
 
 export function middleware(request: NextRequest) {
   const host = request.headers.get("host")?.replace(/:\d+$/, "") ?? "";
@@ -77,12 +186,21 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 301);
   }
 
-  // Path-level redirects (old campaign URLs)
   const pathname = request.nextUrl.pathname;
+
+  // Exact path redirects
   const pathRedirect = PATH_REDIRECTS[pathname];
   if (pathRedirect) {
     const url = new URL(pathRedirect, request.url);
     return NextResponse.redirect(url, 301);
+  }
+
+  // Prefix-based redirects (old WordPress sections)
+  for (const [prefix, target] of PREFIX_REDIRECTS) {
+    if (pathname.startsWith(prefix)) {
+      const url = new URL(target, request.url);
+      return NextResponse.redirect(url, 301);
+    }
   }
 
   return NextResponse.next();

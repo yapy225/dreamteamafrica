@@ -36,6 +36,8 @@ const CATEGORY_DESCRIPTIONS: Record<string, string> = {
   OPINION: "Tribunes, analyses et points de vue sur l'Afrique et sa diaspora.",
 };
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
+
 export async function generateMetadata({
   params,
 }: {
@@ -45,9 +47,25 @@ export async function generateMetadata({
   const category = VALID_CATEGORIES[cat];
   if (!category) return { title: "Categorie introuvable" };
   const config = CATEGORY_CONFIG[category];
+  const title = `${config?.label ?? cat} — L'Afropéen | Journal Diaspora Africaine`;
+  const description = CATEGORY_DESCRIPTIONS[category];
   return {
-    title: `${config?.label ?? cat} — L'Afropeen`,
-    description: CATEGORY_DESCRIPTIONS[category],
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: `${siteUrl}/lafropeen/categorie/${cat}`,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+    alternates: {
+      canonical: `${siteUrl}/lafropeen/categorie/${cat}`,
+    },
   };
 }
 

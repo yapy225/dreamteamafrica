@@ -40,6 +40,11 @@ export const metadata = {
     "culture africaine Paris",
     "journal diaspora africaine",
     "média diaspora africaine",
+    "actualité Afrique",
+    "cinéma africain",
+    "musique africaine",
+    "entrepreneuriat africain France",
+    "lifestyle afro Paris",
   ],
   openGraph: {
     title: "L'Afropéen — Journal Diaspora Africaine",

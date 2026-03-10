@@ -26,16 +26,21 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
   const article = await prisma.article.findUnique({ where: { slug } });
   if (!article) return { title: "Article introuvable" };
+  const title = article.metaTitle || `${article.title} — L'Afropéen`;
+  const description = article.metaDescription || article.excerpt;
   return {
-    title: `${article.title} - L'Afropeen`,
-    description: article.excerpt,
+    title,
+    description,
+    keywords: article.seoKeywords.length > 0 ? article.seoKeywords : undefined,
     openGraph: {
       title: article.title,
-      description: article.excerpt,
+      description,
       type: "article",
       publishedTime: article.publishedAt.toISOString(),
+      url: `${siteUrl}/lafropeen/${slug}`,
       ...(article.coverImage && {
         images: [
           {
@@ -50,8 +55,11 @@ export async function generateMetadata({
     twitter: {
       card: "summary_large_image",
       title: article.title,
-      description: article.excerpt,
+      description,
       ...(article.coverImage && { images: [article.coverImage] }),
+    },
+    alternates: {
+      canonical: `${siteUrl}/lafropeen/${slug}`,
     },
   };
 }
@@ -308,7 +316,7 @@ export default async function ArticleDetailPage({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={article.coverImage}
-              alt=""
+              alt={article.title}
               className="absolute inset-0 h-full w-full object-cover opacity-20"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-dta-dark via-dta-dark/60 to-transparent" />

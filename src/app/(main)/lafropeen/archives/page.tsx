@@ -7,10 +7,21 @@ import JournalFooter from "@/components/journal/JournalFooter";
 
 export const dynamic = "force-dynamic";
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
+
 export const metadata = {
-  title: "Archives - L'Afropeen",
+  title: "Archives — L'Afropéen | Articles Diaspora Africaine",
   description:
-    "Archives des articles du journal L'Afropeen. Tous les articles de plus de 21 jours.",
+    "Archives complètes du journal L'Afropéen. Retrouvez tous nos articles sur la culture africaine, la diaspora, le business et le lifestyle.",
+  openGraph: {
+    title: "Archives — L'Afropéen",
+    description: "Tous les articles archivés du journal de la diaspora africaine.",
+    type: "website",
+    url: `${siteUrl}/lafropeen/archives`,
+  },
+  alternates: {
+    canonical: `${siteUrl}/lafropeen/archives`,
+  },
 };
 
 const ARTICLES_PER_PAGE = 8;

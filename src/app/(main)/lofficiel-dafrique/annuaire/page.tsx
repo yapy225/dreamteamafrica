@@ -22,10 +22,34 @@ function maskPhone(phone: string): string {
 
 export const dynamic = "force-dynamic";
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
+
 export const metadata: Metadata = {
-  title: "Annuaire — L'Officiel d'Afrique 2026",
+  title: "Annuaire Professionnel — L'Officiel d'Afrique 2026 | Diaspora Africaine Paris",
   description:
-    "Consultez l'annuaire professionnel de la Saison Culturelle Africaine Paris 2026. Exposants, artistes, mannequins et plus.",
+    "Consultez l'annuaire professionnel de la diaspora africaine à Paris. Artistes, restaurants, médias, associations, sport. Filtrez par catégorie et pays.",
+  keywords: [
+    "annuaire professionnel diaspora africaine",
+    "annuaire entreprises africaines Paris",
+    "artistes africains France annuaire",
+    "restaurants africains Paris",
+    "associations diaspora africaine",
+    "professionnels africains France",
+  ],
+  openGraph: {
+    title: "Annuaire — L'Officiel d'Afrique 2026",
+    description: "L'annuaire professionnel de la diaspora africaine à Paris. Filtrez par catégorie et pays.",
+    type: "website",
+    url: `${siteUrl}/lofficiel-dafrique/annuaire`,
+  },
+  twitter: {
+    card: "summary",
+    title: "Annuaire — L'Officiel d'Afrique 2026",
+    description: "Annuaire professionnel de la diaspora africaine à Paris.",
+  },
+  alternates: {
+    canonical: `${siteUrl}/lofficiel-dafrique/annuaire`,
+  },
 };
 
 
@@ -96,11 +120,25 @@ export default async function AnnuairePage({
     .sort((a, b) => b[1] - a[1])
     .map(([c, count]) => ({ country: c, _count: count }));
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: siteUrl },
+      { "@type": "ListItem", position: 2, name: "L'Officiel d'Afrique", item: `${siteUrl}/lofficiel-dafrique` },
+      { "@type": "ListItem", position: 3, name: "Annuaire" },
+    ],
+  };
+
   return (
     <ProtectedContent>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+    />
     <div className="min-h-screen bg-[#FAFAF7]">
       {/* Breadcrumb */}
-      <nav className="border-b border-[#F0ECE7] bg-white">
+      <nav className="border-b border-[#F0ECE7] bg-white" aria-label="Fil d'Ariane" itemScope itemType="https://schema.org/BreadcrumbList">
         <div className="mx-auto flex max-w-7xl items-center gap-1.5 px-4 py-3 text-xs text-[#999] sm:px-6 lg:px-8">
           <Link href="/" className="hover:text-[#C4704B] transition-colors">
             Accueil
@@ -279,7 +317,7 @@ export default async function AnnuairePage({
                       {/* CTA contact */}
                       <div className="mt-3">
                         <Link
-                          href={`/contact?ref=annuaire&name=${encodeURIComponent(entry.contactName)}`}
+                          href={`/nous-contacter?ref=annuaire&name=${encodeURIComponent(entry.contactName)}`}
                           className="inline-flex items-center gap-1.5 rounded-lg bg-[#2C2C2C] px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#C4704B]"
                         >
                           <Mail size={11} /> Contacter

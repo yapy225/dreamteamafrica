@@ -29,9 +29,42 @@ const PRIMARY_DOMAIN = "dreamteamafrica.com";
  * Keeps Facebook Pixel retargeting & ad links working.
  */
 const PATH_REDIRECTS: Record<string, string> = {
+  // Foire d'Afrique
   "/foire-dafrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
   "/foire-afrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
   "/saison-culturelle-africaine/foire-afrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
+  // Old event pages (WordPress-era URLs still getting Google traffic)
+  "/fashion-week-africa-paris": "/saison-culturelle-africaine",
+  "/fashion-week-africa-paris/": "/saison-culturelle-africaine",
+  "/festival-du-conte-africain": "/saison-culturelle-africaine",
+  "/festival-du-conte-africain/": "/saison-culturelle-africaine",
+  "/festival-du-conte-africain-paris-2025": "/saison-culturelle-africaine",
+  "/juste-une-danse": "/saison-culturelle-africaine",
+  "/juste-une-danse/": "/saison-culturelle-africaine",
+  "/salon-made-in-africa": "/saison-culturelle-africaine",
+  "/evenements": "/saison-culturelle-africaine",
+  "/evenements/": "/saison-culturelle-africaine",
+  "/events": "/saison-culturelle-africaine",
+  "/events/": "/saison-culturelle-africaine",
+  "/event/fashion-week-africa-paris": "/saison-culturelle-africaine",
+  "/event/fashion-week-africa-paris/": "/saison-culturelle-africaine",
+  "/event/foire-dafrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
+  "/event/foire-dafrique-paris/": "/saison-culturelle-africaine/foire-dafrique-paris",
+  "/event/billets-salon-made-in-africa": "/saison-culturelle-africaine",
+  "/event/billets-salon-made-in-africa/": "/saison-culturelle-africaine",
+  "/event/billets-le-grand-defile-zulu": "/saison-culturelle-africaine",
+  "/event/billets-le-grand-defile-zulu/": "/saison-culturelle-africaine",
+  "/event/festival-du-conte-africain": "/saison-culturelle-africaine",
+  "/event/festival-du-conte-africain/": "/saison-culturelle-africaine",
+  "/event/salon-made-in-africa-paris-2025": "/saison-culturelle-africaine",
+  "/event/salon-made-in-africa-paris-2025/": "/saison-culturelle-africaine",
+  // Old legal pages
+  "/conditions-generales-de-ventes": "/conditions-generales",
+  "/conditions-generales-de-ventes/": "/conditions-generales",
+  "/conditions-generales-dutilisation": "/conditions-utilisation",
+  "/conditions-generales-dutilisation/": "/conditions-utilisation",
+  "/contact": "/nous-contacter",
+  "/contact/": "/nous-contacter",
 };
 
 export function middleware(request: NextRequest) {

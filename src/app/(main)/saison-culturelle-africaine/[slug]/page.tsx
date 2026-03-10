@@ -115,13 +115,17 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
     take: 3,
   });
 
+  const eventUrl = `${siteUrl}/saison-culturelle-africaine/${event.slug}`;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Event",
     name: event.title,
     description: event.description,
     startDate: event.date.toISOString(),
-    ...(event.endDate && { endDate: event.endDate.toISOString() }),
+    endDate: event.endDate ? event.endDate.toISOString() : event.date.toISOString(),
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    url: eventUrl,
     location: Array.isArray(multiVenues) && multiVenues.length > 1
       ? multiVenues.map((v) => ({
           "@type": "Place",
@@ -134,11 +138,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           address: { "@type": "PostalAddress", streetAddress: event.address },
         },
     ...(event.coverImage && { image: event.coverImage }),
+    performer: { "@type": "Organization", name: "Dream Team Africa" },
     offers: isFreeEvent
       ? {
           "@type": "Offer",
           price: 0,
           priceCurrency: "EUR",
+          url: eventUrl,
+          validFrom: event.createdAt ? event.createdAt.toISOString() : "2026-01-01T00:00:00Z",
           availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
         }
       : {
@@ -146,9 +153,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           lowPrice: Math.min(event.priceEarly, event.priceStd, event.priceVip),
           highPrice: Math.max(event.priceEarly, event.priceStd, event.priceVip),
           priceCurrency: "EUR",
+          url: eventUrl,
+          validFrom: event.createdAt ? event.createdAt.toISOString() : "2026-01-01T00:00:00Z",
           availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
         },
-    organizer: { "@type": "Organization", name: "Dream Team Africa" },
+    organizer: { "@type": "Organization", name: "Dream Team Africa", url: siteUrl },
   };
 
   return (

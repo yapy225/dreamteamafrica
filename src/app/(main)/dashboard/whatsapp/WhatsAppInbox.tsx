@@ -48,6 +48,56 @@ function formatTime(dateStr: string) {
     " " + d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 }
 
+const IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+const VIDEO_EXTENSIONS = [".mp4", ".mov", ".avi", ".webm", ".3gp"];
+
+function isImageUrl(url: string) {
+  const lower = url.toLowerCase();
+  return IMAGE_EXTENSIONS.some((ext) => lower.includes(ext));
+}
+
+function isVideoUrl(url: string) {
+  const lower = url.toLowerCase();
+  return VIDEO_EXTENSIONS.some((ext) => lower.includes(ext));
+}
+
+function MediaBubble({ url, type, body }: { url: string; type: string; body: string | null }) {
+  // Images (sent as image or as document with image extension)
+  if (type === "image" || type === "sticker" || (type === "document" && isImageUrl(url))) {
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer">
+        <img src={url} alt={body ?? ""} className="max-w-full rounded-lg mb-1" style={{ maxHeight: 300 }} loading="lazy" />
+      </a>
+    );
+  }
+
+  // Videos
+  if (type === "video" || (type === "document" && isVideoUrl(url))) {
+    return (
+      <video controls className="max-w-full rounded-lg mb-1" style={{ maxHeight: 300 }}>
+        <source src={url} />
+      </video>
+    );
+  }
+
+  // Audio
+  if (type === "audio") {
+    return (
+      <audio controls className="mb-1 w-full max-w-[250px]">
+        <source src={url} />
+      </audio>
+    );
+  }
+
+  // Other documents — show as link
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm text-blue-600 hover:bg-gray-200 transition-colors mb-1">
+      <svg className="shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      {body || "Document"}
+    </a>
+  );
+}
+
 export default function WhatsAppInbox() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedPhone, setSelectedPhone] = useState<string | null>(null);
@@ -230,28 +280,12 @@ export default function WhatsAppInbox() {
                   : "bg-white rounded-tl-sm"
               }`}
             >
-              {msg.mediaUrl && (msg.type === "image" || msg.type === "sticker") && (
-                <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer">
-                  <img src={msg.mediaUrl} alt="" className="max-w-full rounded-lg mb-1" style={{ maxHeight: 300 }} />
-                </a>
-              )}
-              {msg.mediaUrl && msg.type === "video" && (
-                <video controls className="max-w-full rounded-lg mb-1" style={{ maxHeight: 300 }}>
-                  <source src={msg.mediaUrl} />
-                </video>
-              )}
-              {msg.mediaUrl && msg.type === "audio" && (
-                <audio controls className="mb-1 max-w-full">
-                  <source src={msg.mediaUrl} />
-                </audio>
-              )}
-              {msg.mediaUrl && msg.type === "document" && (
-                <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 underline text-sm mb-1">
-                  {msg.body || "Document"}
-                </a>
-              )}
-              {(!msg.mediaUrl || (msg.body && msg.body !== "[Image]" && msg.body !== "[Video]" && msg.body !== "[Audio]" && msg.body !== "[Sticker]")) && (
+              {msg.mediaUrl && <MediaBubble url={msg.mediaUrl} type={msg.type} body={msg.body} />}
+              {!msg.mediaUrl && (
                 <p className="text-sm whitespace-pre-wrap break-words">{msg.body || `[${msg.type}]`}</p>
+              )}
+              {msg.mediaUrl && msg.body && !["[Image]", "[Video]", "[Audio]", "[Sticker]"].includes(msg.body) && (
+                <p className="text-sm whitespace-pre-wrap break-words mt-1">{msg.body}</p>
               )}
               <div className="flex items-center justify-end gap-1 mt-1">
                 <span className="text-[10px] text-gray-500">

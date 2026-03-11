@@ -35,6 +35,9 @@ export async function PUT(
       status,
       authorType,
       seoKeywords,
+      metaTitle,
+      metaDescription,
+      altText,
     } = await request.json();
 
     const readingTimeMin = content
@@ -57,6 +60,9 @@ export async function PUT(
         ...(authorType && { authorType }),
         ...(readingTimeMin !== undefined && { readingTimeMin }),
         ...(seoKeywords !== undefined && { seoKeywords: Array.isArray(seoKeywords) ? seoKeywords : [] }),
+        ...(metaTitle !== undefined && { metaTitle: metaTitle || null }),
+        ...(metaDescription !== undefined && { metaDescription: metaDescription || null }),
+        ...(altText !== undefined && { altText: altText || null }),
       },
     });
 

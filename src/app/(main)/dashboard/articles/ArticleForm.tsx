@@ -6,8 +6,11 @@ import { Loader2 } from "lucide-react";
 import BunnyCdnInput from "@/components/BunnyCdnInput";
 
 const categories = [
-  { value: "ACTUALITE", label: "Actualite" },
+  { value: "ACTUALITE", label: "Actualité" },
   { value: "CULTURE", label: "Culture" },
+  { value: "CINEMA", label: "Cinéma" },
+  { value: "MUSIQUE", label: "Musique" },
+  { value: "SPORT", label: "Sport" },
   { value: "DIASPORA", label: "Diaspora" },
   { value: "BUSINESS", label: "Business" },
   { value: "LIFESTYLE", label: "Lifestyle" },
@@ -62,6 +65,9 @@ interface ArticleFormProps {
     status: string;
     authorType: string;
     seoKeywords?: string[];
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    altText?: string | null;
   };
 }
 
@@ -82,6 +88,9 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
     status: initialData?.status || "PUBLISHED",
     authorType: initialData?.authorType || "humain",
     seoKeywords: initialData?.seoKeywords || [] as string[],
+    metaTitle: initialData?.metaTitle || "",
+    metaDescription: initialData?.metaDescription || "",
+    altText: initialData?.altText || "",
   });
   const [kwSearch, setKwSearch] = useState("");
   const [error, setError] = useState("");
@@ -106,6 +115,9 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
           gradientClass: form.gradientClass || null,
           sponsorName: form.sponsorName || null,
           seoKeywords: form.seoKeywords,
+          metaTitle: form.metaTitle || null,
+          metaDescription: form.metaDescription || null,
+          altText: form.altText || null,
         }),
       });
 
@@ -352,6 +364,55 @@ export default function ArticleForm({ initialData }: ArticleFormProps) {
         <p className="mt-1 text-xs text-dta-taupe">
           Tapez Entr&eacute;e pour ajouter un mot-cl&eacute; libre, ou cliquez sur les suggestions.
         </p>
+      </div>
+
+      {/* SEO Meta Fields */}
+      <div className="rounded-[var(--radius-input)] border border-dta-sand/50 bg-dta-bg/50 p-4 space-y-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-dta-taupe">
+          SEO avanc&eacute; <span className="font-normal">(optionnel)</span>
+        </p>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-dta-char">
+            Meta Title
+          </label>
+          <input
+            value={form.metaTitle}
+            onChange={(e) => setForm({ ...form, metaTitle: e.target.value })}
+            className={inputClass}
+            placeholder="Titre personnalisé pour Google (laissez vide = titre article)"
+            maxLength={70}
+          />
+          <p className="mt-1 text-xs text-dta-taupe">
+            {form.metaTitle.length}/70 caract&egrave;res
+          </p>
+        </div>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-dta-char">
+            Meta Description
+          </label>
+          <textarea
+            rows={2}
+            value={form.metaDescription}
+            onChange={(e) => setForm({ ...form, metaDescription: e.target.value })}
+            className={inputClass}
+            placeholder="Description personnalisée pour Google (laissez vide = extrait)"
+            maxLength={160}
+          />
+          <p className="mt-1 text-xs text-dta-taupe">
+            {form.metaDescription.length}/160 caract&egrave;res
+          </p>
+        </div>
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-dta-char">
+            Texte alternatif image
+          </label>
+          <input
+            value={form.altText}
+            onChange={(e) => setForm({ ...form, altText: e.target.value })}
+            className={inputClass}
+            placeholder="Description de l'image pour l'accessibilité et le SEO"
+          />
+        </div>
       </div>
 
       {/* Toggles row */}

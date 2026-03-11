@@ -26,13 +26,16 @@ export async function POST(request: Request) {
       sponsorName,
       status,
       seoKeywords,
+      metaTitle,
+      metaDescription,
+      altText,
     } = await request.json();
 
     if (!title || !excerpt || !content || !category) {
       return NextResponse.json({ error: "Champs requis manquants." }, { status: 400 });
     }
 
-    const validCategories = ["ACTUALITE", "CULTURE", "DIASPORA", "BUSINESS", "LIFESTYLE", "OPINION"];
+    const validCategories = ["ACTUALITE", "CULTURE", "CINEMA", "MUSIQUE", "SPORT", "DIASPORA", "BUSINESS", "LIFESTYLE", "OPINION"];
     if (!validCategories.includes(category)) {
       return NextResponse.json({ error: "Catégorie invalide." }, { status: 400 });
     }
@@ -59,6 +62,9 @@ export async function POST(request: Request) {
         readingTimeMin,
         status: status || "PUBLISHED",
         seoKeywords: Array.isArray(seoKeywords) ? seoKeywords : [],
+        metaTitle: metaTitle || null,
+        metaDescription: metaDescription || null,
+        altText: altText || null,
         position: "UNE",
         dayCount: 1,
         publishedAt: new Date(),

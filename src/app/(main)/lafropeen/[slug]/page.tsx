@@ -17,6 +17,7 @@ import Newsletter from "@/components/journal/Newsletter";
 import JournalFooter from "@/components/journal/JournalFooter";
 import EventPromoCard from "@/components/journal/EventPromoCard";
 import OfficielPromoCard from "@/components/journal/OfficielPromoCard";
+import Comments from "@/components/sections/Comments";
 
 export const dynamic = "force-dynamic";
 
@@ -526,6 +527,9 @@ export default async function ArticleDetailPage({
           </div>
         </div>
       </section>
+
+      {/* Comments */}
+      <Comments />
 
       {/* Newsletter */}
       <Newsletter />

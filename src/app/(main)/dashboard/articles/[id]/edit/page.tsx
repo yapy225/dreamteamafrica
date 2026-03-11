@@ -37,6 +37,9 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
             status: article.status,
             authorType: article.authorType,
             seoKeywords: article.seoKeywords,
+            metaTitle: article.metaTitle,
+            metaDescription: article.metaDescription,
+            altText: article.altText,
           }}
         />
       </div>

@@ -19,6 +19,8 @@ const DOMAIN_REDIRECTS: Record<string, string> = {
   "www.salonmadeinafrica.fr": "/saison-culturelle-africaine/salon-made-in-africa-2026",
   "justeunedanse.fr": "/saison-culturelle-africaine/juste-une-danse-2026",
   "www.justeunedanse.fr": "/saison-culturelle-africaine/juste-une-danse-2026",
+  "lofficieldafrique.fr": "/lofficiel-dafrique",
+  "www.lofficieldafrique.fr": "/lofficiel-dafrique",
 };
 
 const PRIMARY_DOMAIN = "dreamteamafrica.com";

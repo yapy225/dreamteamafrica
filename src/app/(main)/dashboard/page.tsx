@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail, ScanLine, MessageSquare, ExternalLink, Inbox } from "lucide-react";
+import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail, ScanLine, MessageSquare, ExternalLink, Inbox, MessageCircle } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getRevenueData } from "@/lib/revenue";
@@ -106,6 +106,13 @@ export default async function DashboardPage() {
             label: "Réservations gratuites",
             count: null,
             color: "bg-lime-100 text-lime-600",
+          },
+          {
+            href: "/dashboard/whatsapp",
+            icon: MessageCircle,
+            label: "WhatsApp Business",
+            count: null,
+            color: "bg-green-100 text-green-600",
           },
           {
             href: "/dashboard/contacts",

@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { prisma } from "@/lib/db";
 
 const VERIFY_TOKEN = process.env.FB_LEADS_VERIFY_TOKEN ?? process.env.CRON_SECRET!;
 const APP_SECRET = process.env.WHATSAPP_APP_SECRET!;
+const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID!;
 
 /**
  * GET — WhatsApp webhook verification handshake.
@@ -50,41 +52,72 @@ export async function POST(request: Request) {
         if (change.field !== "messages") continue;
 
         const value = change.value;
+        const phoneNumberId = value?.metadata?.phone_number_id;
 
         // Handle incoming messages
         const messages = value?.messages ?? [];
         for (const msg of messages) {
-          const from = msg.from; // sender phone number
-          const timestamp = msg.timestamp;
+          const from = msg.from;
+          const contactName = value.contacts?.[0]?.profile?.name ?? "Inconnu";
           const type = msg.type;
-          const contactName =
-            value.contacts?.[0]?.profile?.name ?? "Inconnu";
 
+          let body = "";
           if (type === "text") {
-            console.log(
-              `[WhatsApp] Message from ${contactName} (${from}): ${msg.text?.body}`
-            );
-          } else if (type === "image") {
-            console.log(
-              `[WhatsApp] Image from ${contactName} (${from}): ${msg.image?.id}`
-            );
+            body = msg.text?.body ?? "";
           } else if (type === "button") {
-            console.log(
-              `[WhatsApp] Button from ${contactName} (${from}): ${msg.button?.text}`
-            );
+            body = msg.button?.text ?? "";
+          } else if (type === "image") {
+            body = msg.image?.caption ?? "[Image]";
+          } else if (type === "document") {
+            body = msg.document?.filename ?? "[Document]";
+          } else if (type === "audio") {
+            body = "[Audio]";
+          } else if (type === "video") {
+            body = "[Video]";
+          } else if (type === "location") {
+            body = `[Location: ${msg.location?.latitude}, ${msg.location?.longitude}]`;
+          } else if (type === "sticker") {
+            body = "[Sticker]";
           } else {
-            console.log(
-              `[WhatsApp] ${type} from ${contactName} (${from}) at ${timestamp}`
-            );
+            body = `[${type}]`;
+          }
+
+          console.log(`[WhatsApp] Message from ${contactName} (${from}): ${body}`);
+
+          // Save to database
+          try {
+            await prisma.whatsAppMessage.upsert({
+              where: { waMessageId: msg.id },
+              update: {},
+              create: {
+                waMessageId: msg.id,
+                from,
+                to: phoneNumberId ?? PHONE_NUMBER_ID,
+                contactName,
+                direction: "inbound",
+                type,
+                body,
+                mediaUrl: msg.image?.id ?? msg.document?.id ?? msg.audio?.id ?? msg.video?.id ?? null,
+              },
+            });
+          } catch (dbErr) {
+            console.error("WhatsApp message save error:", dbErr);
           }
         }
 
         // Handle status updates (sent, delivered, read)
         const statuses = value?.statuses ?? [];
         for (const status of statuses) {
-          console.log(
-            `[WhatsApp] Status: ${status.status} for message ${status.id} to ${status.recipient_id}`
-          );
+          console.log(`[WhatsApp] Status: ${status.status} for ${status.id}`);
+
+          try {
+            await prisma.whatsAppMessage.updateMany({
+              where: { waMessageId: status.id },
+              data: { status: status.status },
+            });
+          } catch {
+            // Message might not exist in DB (e.g. sent before webhook was set up)
+          }
         }
       }
     }

@@ -662,6 +662,28 @@ model SocialDraft {
   @@index([createdAt])
 }
 
+// ─── WHATSAPP MESSAGES ──────────────────────────────
+
+model WhatsAppMessage {
+  id             String   @id @default(cuid())
+  waMessageId    String   @unique // WhatsApp message ID (wamid.xxx)
+  from           String   // sender phone number
+  to             String   // receiver phone number
+  contactName    String   @default("Inconnu")
+  direction      String   // "inbound" or "outbound"
+  type           String   @default("text") // text, image, button, etc.
+  body           String?  @db.Text
+  mediaUrl       String?
+  status         String?  // sent, delivered, read (for outbound)
+  read           Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  @@index([from])
+  @@index([direction])
+  @@index([read])
+  @@index([createdAt])
+}
+
 model SocialCredential {
   id           String         @id @default(cuid())
   platform     SocialPlatform @unique

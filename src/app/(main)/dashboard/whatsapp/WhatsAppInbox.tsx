@@ -20,6 +20,7 @@ interface Message {
   direction: string;
   type: string;
   body: string | null;
+  mediaUrl: string | null;
   status: string | null;
   createdAt: string;
 }
@@ -229,7 +230,29 @@ export default function WhatsAppInbox() {
                   : "bg-white rounded-tl-sm"
               }`}
             >
-              <p className="text-sm whitespace-pre-wrap break-words">{msg.body || `[${msg.type}]`}</p>
+              {msg.mediaUrl && (msg.type === "image" || msg.type === "sticker") && (
+                <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer">
+                  <img src={msg.mediaUrl} alt="" className="max-w-full rounded-lg mb-1" style={{ maxHeight: 300 }} />
+                </a>
+              )}
+              {msg.mediaUrl && msg.type === "video" && (
+                <video controls className="max-w-full rounded-lg mb-1" style={{ maxHeight: 300 }}>
+                  <source src={msg.mediaUrl} />
+                </video>
+              )}
+              {msg.mediaUrl && msg.type === "audio" && (
+                <audio controls className="mb-1 max-w-full">
+                  <source src={msg.mediaUrl} />
+                </audio>
+              )}
+              {msg.mediaUrl && msg.type === "document" && (
+                <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 underline text-sm mb-1">
+                  {msg.body || "Document"}
+                </a>
+              )}
+              {(!msg.mediaUrl || (msg.body && msg.body !== "[Image]" && msg.body !== "[Video]" && msg.body !== "[Audio]" && msg.body !== "[Sticker]")) && (
+                <p className="text-sm whitespace-pre-wrap break-words">{msg.body || `[${msg.type}]`}</p>
+              )}
               <div className="flex items-center justify-end gap-1 mt-1">
                 <span className="text-[10px] text-gray-500">
                   {formatTime(msg.createdAt)}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import OfficielClient from "./OfficielClient";
 import DiscoverMore from "@/components/sections/DiscoverMore";
+import { prisma } from "@/lib/db";
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
 
@@ -79,7 +80,7 @@ const faqJsonLd = {
       name: "Qui peut consulter l'annuaire L'Officiel d'Afrique ?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "L'annuaire est accessible aux membres inscrits sur Dream Team Africa. Créez un compte gratuit pour consulter les fiches des professionnels de la diaspora africaine.",
+        text: "L'annuaire est accessible gratuitement à tous. Consultez les fiches des professionnels de la diaspora africaine directement sur dreamteamafrica.com/lofficiel-dafrique/annuaire.",
       },
     },
   ],
@@ -98,7 +99,9 @@ const webPageJsonLd = {
   },
 };
 
-export default function OfficielAfriquePage() {
+export default async function OfficielAfriquePage() {
+  const directoryCount = await prisma.directoryEntry.count({ where: { published: true } });
+
   return (
     <>
       <script
@@ -109,7 +112,7 @@ export default function OfficielAfriquePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
       />
-      <OfficielClient />
+      <OfficielClient directoryCount={directoryCount} />
       <DiscoverMore exclude="officiel" />
     </>
   );

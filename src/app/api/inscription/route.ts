@@ -69,6 +69,64 @@ async function sendNotification(inscription: {
   }
 }
 
+async function sendConfirmation(inscription: {
+  entreprise: string;
+  directeur: string;
+  email: string;
+}) {
+  try {
+    const smtpUser = process.env.SMTP_USER || process.env.E_MAIL;
+    const smtpPass = process.env.SMTP_PASS || process.env.PASSEWORD;
+
+    if (!smtpUser || !smtpPass) return;
+
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || "smtp.gmail.com",
+      port: parseInt(process.env.SMTP_PORT || "587", 10),
+      secure: false,
+      auth: { user: smtpUser, pass: smtpPass },
+    });
+
+    await transporter.sendMail({
+      from: `"L'Officiel d'Afrique" <${smtpUser}>`,
+      to: inscription.email,
+      subject: `Inscription reçue — ${inscription.entreprise}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0E0E0E;color:#F2EDE4;padding:2rem;">
+          <h1 style="color:#C8A246;font-size:1.4rem;margin-bottom:1.5rem;">
+            Merci pour votre inscription !
+          </h1>
+          <p style="font-size:.95rem;line-height:1.7;">
+            Bonjour <strong>${inscription.directeur}</strong>,
+          </p>
+          <p style="font-size:.9rem;line-height:1.7;color:rgba(242,237,228,0.8);">
+            Nous avons bien reçu l'inscription de <strong style="color:#C8A246;">${inscription.entreprise}</strong>
+            dans L'Officiel d'Afrique — l'annuaire professionnel de la diaspora africaine.
+          </p>
+          <div style="margin:1.5rem 0;padding:1rem;background:#151515;border-left:3px solid #C8A246;">
+            <p style="margin:0;font-size:.85rem;line-height:1.6;">
+              <strong style="color:#C8A246;">Prochaines étapes :</strong><br/>
+              1. Notre équipe vérifie votre fiche (sous 48h)<br/>
+              2. Vous recevrez un email de confirmation<br/>
+              3. Votre entreprise apparaîtra dans l'annuaire
+            </p>
+          </div>
+          <p style="font-size:.85rem;color:rgba(242,237,228,0.5);margin-top:1.5rem;">
+            Une question ? Répondez directement à cet email.
+          </p>
+          <hr style="border:none;border-top:1px solid rgba(242,237,228,0.1);margin:1.5rem 0;" />
+          <p style="font-size:.7rem;color:rgba(242,237,228,0.3);">
+            L'Officiel d'Afrique — Dream Team Africa<br/>
+            <a href="https://dreamteamafrica.com/lofficiel-dafrique" style="color:#C8A246;text-decoration:none;">dreamteamafrica.com/lofficiel-dafrique</a>
+          </p>
+        </div>
+      `,
+    });
+  } catch (err) {
+    console.error("Confirmation email failed:", err);
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -129,8 +187,9 @@ export async function POST(request: Request) {
       },
     });
 
-    // Send notification email (non-blocking)
+    // Send notification emails (non-blocking)
     sendNotification(inscription);
+    sendConfirmation(inscription);
 
     return NextResponse.json(
       { id: inscription.id, message: "Inscription enregistrée avec succès." },

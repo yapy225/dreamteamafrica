@@ -100,7 +100,7 @@ function useScrollReveal() {
 
 // ─── MAIN COMPONENT ───────────────────────────────────────
 
-export default function OfficielClient() {
+export default function OfficielClient({ directoryCount = 0 }: { directoryCount?: number }) {
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -450,7 +450,7 @@ export default function OfficielClient() {
         >
           <div>
             <p className="text-lg font-bold text-[#2C2C2C]">Consulter l&apos;annuaire</p>
-            <p className="mt-0.5 text-sm text-[#6B6B6B]">58 fiches professionnelles — Exposants, Artistes, Mannequins et plus</p>
+            <p className="mt-0.5 text-sm text-[#6B6B6B]">{directoryCount} fiches professionnelles — Exposants, Artistes, Mannequins et plus</p>
           </div>
           <span className="shrink-0 rounded-full bg-[#C4704B] px-4 py-2 text-sm font-semibold text-white">
             Voir l&apos;annuaire →

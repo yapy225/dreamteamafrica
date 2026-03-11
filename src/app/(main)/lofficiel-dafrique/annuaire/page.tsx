@@ -1,8 +1,6 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, Phone, Mail, MapPin } from "lucide-react";
 import { prisma } from "@/lib/db";
-import { auth } from "@/lib/auth";
 import type { Metadata } from "next";
 import ProtectedContent from "./ProtectedContent";
 
@@ -58,11 +56,6 @@ export default async function AnnuairePage({
 }: {
   searchParams: Promise<{ category?: string; country?: string; q?: string }>;
 }) {
-  const session = await auth();
-  if (!session) {
-    redirect("/auth/signin");
-  }
-
   const params = await searchParams;
   const category = params.category || "";
   const country = params.country || "";

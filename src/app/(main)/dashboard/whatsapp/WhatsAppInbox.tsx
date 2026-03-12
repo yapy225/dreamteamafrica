@@ -106,6 +106,8 @@ export default function WhatsAppInbox() {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const prevMessageCountRef = useRef<number>(0);
+  const isFirstLoadRef = useRef<boolean>(true);
 
   // Load conversations
   const loadConversations = async () => {
@@ -167,6 +169,8 @@ export default function WhatsAppInbox() {
 
   useEffect(() => {
     if (selectedPhone) {
+      isFirstLoadRef.current = true;
+      prevMessageCountRef.current = 0;
       loadMessages(selectedPhone);
       const interval = setInterval(() => loadMessages(selectedPhone), 5000);
       return () => clearInterval(interval);
@@ -174,7 +178,14 @@ export default function WhatsAppInbox() {
   }, [selectedPhone]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Only scroll to bottom on first load or when new messages arrive
+    if (messages.length > 0) {
+      if (isFirstLoadRef.current || messages.length > prevMessageCountRef.current) {
+        messagesEndRef.current?.scrollIntoView({ behavior: isFirstLoadRef.current ? "instant" : "smooth" });
+        isFirstLoadRef.current = false;
+      }
+      prevMessageCountRef.current = messages.length;
+    }
   }, [messages]);
 
   // Conversation list

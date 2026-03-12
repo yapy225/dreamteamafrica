@@ -160,8 +160,11 @@ async function handleExhibitorBooking(session: Stripe.Checkout.Session) {
     `Exhibitor booking ${bookingId}: ${isOneTime ? "CONFIRMED (1x)" : "PARTIAL (1/" + installments + ")"}`
   );
 
-  // Send thank you email
-  const booking = await prisma.exhibitorBooking.findUnique({ where: { id: bookingId } });
+  // Send thank you email with profile link
+  const booking = await prisma.exhibitorBooking.findUnique({
+    where: { id: bookingId },
+    include: { profile: { select: { token: true } } },
+  });
   if (booking) {
     try {
       await sendThankYouEmail({
@@ -171,6 +174,7 @@ async function handleExhibitorBooking(session: Stripe.Checkout.Session) {
         totalPrice: booking.totalPrice,
         installments: booking.installments,
         isFullyPaid: isOneTime,
+        profileToken: booking.profile?.token,
       });
     } catch (emailErr) {
       console.error("Thank you email failed:", emailErr);

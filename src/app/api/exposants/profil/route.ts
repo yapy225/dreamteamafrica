@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { uploadFile } from "@/lib/bunny";
+import { sendExhibitorProfileNotification } from "@/lib/email";
 
 /**
  * GET /api/exposants/profil?token=xxx
@@ -120,6 +121,17 @@ export async function POST(request: Request) {
         submittedAt: new Date(),
       },
     });
+
+    // Notify admin
+    try {
+      await sendExhibitorProfileNotification({
+        companyName: updated.companyName || "Exposant",
+        contactName: `${updated.firstName || ""} ${updated.lastName || ""}`.trim(),
+        profileId: updated.id,
+      });
+    } catch (notifErr) {
+      console.error("Admin notification failed (non-blocking):", notifErr);
+    }
 
     return NextResponse.json({ success: true, id: updated.id });
   } catch (error) {

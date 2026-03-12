@@ -78,20 +78,6 @@ export async function sendQuoteEmail(opts: {
     en répondant à cet email ou en nous contactant directement.
   </p>
 
-  ${opts.profileToken ? `
-  <div style="margin-top: 24px; padding: 20px; background: #fdf8f0; border: 1px solid #e8dfd3; border-radius: 8px;">
-    <h3 style="margin: 0 0 8px; font-size: 16px; color: #8B6F4E;">Maximisez votre visibilité</h3>
-    <p style="margin: 0 0 16px; font-size: 14px; color: #666;">
-      Complétez votre fiche exposant pour bénéficier d'une visibilité optimale sur nos réseaux sociaux
-      et supports de communication : logo, description, photos, vidéo, réseaux sociaux…
-    </p>
-    <a href="${process.env.NEXT_PUBLIC_APP_URL}/exposants/profil/${opts.profileToken}"
-       style="display: inline-block; background: #8B6F4E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px;">
-      Compléter ma fiche exposant
-    </a>
-  </div>
-  ` : ''}
-
   <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #999;">
     <p>Dream Team Africa — Saison Culturelle Africaine 2026</p>
     <p>contact@dreamteamafrica.com</p>
@@ -119,6 +105,7 @@ export async function sendThankYouEmail(opts: {
   totalPrice: number;
   installments: number;
   isFullyPaid: boolean;
+  profileToken?: string;
 }) {
   const formatter = new Intl.NumberFormat("fr-FR", {
     style: "currency",
@@ -151,7 +138,19 @@ export async function sendThankYouEmail(opts: {
     </div>`
   }
 
-  <p>Notre équipe vous contactera prochainement avec tous les détails pratiques pour votre installation.</p>
+  <div style="margin-top: 24px; padding: 20px; background: #fdf8f0; border: 1px solid #e8dfd3; border-radius: 8px;">
+    <h3 style="margin: 0 0 8px; font-size: 16px; color: #8B6F4E;">Maximisez votre visibilité</h3>
+    <p style="margin: 0 0 16px; font-size: 14px; color: #666;">
+      Complétez votre fiche exposant depuis votre espace client pour bénéficier d'une visibilité
+      sur nos réseaux sociaux et supports de communication : logo, photos produits, vidéo, description…
+    </p>
+    <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/mon-stand"
+       style="display: inline-block; background: #8B6F4E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px;">
+      Compléter ma fiche exposant
+    </a>
+  </div>
+
+  <p style="margin-top: 20px;">Notre équipe vous contactera prochainement avec tous les détails pratiques pour votre installation.</p>
 
   <p>À très bientôt !</p>
 
@@ -341,5 +340,55 @@ export async function sendFreeTicketEmail(opts: {
   if (error) {
     console.error("Free ticket email error:", error);
     throw new Error(`Failed to send email: ${error.message}`);
+  }
+}
+
+export async function sendExhibitorProfileNotification(opts: {
+  companyName: string;
+  contactName: string;
+  profileId: string;
+}) {
+  const adminEmail = process.env.ADMIN_EMAIL || "hello@dreamteamafrica.com";
+  const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/exposants`;
+
+  const html = `
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="utf-8"></head>
+<body style="font-family: Georgia, serif; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="border-bottom: 3px solid #8B6F4E; padding-bottom: 16px; margin-bottom: 24px;">
+    <h1 style="margin: 0; font-size: 24px; color: #8B6F4E;">Dream Team Africa</h1>
+    <p style="margin: 4px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #999;">Notification Admin</p>
+  </div>
+
+  <p>Nouvelle fiche exposant soumise !</p>
+
+  <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin: 24px 0;">
+    <p style="margin: 0; font-size: 18px; font-weight: bold; color: #166534;">${opts.companyName}</p>
+    <p style="margin: 8px 0 0; font-size: 14px; color: #166534;">Soumise par ${opts.contactName}</p>
+  </div>
+
+  <p>Connectez-vous au dashboard pour consulter, modifier et valider la fiche :</p>
+
+  <a href="${dashboardUrl}"
+     style="display: inline-block; background: #8B6F4E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px;">
+    Voir dans le dashboard
+  </a>
+
+  <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #999;">
+    <p>Dream Team Africa — Notification automatique</p>
+  </div>
+</body>
+</html>`;
+
+  try {
+    await getResend().emails.send({
+      from: FROM_EMAIL,
+      to: adminEmail,
+      subject: `Fiche exposant soumise — ${opts.companyName}`,
+      html,
+    });
+  } catch (err) {
+    console.error("Admin notification email failed:", err);
   }
 }

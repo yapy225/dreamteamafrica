@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { EXHIBITOR_EVENTS, EXHIBITOR_PACKS } from "@/lib/exhibitor-events";
 import ResendQuoteButton from "./ResendQuoteButton";
 import GeneratePostsButton from "./GeneratePostsButton";
+import ValidateProfileButton from "./ValidateProfileButton";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Gestion Exposants | Dashboard" };
@@ -24,7 +25,7 @@ export default async function ExposantsDashboardPage() {
   const bookings = await prisma.exhibitorBooking.findMany({
     include: {
       user: { select: { name: true, email: true } },
-      profile: { select: { token: true, submittedAt: true, logoUrl: true, description: true } },
+      profile: { select: { id: true, token: true, submittedAt: true, logoUrl: true, description: true } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -143,16 +144,19 @@ export default async function ExposantsDashboardPage() {
                   <td className="px-4 py-3">
                     {b.profile ? (
                       b.profile.submittedAt ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                          Complet
-                        </span>
+                        <div className="space-y-1.5">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
+                            Soumise
+                          </span>
+                          <ValidateProfileButton profileId={b.profile.id} />
+                        </div>
                       ) : (
                         <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
                           En attente
                         </span>
                       )
                     ) : (
-                      <span className="text-xs text-dta-taupe">—</span>
+                      <span className="text-xs text-dta-taupe">&mdash;</span>
                     )}
                     {b.profile && (
                       <a

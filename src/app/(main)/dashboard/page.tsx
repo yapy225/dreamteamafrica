@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail, ScanLine, MessageSquare, ExternalLink, Inbox, MessageCircle } from "lucide-react";
+import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail, ScanLine, MessageSquare, ExternalLink, Inbox, MessageCircle, FileImage } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getRevenueData } from "@/lib/revenue";
@@ -17,10 +17,14 @@ export default async function DashboardPage() {
 
   const isAdmin = session.user.role === "ADMIN";
 
-  const [ticketCount, orderCount, revenueData] = await Promise.all([
+  const [ticketCount, orderCount, revenueData, exhibitorBooking] = await Promise.all([
     prisma.ticket.count({ where: { userId: session.user.id } }),
     prisma.order.count({ where: { userId: session.user.id } }),
     isAdmin ? getRevenueData() : null,
+    prisma.exhibitorBooking.findFirst({
+      where: { userId: session.user.id, status: { in: ["PARTIAL", "CONFIRMED"] } },
+      select: { id: true },
+    }),
   ]);
 
   const quickLinks = [
@@ -51,6 +55,17 @@ export default async function DashboardPage() {
             href: "/dashboard/articles",
             icon: Newspaper,
             label: "Mes articles",
+            count: null,
+            color: "bg-amber-100 text-amber-600",
+          },
+        ]
+      : []),
+    ...(exhibitorBooking
+      ? [
+          {
+            href: "/dashboard/mon-stand",
+            icon: FileImage,
+            label: "Ma fiche exposant",
             count: null,
             color: "bg-amber-100 text-amber-600",
           },

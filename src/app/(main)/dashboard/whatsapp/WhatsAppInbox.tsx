@@ -125,7 +125,14 @@ export default function WhatsAppInbox() {
     try {
       const res = await fetch(`/api/whatsapp/messages?phone=${phone}`);
       const data = await res.json();
-      setMessages(Array.isArray(data) ? data : []);
+      const newMessages = Array.isArray(data) ? data : [];
+      setMessages((prev) => {
+        // Only update if messages actually changed (avoids unnecessary re-renders and scrolls)
+        if (prev.length === newMessages.length && prev.length > 0 && prev[prev.length - 1]?.id === newMessages[newMessages.length - 1]?.id) {
+          return prev;
+        }
+        return newMessages;
+      });
     } catch {
       console.error("Failed to load messages");
     }

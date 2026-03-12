@@ -116,23 +116,9 @@ export default function EmailInbox() {
     setLoading(false);
   };
 
-  const syncEmails = async (silent = false) => {
+  const refreshEmails = async () => {
     setSyncing(true);
-    try {
-      const res = await fetch("/api/emails/sync", { method: "POST" });
-      const data = await res.json();
-      if (res.ok) {
-        await loadEmails(1, search);
-      } else if (!silent) {
-        console.error("Sync error:", data);
-        alert(data.error || "Erreur de synchronisation");
-      }
-    } catch (err) {
-      if (!silent) {
-        console.error("Sync network error:", err);
-        alert("Erreur reseau");
-      }
-    }
+    await loadEmails(1, search);
     setSyncing(false);
   };
 
@@ -283,12 +269,12 @@ export default function EmailInbox() {
               />
             </div>
             <button
-              onClick={() => syncEmails()}
+              onClick={refreshEmails}
               disabled={syncing}
               className="flex items-center gap-1.5 rounded-[var(--radius-button)] bg-dta-beige px-3 py-1.5 text-sm font-medium text-dta-char hover:bg-dta-taupe/20 disabled:opacity-50"
             >
               <RefreshCw size={14} className={syncing ? "animate-spin" : ""} />
-              Sync
+              Actualiser
             </button>
           </div>
         </div>

@@ -34,9 +34,12 @@ export async function POST(request: NextRequest) {
         "@/lib/social-drafts"
       );
       result = await generateOfficielPromoDrafts();
+    } else if (type === "exposant") {
+      const { generateExhibitorDrafts } = await import("@/lib/social-drafts");
+      result = await generateExhibitorDrafts(body.profileId);
     } else {
       return NextResponse.json(
-        { error: "type must be engagement or officiel" },
+        { error: "type must be engagement, officiel, or exposant" },
         { status: 400 }
       );
     }

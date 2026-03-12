@@ -278,6 +278,163 @@ export async function generateOfficielPromoDrafts(): Promise<{
   return { generated: results.length, drafts: results };
 }
 
+// ── Exposant Visibility Drafts ────────────────────────────
+
+const EXPOSANT_PROMPT = (
+  companyName: string,
+  sector: string,
+  description: string,
+  socialLinks: string,
+  eventName: string,
+  platform: string,
+) => `Tu es community manager pour Dream Team Africa.
+
+Génère 1 post promotionnel pour présenter un exposant de la ${eventName}.
+
+Exposant :
+- Entreprise : ${companyName}
+- Secteur : ${sector}
+- Description : ${description}
+${socialLinks ? `- Réseaux sociaux : ${socialLinks}` : ""}
+
+Objectif : donner envie aux visiteurs de venir découvrir cet exposant à l'événement.
+
+Règles :
+- Adapte le ton à ${platform}
+- Commence par une accroche engageante (pas "Découvrez" à chaque fois, varie les formules)
+- Mentionne le nom de l'entreprise et son secteur
+- Intègre un extrait de la description si pertinent
+- Tag les réseaux sociaux de l'exposant si disponibles
+- Inclus 3-5 hashtags pertinents dont #FoiredAfrique #DreamTeamAfrica
+- En français
+- Longueur adaptée au réseau social (court pour Twitter, plus détaillé pour LinkedIn/Facebook)
+
+Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks) :
+{
+  "content": "le contenu du post"
+}`;
+
+export async function generateExhibitorDrafts(profileId?: string): Promise<{
+  generated: number;
+  drafts: { platform: string; content: string; companyName: string }[];
+}> {
+  // Fetch submitted profiles (with booking info for event names)
+  const where: Record<string, unknown> = { submittedAt: { not: null } };
+  if (profileId) where.id = profileId;
+
+  const profiles = await prisma.exhibitorProfile.findMany({
+    where,
+    include: {
+      booking: {
+        select: { companyName: true, events: true },
+      },
+    },
+  });
+
+  if (profiles.length === 0) {
+    // If none submitted, generate for all profiles that have at least a description
+    const allProfiles = await prisma.exhibitorProfile.findMany({
+      where: profileId
+        ? { id: profileId }
+        : { OR: [{ description: { not: null } }, { companyName: { not: null } }] },
+      include: {
+        booking: {
+          select: { companyName: true, events: true },
+        },
+      },
+    });
+
+    if (allProfiles.length === 0) {
+      return { generated: 0, drafts: [] };
+    }
+
+    profiles.push(
+      ...allProfiles.filter((p) => !profiles.some((ep) => ep.id === p.id)),
+    );
+  }
+
+  const results: { platform: string; content: string; companyName: string }[] = [];
+  const platforms: SocialPlatform[] = ["TWITTER", "FACEBOOK", "INSTAGRAM", "LINKEDIN"];
+
+  for (const profile of profiles) {
+    const companyName = profile.companyName || profile.booking.companyName;
+    const sector = profile.sector || "";
+    const description = profile.description || companyName;
+    const eventName = "Foire d'Afrique Paris 2026";
+
+    // Build social links string
+    const socialParts: string[] = [];
+    if (profile.facebook) socialParts.push(`Facebook: ${profile.facebook}`);
+    if (profile.instagram) socialParts.push(`Instagram: ${profile.instagram}`);
+    const socialLinks = socialParts.join(", ");
+
+    // Pick image URL (first available)
+    const imageUrl = profile.image1Url || profile.image2Url || profile.image3Url || profile.logoUrl;
+
+    // Check if drafts already exist for this profile
+    const existing = await prisma.socialDraft.count({
+      where: {
+        section: "exposant",
+        content: { contains: companyName },
+        status: { in: ["DRAFT", "APPROVED", "POSTED"] },
+      },
+    });
+
+    if (existing > 0) continue; // Skip if already generated
+
+    for (const platform of platforms) {
+      try {
+        const response = await getOpenAI().chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "user",
+              content: EXPOSANT_PROMPT(
+                companyName,
+                sector,
+                description,
+                socialLinks,
+                eventName,
+                platform,
+              ),
+            },
+          ],
+          max_tokens: 500,
+          temperature: 0.85,
+        });
+
+        const raw = response.choices[0]?.message?.content || "";
+        const jsonMatch = raw.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          console.error(`[SOCIAL-DRAFTS] GPT invalid JSON for exposant ${companyName} on ${platform}`);
+          continue;
+        }
+
+        const parsed = JSON.parse(jsonMatch[0]) as { content: string };
+        if (!parsed.content) continue;
+
+        await prisma.socialDraft.create({
+          data: {
+            platform,
+            type: "PROMO",
+            status: "DRAFT",
+            content: parsed.content,
+            imageUrl: imageUrl || null,
+            section: "exposant",
+          },
+        });
+
+        results.push({ platform, content: parsed.content, companyName });
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Erreur inconnue";
+        console.error(`[SOCIAL-DRAFTS] Erreur exposant ${companyName} ${platform}:`, message);
+      }
+    }
+  }
+
+  return { generated: results.length, drafts: results };
+}
+
 // ── Publication des brouillons approuvés ───────────────────
 
 async function postTwitterComment(

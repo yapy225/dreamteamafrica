@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { EXHIBITOR_EVENTS, EXHIBITOR_PACKS } from "@/lib/exhibitor-events";
 import ResendQuoteButton from "./ResendQuoteButton";
+import GeneratePostsButton from "./GeneratePostsButton";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Gestion Exposants | Dashboard" };
@@ -50,9 +51,12 @@ export default async function ExposantsDashboardPage() {
       <h1 className="mb-2 font-serif text-3xl font-bold text-dta-dark">
         Gestion Exposants
       </h1>
-      <p className="mb-8 text-dta-char/70">
-        Saison Culturelle 2026 &mdash; Suivi des r&eacute;servations et paiements
-      </p>
+      <div className="mb-8 flex items-center justify-between">
+        <p className="text-dta-char/70">
+          Saison Culturelle 2026 &mdash; Suivi des r&eacute;servations et paiements
+        </p>
+        <GeneratePostsButton />
+      </div>
 
       {/* Stats */}
       <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">

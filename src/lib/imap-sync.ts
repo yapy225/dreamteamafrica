@@ -4,7 +4,7 @@ import { prisma } from "./db";
 
 export async function syncEmails(folder = "INBOX", maxMessages = 200) {
   const client = new ImapFlow({
-    host: process.env.IMAP_HOST || "mail.dreamteamafrica.com",
+    host: process.env.IMAP_HOST || "mail59.lwspanel.com",
     port: 993,
     secure: true,
     auth: {

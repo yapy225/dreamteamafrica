@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import { prisma } from "./db";
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "mail.dreamteamafrica.com",
+  host: process.env.SMTP_HOST || "mail59.lwspanel.com",
   port: Number(process.env.SMTP_PORT) || 465,
   secure: true,
   auth: {

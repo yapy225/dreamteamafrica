@@ -283,7 +283,7 @@ export default function EmailInbox() {
               />
             </div>
             <button
-              onClick={syncEmails}
+              onClick={() => syncEmails()}
               disabled={syncing}
               className="flex items-center gap-1.5 rounded-[var(--radius-button)] bg-dta-beige px-3 py-1.5 text-sm font-medium text-dta-char hover:bg-dta-taupe/20 disabled:opacity-50"
             >

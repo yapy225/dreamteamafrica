@@ -27,6 +27,7 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
     phone: "",
     sector: "",
   });
+  const [newsletter, setNewsletter] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -77,6 +78,7 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
           pack: pack.id,
           events: [event.id],
           installments,
+          newsletter,
           ...form,
         }),
       });
@@ -380,6 +382,19 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
           </li>
         </ul>
       </div>
+
+      {/* Newsletter opt-in */}
+      <label className="flex cursor-pointer items-start gap-3">
+        <input
+          type="checkbox"
+          checked={newsletter}
+          onChange={(e) => setNewsletter(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 accent-dta-accent"
+        />
+        <span className="text-xs leading-relaxed text-dta-char/70">
+          Je souhaite recevoir les actualit&eacute;s, offres et informations de Dream Team Africa par email. Vous pouvez vous d&eacute;sabonner &agrave; tout moment.
+        </span>
+      </label>
 
       {/* Submit */}
       <button

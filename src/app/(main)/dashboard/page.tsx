@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail, ScanLine, MessageSquare, ExternalLink, Inbox, MessageCircle, FileImage } from "lucide-react";
+import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail, ScanLine, MessageSquare, Inbox, MessageCircle, FileImage } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getRevenueData } from "@/lib/revenue";
@@ -130,6 +130,13 @@ export default async function DashboardPage() {
             color: "bg-green-100 text-green-600",
           },
           {
+            href: "/dashboard/emails",
+            icon: Inbox,
+            label: "Boite mail",
+            count: null,
+            color: "bg-yellow-100 text-yellow-600",
+          },
+          {
             href: "/dashboard/contacts",
             icon: Mail,
             label: "Messages de contact",
@@ -154,17 +161,7 @@ export default async function DashboardPage() {
       : []),
   ];
 
-  const externalLinks = isAdmin
-    ? [
-        {
-          href: "https://mail.hostinger.com",
-          icon: Inbox,
-          label: "Boîte mail",
-          description: "hello@dreamteamafrica.com",
-          color: "bg-yellow-100 text-yellow-600",
-        },
-      ]
-    : [];
+  const externalLinks: typeof quickLinks = [];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -229,26 +226,6 @@ export default async function DashboardPage() {
               )}
             </div>
           </Link>
-        ))}
-        {externalLinks.map((link) => (
-          <a
-            key={link.href}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex items-center gap-4 rounded-[var(--radius-card)] bg-white p-5 shadow-[var(--shadow-card)] transition-all duration-200 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5"
-          >
-            <div className={`rounded-[var(--radius-button)] p-3 ${link.color}`}>
-              <link.icon size={20} />
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-dta-dark group-hover:text-dta-accent transition-colors">
-                {link.label}
-              </p>
-              <p className="text-sm text-dta-taupe">{link.description}</p>
-            </div>
-            <ExternalLink size={14} className="text-dta-taupe opacity-0 group-hover:opacity-100 transition-opacity" />
-          </a>
         ))}
       </div>
     </div>

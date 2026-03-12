@@ -125,6 +125,7 @@ export default function ExhibitorProfileClientForm({
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [newsletter, setNewsletter] = useState(true);
   const [files, setFiles] = useState<Record<string, File | null>>({});
 
   useEffect(() => {
@@ -151,6 +152,9 @@ export default function ExhibitorProfileClientForm({
     for (const [key, file] of Object.entries(files)) {
       if (file) formData.set(key, file);
     }
+
+    // Newsletter opt-in
+    formData.set("newsletter", newsletter ? "true" : "false");
 
     // Ensure daysPresent is sent
     const checkboxes = e.currentTarget.querySelectorAll<HTMLInputElement>(
@@ -460,6 +464,19 @@ export default function ExhibitorProfileClientForm({
           </div>
         </div>
       </fieldset>
+
+      {/* Newsletter opt-in */}
+      <label className="flex cursor-pointer items-start gap-3">
+        <input
+          type="checkbox"
+          checked={newsletter}
+          onChange={(e) => setNewsletter(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 accent-dta-accent"
+        />
+        <span className="text-xs leading-relaxed text-dta-char/70">
+          Je souhaite recevoir les actualit&eacute;s, offres et informations de Dream Team Africa par email.
+        </span>
+      </label>
 
       {error && (
         <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-600">

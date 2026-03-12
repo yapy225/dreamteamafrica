@@ -736,6 +736,44 @@ model WhatsAppMessage {
   @@index([createdAt])
 }
 
+// ─── EMAIL INBOX ──────────────────────────────────────
+
+model Email {
+  id             String   @id @default(cuid())
+  messageId      String   @unique
+  imapUid        Int?
+  folder         String   @default("INBOX")
+  fromName       String?
+  fromEmail      String
+  toEmails       String[]
+  ccEmails       String[] @default([])
+  subject        String
+  bodyText       String?  @db.Text
+  bodyHtml       String?  @db.Text
+  snippet        String?
+  hasAttachments Boolean  @default(false)
+  attachments    Json?
+  inReplyTo      String?
+  references     String[] @default([])
+  isRead         Boolean  @default(false)
+  isArchived     Boolean  @default(false)
+  isStarred      Boolean  @default(false)
+  receivedAt     DateTime
+  syncedAt       DateTime @default(now())
+
+  @@index([isArchived, isRead])
+  @@index([fromEmail])
+  @@index([receivedAt])
+  @@index([inReplyTo])
+}
+
+model EmailSyncState {
+  id         String   @id @default(cuid())
+  folder     String   @unique
+  lastUid    Int      @default(0)
+  lastSyncAt DateTime @default(now())
+}
+
 model SocialCredential {
   id           String         @id @default(cuid())
   platform     SocialPlatform @unique

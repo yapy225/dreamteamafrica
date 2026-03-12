@@ -122,6 +122,20 @@ export async function POST(request: Request) {
       },
     });
 
+    // Newsletter subscription
+    const newsletterOpt = formData.get("newsletter");
+    if (newsletterOpt === "true" && updated.email) {
+      try {
+        await prisma.newsletterSubscriber.upsert({
+          where: { email: updated.email },
+          create: { email: updated.email },
+          update: { isActive: true },
+        });
+      } catch (nlErr) {
+        console.error("Newsletter subscribe failed (non-blocking):", nlErr);
+      }
+    }
+
     // Notify admin
     try {
       await sendExhibitorProfileNotification({

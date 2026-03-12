@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
 
-    const { pack, events, installments, companyName, contactName, email, phone, sector } =
+    const { pack, events, installments, companyName, contactName, email, phone, sector, newsletter } =
       await request.json();
 
     // Validate pack
@@ -92,6 +92,19 @@ export async function POST(request: Request) {
         status: "PENDING",
       },
     });
+
+    // Newsletter subscription
+    if (newsletter) {
+      try {
+        await prisma.newsletterSubscriber.upsert({
+          where: { email: email.trim() },
+          create: { email: email.trim() },
+          update: { isActive: true },
+        });
+      } catch (nlErr) {
+        console.error("Newsletter subscribe failed (non-blocking):", nlErr);
+      }
+    }
 
     // Create exhibitor profile for visibility form
     const profileToken = randomUUID();

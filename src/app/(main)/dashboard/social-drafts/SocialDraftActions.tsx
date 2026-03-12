@@ -208,7 +208,7 @@ export function QuickActions() {
       });
       const data = await res.json();
       if (res.ok) {
-        alert(`${data.count} brouillon(s) genere(s)`);
+        alert(`${data.generated || data.count || 0} brouillon(s) genere(s)`);
       } else {
         alert(data.error || "Erreur lors de la generation");
       }

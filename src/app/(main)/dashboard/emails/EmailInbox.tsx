@@ -116,18 +116,22 @@ export default function EmailInbox() {
     setLoading(false);
   };
 
-  const syncEmails = async () => {
+  const syncEmails = async (silent = false) => {
     setSyncing(true);
     try {
       const res = await fetch("/api/emails/sync", { method: "POST" });
       const data = await res.json();
       if (res.ok) {
         await loadEmails(1, search);
-      } else {
+      } else if (!silent) {
+        console.error("Sync error:", data);
         alert(data.error || "Erreur de synchronisation");
       }
-    } catch {
-      alert("Erreur reseau");
+    } catch (err) {
+      if (!silent) {
+        console.error("Sync network error:", err);
+        alert("Erreur reseau");
+      }
     }
     setSyncing(false);
   };
@@ -225,8 +229,8 @@ export default function EmailInbox() {
   }, [tab]);
 
   useEffect(() => {
-    // Auto-sync on first load
-    syncEmails();
+    // Auto-sync on first load (silent — don't alert on error)
+    syncEmails(true).then(() => loadEmails(1, ""));
   }, []);
 
   // Email list view

@@ -3,18 +3,27 @@ import { simpleParser } from "mailparser";
 import { prisma } from "./db";
 
 export async function syncEmails(folder = "INBOX", maxMessages = 200) {
+  const host = process.env.IMAP_HOST || "mail59.lwspanel.com";
+  const user = process.env.IMAP_USER!;
+
+  console.log(`[IMAP] Connecting to ${host} as ${user}...`);
+
   const client = new ImapFlow({
-    host: process.env.IMAP_HOST || "mail59.lwspanel.com",
+    host,
     port: 993,
     secure: true,
-    auth: {
-      user: process.env.IMAP_USER!,
-      pass: process.env.IMAP_PASS!,
-    },
+    auth: { user, pass: process.env.IMAP_PASS! },
     logger: false,
+    tls: { rejectUnauthorized: true, servername: host },
   });
 
-  await client.connect();
+  try {
+    await client.connect();
+  } catch (err: any) {
+    console.error(`[IMAP] Connection failed:`, err.message);
+    throw new Error(`IMAP connection failed: ${err.message}`);
+  }
+  console.log("[IMAP] Connected");
 
   // Get last synced UID
   let syncState = await prisma.emailSyncState.findUnique({
@@ -27,15 +36,29 @@ export async function syncEmails(folder = "INBOX", maxMessages = 200) {
     });
   }
 
-  const lock = await client.getMailboxLock(folder);
+  let lock;
+  try {
+    lock = await client.getMailboxLock(folder);
+  } catch (err: any) {
+    console.error(`[IMAP] Failed to lock ${folder}:`, err.message);
+    await client.logout();
+    throw new Error(`IMAP mailbox lock failed: ${err.message}`);
+  }
+  console.log(`[IMAP] Mailbox locked: ${folder}`);
   let synced = 0;
 
   try {
     const total = (client.mailbox as any)?.exists || 0;
-    if (total === 0) return { synced: 0, total: 0 };
+    console.log(`[IMAP] ${folder}: ${total} messages`);
+    if (total === 0) {
+      lock.release();
+      await client.logout();
+      return { synced: 0, total: 0 };
+    }
 
     // Fetch messages with UID greater than lastUid
     const range = syncState.lastUid > 0 ? `${syncState.lastUid + 1}:*` : "1:*";
+    console.log(`[IMAP] Fetching range: ${range}`);
     let maxUid = syncState.lastUid;
     let count = 0;
 

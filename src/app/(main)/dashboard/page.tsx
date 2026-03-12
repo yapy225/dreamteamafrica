@@ -17,7 +17,7 @@ export default async function DashboardPage() {
 
   const isAdmin = session.user.role === "ADMIN";
 
-  const [ticketCount, orderCount, revenueData, exhibitorBooking] = await Promise.all([
+  const [ticketCount, orderCount, revenueData, exhibitorBooking, unreadWhatsApp, unreadContacts, unreadEmails] = await Promise.all([
     prisma.ticket.count({ where: { userId: session.user.id } }),
     prisma.order.count({ where: { userId: session.user.id } }),
     isAdmin ? getRevenueData() : null,
@@ -25,6 +25,9 @@ export default async function DashboardPage() {
       where: { userId: session.user.id, status: { in: ["PARTIAL", "CONFIRMED"] } },
       select: { id: true },
     }),
+    isAdmin ? prisma.whatsAppMessage.count({ where: { read: false, direction: "inbound" } }) : 0,
+    isAdmin ? prisma.contactMessage.count({ where: { read: false } }) : 0,
+    isAdmin ? prisma.email.count({ where: { isRead: false, isArchived: false, folder: "INBOX" } }) : 0,
   ]);
 
   const quickLinks = [
@@ -126,21 +129,21 @@ export default async function DashboardPage() {
             href: "/dashboard/whatsapp",
             icon: MessageCircle,
             label: "WhatsApp Business",
-            count: null,
+            count: unreadWhatsApp || null,
             color: "bg-green-100 text-green-600",
           },
           {
             href: "/dashboard/emails",
             icon: Inbox,
             label: "Boite mail",
-            count: null,
+            count: unreadEmails || null,
             color: "bg-yellow-100 text-yellow-600",
           },
           {
             href: "/dashboard/contacts",
             icon: Mail,
             label: "Messages de contact",
-            count: null,
+            count: unreadContacts || null,
             color: "bg-pink-100 text-pink-600",
           },
           {

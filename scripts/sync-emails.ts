@@ -1,31 +1,27 @@
 import { ImapFlow } from "imapflow";
 import { simpleParser } from "mailparser";
-import { prisma } from "./db";
+import { PrismaClient } from "@prisma/client";
 
-export async function syncEmails(folder = "INBOX", maxMessages = 200) {
+const prisma = new PrismaClient();
+
+async function syncEmails(folder = "INBOX", maxMessages = 500) {
   const host = process.env.IMAP_HOST || "mail59.lwspanel.com";
-  const user = process.env.IMAP_USER!;
+  const user = process.env.IMAP_USER || "hello@dreamteamafrica.com";
+  const pass = process.env.IMAP_PASS!;
 
-  console.log(`[IMAP] Connecting to ${host} as ${user}...`);
+  console.log(`Connecting to ${host} as ${user}...`);
 
   const client = new ImapFlow({
     host,
     port: 993,
     secure: true,
-    auth: { user, pass: process.env.IMAP_PASS! },
+    auth: { user, pass },
     logger: false,
-    tls: { rejectUnauthorized: true, servername: host },
   });
 
-  try {
-    await client.connect();
-  } catch (err: any) {
-    console.error(`[IMAP] Connection failed:`, err.message);
-    throw new Error(`IMAP connection failed: ${err.message}`);
-  }
-  console.log("[IMAP] Connected");
+  await client.connect();
+  console.log("Connected");
 
-  // Get last synced UID
   let syncState = await prisma.emailSyncState.findUnique({
     where: { folder },
   });
@@ -36,27 +32,20 @@ export async function syncEmails(folder = "INBOX", maxMessages = 200) {
     });
   }
 
-  let lock;
-  try {
-    lock = await client.getMailboxLock(folder);
-  } catch (err: any) {
-    console.error(`[IMAP] Failed to lock ${folder}:`, err.message);
-    await client.logout();
-    throw new Error(`IMAP mailbox lock failed: ${err.message}`);
-  }
-  console.log(`[IMAP] Mailbox locked: ${folder}`);
+  const lock = await client.getMailboxLock(folder);
   let synced = 0;
 
   try {
     const total = (client.mailbox as any)?.exists || 0;
-    console.log(`[IMAP] ${folder}: ${total} messages`);
+    console.log(`${folder}: ${total} messages`);
     if (total === 0) {
       lock.release();
       await client.logout();
-      return { synced: 0, total: 0 };
+      console.log("No messages to sync");
+      return;
     }
 
-    // Use UID SEARCH to find new messages
+    // Use UID SEARCH to find messages newer than lastUid
     let uids: number[] = [];
     try {
       const searchResult = await client.search(
@@ -65,30 +54,31 @@ export async function syncEmails(folder = "INBOX", maxMessages = 200) {
       );
       uids = (searchResult || []).filter((uid: number) => uid > syncState!.lastUid);
     } catch {
+      // Fallback: fetch all
       try {
         const searchResult = await client.search({ all: true }, { uid: true });
         uids = (searchResult || []).filter((uid: number) => uid > syncState!.lastUid);
       } catch {}
     }
 
-    console.log(`[IMAP] Found ${uids.length} new messages`);
+    console.log(`Found ${uids.length} new messages (lastUid: ${syncState.lastUid})`);
     if (uids.length === 0) {
       lock.release();
       await client.logout();
       const totalInDb = await prisma.email.count({ where: { folder } });
-      return { synced: 0, total: totalInDb };
+      console.log(`No new messages. Total in DB: ${totalInDb}`);
+      return;
     }
 
     const range = uids.join(",");
     let maxUid = syncState.lastUid;
-    let count = 0;
 
     for await (const msg of client.fetch(range, {
       envelope: true,
       source: true,
       uid: true,
     })) {
-      if (count >= maxMessages) break;
+      if (synced >= maxMessages) break;
       if (msg.uid <= syncState.lastUid) continue;
 
       const env = msg.envelope;
@@ -96,7 +86,7 @@ export async function syncEmails(folder = "INBOX", maxMessages = 200) {
 
       let bodyText = "";
       let bodyHtml = "";
-      let attachmentList: { filename: string; contentType: string; size: number }[] = [];
+      let attachmentList: any[] = [];
       let inReplyTo: string | null = null;
       let references: string[] = [];
 
@@ -120,13 +110,8 @@ export async function syncEmails(folder = "INBOX", maxMessages = 200) {
       const messageId =
         env.messageId || `no-id-${msg.uid}-${folder}-${Date.now()}`;
       const fromAddr = env.from?.[0];
-      const toAddrs = (env.to || []).map(
-        (t: any) => t.address || ""
-      );
-      const ccAddrs = (env.cc || []).map(
-        (c: any) => c.address || ""
-      );
-
+      const toAddrs = (env.to || []).map((t: any) => t.address || "");
+      const ccAddrs = (env.cc || []).map((c: any) => c.address || "");
       const snippet = bodyText.slice(0, 200).replace(/\n/g, " ").trim();
 
       try {
@@ -145,8 +130,7 @@ export async function syncEmails(folder = "INBOX", maxMessages = 200) {
             bodyHtml,
             snippet,
             hasAttachments: attachmentList.length > 0,
-            attachments:
-              attachmentList.length > 0 ? attachmentList : undefined,
+            attachments: attachmentList.length > 0 ? attachmentList : undefined,
             inReplyTo,
             references,
             receivedAt: env.date || new Date(),
@@ -154,18 +138,16 @@ export async function syncEmails(folder = "INBOX", maxMessages = 200) {
           update: {},
         });
         synced++;
+        process.stdout.write(`\r  Synced: ${synced}`);
       } catch (err: any) {
-        // Skip duplicates
         if (!err.message?.includes("Unique constraint")) {
-          console.error(`Email sync error: ${err.message}`);
+          console.error(`\n  Error: ${err.message}`);
         }
       }
 
       if (msg.uid > maxUid) maxUid = msg.uid;
-      count++;
     }
 
-    // Update sync state
     if (maxUid > syncState.lastUid) {
       await prisma.emailSyncState.update({
         where: { folder },
@@ -177,7 +159,11 @@ export async function syncEmails(folder = "INBOX", maxMessages = 200) {
   }
 
   await client.logout();
-
-  const totalEmails = await prisma.email.count({ where: { folder } });
-  return { synced, total: totalEmails };
+  const totalInDb = await prisma.email.count({ where: { folder } });
+  console.log(`\nDone! Synced: ${synced}, Total in DB: ${totalInDb}`);
 }
+
+syncEmails().then(() => prisma.$disconnect()).catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

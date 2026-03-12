@@ -229,8 +229,8 @@ export default function EmailInbox() {
   }, [tab]);
 
   useEffect(() => {
-    // Auto-sync on first load (silent — don't alert on error)
-    syncEmails(true).then(() => loadEmails(1, ""));
+    // Load emails from database on mount (no auto-sync)
+    loadEmails(1, "");
   }, []);
 
   // Email list view

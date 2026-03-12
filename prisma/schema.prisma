@@ -107,6 +107,7 @@ model User {
   favorites   Favorite[]
   officielContents OfficielContent[]
   exhibitorBookings ExhibitorBooking[]
+  exhibitorProfiles ExhibitorProfile[]
 }
 
 model Account {
@@ -535,8 +536,59 @@ model ExhibitorBooking {
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
 
+  profile ExhibitorProfile?
+
   @@index([userId])
   @@index([status])
+}
+
+// ─── PROFIL VISIBILITÉ EXPOSANT ─────────────────────────
+
+model ExhibitorProfile {
+  id            String   @id @default(cuid())
+  bookingId     String   @unique
+  booking       ExhibitorBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+
+  // Token unique pour le formulaire public
+  token         String   @unique @default(cuid())
+
+  // Infos exposant
+  companyName   String?
+  sector        String?
+  firstName     String?
+  lastName      String?
+  phone         String?
+  email         String?
+
+  // Réseaux sociaux
+  facebook      String?
+  instagram     String?
+
+  // Description
+  description   String?  @db.Text
+
+  // Médias (URLs Bunny CDN)
+  logoUrl       String?
+  image1Url     String?
+  image2Url     String?
+  image3Url     String?
+  videoUrl      String?
+
+  // Options
+  masterclass   Boolean  @default(false)
+  daysPresent   String[] // ["1er-mai", "2-mai"]
+
+  // Statut
+  submittedAt   DateTime?
+  promoStatus   String   @default("PENDING") // PENDING, SCHEDULED, POSTED
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([token])
+  @@index([bookingId])
 }
 
 // ─── MESSAGES DE CONTACT ──────────────────────────────

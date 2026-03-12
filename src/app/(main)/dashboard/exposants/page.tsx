@@ -21,7 +21,10 @@ export default async function ExposantsDashboardPage() {
   if (session.user.role !== "ADMIN") redirect("/dashboard");
 
   const bookings = await prisma.exhibitorBooking.findMany({
-    include: { user: { select: { name: true, email: true } } },
+    include: {
+      user: { select: { name: true, email: true } },
+      profile: { select: { token: true, submittedAt: true, logoUrl: true, description: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -82,13 +85,14 @@ export default async function ExposantsDashboardPage() {
               <th className="px-4 py-3 font-medium text-dta-taupe">Total</th>
               <th className="px-4 py-3 font-medium text-dta-taupe">Paiement</th>
               <th className="px-4 py-3 font-medium text-dta-taupe">Statut</th>
+              <th className="px-4 py-3 font-medium text-dta-taupe">Visibilit&eacute;</th>
               <th className="px-4 py-3 font-medium text-dta-taupe">Actions</th>
             </tr>
           </thead>
           <tbody>
             {bookings.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-dta-taupe">
+                <td colSpan={8} className="px-4 py-8 text-center text-dta-taupe">
                   Aucune r&eacute;servation pour le moment.
                 </td>
               </tr>
@@ -131,6 +135,31 @@ export default async function ExposantsDashboardPage() {
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${st.cls}`}>
                       {st.label}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {b.profile ? (
+                      b.profile.submittedAt ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                          Complet
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                          En attente
+                        </span>
+                      )
+                    ) : (
+                      <span className="text-xs text-dta-taupe">—</span>
+                    )}
+                    {b.profile && (
+                      <a
+                        href={`/exposants/profil/${b.profile.token}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 block text-xs text-dta-accent underline"
+                      >
+                        Voir fiche
+                      </a>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">

@@ -8,6 +8,7 @@ import {
   calculatePrice,
 } from "@/lib/exhibitor-events";
 import { sendQuoteEmail } from "@/lib/email";
+import { randomUUID } from "crypto";
 
 export async function POST(request: Request) {
   try {
@@ -92,6 +93,20 @@ export async function POST(request: Request) {
       },
     });
 
+    // Create exhibitor profile for visibility form
+    const profileToken = randomUUID();
+    try {
+      await prisma.exhibitorProfile.create({
+        data: {
+          bookingId: booking.id,
+          userId: session.user.id,
+          token: profileToken,
+        },
+      });
+    } catch (profileErr) {
+      console.error("Profile creation failed (non-blocking):", profileErr);
+    }
+
     // Send quote email instantly
     try {
       await sendQuoteEmail({
@@ -105,6 +120,7 @@ export async function POST(request: Request) {
         installments: nbInstallments,
         installmentAmount,
         bookingId: booking.id,
+        profileToken,
       });
     } catch (emailErr) {
       console.error("Quote email failed (non-blocking):", emailErr);

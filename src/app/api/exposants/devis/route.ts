@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { EXHIBITOR_EVENTS, EXHIBITOR_PACKS } from "@/lib/exhibitor-events";
 import { sendQuoteEmail } from "@/lib/email";
+import { randomUUID } from "crypto";
 
 export async function POST(request: Request) {
   try {
@@ -30,6 +31,20 @@ export async function POST(request: Request) {
       .map((e) => e.title)
       .join(", ");
 
+    // Ensure profile exists (create if missing)
+    let profile = await prisma.exhibitorProfile.findFirst({
+      where: { bookingId: booking.id },
+    });
+    if (!profile) {
+      profile = await prisma.exhibitorProfile.create({
+        data: {
+          bookingId: booking.id,
+          userId: booking.userId,
+          token: randomUUID(),
+        },
+      });
+    }
+
     await sendQuoteEmail({
       to: booking.email,
       contactName: booking.contactName,
@@ -41,6 +56,7 @@ export async function POST(request: Request) {
       installments: booking.installments,
       installmentAmount: booking.installmentAmount,
       bookingId: booking.id,
+      profileToken: profile.token,
     });
 
     return NextResponse.json({ success: true });

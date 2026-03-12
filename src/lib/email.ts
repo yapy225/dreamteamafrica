@@ -17,6 +17,7 @@ export async function sendQuoteEmail(opts: {
   installments: number;
   installmentAmount: number;
   bookingId: string;
+  profileToken?: string;
 }) {
   const formatter = new Intl.NumberFormat("fr-FR", {
     style: "currency",
@@ -76,6 +77,20 @@ export async function sendQuoteEmail(opts: {
     Ce devis est valable 15 jours. Pour confirmer votre réservation, vous pouvez procéder au paiement
     en répondant à cet email ou en nous contactant directement.
   </p>
+
+  ${opts.profileToken ? `
+  <div style="margin-top: 24px; padding: 20px; background: #fdf8f0; border: 1px solid #e8dfd3; border-radius: 8px;">
+    <h3 style="margin: 0 0 8px; font-size: 16px; color: #8B6F4E;">Maximisez votre visibilité</h3>
+    <p style="margin: 0 0 16px; font-size: 14px; color: #666;">
+      Complétez votre fiche exposant pour bénéficier d'une visibilité optimale sur nos réseaux sociaux
+      et supports de communication : logo, description, photos, vidéo, réseaux sociaux…
+    </p>
+    <a href="${process.env.NEXT_PUBLIC_APP_URL}/exposants/profil/${opts.profileToken}"
+       style="display: inline-block; background: #8B6F4E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px;">
+      Compléter ma fiche exposant
+    </a>
+  </div>
+  ` : ''}
 
   <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #999;">
     <p>Dream Team Africa — Saison Culturelle Africaine 2026</p>

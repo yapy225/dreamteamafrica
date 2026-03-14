@@ -67,7 +67,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   if (!event) notFound();
 
   const isFreeEvent = FREE_EVENT_IDS.includes(event.id);
-  const soldCount = isFreeEvent ? event._count.reservations : event._count.tickets;
+  const soldCount = isFreeEvent ? event._count.reservations + event._count.tickets : event._count.tickets;
   const remaining = event.capacity - soldCount;
   const soldOut = remaining <= 0;
   const progressPercent = Math.min(100, Math.round((soldCount / event.capacity) * 100));
@@ -533,57 +533,18 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
       {/* E — Tickets / Reservation Section */}
       <div className="bg-dta-beige py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {isFreeEvent ? (
+          {(() => {
+            const sectionTitle = isFreeEvent ? "Réservation" : "Billetterie";
+            const sectionSubtitle = isFreeEvent
+              ? "Entrée gratuite sur réservation — places limitées"
+              : Array.isArray(event.program) && event.program.length > 0
+                ? "Choisissez votre séance puis votre formule"
+                : "Choisissez votre formule et réservez vos places";
+            return (
             <>
               <div className="text-center">
-                <h2 className="font-serif text-3xl font-bold text-dta-dark">R&eacute;servation</h2>
-                <p className="mt-2 text-sm text-dta-char/70">
-                  Entr&eacute;e gratuite sur r&eacute;servation — places limit&eacute;es
-                </p>
-              </div>
-
-              {event.showCapacity && (
-                <div className="mx-auto mt-8 max-w-md">
-                  <div className="flex items-center justify-between text-xs text-dta-taupe">
-                    <span>{soldCount} r&eacute;serv&eacute;es</span>
-                    <span>{event.capacity} places</span>
-                  </div>
-                  <div className="mt-1.5 h-2 overflow-hidden rounded-[var(--radius-full)] bg-dta-sand">
-                    <div
-                      className="h-full rounded-[var(--radius-full)] bg-dta-accent transition-all duration-500"
-                      style={{ width: `${progressPercent}%` }}
-                    />
-                  </div>
-                  <p className="mt-1.5 text-center text-xs font-medium text-dta-char/60">
-                    {remaining > 0
-                      ? `${remaining} places restantes`
-                      : "Complet"}
-                  </p>
-                </div>
-              )}
-
-              <div className="mx-auto mt-10 max-w-lg">
-                {soldOut ? (
-                  <div className="rounded-[var(--radius-card)] bg-white p-8 text-center shadow-[var(--shadow-card)]">
-                    <p className="font-serif text-2xl font-bold text-dta-dark">Complet</p>
-                    <p className="mt-3 text-sm text-dta-char/70">
-                      Toutes les places ont &eacute;t&eacute; r&eacute;serv&eacute;es.
-                    </p>
-                  </div>
-                ) : (
-                  <FreeReservationForm eventId={event.id} eventTitle={event.title} />
-                )}
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="text-center">
-                <h2 className="font-serif text-3xl font-bold text-dta-dark">Billetterie</h2>
-                <p className="mt-2 text-sm text-dta-char/70">
-                  {Array.isArray(event.program) && event.program.length > 0
-                    ? "Choisissez votre séance puis votre formule"
-                    : "Choisissez votre formule et réservez vos places"}
-                </p>
+                <h2 className="font-serif text-3xl font-bold text-dta-dark">{sectionTitle}</h2>
+                <p className="mt-2 text-sm text-dta-char/70">{sectionSubtitle}</p>
               </div>
 
               {event.showCapacity && (
@@ -675,7 +636,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                 </div>
               )}
             </>
-          )}
+            );
+          })()}
         </div>
       </div>
 

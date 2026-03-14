@@ -26,7 +26,7 @@ Email : contact@dreamteamafrica.com
    - Lieu : Maison des Citoyens et de la Vie Associative, 16 rue du Révérend Père Lucien Aubry, 94120 Fontenay-sous-Bois
    - 2 jours de cinéma, projections et débats avec le Ciné Club Afro
    - Entrée gratuite (réservation obligatoire)
-   - Billetterie : dreamteamafrica.com/saison-culturelle-africaine/festival-international-cinema-africain-2026
+   - Billetterie : dreamteamafrica.com/saison-culturelle-africaine/festival-international-du-cinema-africain
 
 2. **Foire d'Afrique Paris 2026** — 1er et 2 mai 2026
    - Lieu : Espace MAS, 10 rue des terres au curé, Paris
@@ -39,31 +39,31 @@ Email : contact@dreamteamafrica.com
    - Lieu : La Seine, Paris
    - Croisière culturelle avec concerts, dégustations et art contemporain africain
    - Tarifs : Standard 150 €, VIP 250 €
-   - Billetterie : dreamteamafrica.com/saison-culturelle-africaine/evasion-paris-2026
+   - Billetterie : dreamteamafrica.com/saison-culturelle-africaine/evasion-paris
 
 4. **Festival de l'Autre Culture** — 27 juin 2026
    - Lieu : Parc des Épivans, Fontenay-sous-Bois
    - Festival multiculturel en plein air
    - Entrée gratuite (réservation obligatoire)
-   - Réservation : dreamteamafrica.com/saison-culturelle-africaine/festival-autre-culture-2026
+   - Réservation : dreamteamafrica.com/saison-culturelle-africaine/festival-de-lautre-culture
 
 5. **Juste Une Danse** — 31 octobre 2026
    - Lieu : Espace MAS, 10 rue des terres au curé, Paris
    - Festival des danses traditionnelles africaines
    - Tarifs visiteurs : Early Bird 15 €, Standard 50 €, VIP 110 €
-   - Billetterie : dreamteamafrica.com/saison-culturelle-africaine/juste-une-danse-2026
+   - Billetterie : dreamteamafrica.com/saison-culturelle-africaine/juste-une-danse
 
 6. **Festival du Conte Africain — Sous l'arbre à Palabre** — 11 novembre 2026
    - Lieu : Espace MAS, 10 rue des terres au curé, Paris
    - Griots et conteurs d'Afrique, spectacles pour toute la famille
    - Tarifs visiteurs : Early Bird 10 €, Standard 20 €, VIP 35 €
-   - Billetterie : dreamteamafrica.com/saison-culturelle-africaine/festival-conte-africain-2026
+   - Billetterie : dreamteamafrica.com/saison-culturelle-africaine/festival-conte-africain
 
 7. **Salon Made In Africa** — 11 et 12 décembre 2026
    - Lieu : Espace MAS, 10 rue des terres au curé, Paris
    - L'artisanat africain à l'honneur : mode, décoration, cosmétiques, épicerie fine
    - Tarifs visiteurs : Early Bird 5 €, Standard 10 €, VIP 15 €
-   - Billetterie : dreamteamafrica.com/saison-culturelle-africaine/salon-made-in-africa-2026
+   - Billetterie : dreamteamafrica.com/saison-culturelle-africaine/salon-made-in-africa
 
 ## Packs Exposants (tarifs)
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { sendContactNotificationEmail } from "@/lib/email";
 
 const VALID_CATEGORIES = [
   "EXPOSANT",
@@ -10,6 +11,16 @@ const VALID_CATEGORIES = [
   "MEDIA",
   "ARTISTE",
 ];
+
+const categoryLabels: Record<string, string> = {
+  EXPOSANT: "Exposant",
+  MANNEQUIN: "Mannequin",
+  PRESTATAIRE: "Prestataire",
+  PARTENAIRE: "Partenaire",
+  INSTITUTION: "Institution",
+  MEDIA: "Média",
+  ARTISTE: "Artiste",
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,17 +40,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedFirstName = firstName.trim();
+    const trimmedLastName = lastName.trim();
+    const trimmedPhone = phone?.trim() || null;
+    const trimmedCompany = company?.trim() || null;
+    const trimmedMessage = (message || "").trim();
+
     await prisma.contactMessage.create({
       data: {
         category,
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: email.trim().toLowerCase(),
-        phone: phone?.trim() || null,
-        company: company?.trim() || null,
-        message: (message || "").trim(),
+        firstName: trimmedFirstName,
+        lastName: trimmedLastName,
+        email: trimmedEmail,
+        phone: trimmedPhone,
+        company: trimmedCompany,
+        message: trimmedMessage,
       },
     });
+
+    // Send notification email so it appears in the inbox
+    try {
+      await sendContactNotificationEmail({
+        category: categoryLabels[category] || category,
+        firstName: trimmedFirstName,
+        lastName: trimmedLastName,
+        email: trimmedEmail,
+        phone: trimmedPhone,
+        company: trimmedCompany,
+        message: trimmedMessage,
+      });
+    } catch (emailErr) {
+      console.error("Contact notification email failed:", emailErr);
+    }
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {

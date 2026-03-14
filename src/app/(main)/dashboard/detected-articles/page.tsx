@@ -11,9 +11,9 @@ export const metadata = { title: "Articles detectes - Dashboard" };
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   PENDING: { label: "En attente", color: "bg-gray-100 text-gray-600" },
-  SCORED: { label: "Analyse", color: "bg-blue-100 text-blue-600" },
-  REWRITING: { label: "Reecriture", color: "bg-yellow-100 text-yellow-700" },
-  REWRITTEN: { label: "Reecrit", color: "bg-indigo-100 text-indigo-700" },
+  SCORED: { label: "En cours", color: "bg-blue-100 text-blue-600" },
+  REWRITING: { label: "En cours", color: "bg-yellow-100 text-yellow-700" },
+  REWRITTEN: { label: "En cours", color: "bg-indigo-100 text-indigo-700" },
   PUBLISHED: { label: "Publie", color: "bg-green-100 text-green-700" },
   IGNORED: { label: "Ignore", color: "bg-amber-100 text-amber-700" },
   ERROR: { label: "Erreur", color: "bg-red-100 text-red-700" },

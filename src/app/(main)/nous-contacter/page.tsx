@@ -1,10 +1,27 @@
 import { Mail } from "lucide-react";
 import ContactPageForm from "./ContactPageForm";
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
+
 export const metadata = {
-  title: "Nous Contacter",
+  title: "Nous Contacter — Dream Team Africa",
   description:
-    "Contactez Dream Team Africa — exposant, mannequin, prestataire, partenaire, institution, média ou artiste.",
+    "Contactez Dream Team Africa pour devenir exposant, mannequin, prestataire, partenaire ou artiste. Réponse sous 48h.",
+  keywords: [
+    "contacter Dream Team Africa",
+    "devenir exposant Paris",
+    "événement culturel africain contact",
+    "partenariat diaspora africaine",
+  ],
+  openGraph: {
+    title: "Nous Contacter — Dream Team Africa",
+    description: "Exposant, artiste, partenaire, média : contactez-nous pour collaborer.",
+    type: "website",
+    url: `${siteUrl}/nous-contacter`,
+  },
+  alternates: {
+    canonical: `${siteUrl}/nous-contacter`,
+  },
 };
 
 const categories = [
@@ -18,8 +35,33 @@ const categories = [
 ];
 
 export default function NousContacterPage() {
+  const contactJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    name: "Contacter Dream Team Africa",
+    description:
+      "Formulaire de contact pour exposants, artistes, partenaires, institutions et médias.",
+    url: `${siteUrl}/nous-contacter`,
+    mainEntity: {
+      "@type": "Organization",
+      name: "Dream Team Africa",
+      telephone: "+33753444804",
+      email: "hello@dreamteamafrica.com",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Paris",
+        addressCountry: "FR",
+      },
+    },
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd) }}
+      />
+
       {/* Hero */}
       <div className="bg-dta-dark py-16">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">

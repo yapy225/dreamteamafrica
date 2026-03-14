@@ -3,15 +3,31 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import Parser from "rss-parser";
-import OpenAI from "openai";
-import { marked } from "marked";
 import { generateCoverImage } from "@/lib/generate-cover-image";
 import { publishToSocialMedia } from "@/lib/social-media";
+import {
+  getOpenAI,
+  SCORE_SYSTEM_PROMPT,
+  buildScoreUserPrompt,
+  buildRewritePrompt,
+  parseScoreResponse,
+  parseRewriteResponse,
+  resolveCategory,
+  generateSlug,
+  sanitizeHtml,
+  computeReadingTime,
+  extractImageFromHtml,
+  MIN_SCORE,
+  ARTICLES_PER_RUN,
+  DETECTION_WINDOW_HOURS,
+  CLEANUP_DAYS,
+} from "@/lib/rss-pipeline";
 
 /**
  * CRON: Journal RSS — runs 3x/day (7h, 13h, 19h)
- * Combines: rss-detect + rss-process (score, rewrite, publish)
- * Processes 1 article per run → 3 articles/day, spaced naturally.
+ * 1. Detect new articles from RSS feeds
+ * 2. Score, rewrite, and publish top articles (3 per run)
+ * 3. Cleanup old IGNORED articles (>30 days)
  */
 
 export const maxDuration = 300;
@@ -20,108 +36,6 @@ const parser = new Parser({
   timeout: 10000,
   headers: { "User-Agent": "LAfropeen-Bot/1.0" },
 });
-
-function getOpenAI() {
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-}
-
-// ── Scoring prompt ──
-const SCORE_SYSTEM_PROMPT = `Role : Analyste de tendances pour le media "L'Afropeen".
-Mission : Evaluer le POTENTIEL THEMATIQUE d'un sujet a partir d'un signal faible (resume RSS).
-
-Consigne de notation (1-10) :
-
-Note le SUJET, pas la redaction. Si le resume est court mais traite d'un sujet strategique (Tech, Finance, Diaspora, Culture, Innovation en Afrique), donne une note elevee.
-
-9-10 (Strategique) : Levees de fonds, Licornes africaines, geopolitique majeure, succes eclatants de la diaspora.
-7-8 (Pertinent) : Initiatives locales innovantes, tendances culturelles fortes, nouveaux marches.
-5-6 (Moyen mais exploitable) : Actualite economique ou politique classique qui necessite un angle "Afropeen" pour devenir interessante.
-1-4 (A ecarter) : Faits divers, sport pur, meteo, depeches sans analyse possible.
-
-Format de sortie : {"score": X, "topic_potential": "explication en 5 mots"}`;
-
-const REWRITE_PROMPT_TEMPLATE = (title: string, summary: string) => `Tu es journaliste expert pour L'Afropeen, media specialise Afrique, diaspora, economie emergente et innovation culturelle.
-
-Redige un article expert structure SEO a partir des elements suivants :
-
-Titre : ${title}
-Resume RSS : ${summary}
-
-Structure obligatoire en Markdown :
-- Premiere ligne : le titre optimise SEO (sans prefixe, sans #)
-- Un paragraphe d'introduction (sans sous-titre "Introduction")
-- 3 a 4 sections avec des sous-titres ## evocateurs et journalistiques (JAMAIS de titres generiques comme "Introduction contextualisee", "Analyse strategique", "Conclusion prospective", "Enjeux pour la diaspora")
-- Un dernier paragraphe de conclusion avec un sous-titre ## accrocheur (PAS "Conclusion prospective")
-
-Apres l'article, ajoute sur des lignes separees :
-META: [meta description de 155 caracteres max]
-KEYWORDS: [5 mots-cles SEO separes par des virgules]
-
-Important :
-- Utilise le format Markdown : ## pour les sous-titres, **gras**, *italique*. Ne mets JAMAIS "h2", "h:2" ou du HTML brut.
-- Ne pas inventer de donnees chiffrees.
-- Ne pas halluciner des faits.
-- Ajouter de la profondeur strategique.
-- Style professionnel, credible et analytique.
-- Redige en francais.`;
-
-const VALID_CATEGORIES = [
-  "ACTUALITE", "CULTURE", "CINEMA", "MUSIQUE", "SPORT", "DIASPORA", "BUSINESS", "LIFESTYLE", "OPINION",
-] as const;
-
-const CATEGORY_MAP: Record<string, string> = {
-  "ACTUALITE GENERALE": "ACTUALITE",
-  "ECONOMIE & TECH": "BUSINESS",
-  "DIASPORA & CULTURE": "CULTURE",
-  "INSTITUTIONNEL": "ACTUALITE",
-  "TECHNOLOGIE": "BUSINESS",
-  "SPORT": "SPORT",
-  "FOOTBALL": "SPORT",
-  "MUSIQUE": "MUSIQUE",
-  "CINEMA": "CINEMA",
-  "FILM": "CINEMA",
-  "MODE": "LIFESTYLE",
-  "POLITIQUE": "ACTUALITE",
-  "ENQUETE & ANALYSE": "OPINION",
-};
-
-function resolveCategory(raw: string): string {
-  const upper = raw.toUpperCase().trim();
-  if (VALID_CATEGORIES.includes(upper as any)) return upper;
-  return CATEGORY_MAP[upper] || "ACTUALITE";
-}
-
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
-function sanitizeHtml(dirty: string): string {
-  return dirty
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
-    .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, "")
-    .replace(/\son\w+\s*=\s*[^\s>]*/gi, "")
-    .replace(/javascript\s*:/gi, "")
-    .replace(/data\s*:/gi, "")
-    .trim();
-}
-
-function computeReadingTime(html: string): number {
-  const text = html.replace(/<[^>]*>/g, "");
-  const words = text.split(/\s+/).filter(Boolean).length;
-  return Math.max(1, Math.ceil(words / 200));
-}
-
-function extractImageFromHtml(html: string): string | null {
-  const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
-  return match?.[1] || null;
-}
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -136,7 +50,7 @@ export async function GET(request: Request) {
     // PHASE 1: RSS DETECTION
     // ══════════════════════════════════════════════
     const feeds = await prisma.rssFeed.findMany({ where: { active: true } });
-    const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000); // 48h window
+    const cutoff = new Date(Date.now() - DETECTION_WINDOW_HOURS * 60 * 60 * 1000);
     let totalDetected = 0;
     let totalSkipped = 0;
     const detectErrors: string[] = [];
@@ -200,7 +114,7 @@ export async function GET(request: Request) {
     const pending = await prisma.detectedArticle.findMany({
       where: { status: "PENDING" },
       orderBy: { createdAt: "asc" },
-      take: 1,
+      take: ARTICLES_PER_RUN,
     });
 
     let scored = 0;
@@ -208,115 +122,57 @@ export async function GET(request: Request) {
     let ignored = 0;
     let errored = 0;
 
+    const openai = getOpenAI();
+
     for (const article of pending) {
       try {
-        // Score
-        await prisma.detectedArticle.update({
-          where: { id: article.id },
-          data: { status: "SCORED" },
-        });
-
-        const scoreResponse = await getOpenAI().chat.completions.create({
+        // ── Score ──
+        const scoreResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
           messages: [
             { role: "system", content: SCORE_SYSTEM_PROMPT },
-            {
-              role: "user",
-              content: `Note cet article pour L'Afropeen sur 10.
-
-Regles de scoring (obligatoires) :
-- 1-3 : hors ligne editoriale / faible interet
-- 4-6 : moyen / pas prioritaire
-- 7-8 : bon / interessant
-- 9-10 : excellent / tres prioritaire (impact diaspora + potentiel viral)
-
-Interdiction : ne reponds PAS 7 par defaut.
-Important: 7 doit etre rare. Utilise 5,6 pour "moyen" et 8,9 pour "fort".
-Si l'info est trop vague, mets 4 ou 5.
-Si c'est tres pertinent, monte a 8-10.
-
-Titre : ${article.title}
-Resume : ${article.summary || "Pas de resume disponible"}
-
-Reponds uniquement sous ce format exact :
-{"score": X, "topic_potential": "explication en 5 mots"}`,
-            },
+            { role: "user", content: buildScoreUserPrompt(article.title, article.summary || "") },
           ],
           max_tokens: 100,
           temperature: 1,
         });
 
-        const scoreText = scoreResponse.choices[0]?.message?.content || "";
-        const scoreMatch = scoreText.match(/"score"\s*:\s*(\d+)/);
-        const score = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
-        const topicMatch = scoreText.match(/"topic_potential"\s*:\s*"([^"]+)"/);
-        const scoreReason = topicMatch?.[1] || scoreText;
-
+        const { score, reason } = parseScoreResponse(
+          scoreResponse.choices[0]?.message?.content || ""
+        );
         scored++;
 
-        if (score < 5) {
+        if (score < MIN_SCORE) {
           await prisma.detectedArticle.update({
             where: { id: article.id },
-            data: { score, scoreReason, status: "IGNORED" },
+            data: { score, scoreReason: reason, status: "IGNORED" },
           });
           ignored++;
           continue;
         }
 
-        // Rewrite
-        await prisma.detectedArticle.update({
-          where: { id: article.id },
-          data: { score, scoreReason, status: "REWRITING" },
-        });
-
-        const rewriteResponse = await getOpenAI().chat.completions.create({
+        // ── Rewrite ──
+        const rewriteResponse = await openai.chat.completions.create({
           model: "gpt-4o-mini",
           messages: [
-            { role: "user", content: REWRITE_PROMPT_TEMPLATE(article.title, article.summary || "") },
+            { role: "user", content: buildRewritePrompt(article.title, article.summary || "") },
           ],
           max_tokens: 1500,
           temperature: 0.7,
         });
 
-        const rewrittenRaw = rewriteResponse.choices[0]?.message?.content || "";
-        const lines = rewrittenRaw.split("\n");
-        const metaLine = lines.find((l) => l.startsWith("META:"));
-        const keywordsLine = lines.find((l) => l.startsWith("KEYWORDS:"));
-
-        const meta = metaLine?.replace("META:", "").trim() || "";
-        const keywords = keywordsLine
-          ? keywordsLine.replace("KEYWORDS:", "").trim().split(",").map((k) => k.trim()).filter(Boolean)
-          : [];
-
-        const contentLines = lines.filter(
-          (l) => !l.startsWith("META:") && !l.startsWith("KEYWORDS:")
+        const rewritten = parseRewriteResponse(
+          rewriteResponse.choices[0]?.message?.content || "",
+          article.title,
+          article.summary || ""
         );
 
-        const rewrittenTitle = contentLines.find((l) => l.trim())?.replace(/^#+\s*/, "").trim() || article.title;
-        const contentBody = contentLines.slice(contentLines.indexOf(contentLines.find((l) => l.trim())!) + 1).join("\n").trim();
-        const contentHtml = marked.parse(contentBody) as string;
-
-        const excerptMatch = contentBody.match(/^[^#\n].+/m);
-        const excerpt = excerptMatch?.[0]?.trim().slice(0, 300) || meta || article.summary?.slice(0, 300) || "";
-
-        await prisma.detectedArticle.update({
-          where: { id: article.id },
-          data: {
-            rewrittenTitle,
-            rewrittenContent: contentHtml,
-            rewrittenExcerpt: excerpt,
-            rewrittenMeta: meta,
-            rewrittenKeywords: keywords,
-            status: "REWRITTEN",
-          },
-        });
-
-        // Publish
+        // ── Publish ──
         const category = resolveCategory(article.sourceCategory || "ACTUALITE");
-        let slug = generateSlug(rewrittenTitle);
+        let slug = generateSlug(rewritten.title);
 
         const coverImage = await generateCoverImage(
-          rewrittenTitle, category, slug, article.sourceImageUrl
+          rewritten.title, category, slug, article.sourceImageUrl
         );
 
         const existingSlug = await prisma.article.findUnique({
@@ -331,22 +187,21 @@ Reponds uniquement sous ce format exact :
           where: { role: "ADMIN" },
           select: { id: true },
         });
-
         if (!admin) throw new Error("No ADMIN user found for article attribution");
 
         const publishedArticle = await prisma.article.create({
           data: {
-            title: rewrittenTitle,
+            title: rewritten.title,
             slug,
-            excerpt,
-            content: sanitizeHtml(contentHtml),
+            excerpt: rewritten.excerpt,
+            content: sanitizeHtml(rewritten.contentHtml),
             category: category as any,
             coverImage: coverImage || null,
-            tags: keywords,
-            readingTimeMin: computeReadingTime(contentHtml),
-            metaTitle: rewrittenTitle,
-            metaDescription: meta || excerpt.slice(0, 155),
-            seoKeywords: keywords,
+            tags: rewritten.keywords,
+            readingTimeMin: computeReadingTime(rewritten.contentHtml),
+            metaTitle: rewritten.title,
+            metaDescription: rewritten.meta || rewritten.excerpt.slice(0, 155),
+            seoKeywords: rewritten.keywords,
             sourceUrl: article.sourceUrl,
             authorType: "ia",
             source: "rss_auto",
@@ -360,10 +215,20 @@ Reponds uniquement sous ce format exact :
 
         await prisma.detectedArticle.update({
           where: { id: article.id },
-          data: { status: "PUBLISHED", publishedArticleId: publishedArticle.id },
+          data: {
+            score,
+            scoreReason: reason,
+            rewrittenTitle: rewritten.title,
+            rewrittenContent: rewritten.contentHtml,
+            rewrittenExcerpt: rewritten.excerpt,
+            rewrittenMeta: rewritten.meta,
+            rewrittenKeywords: rewritten.keywords,
+            status: "PUBLISHED",
+            publishedArticleId: publishedArticle.id,
+          },
         });
 
-        // Publication automatique sur les réseaux sociaux
+        // Social media (non-blocking)
         try {
           const socialResult = await publishToSocialMedia({
             id: publishedArticle.id,
@@ -372,8 +237,8 @@ Reponds uniquement sous ce format exact :
             excerpt: publishedArticle.excerpt,
             category: publishedArticle.category,
             coverImage: publishedArticle.coverImage,
-            tags: keywords,
-            seoKeywords: keywords,
+            tags: rewritten.keywords,
+            seoKeywords: rewritten.keywords,
           });
           console.log(`[journal-rss] Social: ${socialResult.posted} posted, ${socialResult.failed} failed`);
         } catch (socialErr: any) {
@@ -391,9 +256,21 @@ Reponds uniquement sous ce format exact :
       }
     }
 
+    // ══════════════════════════════════════════════
+    // PHASE 3: CLEANUP OLD IGNORED ARTICLES
+    // ══════════════════════════════════════════════
+    const cleanupCutoff = new Date(Date.now() - CLEANUP_DAYS * 24 * 60 * 60 * 1000);
+    const { count: cleaned } = await prisma.detectedArticle.deleteMany({
+      where: {
+        status: "IGNORED",
+        createdAt: { lt: cleanupCutoff },
+      },
+    });
+
     const result = {
       detection: { feeds: feeds.length, detected: totalDetected, skipped: totalSkipped, errors: detectErrors.length },
       processing: { pending: pending.length, scored, published, ignored, errored },
+      cleanup: { removed: cleaned },
       timestamp: new Date().toISOString(),
     };
 

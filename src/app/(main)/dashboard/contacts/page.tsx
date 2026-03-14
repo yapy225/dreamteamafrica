@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Mail, Eye } from "lucide-react";
+import { Mail } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Messages de contact" };
@@ -28,8 +28,17 @@ const categoryColors: Record<string, string> = {
 
 export default async function ContactsAdminPage() {
   const session = await auth();
-  if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
-    redirect("/");
+  if (!session?.user?.id) {
+    redirect("/auth/signin");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+
+  if (user?.role !== "ADMIN") {
+    redirect("/dashboard");
   }
 
   const messages = await prisma.contactMessage.findMany({
@@ -56,9 +65,13 @@ export default async function ContactsAdminPage() {
             </span>
           )}
         </p>
+        <p className="mt-2 flex items-center gap-2 rounded-lg bg-dta-accent/10 px-4 py-2.5 text-sm text-dta-accent">
+          <Mail size={16} />
+          Les nouveaux messages sont envoyés automatiquement à votre boîte mail.
+        </p>
       </div>
 
-      {/* Stats par cat&eacute;gorie */}
+      {/* Stats par catégorie */}
       <div className="mt-6 flex flex-wrap gap-3">
         {Object.entries(byCategory).map(([cat, count]) => (
           <span
@@ -78,7 +91,7 @@ export default async function ContactsAdminPage() {
               <th className="px-4 py-3">Profil</th>
               <th className="px-4 py-3">Nom</th>
               <th className="px-4 py-3">Email</th>
-              <th className="px-4 py-3">T&eacute;l.</th>
+              <th className="px-4 py-3">Tél.</th>
               <th className="px-4 py-3">Structure</th>
               <th className="px-4 py-3">Message</th>
               <th className="px-4 py-3">Date</th>
@@ -103,9 +116,17 @@ export default async function ContactsAdminPage() {
                   )}
                   {m.firstName} {m.lastName}
                 </td>
-                <td className="px-4 py-3 text-dta-char/70">{m.email}</td>
+                <td className="px-4 py-3 text-dta-char/70">
+                  <a href={`mailto:${m.email}`} className="hover:text-dta-accent hover:underline">
+                    {m.email}
+                  </a>
+                </td>
                 <td className="whitespace-nowrap px-4 py-3 text-dta-char/70">
-                  {m.phone || "—"}
+                  {m.phone ? (
+                    <a href={`tel:${m.phone}`} className="hover:text-dta-accent hover:underline">
+                      {m.phone}
+                    </a>
+                  ) : "—"}
                 </td>
                 <td className="px-4 py-3 text-dta-char/70">
                   {m.company || "—"}

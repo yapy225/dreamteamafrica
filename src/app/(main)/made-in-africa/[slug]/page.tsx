@@ -13,13 +13,7 @@ import ShareButton from "./ShareButton";
 
 export const revalidate = 60;
 
-export async function generateStaticParams() {
-  const products = await prisma.product.findMany({
-    where: { published: true },
-    select: { slug: true },
-  });
-  return products.map((product) => ({ slug: product.slug }));
-}
+
 
 export async function generateMetadata({
   params,

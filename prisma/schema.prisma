@@ -519,6 +519,7 @@ model ExhibitorBooking {
   pack                 ExhibitorPack
   events               String[]       // ["foire-afrique", "juste-une-danse", ...]
   totalDays            Int
+  stands               Int            @default(1)
   totalPrice           Float
 
   // Paiement fractionné
@@ -784,4 +785,52 @@ model SocialCredential {
   metadata     Json?          // Extra platform-specific data
   updatedAt    DateTime       @updatedAt
   createdAt    DateTime       @default(now())
+}
+
+// ─── SONDAGE EXPOSANTS ──────────────────────────────────
+
+enum SurveyAnswer {
+  YES
+  NO
+}
+
+model ExhibitorSurvey {
+  id        String       @id @default(cuid())
+  email     String
+  name      String
+  phone     String?
+  answer    SurveyAnswer
+  days      Int[]        // [1], [2], or [1, 2]
+  comment   String?
+  sentAt    DateTime?    // date d'envoi de la proposition WhatsApp
+  createdAt DateTime     @default(now())
+
+  @@unique([email])
+}
+
+// ─── SOUMISSIONS FORMULAIRE EXPOSANTS (données brutes) ──────
+
+model ExhibitorFormEntry {
+  id              String   @id @default(cuid())
+  submittedAt     DateTime?
+  societe         String
+  firstName       String?
+  lastName        String?
+  phone           String?
+  email           String?
+  description     String?  @db.Text
+  secteur         String?
+  besoinPrise     Boolean  @default(false)
+  instagram       String?
+  facebook        String?
+  visibilite      String?  // "Interview avec notre journaliste", etc.
+  masterclass     Boolean  @default(false)
+  joursPresence   String[] @default([])
+  salon           String   @default("Foire Afrique 2024")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([email])
+  @@index([secteur])
+  @@index([salon])
 }

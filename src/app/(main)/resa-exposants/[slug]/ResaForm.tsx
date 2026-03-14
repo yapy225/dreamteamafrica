@@ -7,9 +7,11 @@ import {
   type ExhibitorEvent,
   type ExhibitorPackInfo,
   formatDate,
+  DEPOSIT_AMOUNT,
+  MAX_INSTALLMENTS,
 } from "@/lib/exhibitor-events";
 
-const INSTALLMENT_OPTIONS = [1, 2, 3] as const;
+const INSTALLMENT_OPTIONS = Array.from({ length: MAX_INSTALLMENTS }, (_, i) => i + 1) as number[];
 
 const inputClass =
   "w-full rounded-[var(--radius-input)] border border-dta-sand bg-dta-bg px-4 py-2.5 text-sm text-dta-dark placeholder:text-dta-taupe focus:border-dta-accent focus:outline-none focus:ring-1 focus:ring-dta-accent";
@@ -19,6 +21,7 @@ const SINGLE_PACKS = EXHIBITOR_PACKS.filter((p) => p.id !== "SAISON");
 
 export default function ResaForm({ event }: { event: ExhibitorEvent }) {
   const [pack, setPack] = useState<ExhibitorPackInfo>(SINGLE_PACKS[0]);
+  const [stands, setStands] = useState(1);
   const [installments, setInstallments] = useState(1);
   const [form, setForm] = useState({
     companyName: "",
@@ -32,8 +35,13 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
   const [error, setError] = useState("");
 
   const effectiveDays = pack.id === "ENTREPRENEUR_1J" ? 1 : event.days;
-  const totalPrice = effectiveDays * pack.pricePerDay;
-  const installmentAmount = Math.ceil((totalPrice / installments) * 100) / 100;
+  const unitPrice = effectiveDays * pack.pricePerDay;
+  const totalPrice = unitPrice * stands;
+  const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalPrice);
+  const remainingBalance = totalPrice - deposit;
+  const installmentAmount = installments > 1 && remainingBalance > 0
+    ? Math.ceil((remainingBalance / (installments - 1)) * 100) / 100
+    : 0;
 
   const canSubmit =
     form.companyName.trim() &&
@@ -78,6 +86,7 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
           pack: pack.id,
           events: [event.id],
           installments,
+          stands,
           newsletter,
           ...form,
         }),
@@ -202,10 +211,51 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
         </div>
       </fieldset>
 
+      {/* Nombre de stands */}
+      <fieldset>
+        <legend className="mb-4 font-serif text-lg font-bold text-dta-dark">
+          2. Nombre de stands
+        </legend>
+        <div className="rounded-[var(--radius-card)] border border-dta-sand bg-white p-5">
+          <p className="mb-3 text-sm text-dta-char/70">
+            Vous pouvez r&eacute;server plusieurs stands (2&nbsp;m&sup2; chacun) pour un espace plus grand.
+          </p>
+          <div className="flex items-center gap-3">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setStands(n)}
+                className={`flex h-12 w-12 items-center justify-center rounded-xl border-2 text-lg font-bold transition-all ${
+                  stands === n
+                    ? "border-dta-accent bg-dta-accent text-white"
+                    : "border-dta-sand bg-white text-dta-dark hover:border-dta-accent/40"
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+          {stands > 1 && (
+            <div className="mt-3 rounded-lg bg-dta-accent/5 px-4 py-2.5 text-sm">
+              <span className="font-medium text-dta-dark">
+                {stands} stands &times; {formatter.format(unitPrice)} ={" "}
+              </span>
+              <span className="font-bold text-dta-accent">
+                {formatter.format(totalPrice)}
+              </span>
+              <span className="ml-2 text-dta-char/70">
+                ({stands * 2}&nbsp;m&sup2; au total)
+              </span>
+            </div>
+          )}
+        </div>
+      </fieldset>
+
       {/* Infos exposant */}
       <fieldset>
         <legend className="mb-4 font-serif text-lg font-bold text-dta-dark">
-          2. Vos informations
+          3. Vos informations
         </legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -277,10 +327,10 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
         </div>
       </fieldset>
 
-      {/* Paiement fractionné */}
+      {/* Mode de paiement */}
       <fieldset>
         <legend className="mb-4 font-serif text-lg font-bold text-dta-dark">
-          3. Mode de paiement
+          4. Mode de paiement
         </legend>
 
         <div className="rounded-[var(--radius-card)] border border-dta-sand bg-white p-5">
@@ -291,76 +341,134 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
             </span>
           </div>
 
+          {/* Choix : paiement intégral ou acompte */}
           <div className="space-y-2">
-            {INSTALLMENT_OPTIONS.map((n) => {
-              const amount = Math.ceil((totalPrice / n) * 100) / 100;
-              return (
-                <label
-                  key={n}
-                  className={`flex cursor-pointer items-center justify-between rounded-lg border-2 px-4 py-3 transition-all ${
-                    installments === n
-                      ? "border-dta-accent bg-dta-accent/5"
-                      : "border-dta-sand hover:border-dta-accent/40"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="radio"
-                      name="installments"
-                      value={n}
-                      checked={installments === n}
-                      onChange={() => setInstallments(n)}
-                      className="accent-dta-accent"
-                    />
-                    <span className="text-sm font-medium text-dta-dark">
-                      {n === 1
-                        ? "Payer en 1 fois"
-                        : `Payer en ${n} fois sans frais`}
-                    </span>
-                  </div>
-                  <span className="text-sm font-bold text-dta-dark">
-                    {formatter.format(amount)}
-                    {n > 1 && (
-                      <span className="font-normal text-dta-taupe">
-                        {" "}
-                        /mois
-                      </span>
-                    )}
+            <label
+              className={`flex cursor-pointer items-center justify-between rounded-lg border-2 px-4 py-3 transition-all ${
+                installments === 1
+                  ? "border-dta-accent bg-dta-accent/5"
+                  : "border-dta-sand hover:border-dta-accent/40"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <input
+                  type="radio"
+                  name="paymentMode"
+                  checked={installments === 1}
+                  onChange={() => setInstallments(1)}
+                  className="accent-dta-accent"
+                />
+                <span className="text-sm font-medium text-dta-dark">
+                  Payer en 1 fois
+                </span>
+              </div>
+              <span className="text-sm font-bold text-dta-dark">
+                {formatter.format(totalPrice)}
+              </span>
+            </label>
+
+            <label
+              className={`flex cursor-pointer items-center justify-between rounded-lg border-2 px-4 py-3 transition-all ${
+                installments > 1
+                  ? "border-dta-accent bg-dta-accent/5"
+                  : "border-dta-sand hover:border-dta-accent/40"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <input
+                  type="radio"
+                  name="paymentMode"
+                  checked={installments > 1}
+                  onChange={() => setInstallments(2)}
+                  className="accent-dta-accent"
+                />
+                <div>
+                  <span className="text-sm font-medium text-dta-dark">
+                    R&eacute;server avec un acompte de {formatter.format(deposit)}
                   </span>
-                </label>
-              );
-            })}
+                  <p className="text-xs text-dta-char/60 mt-0.5">
+                    Puis mensualit&eacute;s &agrave; partir du mois suivant
+                  </p>
+                </div>
+              </div>
+              <span className="text-sm font-bold text-dta-accent">
+                {formatter.format(deposit)}
+                <span className="font-normal text-dta-taupe"> aujourd&apos;hui</span>
+              </span>
+            </label>
           </div>
 
+          {/* Choix du nombre de mensualités (visible uniquement si acompte) */}
           {installments > 1 && (
-            <div className="mt-4 rounded-lg bg-dta-bg p-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-dta-taupe">
-                &Eacute;ch&eacute;ancier
+            <div className="mt-4 space-y-3">
+              <p className="text-sm font-medium text-dta-dark">
+                Solde restant : {formatter.format(remainingBalance)} &mdash; en combien de mensualit&eacute;s ?
               </p>
-              <div className="space-y-1">
-                {Array.from({ length: installments }, (_, i) => {
-                  const date = new Date();
-                  date.setMonth(date.getMonth() + i);
+              <div className="flex flex-wrap gap-2">
+                {Array.from({ length: MAX_INSTALLMENTS - 1 }, (_, i) => {
+                  const n = i + 2; // 2 to MAX_INSTALLMENTS (total payments = deposit + n-1 installments)
+                  const nbMonths = n - 1;
+                  const monthly = Math.ceil((remainingBalance / nbMonths) * 100) / 100;
                   return (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between text-sm"
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setInstallments(n)}
+                      className={`rounded-lg border-2 px-3 py-2 text-center transition-all ${
+                        installments === n
+                          ? "border-dta-accent bg-dta-accent text-white"
+                          : "border-dta-sand bg-white text-dta-dark hover:border-dta-accent/40"
+                      }`}
                     >
-                      <span className="text-dta-char/70">
-                        {i === 0
-                          ? "Aujourd'hui"
-                          : date.toLocaleDateString("fr-FR", {
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            })}
+                      <span className="block text-sm font-bold">{nbMonths}x</span>
+                      <span className={`block text-xs ${installments === n ? "text-white/80" : "text-dta-taupe"}`}>
+                        {formatter.format(monthly)}/mois
                       </span>
-                      <span className="font-medium text-dta-dark">
-                        {formatter.format(installmentAmount)}
-                      </span>
-                    </div>
+                    </button>
                   );
                 })}
+              </div>
+
+              {/* Échéancier détaillé */}
+              <div className="rounded-lg bg-dta-bg p-3">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-dta-taupe">
+                  &Eacute;ch&eacute;ancier
+                </p>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-dta-char/70 font-medium">
+                      Aujourd&apos;hui &mdash; Acompte de r&eacute;servation
+                    </span>
+                    <span className="font-semibold text-dta-accent">
+                      {formatter.format(deposit)}
+                    </span>
+                  </div>
+                  {Array.from({ length: installments - 1 }, (_, i) => {
+                    const date = new Date();
+                    date.setMonth(date.getMonth() + i + 1);
+                    return (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <span className="text-dta-char/70">
+                          {date.toLocaleDateString("fr-FR", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </span>
+                        <span className="font-medium text-dta-dark">
+                          {formatter.format(installmentAmount)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  <div className="mt-2 border-t border-dta-sand pt-2 flex items-center justify-between text-sm">
+                    <span className="font-medium text-dta-char">Total</span>
+                    <span className="font-bold text-dta-dark">{formatter.format(totalPrice)}</span>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -405,7 +513,7 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
         {loading && <Loader2 size={16} className="animate-spin" />}
         {installments === 1
           ? `Payer ${formatter.format(totalPrice)}`
-          : `Payer ${formatter.format(installmentAmount)} (1/${installments})`}
+          : `Réserver mon stand — Acompte de ${formatter.format(deposit)}`}
       </button>
     </form>
   );

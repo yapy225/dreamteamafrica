@@ -38,6 +38,8 @@ export async function POST(request: Request) {
       await handleOrderPurchase(session);
     } else if (metadata?.type === "exhibitor") {
       await handleExhibitorBooking(session);
+    } else if (metadata?.type === "exhibitor_early_payment") {
+      await handleExhibitorEarlyPayment(session);
     }
   }
 
@@ -141,24 +143,102 @@ async function handleOrderPurchase(session: Stripe.Checkout.Session) {
 }
 
 async function handleExhibitorBooking(session: Stripe.Checkout.Session) {
-  const { bookingId, installments } = session.metadata!;
+  const { bookingId, installments, remainingBalance, installmentAmount } = session.metadata!;
   if (!bookingId) return;
 
-  const isOneTime = installments === "1";
+  const nbInstallments = parseInt(installments || "1");
+  const isOneTime = nbInstallments === 1;
 
-  await prisma.exhibitorBooking.update({
-    where: { id: bookingId },
-    data: {
-      stripeSessionId: session.id,
-      stripeSubscriptionId: isOneTime ? null : (session.subscription as string),
-      paidInstallments: 1,
-      status: isOneTime ? "CONFIRMED" : "PARTIAL",
-    },
-  });
+  if (isOneTime) {
+    // Full payment — confirm immediately
+    await prisma.exhibitorBooking.update({
+      where: { id: bookingId },
+      data: {
+        stripeSessionId: session.id,
+        paidInstallments: 1,
+        status: "CONFIRMED",
+      },
+    });
+    console.log(`Exhibitor booking ${bookingId}: CONFIRMED (full payment)`);
+  } else {
+    // Deposit paid — create subscription for remaining balance
+    await prisma.exhibitorBooking.update({
+      where: { id: bookingId },
+      data: {
+        stripeSessionId: session.id,
+        paidInstallments: 1,
+        status: "PARTIAL",
+      },
+    });
+    console.log(`Exhibitor booking ${bookingId}: PARTIAL (deposit paid, 1/${nbInstallments})`);
 
-  console.log(
-    `Exhibitor booking ${bookingId}: ${isOneTime ? "CONFIRMED (1x)" : "PARTIAL (1/" + installments + ")"}`
-  );
+    // Create subscription for remaining installments
+    const balance = parseFloat(remainingBalance || "0");
+    const monthlyAmount = parseFloat(installmentAmount || "0");
+    const remainingMonths = nbInstallments - 1;
+
+    if (balance > 0 && monthlyAmount > 0 && remainingMonths > 0) {
+      try {
+        const stripe = getStripe();
+
+        // Get or create customer from checkout session
+        const customerEmail = session.customer_email || session.customer_details?.email;
+        let customerId = session.customer as string | null;
+        if (!customerId && customerEmail) {
+          const customers = await stripe.customers.list({ email: customerEmail, limit: 1 });
+          if (customers.data.length > 0) {
+            customerId = customers.data[0].id;
+          } else {
+            const customer = await stripe.customers.create({ email: customerEmail });
+            customerId = customer.id;
+          }
+        }
+
+        if (customerId) {
+          const booking = await prisma.exhibitorBooking.findUnique({
+            where: { id: bookingId },
+            select: { companyName: true, pack: true },
+          });
+
+          const product = await stripe.products.create({
+            name: `Solde Stand Exposant — ${booking?.companyName || "Exposant"}`,
+            description: `${remainingMonths} mensualité${remainingMonths > 1 ? "s" : ""} de ${monthlyAmount} €`,
+          });
+
+          const price = await stripe.prices.create({
+            product: product.id,
+            unit_amount: Math.round(monthlyAmount * 100),
+            currency: "eur",
+            recurring: { interval: "month" },
+          });
+
+          const cancelAt = new Date();
+          cancelAt.setMonth(cancelAt.getMonth() + remainingMonths);
+          cancelAt.setDate(cancelAt.getDate() + 3);
+
+          const subscription = await stripe.subscriptions.create({
+            customer: customerId,
+            items: [{ price: price.id }],
+            cancel_at: Math.floor(cancelAt.getTime() / 1000),
+            metadata: {
+              type: "exhibitor_installment",
+              bookingId,
+              totalInstallments: String(nbInstallments),
+            },
+          });
+
+          await prisma.exhibitorBooking.update({
+            where: { id: bookingId },
+            data: { stripeSubscriptionId: subscription.id },
+          });
+
+          console.log(`Exhibitor ${bookingId}: subscription ${subscription.id} created (${remainingMonths} months × ${monthlyAmount} €)`);
+        }
+      } catch (subErr) {
+        console.error(`Failed to create subscription for ${bookingId}:`, subErr);
+      }
+    }
+  }
 
   // Send thank you email with profile link
   const booking = await prisma.exhibitorBooking.findUnique({
@@ -180,6 +260,44 @@ async function handleExhibitorBooking(session: Stripe.Checkout.Session) {
       console.error("Thank you email failed:", emailErr);
     }
   }
+}
+
+async function handleExhibitorEarlyPayment(session: Stripe.Checkout.Session) {
+  const { bookingId, nbInstallments } = session.metadata!;
+  if (!bookingId) return;
+
+  const nbPaid = parseInt(nbInstallments || "1");
+
+  const booking = await prisma.exhibitorBooking.findUnique({
+    where: { id: bookingId },
+  });
+  if (!booking) return;
+
+  const newPaid = booking.paidInstallments + nbPaid;
+  const isComplete = newPaid >= booking.installments;
+
+  await prisma.exhibitorBooking.update({
+    where: { id: bookingId },
+    data: {
+      paidInstallments: newPaid,
+      status: isComplete ? "CONFIRMED" : "PARTIAL",
+    },
+  });
+
+  // If fully paid, cancel the Stripe subscription (no more automatic charges)
+  if (isComplete && booking.stripeSubscriptionId) {
+    try {
+      const stripe = getStripe();
+      await stripe.subscriptions.cancel(booking.stripeSubscriptionId);
+      console.log(`Exhibitor ${bookingId}: subscription ${booking.stripeSubscriptionId} cancelled (fully paid early)`);
+    } catch (cancelErr) {
+      console.error(`Failed to cancel subscription for ${bookingId}:`, cancelErr);
+    }
+  }
+
+  console.log(
+    `Exhibitor early payment ${bookingId}: +${nbPaid} → ${newPaid}/${booking.installments} ${isComplete ? "→ CONFIRMED" : ""}`
+  );
 }
 
 async function handleExhibitorInstallment(invoice: Stripe.Invoice) {

@@ -6,6 +6,8 @@ import {
   EXHIBITOR_EVENTS,
   EXHIBITOR_PACKS,
   calculatePrice,
+  DEPOSIT_AMOUNT,
+  MAX_INSTALLMENTS,
 } from "@/lib/exhibitor-events";
 import { sendQuoteEmail } from "@/lib/email";
 import { randomUUID } from "crypto";
@@ -17,8 +19,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
 
-    const { pack, events, installments, companyName, contactName, email, phone, sector, newsletter } =
+    const { pack, events, installments, stands: rawStands, companyName, contactName, email, phone, sector, newsletter } =
       await request.json();
+
+    // Validate stands (1-5)
+    const stands = Math.max(1, Math.min(5, Number(rawStands) || 1));
 
     // Validate pack
     const selectedPack = EXHIBITOR_PACKS.find((p) => p.id === pack);
@@ -45,9 +50,9 @@ export async function POST(request: Request) {
 
     // Validate installments
     const nbInstallments = Number(installments);
-    if (nbInstallments < 1 || nbInstallments > 3) {
+    if (nbInstallments < 1 || nbInstallments > MAX_INSTALLMENTS) {
       return NextResponse.json(
-        { error: "Nombre d'échéances invalide." },
+        { error: "Nombre de mensualités invalide." },
         { status: 400 }
       );
     }
@@ -60,18 +65,26 @@ export async function POST(request: Request) {
       );
     }
 
-    // Calculate price
-    const { totalDays, totalPrice } = calculatePrice(pack, eventIds);
+    // Calculate price (per stand), then multiply by number of stands
+    const { totalDays, totalPrice: unitPrice } = calculatePrice(pack, eventIds);
+    const totalPrice = unitPrice * stands;
     if (totalPrice <= 0) {
       return NextResponse.json({ error: "Prix invalide." }, { status: 400 });
     }
 
-    const installmentAmount = Math.ceil((totalPrice / nbInstallments) * 100) / 100;
+    // ── Payment calculation ──
+    // Deposit is paid upfront, remaining balance in N monthly installments
+    const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalPrice);
+    const remainingBalance = totalPrice - deposit;
+    const installmentAmount = nbInstallments > 1 && remainingBalance > 0
+      ? Math.ceil((remainingBalance / (nbInstallments - 1)) * 100) / 100
+      : 0;
 
     // Build event description
     const selectedEvents = EXHIBITOR_EVENTS.filter((e) => eventIds.includes(e.id));
     const eventNames = selectedEvents.map((e) => e.title).join(", ");
-    const description = `${selectedPack.name} — ${eventNames} (${totalDays} jour${totalDays > 1 ? "s" : ""})`;
+    const standsLabel = stands > 1 ? ` × ${stands} stands` : "";
+    const description = `${selectedPack.name}${standsLabel} — ${eventNames} (${totalDays} jour${totalDays > 1 ? "s" : ""})`;
 
     // Create booking in DB
     const booking = await prisma.exhibitorBooking.create({
@@ -86,8 +99,9 @@ export async function POST(request: Request) {
         events: eventIds,
         totalDays,
         totalPrice,
+        stands,
         installments: nbInstallments,
-        installmentAmount,
+        installmentAmount: nbInstallments === 1 ? totalPrice : installmentAmount,
         paidInstallments: 0,
         status: "PENDING",
       },
@@ -131,7 +145,7 @@ export async function POST(request: Request) {
         totalDays,
         totalPrice,
         installments: nbInstallments,
-        installmentAmount,
+        installmentAmount: nbInstallments === 1 ? totalPrice : installmentAmount,
         bookingId: booking.id,
         profileToken,
       });
@@ -142,7 +156,7 @@ export async function POST(request: Request) {
     const stripe = getStripe();
 
     if (nbInstallments === 1) {
-      // Single payment
+      // ── Single full payment ──
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
         customer_email: email.trim(),
@@ -152,7 +166,7 @@ export async function POST(request: Request) {
               currency: "eur",
               unit_amount: Math.round(totalPrice * 100),
               product_data: {
-                name: `Stand Exposant — ${selectedPack.name}`,
+                name: `Stand Exposant${standsLabel} — ${selectedPack.name}`,
                 description,
               },
             },
@@ -163,6 +177,7 @@ export async function POST(request: Request) {
           type: "exhibitor",
           bookingId: booking.id,
           userId: session.user.id,
+          stands: String(stands),
           installments: "1",
         },
         success_url: `${process.env.NEXT_PUBLIC_APP_URL}/exposants/confirmation/${booking.id}`,
@@ -176,47 +191,38 @@ export async function POST(request: Request) {
 
       return NextResponse.json({ url: checkoutSession.url });
     } else {
-      // Subscription with N installments
-      const product = await stripe.products.create({
-        name: `Stand Exposant — ${selectedPack.name}`,
-        description,
-      });
+      // ── Deposit (50€) + remaining balance in (N-1) monthly installments ──
 
-      const price = await stripe.prices.create({
-        product: product.id,
-        unit_amount: Math.round(installmentAmount * 100),
-        currency: "eur",
-        recurring: { interval: "month" },
-      });
-
-      // Cancel after last installment
-      const cancelAt = new Date();
-      cancelAt.setMonth(cancelAt.getMonth() + nbInstallments);
-      // Add a few days buffer for the last payment to process
-      cancelAt.setDate(cancelAt.getDate() + 3);
-
+      // Step 1: Create Stripe checkout for the deposit only
       const checkoutSession = await stripe.checkout.sessions.create({
-        mode: "subscription" as const,
+        mode: "payment",
         customer_email: email.trim(),
-        line_items: [{ price: price.id, quantity: 1 }],
-        subscription_data: {
-          metadata: {
-            type: "exhibitor_installment",
-            bookingId: booking.id,
-            userId: session.user.id,
-            totalInstallments: String(nbInstallments),
+        line_items: [
+          {
+            price_data: {
+              currency: "eur",
+              unit_amount: Math.round(deposit * 100),
+              product_data: {
+                name: `Acompte de réservation${standsLabel} — ${selectedPack.name}`,
+                description: `Acompte ${deposit} € sur ${totalPrice} € total. Solde restant (${remainingBalance} €) en ${nbInstallments - 1} mensualité${nbInstallments - 1 > 1 ? "s" : ""}.`,
+              },
+            },
+            quantity: 1,
           },
-        },
+        ],
         metadata: {
           type: "exhibitor",
           bookingId: booking.id,
           userId: session.user.id,
+          stands: String(stands),
           installments: String(nbInstallments),
-          cancelAt: String(Math.floor(cancelAt.getTime() / 1000)),
+          deposit: String(deposit),
+          remainingBalance: String(remainingBalance),
+          installmentAmount: String(installmentAmount),
         },
         success_url: `${process.env.NEXT_PUBLIC_APP_URL}/exposants/confirmation/${booking.id}`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/exposants/reservation?pack=${pack}`,
-      } as Parameters<typeof stripe.checkout.sessions.create>[0]);
+      });
 
       await prisma.exhibitorBooking.update({
         where: { id: booking.id },

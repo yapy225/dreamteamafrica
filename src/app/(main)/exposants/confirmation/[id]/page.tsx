@@ -4,7 +4,8 @@ import Script from "next/script";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { CheckCircle, CalendarDays, Building2, CreditCard } from "lucide-react";
-import { EXHIBITOR_EVENTS, EXHIBITOR_PACKS } from "@/lib/exhibitor-events";
+import { EXHIBITOR_EVENTS, EXHIBITOR_PACKS, DEPOSIT_AMOUNT } from "@/lib/exhibitor-events";
+import EarlyPaymentButton from "./EarlyPaymentButton";
 
 export const metadata = { title: "Confirmation Réservation Exposant" };
 
@@ -63,11 +64,14 @@ export default async function ConfirmationPage({
       <div className="text-center">
         <CheckCircle size={48} className="mx-auto text-green-500" />
         <h1 className="mt-4 font-serif text-3xl font-bold text-dta-dark">
-          R&eacute;servation confirm&eacute;e
+          {booking.status === "CONFIRMED"
+            ? "Réservation confirmée"
+            : "Paiement enregistré"}
         </h1>
         <p className="mt-2 text-dta-char/70">
-          Merci {booking.contactName}, votre stand exposant est
-          r&eacute;serv&eacute;.
+          {booking.status === "CONFIRMED"
+            ? `Merci ${booking.contactName}, votre stand exposant est réservé.`
+            : `Merci ${booking.contactName}, votre acompte a bien été reçu. Votre stand sera confirmé après paiement complet.`}
         </p>
       </div>
 
@@ -149,18 +153,28 @@ export default async function ConfirmationPage({
                 {formatter.format(booking.totalPrice)}
               </dd>
             </div>
-            {booking.installments > 1 && (
+            {booking.installments > 1 && (() => {
+              const deposit = Math.min(50, booking.totalPrice);
+              const remaining = booking.totalPrice - deposit;
+              const monthlyAmount = Math.ceil((remaining / (booking.installments - 1)) * 100) / 100;
+              return (
               <>
                 <div className="flex justify-between">
-                  <dt className="text-dta-taupe">Mode</dt>
-                  <dd className="font-medium text-dta-dark">
-                    {booking.installments}x sans frais
+                  <dt className="text-dta-taupe">Acompte vers&eacute;</dt>
+                  <dd className="font-medium text-dta-accent">
+                    {formatter.format(deposit)}
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-dta-taupe">&Eacute;ch&eacute;ance</dt>
+                  <dt className="text-dta-taupe">Solde restant</dt>
                   <dd className="font-medium text-dta-dark">
-                    {formatter.format(booking.installmentAmount)} /mois
+                    {formatter.format(remaining)}
+                  </dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-dta-taupe">Mensualit&eacute;s</dt>
+                  <dd className="font-medium text-dta-dark">
+                    {booking.installments - 1}x {formatter.format(monthlyAmount)}
                   </dd>
                 </div>
                 <div className="flex justify-between">
@@ -170,7 +184,8 @@ export default async function ConfirmationPage({
                   </dd>
                 </div>
               </>
-            )}
+              );
+            })()}
             <div className="flex justify-between">
               <dt className="text-dta-taupe">Statut</dt>
               <dd>
@@ -193,6 +208,30 @@ export default async function ConfirmationPage({
             </div>
           </dl>
         </div>
+
+        {/* Paiement anticipé — visible si mensualités en cours */}
+        {booking.installments > 1 && booking.status !== "CONFIRMED" && (() => {
+          const stands = booking.stands ?? 1;
+          const dep = Math.min(DEPOSIT_AMOUNT * stands, booking.totalPrice);
+          const totalRemaining = booking.totalPrice - dep;
+          const totalMonths = booking.installments - 1;
+          const monthly = totalMonths > 0 ? Math.ceil((totalRemaining / totalMonths) * 100) / 100 : 0;
+          const paidMonths = Math.max(0, booking.paidInstallments - 1);
+          const paidAmount = paidMonths * monthly;
+          const balance = Math.max(0, totalRemaining - paidAmount);
+          const remainingInst = totalMonths - paidMonths;
+          if (remainingInst <= 0 || balance <= 0) return null;
+          return (
+            <div className="rounded-[var(--radius-card)] border border-dta-accent/30 bg-dta-accent/5 p-6 shadow-[var(--shadow-card)]">
+              <EarlyPaymentButton
+                bookingId={booking.id}
+                remainingInstallments={remainingInst}
+                monthlyAmount={monthly}
+                remainingBalance={balance}
+              />
+            </div>
+          );
+        })()}
       </div>
 
       <div className="mt-8 text-center">

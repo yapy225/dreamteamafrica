@@ -22,16 +22,21 @@ const formatCurrency = (amount: number) =>
     amount,
   );
 
-/** Return every calendar day between two ISO date strings (inclusive). */
+/** Return every calendar day between two ISO date strings (inclusive).
+ *  Subtracts 1s from endDate to handle midnight boundaries correctly —
+ *  e.g. endDate "May 3 00:00 UTC" means the event ends May 2 night, not May 3. */
 function getDaysBetween(startISO: string, endISO: string): Date[] {
   const days: Date[] = [];
-  const cur = new Date(startISO);
-  cur.setHours(0, 0, 0, 0);
-  const end = new Date(endISO);
-  end.setHours(0, 0, 0, 0);
+  const startDate = startISO.slice(0, 10); // "2026-05-01"
+  const adjEnd = new Date(new Date(endISO).getTime() - 1000);
+  const endDate = adjEnd.toISOString().slice(0, 10); // "2026-05-02"
+
+  const cur = new Date(startDate + "T12:00:00Z");
+  const end = new Date(endDate + "T12:00:00Z");
+
   while (cur <= end) {
     days.push(new Date(cur));
-    cur.setDate(cur.getDate() + 1);
+    cur.setUTCDate(cur.getUTCDate() + 1);
   }
   return days;
 }

@@ -16,8 +16,7 @@ const INSTALLMENT_OPTIONS = Array.from({ length: MAX_INSTALLMENTS }, (_, i) => i
 const inputClass =
   "w-full rounded-[var(--radius-input)] border border-dta-sand bg-dta-bg px-4 py-2.5 text-sm text-dta-dark placeholder:text-dta-taupe focus:border-dta-accent focus:outline-none focus:ring-1 focus:ring-dta-accent";
 
-// Packs disponibles pour un seul événement (pas le pack saison)
-const SINGLE_PACKS = EXHIBITOR_PACKS.filter((p) => p.id !== "SAISON");
+const SINGLE_PACKS = EXHIBITOR_PACKS;
 
 export default function ResaForm({ event }: { event: ExhibitorEvent }) {
   const [pack, setPack] = useState<ExhibitorPackInfo>(SINGLE_PACKS[0]);

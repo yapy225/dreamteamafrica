@@ -62,8 +62,12 @@ export async function sendQuoteEmail(opts: {
     ${
       opts.installments > 1
         ? `<tr>
-      <td style="padding: 10px 0; color: #666;">Paiement</td>
-      <td style="padding: 10px 0; text-align: right;">${opts.installments}x ${formatter.format(opts.installmentAmount)}/mois</td>
+      <td style="padding: 10px 0; color: #666;">Acompte</td>
+      <td style="padding: 10px 0; font-weight: bold; text-align: right; color: #8B6F4E;">${formatter.format(50)}</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px 0; color: #666;">Solde</td>
+      <td style="padding: 10px 0; text-align: right;">${opts.installments - 1}x ${formatter.format(opts.installmentAmount)}/mois</td>
     </tr>`
         : ""
     }
@@ -133,8 +137,8 @@ export async function sendThankYouEmail(opts: {
       <p style="margin: 8px 0 0; font-size: 24px; font-weight: bold; color: #166534;">${formatter.format(opts.totalPrice)}</p>
     </div>`
       : `<div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin: 24px 0; text-align: center;">
-      <p style="margin: 0; font-size: 14px; color: #1e40af;">Premier versement reçu (1/${opts.installments})</p>
-      <p style="margin: 8px 0 0; font-size: 14px; color: #1e40af;">Total : ${formatter.format(opts.totalPrice)}</p>
+      <p style="margin: 0; font-size: 14px; color: #1e40af;">Acompte de ${formatter.format(50)} reçu</p>
+      <p style="margin: 8px 0 0; font-size: 14px; color: #1e40af;">Solde restant : ${formatter.format(opts.totalPrice - 50)} en ${opts.installments - 1} mensualité${opts.installments - 1 > 1 ? "s" : ""}</p>
     </div>`
   }
 
@@ -390,5 +394,87 @@ export async function sendExhibitorProfileNotification(opts: {
     });
   } catch (err) {
     console.error("Admin notification email failed:", err);
+  }
+}
+
+export async function sendSurveyEmail(opts: { to: string }) {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
+  const surveyUrl = `${baseUrl}/sondage/foire-afrique`;
+
+  const html = `
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="font-family: Georgia, serif; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f0ea;">
+  <div style="background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
+
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #8B6F4E, #6F5A3E); padding: 30px 24px; text-align: center;">
+      <h1 style="margin: 0; font-size: 22px; color: #fff;">Dream Team Africa</h1>
+      <p style="margin: 8px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.7);">Foire d'Afrique Paris — 6ème édition</p>
+    </div>
+
+    <div style="padding: 30px 24px;">
+      <p style="font-size: 15px; line-height: 1.6;">Bonjour,</p>
+
+      <p style="font-size: 15px; line-height: 1.6;">
+        La <strong>6ème édition de la Foire d'Afrique Paris</strong> se tiendra les
+        <strong>1er et 2 mai 2026</strong> à l'<strong>Espace MAS</strong> (Paris 13e).
+      </p>
+
+      <p style="font-size: 15px; line-height: 1.6;">
+        Seriez-vous prêt(e) à exposer cette année ?
+      </p>
+
+      <!-- Boutons Oui / Non -->
+      <div style="margin: 28px 0; text-align: center;">
+        <a href="${surveyUrl}"
+           style="display: inline-block; background: #22c55e; color: #fff; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px; margin-right: 12px;">
+          ✓ Oui, je suis intéressé(e)
+        </a>
+        <a href="${surveyUrl}"
+           style="display: inline-block; background: #ef4444; color: #fff; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
+          ✗ Non merci
+        </a>
+      </div>
+
+      <div style="background: #fdf8f0; border: 1px solid #e8dfd3; border-radius: 8px; padding: 16px; margin: 24px 0;">
+        <p style="margin: 0 0 8px; font-size: 14px; font-weight: bold; color: #8B6F4E;">Infos pratiques</p>
+        <ul style="margin: 0; padding-left: 16px; font-size: 13px; color: #666; line-height: 1.8;">
+          <li><strong>Dates :</strong> 1er & 2 mai 2026</li>
+          <li><strong>Lieu :</strong> Espace MAS — 10 rue des terres au curé, Paris 13e</li>
+          <li><strong>Horaires :</strong> 12h – 22h</li>
+          <li><strong>Stand à partir de :</strong> 190 €</li>
+        </ul>
+      </div>
+
+      <p style="font-size: 13px; color: #666; line-height: 1.6;">
+        Répondez en 30 secondes et nous vous recontacterons par <strong>WhatsApp</strong> avec notre proposition personnalisée.
+      </p>
+
+      <p style="margin-top: 24px;">À très bientôt !</p>
+      <p><strong>L'équipe Dream Team Africa</strong></p>
+    </div>
+
+    <!-- Footer -->
+    <div style="padding: 16px 24px; background: #f9f6f2; border-top: 1px solid #e8dfd3; font-size: 11px; color: #999; text-align: center;">
+      <p style="margin: 0;">Dream Team Africa — Saison Culturelle Africaine 2026</p>
+      <p style="margin: 4px 0 0;">contact@dreamteamafrica.com</p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: "Foire d'Afrique Paris 2026 — Seriez-vous prêt(e) à exposer ?",
+    html,
+  });
+
+  if (error) {
+    console.error("Survey email error:", error);
+    throw new Error(`Failed to send survey email: ${error.message}`);
   }
 }

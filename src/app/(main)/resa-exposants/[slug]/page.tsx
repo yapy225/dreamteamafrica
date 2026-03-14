@@ -23,7 +23,7 @@ export default async function ResaExposantPage({
   params: Promise<{ slug: string }>;
 }) {
   const session = await auth();
-  if (!session) redirect("/auth/signin");
+  if (!session) redirect("/auth/signup?role=exposant");
 
   const { slug } = await params;
   const event = EXHIBITOR_EVENTS.find((e) => e.id === slug);

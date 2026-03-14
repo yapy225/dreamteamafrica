@@ -8,7 +8,8 @@ import { signIn } from "next-auth/react";
 function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const defaultRole = searchParams.get("role") === "artisan" ? "ARTISAN" : "USER";
+  const roleParam = searchParams.get("role");
+  const defaultRole = roleParam === "artisan" ? "ARTISAN" : roleParam === "exposant" ? "EXPOSANT" : "USER";
 
   const [form, setForm] = useState({
     name: "",
@@ -64,7 +65,9 @@ function SignUpForm() {
           <p className="mt-2 text-sm text-dta-char/70">
             {defaultRole === "ARTISAN"
               ? "Inscrivez-vous en tant qu'artisan pour vendre vos créations"
-              : "Rejoignez la communauté Dream Team Africa"}
+              : defaultRole === "EXPOSANT"
+                ? "Créez votre espace exposant pour réserver et gérer votre stand"
+                : "Rejoignez la communauté Dream Team Africa"}
           </p>
         </div>
 
@@ -127,29 +130,25 @@ function SignUpForm() {
               <label className="mb-1.5 block text-sm font-medium text-dta-char">
                 Type de compte
               </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, role: "USER" })}
-                  className={`rounded-[var(--radius-button)] px-4 py-2.5 text-sm font-medium transition-colors ${
-                    form.role === "USER"
-                      ? "bg-dta-accent text-white"
-                      : "border border-dta-sand text-dta-char hover:bg-dta-beige"
-                  }`}
-                >
-                  Acheteur
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, role: "ARTISAN" })}
-                  className={`rounded-[var(--radius-button)] px-4 py-2.5 text-sm font-medium transition-colors ${
-                    form.role === "ARTISAN"
-                      ? "bg-dta-accent text-white"
-                      : "border border-dta-sand text-dta-char hover:bg-dta-beige"
-                  }`}
-                >
-                  Artisan
-                </button>
+              <div className="grid grid-cols-3 gap-2">
+                {([
+                  { value: "USER", label: "Acheteur" },
+                  { value: "ARTISAN", label: "Artisan" },
+                  { value: "EXPOSANT", label: "Exposant" },
+                ] as const).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setForm({ ...form, role: opt.value })}
+                    className={`rounded-[var(--radius-button)] px-4 py-2.5 text-sm font-medium transition-colors ${
+                      form.role === opt.value
+                        ? "bg-dta-accent text-white"
+                        : "border border-dta-sand text-dta-char hover:bg-dta-beige"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
               </div>
             </div>
 

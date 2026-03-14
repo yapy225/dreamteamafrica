@@ -28,7 +28,7 @@ export async function PUT(
         ...(body.email && { email: body.email }),
         ...(body.phone && { phone: body.phone }),
         ...(body.sector && { sector: body.sector }),
-        ...(body.pack && { pack: body.pack as "ENTREPRENEUR_1J" | "ENTREPRENEUR" | "RESTAURATION" | "SAISON" }),
+        ...(body.pack && { pack: body.pack as "ENTREPRENEUR_1J" | "ENTREPRENEUR" | "RESTAURATION" }),
         ...(body.totalPrice !== undefined && { totalPrice: parseFloat(body.totalPrice) }),
         ...(body.installments !== undefined && { installments: Number(body.installments) }),
         ...(body.installmentAmount !== undefined && { installmentAmount: parseFloat(body.installmentAmount) }),

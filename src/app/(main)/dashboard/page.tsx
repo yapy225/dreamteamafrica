@@ -63,12 +63,12 @@ export default async function DashboardPage() {
           },
         ]
       : []),
-    ...(exhibitorBooking
+    ...(exhibitorBooking || session.user.role === "EXPOSANT"
       ? [
           {
             href: "/dashboard/mon-stand",
             icon: FileImage,
-            label: "Ma fiche exposant",
+            label: "Mon espace exposant",
             count: null,
             color: "bg-amber-100 text-amber-600",
           },
@@ -186,7 +186,9 @@ export default async function DashboardPage() {
               ? "Administrateur"
               : session.user?.role === "ARTISAN"
                 ? "Artisan"
-                : "Membre"}
+                : session.user?.role === "EXPOSANT"
+                  ? "Exposant"
+                  : "Membre"}
           </p>
         </div>
 

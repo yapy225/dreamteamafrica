@@ -12,6 +12,7 @@ datasource db {
 enum Role {
   USER
   ARTISAN
+  EXPOSANT
   ADMIN
 }
 
@@ -531,16 +532,33 @@ model ExhibitorBooking {
   stripeSessionId      String?
   stripeSubscriptionId String?
 
+  // Facture
+  invoiceNumber        String?        @unique
+
   // Statut
   status               BookingStatus  @default(PENDING)
 
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
 
-  profile ExhibitorProfile?
+  profile  ExhibitorProfile?
+  payments ExhibitorPayment[]
 
   @@index([userId])
   @@index([status])
+}
+
+model ExhibitorPayment {
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   ExhibitorBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount    Float
+  type      String   // "deposit" | "installment" | "early_payment" | "full_payment"
+  label     String   // e.g. "Acompte", "Mensualité 3/9", "Paiement anticipé (2 mois)"
+  stripeId  String?  // Stripe session or invoice ID
+  paidAt    DateTime @default(now())
+
+  @@index([bookingId])
 }
 
 // ─── PROFIL VISIBILITÉ EXPOSANT ─────────────────────────

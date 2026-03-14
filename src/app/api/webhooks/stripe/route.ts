@@ -5,6 +5,8 @@ import { prisma } from "@/lib/db";
 import QRCode from "qrcode";
 import { sendThankYouEmail } from "@/lib/email";
 import { sendTicketConfirmationWhatsApp } from "@/lib/whatsapp";
+import { generateInvoicePDF, generateInvoiceNumber } from "@/lib/generate-invoice";
+import { DEPOSIT_AMOUNT } from "@/lib/exhibitor-events";
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -149,6 +151,14 @@ async function handleExhibitorBooking(session: Stripe.Checkout.Session) {
   const nbInstallments = parseInt(installments || "1");
   const isOneTime = nbInstallments === 1;
 
+  // Get booking to calculate amounts
+  const bookingData = await prisma.exhibitorBooking.findUnique({
+    where: { id: bookingId },
+    select: { totalPrice: true, stands: true },
+  });
+  const stands = bookingData?.stands ?? 1;
+  const deposit = Math.min(DEPOSIT_AMOUNT * stands, bookingData?.totalPrice ?? 0);
+
   if (isOneTime) {
     // Full payment — confirm immediately
     await prisma.exhibitorBooking.update({
@@ -159,6 +169,20 @@ async function handleExhibitorBooking(session: Stripe.Checkout.Session) {
         status: "CONFIRMED",
       },
     });
+
+    // Record payment
+    await prisma.exhibitorPayment.create({
+      data: {
+        bookingId,
+        amount: bookingData?.totalPrice ?? 0,
+        type: "full_payment",
+        label: "Paiement intégral",
+        stripeId: session.id,
+      },
+    });
+
+    // Generate invoice
+    await generateInvoiceOnCompletion(bookingId);
     console.log(`Exhibitor booking ${bookingId}: CONFIRMED (full payment)`);
   } else {
     // Deposit paid — create subscription for remaining balance
@@ -170,6 +194,18 @@ async function handleExhibitorBooking(session: Stripe.Checkout.Session) {
         status: "PARTIAL",
       },
     });
+
+    // Record deposit payment
+    await prisma.exhibitorPayment.create({
+      data: {
+        bookingId,
+        amount: deposit,
+        type: "deposit",
+        label: "Acompte de réservation",
+        stripeId: session.id,
+      },
+    });
+
     console.log(`Exhibitor booking ${bookingId}: PARTIAL (deposit paid, 1/${nbInstallments})`);
 
     // Create subscription for remaining installments
@@ -276,11 +312,36 @@ async function handleExhibitorEarlyPayment(session: Stripe.Checkout.Session) {
   const newPaid = booking.paidInstallments + nbPaid;
   const isComplete = newPaid >= booking.installments;
 
+  // Calculate amount paid
+  const stands = booking.stands ?? 1;
+  const dep = Math.min(DEPOSIT_AMOUNT * stands, booking.totalPrice);
+  const totalRemaining = booking.totalPrice - dep;
+  const totalMonths = booking.installments - 1;
+  const monthly = totalMonths > 0 ? Math.ceil((totalRemaining / totalMonths) * 100) / 100 : 0;
+  const paidMonths = Math.max(0, booking.paidInstallments - 1);
+  const remainingInst = totalMonths - paidMonths;
+  const amount = nbPaid === remainingInst
+    ? Math.max(0, totalRemaining - paidMonths * monthly)
+    : nbPaid * monthly;
+
   await prisma.exhibitorBooking.update({
     where: { id: bookingId },
     data: {
       paidInstallments: newPaid,
       status: isComplete ? "CONFIRMED" : "PARTIAL",
+    },
+  });
+
+  // Record payment
+  await prisma.exhibitorPayment.create({
+    data: {
+      bookingId,
+      amount,
+      type: "early_payment",
+      label: nbPaid === remainingInst
+        ? `Solde intégral (${nbPaid} mensualité${nbPaid > 1 ? "s" : ""})`
+        : `Paiement anticipé (${nbPaid} mensualité${nbPaid > 1 ? "s" : ""})`,
+      stripeId: session.id,
     },
   });
 
@@ -293,6 +354,11 @@ async function handleExhibitorEarlyPayment(session: Stripe.Checkout.Session) {
     } catch (cancelErr) {
       console.error(`Failed to cancel subscription for ${bookingId}:`, cancelErr);
     }
+  }
+
+  // Generate invoice on completion
+  if (isComplete) {
+    await generateInvoiceOnCompletion(bookingId);
   }
 
   console.log(
@@ -314,6 +380,8 @@ async function handleExhibitorInstallment(invoice: Stripe.Invoice) {
 
   const newPaid = booking.paidInstallments + 1;
   const isComplete = newPaid >= booking.installments;
+  const installmentIndex = newPaid - 1; // minus deposit
+  const totalMonths = booking.installments - 1;
 
   await prisma.exhibitorBooking.update({
     where: { id: booking.id },
@@ -323,7 +391,52 @@ async function handleExhibitorInstallment(invoice: Stripe.Invoice) {
     },
   });
 
+  // Record payment
+  await prisma.exhibitorPayment.create({
+    data: {
+      bookingId: booking.id,
+      amount: booking.installmentAmount,
+      type: "installment",
+      label: `Mensualité ${installmentIndex}/${totalMonths}`,
+      stripeId: invoice.id,
+    },
+  });
+
+  // Generate invoice on completion
+  if (isComplete) {
+    await generateInvoiceOnCompletion(booking.id);
+  }
+
   console.log(
     `Exhibitor installment ${booking.id}: ${newPaid}/${booking.installments} ${isComplete ? "→ CONFIRMED" : ""}`
   );
+}
+
+/**
+ * Generate invoice number and send invoice email when booking is fully paid
+ */
+async function generateInvoiceOnCompletion(bookingId: string) {
+  try {
+    const invoiceNumber = await generateInvoiceNumber();
+    await prisma.exhibitorBooking.update({
+      where: { id: bookingId },
+      data: { invoiceNumber },
+    });
+
+    // Pre-generate the PDF to validate it works (actual download via API)
+    await generateInvoicePDF(bookingId);
+
+    const booking = await prisma.exhibitorBooking.findUnique({
+      where: { id: bookingId },
+      select: { email: true, contactName: true, companyName: true, invoiceNumber: true },
+    });
+
+    if (booking) {
+      console.log(
+        `[INVOICE] ${booking.invoiceNumber} generated for ${booking.companyName} (${bookingId})`
+      );
+    }
+  } catch (err) {
+    console.error(`[INVOICE] Failed to generate for ${bookingId}:`, err);
+  }
 }

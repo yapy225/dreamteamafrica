@@ -30,14 +30,43 @@ export async function POST(request: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Check if exhibitor bookings exist with this email → auto-assign EXPOSANT role
+    const hasExhibitorBookings = await prisma.exhibitorBooking.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
+      select: { id: true },
+    });
+
+    const finalRole = hasExhibitorBookings
+      ? "EXPOSANT"
+      : role === "ARTISAN"
+        ? "ARTISAN"
+        : role === "EXPOSANT"
+          ? "EXPOSANT"
+          : "USER";
+
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        role: role === "ARTISAN" ? "ARTISAN" : "USER",
+        role: finalRole,
       },
     });
+
+    // Link orphan bookings to this new user
+    if (hasExhibitorBookings) {
+      await prisma.exhibitorBooking.updateMany({
+        where: { email: { equals: email, mode: "insensitive" } },
+        data: { userId: user.id },
+      });
+      await prisma.exhibitorProfile.updateMany({
+        where: {
+          booking: { email: { equals: email, mode: "insensitive" } },
+        },
+        data: { userId: user.id },
+      });
+      console.log(`[REGISTER] Linked exhibitor bookings to new user ${user.id} (${email})`);
+    }
 
     return NextResponse.json(
       { id: user.id, name: user.name, email: user.email },

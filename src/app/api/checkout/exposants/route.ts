@@ -25,13 +25,14 @@ export async function POST(request: Request) {
     // Validate stands (1-5)
     const stands = Math.max(1, Math.min(5, Number(rawStands) || 1));
 
-    // Validate pack
-    const selectedPack = EXHIBITOR_PACKS.find((p) => p.id === pack);
+    // Validate pack (support legacy SAISON → ENTREPRENEUR)
+    const effectivePackId = pack === "SAISON" ? "ENTREPRENEUR" : pack;
+    const selectedPack = EXHIBITOR_PACKS.find((p) => p.id === effectivePackId);
     if (!selectedPack) {
       return NextResponse.json({ error: "Formule invalide." }, { status: 400 });
     }
 
-    // Validate events
+    // Validate events (SAISON = all events)
     const eventIds: string[] = pack === "SAISON"
       ? EXHIBITOR_EVENTS.map((e) => e.id)
       : events;
@@ -66,7 +67,7 @@ export async function POST(request: Request) {
     }
 
     // Calculate price (per stand), then multiply by number of stands
-    const { totalDays, totalPrice: unitPrice } = calculatePrice(pack, eventIds);
+    const { totalDays, totalPrice: unitPrice } = calculatePrice(effectivePackId, eventIds);
     const totalPrice = unitPrice * stands;
     if (totalPrice <= 0) {
       return NextResponse.json({ error: "Prix invalide." }, { status: 400 });
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
         email: email.trim(),
         phone: phone.trim(),
         sector: sector.trim(),
-        pack: pack as "ENTREPRENEUR_1J" | "ENTREPRENEUR" | "RESTAURATION" | "SAISON",
+        pack: effectivePackId,
         events: eventIds,
         totalDays,
         totalPrice,

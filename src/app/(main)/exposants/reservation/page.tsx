@@ -8,7 +8,7 @@ export const metadata = {
 
 export default async function ReservationPage() {
   const session = await auth();
-  if (!session) redirect("/auth/signin");
+  if (!session) redirect("/auth/signup?role=exposant");
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">

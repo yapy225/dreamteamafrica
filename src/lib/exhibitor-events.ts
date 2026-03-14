@@ -51,9 +51,11 @@ export const EXHIBITOR_EVENTS: ExhibitorEvent[] = [
 ];
 
 export interface ExhibitorPackInfo {
-  id: "ENTREPRENEUR_1J" | "ENTREPRENEUR" | "RESTAURATION" | "SAISON";
+  id: "ENTREPRENEUR_1J" | "ENTREPRENEUR" | "RESTAURATION";
   name: string;
   pricePerDay: number;
+  /** Tarif préférentiel par jour quand l'exposant réserve tous les événements */
+  allEventsPricePerDay: number;
   description: string;
   kit: string[];
   highlight?: boolean;
@@ -64,6 +66,7 @@ export const EXHIBITOR_PACKS: ExhibitorPackInfo[] = [
     id: "ENTREPRENEUR_1J",
     name: "Pack Entrepreneur 1 jour",
     pricePerDay: 190,
+    allEventsPricePerDay: 170,
     description: "Stand exposant 2 m² pour 1 journée — idéal pour tester",
     kit: [
       "1 table (1,50 m x 0,60 m)",
@@ -75,6 +78,7 @@ export const EXHIBITOR_PACKS: ExhibitorPackInfo[] = [
     id: "ENTREPRENEUR",
     name: "Pack Entrepreneur 2 jours",
     pricePerDay: 160,
+    allEventsPricePerDay: 150,
     description: "Stand exposant 2 m² — idéal pour présenter vos produits et services",
     kit: [
       "1 table (1,50 m x 0,60 m)",
@@ -86,6 +90,7 @@ export const EXHIBITOR_PACKS: ExhibitorPackInfo[] = [
     id: "RESTAURATION",
     name: "Pack Restauration 2 jours",
     pricePerDay: 500,
+    allEventsPricePerDay: 450,
     description: "Espace restauration — pour les traiteurs et food entrepreneurs",
     kit: [
       "2 tables",
@@ -94,39 +99,46 @@ export const EXHIBITOR_PACKS: ExhibitorPackInfo[] = [
     ],
     highlight: true,
   },
-  {
-    id: "SAISON",
-    name: "Pack Saison Complète",
-    pricePerDay: 150,
-    description: "Exposez sur les 4 événements de la saison 2026 — tarif préférentiel",
-    kit: [
-      "1 table (1,50 m x 0,60 m)",
-      "2 chaises",
-      "2 badges exposants",
-      "Présence sur les 4 événements",
-    ],
-  },
 ];
+
+/** Check if all events are selected */
+export function isAllEvents(eventIds: string[]): boolean {
+  return EXHIBITOR_EVENTS.every((e) => eventIds.includes(e.id));
+}
 
 export function calculatePrice(
   packId: string,
   eventIds: string[]
-): { totalDays: number; totalPrice: number } {
+): { totalDays: number; totalPrice: number; fullPrice: number } {
   const pack = EXHIBITOR_PACKS.find((p) => p.id === packId);
-  if (!pack) return { totalDays: 0, totalPrice: 0 };
+  if (!pack) return { totalDays: 0, totalPrice: 0, fullPrice: 0 };
 
-  if (packId === "SAISON") {
-    const totalDays = EXHIBITOR_EVENTS.reduce((sum, e) => sum + e.days, 0);
-    return { totalDays, totalPrice: totalDays * pack.pricePerDay };
-  }
+  // Support legacy SAISON pack → map to ENTREPRENEUR with all events
+  const effectivePackId = packId === "SAISON" ? "ENTREPRENEUR" : packId;
+  const effectivePack = EXHIBITOR_PACKS.find((p) => p.id === effectivePackId) ?? pack;
+  const effectiveEvents = packId === "SAISON"
+    ? EXHIBITOR_EVENTS.map((e) => e.id)
+    : eventIds;
 
-  const selectedEvents = EXHIBITOR_EVENTS.filter((e) => eventIds.includes(e.id));
-  // Pack 1 jour = 1 jour par événement, sinon tous les jours de l'événement
-  const totalDays = packId === "ENTREPRENEUR_1J"
+  const selectedEvents = EXHIBITOR_EVENTS.filter((e) => effectiveEvents.includes(e.id));
+  const allSelected = isAllEvents(effectiveEvents);
+
+  const totalDays = effectivePackId === "ENTREPRENEUR_1J"
     ? selectedEvents.length
     : selectedEvents.reduce((sum, e) => sum + e.days, 0);
-  return { totalDays, totalPrice: totalDays * pack.pricePerDay };
+
+  const pricePerDay = allSelected ? effectivePack.allEventsPricePerDay : effectivePack.pricePerDay;
+  const fullPrice = totalDays * effectivePack.pricePerDay;
+  const totalPrice = totalDays * pricePerDay;
+
+  return { totalDays, totalPrice, fullPrice };
 }
+
+// ── Payment configuration ──
+// Deposit amount charged upfront to secure the booking.
+// The remaining balance (totalPrice - DEPOSIT) is payable in monthly installments.
+export const DEPOSIT_AMOUNT = 50;
+export const MAX_INSTALLMENTS = 10;
 
 export function formatDate(dateStr: string): string {
   return new Date(dateStr + "T12:00:00").toLocaleDateString("fr-FR", {

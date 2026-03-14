@@ -2,25 +2,35 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { Loader2, Check, CalendarDays } from "lucide-react";
+import { Loader2, Check, CalendarDays, Sparkles } from "lucide-react";
 import {
   EXHIBITOR_EVENTS,
   EXHIBITOR_PACKS,
   calculatePrice,
+  isAllEvents,
   formatDate,
+  DEPOSIT_AMOUNT,
+  MAX_INSTALLMENTS,
 } from "@/lib/exhibitor-events";
 
-const INSTALLMENT_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+const INSTALLMENT_OPTIONS = Array.from({ length: MAX_INSTALLMENTS }, (_, i) => i + 1) as number[];
 
 const inputClass =
   "w-full rounded-[var(--radius-input)] border border-dta-sand bg-dta-bg px-4 py-2.5 text-sm text-dta-dark placeholder:text-dta-taupe focus:border-dta-accent focus:outline-none focus:ring-1 focus:ring-dta-accent";
 
+const fmt = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
+
 export default function ReservationForm() {
   const searchParams = useSearchParams();
   const preselectedPack = searchParams.get("pack") || "ENTREPRENEUR";
+  // Map legacy SAISON → ENTREPRENEUR with all events
+  const initialPack = preselectedPack === "SAISON" ? "ENTREPRENEUR" : preselectedPack;
 
-  const [pack, setPack] = useState(preselectedPack);
-  const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
+  const [pack, setPack] = useState(initialPack);
+  const [selectedEvents, setSelectedEvents] = useState<string[]>(
+    preselectedPack === "SAISON" ? EXHIBITOR_EVENTS.map((e) => e.id) : []
+  );
+  const [stands, setStands] = useState(1);
   const [installments, setInstallments] = useState(1);
   const [form, setForm] = useState({
     companyName: "",
@@ -32,25 +42,34 @@ export default function ReservationForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Pack saison = tous les événements
-  useEffect(() => {
-    if (pack === "SAISON") {
+  const allSelected = isAllEvents(selectedEvents);
+  const selectedPack = EXHIBITOR_PACKS.find((p) => p.id === pack)!;
+  const { totalDays, totalPrice: unitTotal, fullPrice: unitFull } = calculatePrice(pack, selectedEvents);
+  const totalPrice = unitTotal * stands;
+  const fullPrice = unitFull * stands;
+  const savings = fullPrice - totalPrice;
+  const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalPrice);
+  const remainingBalance = totalPrice - deposit;
+  const installmentAmount =
+    installments > 1 && remainingBalance > 0
+      ? Math.ceil((remainingBalance / (installments - 1)) * 100) / 100
+      : 0;
+
+  const toggleAllEvents = () => {
+    if (allSelected) {
+      setSelectedEvents([]);
+    } else {
       setSelectedEvents(EXHIBITOR_EVENTS.map((e) => e.id));
     }
-  }, [pack]);
+  };
 
   const toggleEvent = (eventId: string) => {
-    if (pack === "SAISON") return;
     setSelectedEvents((prev) =>
       prev.includes(eventId)
         ? prev.filter((id) => id !== eventId)
         : [...prev, eventId]
     );
   };
-
-  const { totalDays, totalPrice } = calculatePrice(pack, selectedEvents);
-  const installmentAmount =
-    totalPrice > 0 ? Math.ceil((totalPrice / installments) * 100) / 100 : 0;
 
   const canSubmit =
     totalPrice > 0 &&
@@ -74,6 +93,7 @@ export default function ReservationForm() {
         body: JSON.stringify({
           pack,
           events: selectedEvents,
+          stands,
           installments,
           ...form,
         }),
@@ -91,8 +111,6 @@ export default function ReservationForm() {
       setLoading(false);
     }
   };
-
-  const selectedPack = EXHIBITOR_PACKS.find((p) => p.id === pack)!;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -112,10 +130,7 @@ export default function ReservationForm() {
             <button
               key={p.id}
               type="button"
-              onClick={() => {
-                setPack(p.id);
-                if (p.id !== "SAISON") setSelectedEvents([]);
-              }}
+              onClick={() => setPack(p.id)}
               className={`rounded-[var(--radius-card)] border-2 p-4 text-left transition-all ${
                 pack === p.id
                   ? "border-dta-accent bg-dta-accent/5"
@@ -125,16 +140,16 @@ export default function ReservationForm() {
               <p className="text-sm font-bold text-dta-dark">{p.name}</p>
               <p className="mt-1 text-lg font-bold text-dta-accent">
                 {p.pricePerDay} &euro;
-                <span className="text-xs font-normal text-dta-taupe">
-                  /jour
-                </span>
+                <span className="text-xs font-normal text-dta-taupe">/jour</span>
               </p>
+              {p.allEventsPricePerDay < p.pricePerDay && (
+                <p className="mt-0.5 text-xs text-dta-accent/80">
+                  {p.allEventsPricePerDay} &euro;/jour pour toute la saison
+                </p>
+              )}
               <ul className="mt-2 space-y-0.5">
                 {p.kit.map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-start gap-1.5 text-xs text-dta-char/70"
-                  >
+                  <li key={item} className="flex items-start gap-1.5 text-xs text-dta-char/70">
                     <Check size={10} className="mt-0.5 shrink-0 text-dta-accent" />
                     {item}
                   </li>
@@ -146,81 +161,127 @@ export default function ReservationForm() {
       </fieldset>
 
       {/* Étape 2 : Choix événement(s) */}
-      {pack !== "SAISON" && (
+      <fieldset>
+        <legend className="mb-4 font-serif text-lg font-bold text-dta-dark">
+          2. Choisissez vos &eacute;v&eacute;nements
+        </legend>
+
+        {/* Tous les événements — CTA prominent */}
+        <button
+          type="button"
+          onClick={toggleAllEvents}
+          className={`mb-4 flex w-full items-center gap-3 rounded-[var(--radius-card)] border-2 p-4 text-left transition-all ${
+            allSelected
+              ? "border-dta-accent bg-gradient-to-r from-dta-accent/10 to-dta-accent/5"
+              : "border-dashed border-dta-accent/40 bg-dta-accent/5 hover:border-dta-accent"
+          }`}
+        >
+          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+            allSelected ? "bg-dta-accent" : "bg-dta-accent/20"
+          }`}>
+            <Sparkles size={16} className={allSelected ? "text-white" : "text-dta-accent"} />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-dta-dark">
+              Toute la saison — {EXHIBITOR_EVENTS.length} &eacute;v&eacute;nements
+            </p>
+            <p className="text-xs text-dta-char/70">
+              {EXHIBITOR_EVENTS.reduce((s, e) => s + e.days, 0)} jours d&apos;exposition
+              {selectedPack.allEventsPricePerDay < selectedPack.pricePerDay && (
+                <span className="ml-1 font-semibold text-dta-accent">
+                  &mdash; tarif pr&eacute;f&eacute;rentiel {selectedPack.allEventsPricePerDay} &euro;/jour
+                  au lieu de {selectedPack.pricePerDay} &euro;
+                </span>
+              )}
+            </p>
+          </div>
+          <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded border-2 transition-colors ${
+            allSelected ? "border-dta-accent bg-dta-accent" : "border-dta-sand"
+          }`}>
+            {allSelected && <Check size={14} className="text-white" />}
+          </div>
+        </button>
+
+        {/* Individual events */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {EXHIBITOR_EVENTS.map((event) => {
+            const selected = selectedEvents.includes(event.id);
+            const eventDays = pack === "ENTREPRENEUR_1J" ? 1 : event.days;
+            const eventPrice = eventDays * selectedPack.pricePerDay;
+            return (
+              <button
+                key={event.id}
+                type="button"
+                onClick={() => toggleEvent(event.id)}
+                className={`rounded-[var(--radius-card)] border-2 p-4 text-left transition-all ${
+                  selected
+                    ? "border-dta-accent bg-dta-accent/5"
+                    : "border-dta-sand bg-white hover:border-dta-accent/40"
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-dta-dark">{event.title}</p>
+                    <p className="mt-1 flex items-center gap-1.5 text-xs text-dta-char/70">
+                      <CalendarDays size={12} />
+                      {formatDate(event.date)}
+                      {event.endDate && ` — ${formatDate(event.endDate)}`}
+                    </p>
+                  </div>
+                  <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
+                    selected ? "border-dta-accent bg-dta-accent" : "border-dta-sand"
+                  }`}>
+                    {selected && <Check size={12} className="text-white" />}
+                  </div>
+                </div>
+                <p className="mt-2 text-sm font-medium text-dta-dark">
+                  {eventDays} jour{eventDays > 1 ? "s" : ""} — {fmt.format(eventPrice)}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Savings banner */}
+        {allSelected && savings > 0 && (
+          <div className="mt-3 rounded-lg bg-green-50 px-4 py-2.5 text-center text-sm font-medium text-green-700">
+            Vous &eacute;conomisez {fmt.format(savings)}{stands > 1 ? ` (${stands} stands)` : ""} avec le tarif saison compl&egrave;te
+          </div>
+        )}
+      </fieldset>
+
+      {/* Étape 2.5 : Nombre de stands */}
+      {selectedEvents.length > 0 && (
         <fieldset>
           <legend className="mb-4 font-serif text-lg font-bold text-dta-dark">
-            2. Choisissez vos &eacute;v&eacute;nements
+            3. Nombre de stands
           </legend>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {EXHIBITOR_EVENTS.map((event) => {
-              const selected = selectedEvents.includes(event.id);
-              const eventPrice = event.days * selectedPack.pricePerDay;
-              return (
-                <button
-                  key={event.id}
-                  type="button"
-                  onClick={() => toggleEvent(event.id)}
-                  className={`rounded-[var(--radius-card)] border-2 p-4 text-left transition-all ${
-                    selected
-                      ? "border-dta-accent bg-dta-accent/5"
-                      : "border-dta-sand bg-white hover:border-dta-accent/40"
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm font-bold text-dta-dark">
-                        {event.title}
-                      </p>
-                      <p className="mt-1 flex items-center gap-1.5 text-xs text-dta-char/70">
-                        <CalendarDays size={12} />
-                        {formatDate(event.date)}
-                        {event.endDate && ` — ${formatDate(event.endDate)}`}
-                      </p>
-                    </div>
-                    <div
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
-                        selected
-                          ? "border-dta-accent bg-dta-accent"
-                          : "border-dta-sand"
-                      }`}
-                    >
-                      {selected && <Check size={12} className="text-white" />}
-                    </div>
-                  </div>
-                  <p className="mt-2 text-sm font-medium text-dta-dark">
-                    {event.days} jour{event.days > 1 ? "s" : ""} —{" "}
-                    {new Intl.NumberFormat("fr-FR", {
-                      style: "currency",
-                      currency: "EUR",
-                    }).format(eventPrice)}
-                  </p>
-                </button>
-              );
-            })}
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setStands(n)}
+                className={`flex h-12 w-12 items-center justify-center rounded-[var(--radius-button)] border-2 text-sm font-bold transition-all ${
+                  stands === n
+                    ? "border-dta-accent bg-dta-accent text-white"
+                    : "border-dta-sand bg-white text-dta-dark hover:border-dta-accent/40"
+                }`}
+              >
+                {n}
+              </button>
+            ))}
           </div>
+          <p className="mt-2 text-xs text-dta-taupe">
+            {stands} stand{stands > 1 ? "s" : ""} ({stands * 2} m&sup2;)
+          </p>
         </fieldset>
       )}
 
-      {pack === "SAISON" && (
-        <div className="rounded-[var(--radius-card)] border border-dta-accent/30 bg-dta-accent/5 p-4">
-          <p className="text-sm font-medium text-dta-accent">
-            Pack Saison — Les 4 &eacute;v&eacute;nements sont inclus (6 jours)
-          </p>
-          <ul className="mt-2 space-y-1">
-            {EXHIBITOR_EVENTS.map((e) => (
-              <li key={e.id} className="text-xs text-dta-char/70">
-                {e.title} — {formatDate(e.date)}
-                {e.endDate && ` au ${formatDate(e.endDate)}`}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Étape 3 : Infos exposant */}
+      {/* Étape 4 : Infos exposant */}
       <fieldset>
         <legend className="mb-4 font-serif text-lg font-bold text-dta-dark">
-          {pack === "SAISON" ? "2" : "3"}. Vos informations
+          4. Vos informations
         </legend>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -230,9 +291,7 @@ export default function ReservationForm() {
             <input
               required
               value={form.companyName}
-              onChange={(e) =>
-                setForm({ ...form, companyName: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, companyName: e.target.value })}
               className={inputClass}
               placeholder="Nom de votre entreprise"
             />
@@ -244,9 +303,7 @@ export default function ReservationForm() {
             <input
               required
               value={form.contactName}
-              onChange={(e) =>
-                setForm({ ...form, contactName: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, contactName: e.target.value })}
               className={inputClass}
               placeholder="Pr&eacute;nom et nom"
             />
@@ -292,99 +349,133 @@ export default function ReservationForm() {
         </div>
       </fieldset>
 
-      {/* Étape 4 : Paiement fractionné */}
+      {/* Étape 5 : Paiement */}
       {totalPrice > 0 && (
         <fieldset>
           <legend className="mb-4 font-serif text-lg font-bold text-dta-dark">
-            {pack === "SAISON" ? "3" : "4"}. Mode de paiement
+            5. Mode de paiement
           </legend>
 
           <div className="mb-4 rounded-[var(--radius-card)] border border-dta-sand bg-white p-5">
             <div className="mb-4 flex items-baseline justify-between">
               <span className="text-sm text-dta-char/70">Total</span>
-              <span className="font-serif text-2xl font-bold text-dta-dark">
-                {new Intl.NumberFormat("fr-FR", {
-                  style: "currency",
-                  currency: "EUR",
-                }).format(totalPrice)}
-              </span>
+              <div className="text-right">
+                {savings > 0 && (
+                  <span className="mr-2 text-sm text-dta-taupe line-through">
+                    {fmt.format(fullPrice)}
+                  </span>
+                )}
+                <span className="font-serif text-2xl font-bold text-dta-dark">
+                  {fmt.format(totalPrice)}
+                </span>
+              </div>
             </div>
 
             <div className="space-y-2">
-              {INSTALLMENT_OPTIONS.map((n) => {
-                const amount =
-                  Math.ceil((totalPrice / n) * 100) / 100;
-                return (
-                  <label
-                    key={n}
-                    className={`flex cursor-pointer items-center justify-between rounded-lg border-2 px-4 py-3 transition-all ${
-                      installments === n
-                        ? "border-dta-accent bg-dta-accent/5"
-                        : "border-dta-sand hover:border-dta-accent/40"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="installments"
-                        value={n}
-                        checked={installments === n}
-                        onChange={() => setInstallments(n)}
-                        className="accent-dta-accent"
-                      />
-                      <span className="text-sm font-medium text-dta-dark">
-                        {n === 1
-                          ? "Payer en 1 fois"
-                          : `Payer en ${n} fois sans frais`}
-                      </span>
-                    </div>
-                    <span className="text-sm font-bold text-dta-dark">
-                      {new Intl.NumberFormat("fr-FR", {
-                        style: "currency",
-                        currency: "EUR",
-                      }).format(amount)}
-                      {n > 1 && (
-                        <span className="font-normal text-dta-taupe">
-                          {" "}
-                          /mois
-                        </span>
-                      )}
-                    </span>
-                  </label>
-                );
-              })}
+              {/* Full payment */}
+              <label
+                className={`flex cursor-pointer items-center justify-between rounded-lg border-2 px-4 py-3 transition-all ${
+                  installments === 1
+                    ? "border-dta-accent bg-dta-accent/5"
+                    : "border-dta-sand hover:border-dta-accent/40"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="installments"
+                    value={1}
+                    checked={installments === 1}
+                    onChange={() => setInstallments(1)}
+                    className="accent-dta-accent"
+                  />
+                  <span className="text-sm font-medium text-dta-dark">Payer en 1 fois</span>
+                </div>
+                <span className="text-sm font-bold text-dta-dark">{fmt.format(totalPrice)}</span>
+              </label>
+
+              {/* Deposit + installments */}
+              <label
+                className={`flex cursor-pointer items-center justify-between rounded-lg border-2 px-4 py-3 transition-all ${
+                  installments > 1
+                    ? "border-dta-accent bg-dta-accent/5"
+                    : "border-dta-sand hover:border-dta-accent/40"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="installments"
+                    value={2}
+                    checked={installments > 1}
+                    onChange={() => setInstallments(3)}
+                    className="accent-dta-accent"
+                  />
+                  <span className="text-sm font-medium text-dta-dark">
+                    Acompte de {fmt.format(deposit)} + mensualit&eacute;s
+                  </span>
+                </div>
+              </label>
             </div>
 
+            {/* Installment count selector */}
             {installments > 1 && (
-              <div className="mt-4 rounded-lg bg-dta-bg p-3">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-dta-taupe">
-                  &Eacute;ch&eacute;ancier
+              <div className="mt-4 space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-dta-taupe">
+                  Nombre de mensualit&eacute;s
                 </p>
-                <div className="space-y-1">
-                  {Array.from({ length: installments }, (_, i) => {
-                    const date = new Date();
-                    date.setMonth(date.getMonth() + i);
+                <div className="flex flex-wrap gap-2">
+                  {Array.from({ length: MAX_INSTALLMENTS - 1 }, (_, i) => i + 2).map((n) => {
+                    const monthly = Math.ceil((remainingBalance / (n - 1)) * 100) / 100;
                     return (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between text-sm"
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setInstallments(n)}
+                        className={`rounded-lg border-2 px-3 py-2 text-center transition-all ${
+                          installments === n
+                            ? "border-dta-accent bg-dta-accent/5"
+                            : "border-dta-sand hover:border-dta-accent/40"
+                        }`}
                       >
-                        <span className="text-dta-char/70">
-                          {i === 0 ? "Aujourd'hui" : date.toLocaleDateString("fr-FR", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })}
-                        </span>
-                        <span className="font-medium text-dta-dark">
-                          {new Intl.NumberFormat("fr-FR", {
-                            style: "currency",
-                            currency: "EUR",
-                          }).format(installmentAmount)}
-                        </span>
-                      </div>
+                        <span className="block text-xs font-bold text-dta-dark">{n - 1}x</span>
+                        <span className="block text-[10px] text-dta-taupe">{fmt.format(monthly)}</span>
+                      </button>
                     );
                   })}
+                </div>
+
+                {/* Schedule */}
+                <div className="rounded-lg bg-dta-bg p-3">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-dta-taupe">
+                    &Eacute;ch&eacute;ancier
+                  </p>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium text-dta-char/70">Aujourd&apos;hui &mdash; Acompte</span>
+                      <span className="font-semibold text-dta-accent">{fmt.format(deposit)}</span>
+                    </div>
+                    {Array.from({ length: installments - 1 }, (_, i) => {
+                      const date = new Date();
+                      date.setMonth(date.getMonth() + i + 1);
+                      return (
+                        <div key={i} className="flex items-center justify-between text-sm">
+                          <span className="text-dta-char/70">
+                            {date.toLocaleDateString("fr-FR", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </span>
+                          <span className="font-medium text-dta-dark">{fmt.format(installmentAmount)}</span>
+                        </div>
+                      );
+                    })}
+                    <div className="mt-2 flex items-center justify-between border-t border-dta-sand pt-2 text-sm">
+                      <span className="font-medium text-dta-char">Total</span>
+                      <span className="font-bold text-dta-dark">{fmt.format(totalPrice)}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -401,12 +492,9 @@ export default function ReservationForm() {
         >
           {loading && <Loader2 size={16} className="animate-spin" />}
           {totalPrice > 0
-            ? `Payer ${new Intl.NumberFormat("fr-FR", {
-                style: "currency",
-                currency: "EUR",
-              }).format(installments === 1 ? totalPrice : installmentAmount)} ${
-                installments > 1 ? `(1/${installments})` : ""
-              }`
+            ? installments === 1
+              ? `Payer ${fmt.format(totalPrice)}`
+              : `R\u00e9server — Acompte de ${fmt.format(deposit)}`
             : "S\u00e9lectionnez un \u00e9v\u00e9nement"}
         </button>
       </div>

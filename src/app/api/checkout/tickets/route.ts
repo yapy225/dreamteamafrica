@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
+import QRCode from "qrcode";
+import { uploadBuffer } from "@/lib/bunny";
+import { sendTicketConfirmationEmail } from "@/lib/email";
+import { sendTicketConfirmationWhatsApp } from "@/lib/whatsapp";
 
 export async function POST(request: Request) {
   try {
@@ -108,6 +112,84 @@ export async function POST(request: Request) {
       );
     }
 
+    /* ── FREE TICKETS: create directly without Stripe ──────────── */
+    if (unitPrice === 0) {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://dreamteamafrica.com";
+      const createdTickets: Array<{ id: string; qrCode: string }> = [];
+
+      const ticketPromises = Array.from({ length: quantity }, async () => {
+        const ticketId = crypto.randomUUID();
+        const qrUrl = `${baseUrl}/check/${ticketId}`;
+        const qrBuffer = await QRCode.toBuffer(qrUrl, { width: 600, margin: 2 });
+        const { url: qrCdnUrl } = await uploadBuffer(
+          Buffer.from(qrBuffer),
+          `qrcodes/tickets/${ticketId}.png`,
+        );
+
+        const ticket = await prisma.ticket.create({
+          data: {
+            id: ticketId,
+            eventId: event.id,
+            userId: user.id,
+            tier,
+            price: 0,
+            qrCode: qrCdnUrl,
+            firstName: trimmedFirstName,
+            lastName: trimmedLastName,
+            email: trimmedEmail,
+            phone: trimmedPhone,
+            visitDate: visitDate ? new Date(visitDate) : null,
+          },
+        });
+        createdTickets.push({ id: ticket.id, qrCode: qrCdnUrl });
+        return ticket;
+      });
+
+      await Promise.all(ticketPromises);
+
+      // Send confirmation email
+      try {
+        await sendTicketConfirmationEmail({
+          to: trimmedEmail,
+          guestName: `${trimmedFirstName} ${trimmedLastName}`,
+          eventTitle: event.title,
+          eventVenue: event.venue,
+          eventAddress: event.address,
+          eventDate: visitDate ? new Date(visitDate) : event.date,
+          eventCoverImage: event.coverImage,
+          tier: tierName,
+          price: 0,
+          quantity,
+          tickets: createdTickets,
+        });
+      } catch (emailErr) {
+        console.error("Free ticket confirmation email failed:", emailErr);
+      }
+
+      // Send WhatsApp confirmation
+      try {
+        await sendTicketConfirmationWhatsApp({
+          phone: trimmedPhone,
+          customerName: `${trimmedFirstName} ${trimmedLastName}`,
+          eventTitle: event.title,
+          tier: tierName,
+          quantity,
+          totalPrice: 0,
+          eventDate: new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(visitDate ? new Date(visitDate) : event.date),
+          eventVenue: event.venue,
+        });
+      } catch (waErr) {
+        console.error("WhatsApp free ticket confirmation failed:", waErr);
+      }
+
+      // Return first ticket ID for confirmation page
+      return NextResponse.json({
+        free: true,
+        confirmationUrl: `${baseUrl}/saison-culturelle-africaine/confirmation/${createdTickets[0].id}`,
+      });
+    }
+
+    /* ── PAID TICKETS: Stripe checkout ──────────────────────── */
     const productName = `${event.title} — ${tierName}`;
 
     const checkoutSession = await getStripe().checkout.sessions.create({

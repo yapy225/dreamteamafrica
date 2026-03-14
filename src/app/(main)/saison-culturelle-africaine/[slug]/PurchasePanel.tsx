@@ -176,7 +176,9 @@ export default function PurchasePanel({
         return;
       }
 
-      if (data.url) {
+      if (data.free && data.confirmationUrl) {
+        window.location.href = data.confirmationUrl;
+      } else if (data.url) {
         window.location.href = data.url;
       } else {
         setError("Aucune URL de paiement reçue.");
@@ -217,7 +219,7 @@ export default function PurchasePanel({
               {tier.name}
             </h2>
             <p className="text-sm text-dta-taupe">
-              {formatCurrency(tier.price)} / billet
+              {tier.price === 0 ? "Gratuit" : `${formatCurrency(tier.price)} / billet`}
             </p>
           </div>
           <button
@@ -367,10 +369,11 @@ export default function PurchasePanel({
           <div className="border-t border-dta-sand pt-4">
             <div className="mb-3 flex items-center justify-between text-sm">
               <span className="text-dta-char/70">
-                {quantity} &times; {formatCurrency(tier.price)}
+                {quantity} billet{quantity > 1 ? "s" : ""}
+                {tier.price > 0 && <> &times; {formatCurrency(tier.price)}</>}
               </span>
               <span className="font-serif text-lg font-bold text-dta-dark">
-                {formatCurrency(total)}
+                {tier.price === 0 ? "Gratuit" : formatCurrency(total)}
               </span>
             </div>
 
@@ -382,8 +385,10 @@ export default function PurchasePanel({
               {loading ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
-                  Redirection&hellip;
+                  {tier.price === 0 ? "Réservation en cours\u2026" : "Redirection\u2026"}
                 </>
+              ) : tier.price === 0 ? (
+                "Réserver gratuitement"
               ) : (
                 `Passer au paiement — ${formatCurrency(total)}`
               )}

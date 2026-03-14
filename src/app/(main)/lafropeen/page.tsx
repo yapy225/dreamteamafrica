@@ -26,7 +26,7 @@ const CATEGORY_SLUGS = [
   { slug: "opinion", key: "OPINION" },
 ];
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
 
@@ -94,8 +94,29 @@ export default async function JournalPage() {
   const archivePreview = zones.ARCHIVES.slice(0, 8);
   const archiveTotalPages = Math.ceil(zones.ARCHIVES.length / 8);
 
+  const collectionJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "L'Afropéen — Journal de la Diaspora Africaine",
+    description:
+      "Actualités, culture, cinéma, musique, business et lifestyle de la diaspora africaine en Europe.",
+    url: `${siteUrl}/lafropeen`,
+    publisher: {
+      "@type": "Organization",
+      name: "Dream Team Africa",
+      logo: { "@type": "ImageObject", url: `${siteUrl}/logo-dta.png` },
+    },
+    inLanguage: "fr-FR",
+    numberOfItems: publishedArticles.length + archivedArticles.length,
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
+
       <JournalNav />
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 py-8 sm:px-6 lg:px-8">

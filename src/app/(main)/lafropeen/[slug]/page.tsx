@@ -19,7 +19,15 @@ import EventPromoCard from "@/components/journal/EventPromoCard";
 import OfficielPromoCard from "@/components/journal/OfficielPromoCard";
 import Comments from "@/components/sections/Comments";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const articles = await prisma.article.findMany({
+    where: { status: "PUBLISHED" },
+    select: { slug: true },
+  });
+  return articles.map((article) => ({ slug: article.slug }));
+}
 
 export async function generateMetadata({
   params,
@@ -32,6 +40,10 @@ export async function generateMetadata({
   if (!article) return { title: "Article introuvable" };
   const title = article.metaTitle || `${article.title} — L'Afropéen`;
   const description = article.metaDescription || article.excerpt;
+  const articleWithAuthor = await prisma.article.findUnique({
+    where: { slug },
+    select: { author: { select: { name: true } }, category: true, updatedAt: true },
+  });
   return {
     title,
     description,
@@ -41,6 +53,10 @@ export async function generateMetadata({
       description,
       type: "article",
       publishedTime: article.publishedAt.toISOString(),
+      modifiedTime: articleWithAuthor?.updatedAt?.toISOString(),
+      authors: articleWithAuthor?.author?.name ? [articleWithAuthor.author.name] : undefined,
+      section: articleWithAuthor?.category,
+      tags: article.seoKeywords.length > 0 ? article.seoKeywords : undefined,
       url: `${siteUrl}/lafropeen/${slug}`,
       ...(article.coverImage && {
         images: [
@@ -55,6 +71,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
+      site: "@dreamteamafrica",
       title: article.title,
       description,
       ...(article.coverImage && { images: [article.coverImage] }),
@@ -234,13 +251,21 @@ export default async function ArticleDetailPage({
     .slice(0, 2);
 
 
+  const articleUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com"}/lafropeen/${slug}`;
+  const logoUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com"}/logo-dta.png`;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: article.title,
     description: article.excerpt,
-    ...(article.coverImage && { image: article.coverImage }),
+    ...(article.coverImage && { image: [article.coverImage] }),
     datePublished: article.publishedAt.toISOString(),
+    dateModified: article.updatedAt.toISOString(),
+    wordCount: article.content.split(/\s+/).length,
+    articleSection: catConfig?.label,
+    keywords: article.seoKeywords?.join(", "),
+    inLanguage: "fr-FR",
     author: {
       "@type": "Person",
       name: article.author.name,
@@ -250,16 +275,17 @@ export default async function ArticleDetailPage({
     },
     publisher: {
       "@type": "Organization",
-      name: "L'Afropeen - DreamTeamAfrica",
+      name: "Dream Team Africa",
       logo: {
         "@type": "ImageObject",
-        url: `${process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com"}/logo-dta.png`,
+        url: logoUrl,
       },
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `${process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com"}/lafropeen/${slug}`,
+      "@id": articleUrl,
     },
+    isAccessibleForFree: true,
   };
 
   return (

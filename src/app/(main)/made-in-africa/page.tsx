@@ -7,7 +7,7 @@ import { formatPrice } from "@/lib/utils";
 import MarketplaceFilters from "./MarketplaceFilters";
 import DiscoverMore from "@/components/sections/DiscoverMore";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 // Marketplace masquée — rediriger vers l'accueil
 const MARKETPLACE_ENABLED = false;

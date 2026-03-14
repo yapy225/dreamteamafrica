@@ -3,6 +3,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Conditions Générales de Vente — Dream Team Africa",
   description: "Conditions générales de vente du site dreamteamafrica.com — commandes, paiement, billets, remboursement, RGPD.",
+  alternates: { canonical: "https://dreamteamafrica.com/conditions-generales" },
 };
 
 export default function CGVPage() {

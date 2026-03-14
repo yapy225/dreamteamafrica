@@ -13,7 +13,9 @@ import ArticleCard from "@/components/journal/ArticleCard";
 import Newsletter from "@/components/journal/Newsletter";
 import styles from "./home.module.css";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
+
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
 
 export const metadata = {
   title: "Accueil — Culture africaine à Paris",
@@ -24,6 +26,10 @@ export const metadata = {
     description:
       "Événements exclusifs, marketplace artisanale et journal de la diaspora. La culture africaine rayonne à Paris.",
     type: "website",
+    url: siteUrl,
+  },
+  alternates: {
+    canonical: siteUrl,
   },
 };
 
@@ -58,8 +64,60 @@ export default async function Home() {
   const featuredArticle = articles[0];
   const sideArticles = articles.slice(1);
 
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Dream Team Africa",
+    url: siteUrl,
+    logo: `${siteUrl}/logo-dta.png`,
+    description:
+      "Plateforme de promotion de la culture africaine à Paris : événements, marketplace artisanale, journal L'Afropéen et annuaire professionnel L'Officiel d'Afrique.",
+    foundingDate: "2024",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Paris",
+      addressCountry: "FR",
+    },
+    sameAs: [
+      "https://www.instagram.com/dreamteamafrica",
+      "https://www.facebook.com/dreamteamafrica",
+      "https://www.tiktok.com/@dreamteamafrica",
+    ],
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: "+33753444804",
+      contactType: "customer service",
+      availableLanguage: ["French"],
+    },
+  };
+
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Dream Team Africa",
+    url: siteUrl,
+    description:
+      "Événements culturels africains, marketplace artisanale et journal de la diaspora à Paris.",
+    publisher: { "@type": "Organization", name: "Dream Team Africa" },
+    inLanguage: "fr-FR",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${siteUrl}/lafropeen/archives?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
+
       {/* ══ 1. Hero Cinématique ══ */}
       <section
         className={`relative min-h-screen overflow-hidden bg-dta-dark ${styles.grainOverlay}`}

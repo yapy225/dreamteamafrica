@@ -3,6 +3,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Politique de Cookies — Dream Team Africa",
   description: "Politique de cookies du site dreamteamafrica.com — types de cookies, finalités, gestion des préférences, RGPD.",
+  alternates: { canonical: "https://dreamteamafrica.com/politique-cookies" },
 };
 
 export default function PolitiqueCookiesPage() {

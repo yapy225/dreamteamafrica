@@ -10,25 +10,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       : "https://dreamteamafrica.com";
 
   // ── Static pages ──────────────────────────────────────────
+  const staticLastModified = new Date('2026-03-14');
   const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
-    { url: `${baseUrl}/saison-culturelle-africaine`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
-    { url: `${baseUrl}/made-in-africa`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/lafropeen`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/lafropeen/archives`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
-    { url: `${baseUrl}/exposants`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/nous-contacter`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${baseUrl}/faire-un-don`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
-    { url: `${baseUrl}/lofficiel-dafrique`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/lofficiel-dafrique/annuaire`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/auth/signin`, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${baseUrl}/auth/signup`, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${baseUrl}/mentions-legales`, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${baseUrl}/conditions-generales`, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${baseUrl}/conditions-utilisation`, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${baseUrl}/politique-de-confidentialite`, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${baseUrl}/politique-cookies`, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${baseUrl}/politique-annulation`, changeFrequency: "yearly", priority: 0.3 },
+    { url: baseUrl, lastModified: staticLastModified, changeFrequency: "daily", priority: 1.0 },
+    { url: `${baseUrl}/saison-culturelle-africaine`, lastModified: staticLastModified, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${baseUrl}/made-in-africa`, lastModified: staticLastModified, changeFrequency: "daily", priority: 0.9 },
+    { url: `${baseUrl}/lafropeen`, lastModified: staticLastModified, changeFrequency: "daily", priority: 0.9 },
+    { url: `${baseUrl}/lafropeen/archives`, lastModified: staticLastModified, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${baseUrl}/exposants`, lastModified: staticLastModified, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${baseUrl}/nous-contacter`, lastModified: staticLastModified, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/faire-un-don`, lastModified: staticLastModified, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${baseUrl}/lofficiel-dafrique`, lastModified: staticLastModified, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/lofficiel-dafrique/annuaire`, lastModified: staticLastModified, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${baseUrl}/mentions-legales`, lastModified: staticLastModified, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${baseUrl}/conditions-generales`, lastModified: staticLastModified, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${baseUrl}/politique-de-confidentialite`, lastModified: staticLastModified, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${baseUrl}/politique-cookies`, lastModified: staticLastModified, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${baseUrl}/conditions-utilisation`, lastModified: staticLastModified, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/politique-annulation`, lastModified: staticLastModified, changeFrequency: "yearly", priority: 0.3 },
   ];
 
   // ── Journal category pages ────────────────────────────────
@@ -45,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
   const categoryPages: MetadataRoute.Sitemap = categories.map((cat) => ({
     url: `${baseUrl}/lafropeen/categorie/${cat}`,
-    lastModified: new Date(),
+    lastModified: staticLastModified,
     changeFrequency: "daily",
     priority: 0.7,
   }));

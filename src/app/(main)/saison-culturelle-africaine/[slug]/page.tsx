@@ -15,7 +15,15 @@ const FREE_EVENT_IDS = [
   "cmm767c1m0007ti79g90z3vdf", // FICA
 ];
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const events = await prisma.event.findMany({
+    where: { published: true },
+    select: { slug: true },
+  });
+  return events.map((event) => ({ slug: event.slug }));
+}
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
 

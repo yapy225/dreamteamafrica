@@ -10,7 +10,7 @@ import JournalNav from "@/components/journal/JournalNav";
 import Newsletter from "@/components/journal/Newsletter";
 import JournalFooter from "@/components/journal/JournalFooter";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const VALID_CATEGORIES: Record<string, ArticleCategory> = {
   actualite: "ACTUALITE",

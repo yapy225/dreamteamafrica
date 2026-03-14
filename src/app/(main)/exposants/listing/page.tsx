@@ -2,7 +2,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/db";
 import { Instagram, Facebook } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export const metadata = {
   title: "Nos Exposants — Foire d'Afrique Paris 2026",

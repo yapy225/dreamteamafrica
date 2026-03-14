@@ -4,6 +4,7 @@ export const metadata: Metadata = {
   title: "Politique de confidentialité — Dream Team Africa",
   description:
     "Politique de confidentialité du site dreamteamafrica.com — collecte, utilisation et protection de vos données personnelles.",
+  alternates: { canonical: "https://dreamteamafrica.com/politique-de-confidentialite" },
 };
 
 export default function PolitiqueConfidentialitePage() {

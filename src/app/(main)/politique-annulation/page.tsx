@@ -3,6 +3,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Politique d'annulation et de remboursement — Dream Team Africa",
   description: "Conditions d'annulation, de remboursement et de report des billets pour les événements Dream Team Africa.",
+  alternates: { canonical: "https://dreamteamafrica.com/politique-annulation" },
 };
 
 export default function PolitiqueAnnulationPage() {

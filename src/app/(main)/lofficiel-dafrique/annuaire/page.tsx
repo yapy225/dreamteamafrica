@@ -18,7 +18,7 @@ function maskPhone(phone: string): string {
   return cleaned.slice(0, 6) + " ** ** " + cleaned.slice(-2);
 }
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
 

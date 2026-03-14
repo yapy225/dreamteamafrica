@@ -5,7 +5,7 @@ import { Calendar, MapPin, Users, Ticket, ArrowRight, Newspaper, ShoppingBag, St
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
 

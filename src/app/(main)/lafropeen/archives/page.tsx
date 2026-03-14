@@ -5,7 +5,7 @@ import JournalNav from "@/components/journal/JournalNav";
 import ArchivesGrid from "@/components/journal/ArchivesGrid";
 import JournalFooter from "@/components/journal/JournalFooter";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
 

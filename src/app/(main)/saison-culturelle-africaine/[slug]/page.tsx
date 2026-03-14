@@ -610,6 +610,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                 <TicketSectionClient
                   eventId={event.id}
                   eventSlug={event.slug}
+                  eventTitle={event.title}
+                  eventDate={event.date.toISOString()}
+                  eventEndDate={event.endDate?.toISOString()}
                   tiers={tiers}
                   soldOut={soldOut}
                   sessions={(event.program as Array<{date:string;time:string;venue:string;address:string;title:string;type:string;pricing:string}>)}
@@ -658,8 +661,12 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                             eventId={event.id}
                             eventSlug={event.slug}
                             tier={tier.id}
+                            tierName={tier.name}
                             price={tier.price}
                             highlight={tier.highlight}
+                            eventTitle={event.title}
+                            eventDate={event.date.toISOString()}
+                            eventEndDate={event.endDate?.toISOString()}
                           />
                         </div>
                       ))}

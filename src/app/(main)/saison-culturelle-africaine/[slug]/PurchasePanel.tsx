@@ -1,0 +1,391 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { Loader2, Minus, Plus, X } from "lucide-react";
+
+interface PurchasePanelProps {
+  open: boolean;
+  onClose: () => void;
+  eventId: string;
+  eventSlug: string;
+  tier: { id: string; name: string; price: number };
+  eventTitle: string;
+  eventDate: string;
+  eventEndDate?: string;
+}
+
+const inputClass =
+  "w-full rounded-[var(--radius-input)] border border-dta-sand bg-dta-bg px-4 py-2.5 text-sm text-dta-dark placeholder:text-dta-taupe focus:border-dta-accent focus:outline-none focus:ring-1 focus:ring-dta-accent";
+
+const formatCurrency = (amount: number) =>
+  new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(
+    amount,
+  );
+
+/** Return every calendar day between two ISO date strings (inclusive). */
+function getDaysBetween(startISO: string, endISO: string): Date[] {
+  const days: Date[] = [];
+  const cur = new Date(startISO);
+  cur.setHours(0, 0, 0, 0);
+  const end = new Date(endISO);
+  end.setHours(0, 0, 0, 0);
+  while (cur <= end) {
+    days.push(new Date(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return days;
+}
+
+/** Format a date in short French, e.g. "Ven. 1 mai" */
+function formatDateFR(date: Date): string {
+  return date
+    .toLocaleDateString("fr-FR", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    })
+    .replace(/^\w/, (c) => c.toUpperCase());
+}
+
+export default function PurchasePanel({
+  open,
+  onClose,
+  eventId,
+  eventSlug,
+  tier,
+  eventTitle,
+  eventDate,
+  eventEndDate,
+}: PurchasePanelProps) {
+  /* ── state ───────────────────────────────────────────── */
+  const [visible, setVisible] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+  });
+  const [selectedDate, setSelectedDate] = useState<string>(eventDate);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  /* ── multi-day dates ─────────────────────────────────── */
+  const isMultiDay = !!eventEndDate;
+  const days = isMultiDay ? getDaysBetween(eventDate, eventEndDate!) : [];
+
+  /* ── animation: delay the translate so the backdrop fades in first ── */
+  useEffect(() => {
+    if (open) {
+      // allow a frame so the initial translate-y-full is painted
+      requestAnimationFrame(() => setVisible(true));
+    } else {
+      setVisible(false);
+    }
+  }, [open]);
+
+  /* ── lock body scroll while open ─────────────────────── */
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  /* ── close on Escape ─────────────────────────────────── */
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    },
+    [onClose],
+  );
+  useEffect(() => {
+    if (open) document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, handleKeyDown]);
+
+  /* ── derived ─────────────────────────────────────────── */
+  const total = tier.price * quantity;
+  const canSubmit =
+    form.firstName.trim() &&
+    form.lastName.trim() &&
+    form.email.trim() &&
+    form.phone.trim();
+
+  /* ── submit ──────────────────────────────────────────── */
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!canSubmit || loading) return;
+    setError("");
+
+    // Facebook Pixel
+    if (typeof window !== "undefined") {
+      if (typeof (window as any).fbq === "function") {
+        (window as any).fbq("track", "InitiateCheckout", {
+          value: total,
+          currency: "EUR",
+          content_type: "product",
+          num_items: quantity,
+        });
+      }
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push({
+        event: "begin_checkout",
+        ecommerce: {
+          value: total,
+          currency: "EUR",
+          items: [
+            { item_category: "Billet", item_name: tier.name, price: tier.price, quantity },
+          ],
+        },
+      });
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/checkout/tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId,
+          tier: tier.id,
+          quantity,
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          phone: form.phone,
+          visitDate: selectedDate,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Erreur lors de la création du paiement.");
+        setLoading(false);
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setError("Aucune URL de paiement reçue.");
+        setLoading(false);
+      }
+    } catch {
+      setError("Erreur réseau. Veuillez réessayer.");
+      setLoading(false);
+    }
+  };
+
+  /* ── don't render in the DOM when fully closed ───────── */
+  if (!open && !visible) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      {/* backdrop */}
+      <div
+        className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${
+          visible ? "opacity-100" : "opacity-0"
+        }`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* panel */}
+      <div
+        className={`relative z-10 w-full max-w-lg transform rounded-t-xl bg-white shadow-xl transition-transform duration-300 ease-out ${
+          visible ? "translate-y-0" : "translate-y-full"
+        }`}
+        role="dialog"
+        aria-modal="true"
+      >
+        {/* header */}
+        <div className="flex items-center justify-between border-b border-dta-sand px-5 py-4">
+          <div>
+            <h2 className="font-serif text-lg font-bold text-dta-dark">
+              {tier.name}
+            </h2>
+            <p className="text-sm text-dta-taupe">
+              {formatCurrency(tier.price)} / billet
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-full p-1.5 text-dta-char/50 transition-colors hover:bg-dta-bg hover:text-dta-dark"
+            aria-label="Fermer"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* scrollable body */}
+        <form
+          onSubmit={handleSubmit}
+          className="max-h-[80vh] space-y-5 overflow-y-auto px-5 py-5"
+        >
+          {/* error */}
+          {error && (
+            <div className="rounded-[var(--radius-input)] bg-red-50 px-4 py-2.5 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
+          {/* multi-day date picker */}
+          {isMultiDay && days.length > 0 && (
+            <div>
+              <label className="mb-2 block text-sm font-medium text-dta-char">
+                Date de visite
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {days.map((day) => {
+                  const iso = day.toISOString();
+                  const isActive = selectedDate === iso;
+                  return (
+                    <button
+                      key={iso}
+                      type="button"
+                      onClick={() => setSelectedDate(iso)}
+                      className={`rounded-[var(--radius-button)] border px-3 py-1.5 text-sm font-medium transition-colors ${
+                        isActive
+                          ? "border-dta-accent bg-dta-accent text-white"
+                          : "border-dta-sand bg-white text-dta-char hover:border-dta-accent/50"
+                      }`}
+                    >
+                      {formatDateFR(day)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* quantity */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-dta-char">
+              Quantit&eacute;
+            </label>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center rounded-[var(--radius-button)] border border-dta-sand">
+                <button
+                  type="button"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="px-3 py-2 text-dta-char/50 transition-colors hover:text-dta-dark"
+                  disabled={quantity <= 1}
+                >
+                  <Minus size={14} />
+                </button>
+                <span className="w-10 text-center text-sm font-medium text-dta-dark">
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity(Math.min(10, quantity + 1))}
+                  className="px-3 py-2 text-dta-char/50 transition-colors hover:text-dta-dark"
+                  disabled={quantity >= 10}
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+              <span className="text-sm text-dta-taupe">
+                billet{quantity > 1 ? "s" : ""}
+              </span>
+            </div>
+          </div>
+
+          {/* contact form */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-dta-char">
+                Pr&eacute;nom
+              </label>
+              <input
+                required
+                value={form.firstName}
+                onChange={(e) =>
+                  setForm({ ...form, firstName: e.target.value })
+                }
+                className={inputClass}
+                placeholder="Votre prénom"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-dta-char">
+                Nom
+              </label>
+              <input
+                required
+                value={form.lastName}
+                onChange={(e) =>
+                  setForm({ ...form, lastName: e.target.value })
+                }
+                className={inputClass}
+                placeholder="Votre nom"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-dta-char">
+              Email
+            </label>
+            <input
+              required
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className={inputClass}
+              placeholder="votre@email.com"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-dta-char">
+              T&eacute;l&eacute;phone
+            </label>
+            <input
+              required
+              type="tel"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              className={inputClass}
+              placeholder="+33 6 00 00 00 00"
+            />
+          </div>
+
+          {/* total + submit */}
+          <div className="border-t border-dta-sand pt-4">
+            <div className="mb-3 flex items-center justify-between text-sm">
+              <span className="text-dta-char/70">
+                {quantity} &times; {formatCurrency(tier.price)}
+              </span>
+              <span className="font-serif text-lg font-bold text-dta-dark">
+                {formatCurrency(total)}
+              </span>
+            </div>
+
+            <button
+              type="submit"
+              disabled={!canSubmit || loading}
+              className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-dta-accent-dark disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Redirection&hellip;
+                </>
+              ) : (
+                `Passer au paiement — ${formatCurrency(total)}`
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

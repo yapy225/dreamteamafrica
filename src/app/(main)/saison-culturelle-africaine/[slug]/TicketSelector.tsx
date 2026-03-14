@@ -1,120 +1,63 @@
 "use client";
 
 import { useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { Minus, Plus, Loader2 } from "lucide-react";
+import PurchasePanel from "./PurchasePanel";
 
 interface TicketSelectorProps {
   eventId: string;
   eventSlug: string;
-  tier: "EARLY_BIRD" | "STANDARD" | "VIP";
+  tier: string;
+  tierName: string;
   price: number;
   highlight: boolean;
+  eventTitle: string;
+  eventDate: string;
+  eventEndDate?: string;
   sessionLabel?: string;
   maxQuantity?: number;
 }
 
-export default function TicketSelector({ eventId, tier, price, highlight, sessionLabel, maxQuantity = 10 }: TicketSelectorProps) {
-  const { data: session } = useSession();
-  const router = useRouter();
-  const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(false);
-
-  const handleCheckout = async () => {
-    if (!session) {
-      router.push("/auth/signin");
-      return;
-    }
-
-    // Facebook Pixel + GTM tracking
-    if (typeof window !== "undefined") {
-      if (typeof (window as any).fbq === "function") {
-        (window as any).fbq("track", "InitiateCheckout", {
-          value: price * quantity,
-          currency: "EUR",
-          content_type: "product",
-          num_items: quantity,
-        });
-      }
-      (window as any).dataLayer = (window as any).dataLayer || [];
-      (window as any).dataLayer.push({
-        event: "begin_checkout",
-        ecommerce: {
-          value: price * quantity,
-          currency: "EUR",
-          items: [{ item_category: "Billet", price, quantity }],
-        },
-      });
-    }
-
-    setLoading(true);
-    try {
-      const res = await fetch("/api/checkout/tickets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          eventId,
-          tier,
-          quantity,
-          sessionLabel,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert(data.error || "Erreur lors de la création du paiement.");
-        setLoading(false);
-      }
-    } catch {
-      alert("Erreur réseau. Veuillez réessayer.");
-      setLoading(false);
-    }
-  };
+export default function TicketSelector({
+  eventId,
+  eventSlug,
+  tier,
+  tierName,
+  price,
+  highlight,
+  eventTitle,
+  eventDate,
+  eventEndDate,
+  sessionLabel,
+}: TicketSelectorProps) {
+  const [open, setOpen] = useState(false);
 
   return (
-    <div className="mt-4 space-y-3">
-      <div className="flex items-center justify-center gap-3">
-        <div className="flex items-center rounded-[var(--radius-button)] border border-dta-sand">
-          <button
-            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            className="px-3 py-2 text-dta-char/50 transition-colors hover:text-dta-dark"
-            disabled={quantity <= 1}
-          >
-            <Minus size={14} />
-          </button>
-          <span className="w-10 text-center text-sm font-medium text-dta-dark">{quantity}</span>
-          <button
-            onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
-            className="px-3 py-2 text-dta-char/50 transition-colors hover:text-dta-dark"
-            disabled={quantity >= maxQuantity}
-          >
-            <Plus size={14} />
-          </button>
-        </div>
-      </div>
-
+    <>
       <button
-        onClick={handleCheckout}
-        disabled={loading}
-        className={`w-full rounded-[var(--radius-button)] px-4 py-3 text-sm font-semibold transition-all duration-200 disabled:opacity-50 ${
+        onClick={() => setOpen(true)}
+        className={`mt-4 w-full rounded-[var(--radius-button)] px-4 py-3 text-sm font-semibold transition-all duration-200 ${
           highlight
             ? "bg-dta-accent text-white hover:bg-dta-accent-dark"
             : "bg-dta-dark text-white hover:bg-dta-char"
         }`}
       >
-        {loading ? (
-          <span className="flex items-center justify-center gap-2">
-            <Loader2 size={14} className="animate-spin" />
-            Redirection...
-          </span>
-        ) : (
-          `Acheter — ${new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(price * quantity)}`
-        )}
+        Réserver —{" "}
+        {new Intl.NumberFormat("fr-FR", {
+          style: "currency",
+          currency: "EUR",
+        }).format(price)}
       </button>
-    </div>
+
+      <PurchasePanel
+        open={open}
+        onClose={() => setOpen(false)}
+        eventId={eventId}
+        eventSlug={eventSlug}
+        tier={{ id: tier, name: tierName, price }}
+        eventTitle={eventTitle}
+        eventDate={eventDate}
+        eventEndDate={eventEndDate}
+      />
+    </>
   );
 }

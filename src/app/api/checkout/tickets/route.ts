@@ -1,17 +1,24 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
 
 export async function POST(request: Request) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
-    }
-
-    const { eventId, tier, quantity, sessionLabel } =
+    const { eventId, tier, quantity, sessionLabel, firstName, lastName, email, phone, visitDate } =
       await request.json();
+
+    // Validate required nominative fields
+    const trimmedFirstName = firstName?.trim();
+    const trimmedLastName = lastName?.trim();
+    const trimmedEmail = email?.trim().toLowerCase();
+    const trimmedPhone = phone?.trim();
+
+    if (!trimmedFirstName || !trimmedLastName || !trimmedEmail || !trimmedPhone) {
+      return NextResponse.json(
+        { error: "Nom, prénom, email et téléphone sont obligatoires." },
+        { status: 400 },
+      );
+    }
 
     if (!eventId || !tier || !quantity || quantity < 1 || quantity > 10) {
       return NextResponse.json(
@@ -19,6 +26,17 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+
+    // Upsert user by email
+    const user = await prisma.user.upsert({
+      where: { email: trimmedEmail },
+      update: {},
+      create: {
+        email: trimmedEmail,
+        name: `${trimmedFirstName} ${trimmedLastName}`,
+        phone: trimmedPhone,
+      },
+    });
 
     const event = await prisma.event.findUnique({
       where: { id: eventId },
@@ -94,7 +112,7 @@ export async function POST(request: Request) {
 
     const checkoutSession = await getStripe().checkout.sessions.create({
       mode: "payment",
-      customer_email: session.user.email!,
+      customer_email: trimmedEmail,
       line_items: [
         {
           price_data: {
@@ -113,10 +131,15 @@ export async function POST(request: Request) {
       metadata: {
         type: "ticket",
         eventId: event.id,
-        userId: session.user.id,
+        userId: user.id,
         tier,
         quantity: String(quantity),
         unitPrice: String(unitPrice),
+        firstName: trimmedFirstName,
+        lastName: trimmedLastName,
+        email: trimmedEmail,
+        phone: trimmedPhone,
+        ...(visitDate && { visitDate: String(visitDate) }),
         ...(sessionLabel && { sessionLabel }),
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/saison-culturelle-africaine/confirmation/{CHECKOUT_SESSION_ID}`,

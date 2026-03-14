@@ -347,6 +347,191 @@ export async function sendFreeTicketEmail(opts: {
   }
 }
 
+export async function sendTicketConfirmationEmail(opts: {
+  to: string;
+  guestName: string;
+  eventTitle: string;
+  eventVenue: string;
+  eventAddress: string;
+  eventDate: Date;
+  eventCoverImage: string | null;
+  tier: string;
+  price: number;
+  quantity: number;
+  tickets: Array<{ id: string; qrCode: string | null }>;
+}) {
+  const dateStr = new Intl.DateTimeFormat("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(opts.eventDate));
+
+  const formatter = new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+  });
+
+  const priceStr = formatter.format(opts.price);
+
+  const ticketCards = opts.tickets
+    .map((ticket, i) => {
+      const refCode = ticket.id.slice(0, 8).toUpperCase();
+      const ticketLabel = `Billet ${i + 1}/${opts.quantity} — ${opts.tier} ${priceStr}`;
+
+      const coverSection = opts.eventCoverImage
+        ? `<div style="position:relative;border-radius:12px 12px 0 0;overflow:hidden;height:200px;background:#1A1A1A;">
+            <img src="${opts.eventCoverImage}" alt="${opts.eventTitle}" style="width:100%;height:100%;object-fit:cover;display:block;opacity:0.8;" />
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,#1A1A1A 0%,rgba(26,26,26,0.3) 50%,transparent 100%);"></div>
+            <div style="position:absolute;bottom:16px;left:20px;right:20px;">
+              <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#d4af37;font-family:Arial,sans-serif;">${ticketLabel}</p>
+              <h2 style="margin:6px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${opts.eventTitle}</h2>
+            </div>
+          </div>`
+        : `<div style="border-radius:12px 12px 0 0;background:linear-gradient(135deg,#8B6F4E,#6F5A3E);padding:30px 20px;">
+            <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.7);font-family:Arial,sans-serif;">${ticketLabel}</p>
+            <h2 style="margin:8px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${opts.eventTitle}</h2>
+          </div>`;
+
+      const qrSection = ticket.qrCode
+        ? `<td style="vertical-align:top;text-align:center;width:200px;">
+              <div style="background:#fff;border-radius:10px;padding:8px;display:inline-block;">
+                <img src="${ticket.qrCode}" alt="QR Code" width="180" height="180" style="width:180px;height:180px;display:block;" />
+              </div>
+              <p style="margin:6px 0 0;font-size:8px;color:rgba(255,255,255,0.2);font-family:Arial,sans-serif;">Présentez ce code à l'entrée</p>
+            </td>`
+        : "";
+
+      return `
+    <!-- TICKET CARD ${i + 1} -->
+    <div style="background:#1A1A1A;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.15);${i > 0 ? "margin-top:24px;" : ""}">
+
+      <!-- Cover image -->
+      ${coverSection}
+
+      <!-- Divider dots -->
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#1A1A1A;">
+        <tr>
+          <td width="12" style="background:#f5f0ea;border-radius:0 50% 50% 0;height:20px;"></td>
+          <td style="border-bottom:2px dashed rgba(255,255,255,0.15);"></td>
+          <td width="12" style="background:#f5f0ea;border-radius:50% 0 0 50%;height:20px;"></td>
+        </tr>
+      </table>
+
+      <!-- Ticket info -->
+      <div style="padding:20px;background:#1A1A1A;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="vertical-align:top;padding-right:16px;">
+              <!-- Guest name -->
+              <p style="margin:0;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.35);font-family:Arial,sans-serif;">Acheteur</p>
+              <p style="margin:4px 0 0;font-size:18px;font-weight:bold;color:#fff;">${opts.guestName}</p>
+
+              <!-- Badge -->
+              <div style="margin-top:10px;">
+                <span style="display:inline-block;background:#d4af37;color:#fff;padding:4px 12px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">
+                  ${opts.tier} — ${priceStr}
+                </span>
+              </div>
+
+              <!-- Details -->
+              <table style="margin-top:14px;" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Date</td>
+                  <td style="padding:3px 0;font-size:12px;font-weight:600;color:#fff;">${dateStr}</td>
+                </tr>
+                <tr>
+                  <td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Lieu</td>
+                  <td style="padding:3px 0;font-size:12px;font-weight:600;color:#fff;">${opts.eventVenue}</td>
+                </tr>
+                <tr>
+                  <td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Adresse</td>
+                  <td style="padding:3px 0;font-size:12px;color:rgba(255,255,255,0.6);">${opts.eventAddress}</td>
+                </tr>
+                <tr>
+                  <td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Billet</td>
+                  <td style="padding:3px 0;font-size:12px;font-weight:600;color:#d4af37;">${i + 1} / ${opts.quantity}</td>
+                </tr>
+                <tr>
+                  <td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Réf.</td>
+                  <td style="padding:3px 0;font-size:11px;font-family:monospace;color:rgba(255,255,255,0.5);">${refCode}</td>
+                </tr>
+              </table>
+            </td>
+
+            <!-- QR Code -->
+            ${qrSection}
+          </tr>
+        </table>
+      </div>
+
+      <!-- Footer -->
+      <div style="padding:8px 20px;background:rgba(255,255,255,0.03);">
+        <table width="100%"><tr>
+          <td style="font-size:8px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.15);font-family:Arial,sans-serif;">Dream Team Africa — Saison 2026</td>
+          <td style="text-align:right;font-size:8px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.15);font-family:Arial,sans-serif;">Billet non cessible</td>
+        </tr></table>
+      </div>
+
+    </div>`;
+    })
+    .join("\n");
+
+  const html = `
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="font-family:Georgia,serif;color:#1a1a1a;margin:0;padding:0;background:#f5f0ea;">
+  <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:24px;">
+      <h1 style="margin:0;font-size:20px;color:#8B6F4E;">Dream Team Africa</h1>
+      <p style="margin:4px 0 0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#999;">Confirmation d'achat</p>
+    </div>
+
+    <!-- Greeting -->
+    <p style="font-size:15px;margin-bottom:20px;">
+      Bonjour <strong>${opts.guestName}</strong>,<br>
+      Votre achat est confirmé ! Voici ${opts.quantity > 1 ? "vos billets" : "votre billet"} :
+    </p>
+
+    ${ticketCards}
+
+    <!-- Instructions -->
+    <div style="margin-top:24px;padding:16px;background:#fff;border-radius:8px;border:1px solid #e8dfd3;">
+      <h3 style="margin:0 0 8px;font-size:14px;color:#1a1a1a;">Informations pratiques</h3>
+      <ul style="margin:0;padding-left:18px;font-size:13px;color:#666;line-height:1.8;">
+        <li>Présentez ce QR code (imprimé ou sur mobile) à l'entrée</li>
+        <li>${opts.quantity > 1 ? `Vous avez <strong>${opts.quantity} billets</strong> — chaque billet a son propre QR code` : "Ce billet est valable pour <strong>1 personne</strong>"}</li>
+        <li>Adresse : <strong>${opts.eventVenue}</strong>, ${opts.eventAddress}</li>
+        <li>Conservez cet email, il fait office de billet</li>
+      </ul>
+    </div>
+
+    <!-- Footer -->
+    <div style="margin-top:24px;text-align:center;font-size:11px;color:#999;">
+      <p>Dream Team Africa — Saison Culturelle Africaine 2026</p>
+      <p>contact@dreamteamafrica.com</p>
+    </div>
+
+  </div>
+</body>
+</html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `Vos billets — ${opts.eventTitle}`,
+    html,
+  });
+
+  if (error) {
+    console.error("Ticket confirmation email error:", error);
+    throw new Error(`Failed to send email: ${error.message}`);
+  }
+}
+
 export async function sendExhibitorProfileNotification(opts: {
   companyName: string;
   contactName: string;
@@ -476,5 +661,134 @@ export async function sendSurveyEmail(opts: { to: string }) {
   if (error) {
     console.error("Survey email error:", error);
     throw new Error(`Failed to send survey email: ${error.message}`);
+  }
+}
+
+export async function sendContactReplyEmail(opts: {
+  to: string;
+  firstName: string;
+  replyBody: string;
+}) {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
+
+  const html = `
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8" /></head>
+<body style="margin:0;padding:0;background:#f5f0eb;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;">
+        <tr><td style="background:#8B6F4E;padding:24px 32px;">
+          <h1 style="margin:0;color:#ffffff;font-size:20px;">Dream Team Africa</h1>
+        </td></tr>
+        <tr><td style="padding:32px;">
+          <p style="margin:0 0 16px;color:#1a1a1a;font-size:15px;">
+            Bonjour ${opts.firstName},
+          </p>
+          <p style="margin:0 0 16px;color:#1a1a1a;font-size:15px;">
+            Merci pour votre message. Voici notre réponse :
+          </p>
+          <div style="background:#f5f0eb;border-left:4px solid #8B6F4E;padding:16px 20px;margin:16px 0;border-radius:0 8px 8px 0;">
+            <p style="margin:0;color:#1a1a1a;font-size:14px;line-height:1.6;white-space:pre-line;">${opts.replyBody}</p>
+          </div>
+          <p style="margin:24px 0 0;color:#666;font-size:13px;">
+            N'hésitez pas à nous répondre directement à cet email si vous avez d'autres questions.
+          </p>
+        </td></tr>
+        <tr><td style="background:#f5f0eb;padding:16px 32px;text-align:center;">
+          <p style="margin:0;color:#999;font-size:11px;">
+            Dream Team Africa — <a href="${baseUrl}" style="color:#8B6F4E;">dreamteamafrica.com</a>
+          </p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  const resend = getResend();
+  const { error } = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    replyTo: "hello@dreamteamafrica.com",
+    subject: "Réponse à votre message — Dream Team Africa",
+    html,
+  });
+
+  if (error) {
+    console.error("Contact reply email error:", error);
+    throw new Error(`Failed to send contact reply: ${error.message}`);
+  }
+}
+
+export async function sendContactNotificationEmail(opts: {
+  category: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  company: string | null;
+  message: string;
+}) {
+  const adminEmail = process.env.ADMIN_EMAIL || "hello@dreamteamafrica.com";
+
+  const html = `
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8" /></head>
+<body style="margin:0;padding:0;background:#f5f0eb;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;">
+        <tr><td style="background:#8B6F4E;padding:24px 32px;">
+          <h1 style="margin:0;color:#ffffff;font-size:20px;">Nouveau message de contact</h1>
+          <p style="margin:4px 0 0;color:#ffffff99;font-size:13px;">${opts.category}</p>
+        </td></tr>
+        <tr><td style="padding:32px;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;color:#1a1a1a;">
+            <tr>
+              <td style="padding:8px 0;color:#666;width:120px;vertical-align:top;">Nom</td>
+              <td style="padding:8px 0;font-weight:bold;">${opts.firstName} ${opts.lastName}</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;color:#666;vertical-align:top;">Email</td>
+              <td style="padding:8px 0;"><a href="mailto:${opts.email}" style="color:#8B6F4E;">${opts.email}</a></td>
+            </tr>
+            ${opts.phone ? `<tr>
+              <td style="padding:8px 0;color:#666;vertical-align:top;">Téléphone</td>
+              <td style="padding:8px 0;"><a href="tel:${opts.phone}" style="color:#8B6F4E;">${opts.phone}</a></td>
+            </tr>` : ""}
+            ${opts.company ? `<tr>
+              <td style="padding:8px 0;color:#666;vertical-align:top;">Structure</td>
+              <td style="padding:8px 0;">${opts.company}</td>
+            </tr>` : ""}
+          </table>
+          <div style="margin:24px 0 0;padding:20px;background:#f5f0eb;border-radius:8px;">
+            <p style="margin:0 0 8px;color:#666;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Message</p>
+            <p style="margin:0;color:#1a1a1a;font-size:14px;line-height:1.6;white-space:pre-line;">${opts.message}</p>
+          </div>
+          <p style="margin:24px 0 0;font-size:13px;color:#666;">
+            Répondez directement à cet email pour contacter ${opts.firstName}.
+          </p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  const resend = getResend();
+  const { error } = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: adminEmail,
+    replyTo: opts.email,
+    subject: `[${opts.category}] ${opts.firstName} ${opts.lastName} — Nouveau message`,
+    html,
+  });
+
+  if (error) {
+    console.error("Contact notification email error:", error);
+    throw new Error(`Failed to send contact notification: ${error.message}`);
   }
 }

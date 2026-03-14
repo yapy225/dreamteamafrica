@@ -28,6 +28,9 @@ interface Tier {
 interface TicketSectionClientProps {
   eventId: string;
   eventSlug: string;
+  eventTitle: string;
+  eventDate: string;
+  eventEndDate?: string;
   tiers: Tier[];
   soldOut: boolean;
   sessions: ProgramSession[];
@@ -64,6 +67,9 @@ function fmtPrice(n: number) {
 export default function TicketSectionClient({
   eventId,
   eventSlug,
+  eventTitle,
+  eventDate,
+  eventEndDate,
   tiers,
   soldOut,
   sessions,
@@ -231,8 +237,12 @@ export default function TicketSectionClient({
                     eventId={eventId}
                     eventSlug={eventSlug}
                     tier={tier.id}
+                    tierName={tier.name}
                     price={tier.price}
                     highlight={tier.highlight}
+                    eventTitle={eventTitle}
+                    eventDate={eventDate}
+                    eventEndDate={eventEndDate}
                     sessionLabel={sessionLabel}
                     maxQuantity={tierRemaining != null ? Math.min(10, tierRemaining) : 10}
                   />

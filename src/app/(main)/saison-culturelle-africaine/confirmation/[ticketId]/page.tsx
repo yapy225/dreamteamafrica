@@ -1,10 +1,8 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
 import { CheckCircle, Calendar, MapPin, Download, ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
-import { auth } from "@/lib/auth";
 import { formatDate, formatPrice } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -43,13 +41,10 @@ export default async function ConfirmationPage({
 }: {
   params: Promise<{ ticketId: string }>;
 }) {
-  const session = await auth();
-  if (!session) redirect("/auth/signin");
-
   const { ticketId } = await params;
 
   const tickets = await prisma.ticket.findMany({
-    where: { stripeSessionId: ticketId, userId: session.user.id },
+    where: { stripeSessionId: ticketId },
     include: { event: true },
   });
 
@@ -57,7 +52,7 @@ export default async function ConfirmationPage({
     tickets.length > 0
       ? tickets
       : await prisma.ticket.findMany({
-          where: { id: ticketId, userId: session.user.id },
+          where: { id: ticketId },
           include: { event: true },
         });
 
@@ -87,6 +82,7 @@ export default async function ConfirmationPage({
   const event = finalTickets[0].event;
   const totalAmount = finalTickets.reduce((sum, t) => sum + t.price, 0);
   const eventDate = new Date(event.date);
+  const holderName = `${finalTickets[0].firstName ?? ""} ${finalTickets[0].lastName ?? ""}`.trim();
 
   return (
     <>
@@ -256,7 +252,7 @@ export default async function ConfirmationPage({
                   Dream Team Africa &mdash; Saison 2026
                 </span>
                 <span className="text-[10px] text-white/30">
-                  {session.user.name || session.user.email}
+                  {`${ticket.firstName ?? ""} ${ticket.lastName ?? ""}`.trim() || holderName}
                 </span>
               </div>
             </div>

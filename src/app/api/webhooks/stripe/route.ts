@@ -3,7 +3,8 @@ import { headers } from "next/headers";
 import { getStripe, Stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/db";
 import QRCode from "qrcode";
-import { sendThankYouEmail } from "@/lib/email";
+import { uploadBuffer } from "@/lib/bunny";
+import { sendThankYouEmail, sendTicketConfirmationEmail } from "@/lib/email";
 import { sendTicketConfirmationWhatsApp } from "@/lib/whatsapp";
 import { generateInvoicePDF, generateInvoiceNumber } from "@/lib/generate-invoice";
 import { DEPOSIT_AMOUNT } from "@/lib/exhibitor-events";
@@ -54,51 +55,98 @@ export async function POST(request: Request) {
 }
 
 async function handleTicketPurchase(session: Stripe.Checkout.Session) {
-  const { eventId, userId, tier, quantity, unitPrice } = session.metadata!;
+  const { eventId, userId, tier, quantity, unitPrice, firstName, lastName, email, phone, visitDate } = session.metadata!;
   const qty = parseInt(quantity);
-  const price = parseFloat(unitPrice);
+  const unitPriceNum = parseFloat(unitPrice);
 
-  const ticketPromises = Array.from({ length: qty }, async (_, i) => {
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    select: { title: true, date: true, venue: true, address: true, coverImage: true },
+  });
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true, phone: true },
+  });
+
+  // Resolve tier name for email
+  const eventFull = await prisma.event.findUnique({ where: { id: eventId }, select: { tiers: true } });
+  const customTiers = eventFull?.tiers as Array<{ id: string; name: string }> | null;
+  const matchedTier = Array.isArray(customTiers) ? customTiers.find((t) => t.id === tier) : null;
+  const legacyLabelMap: Record<string, string> = { EARLY_BIRD: "Early Bird", STANDARD: "Standard", VIP: "VIP" };
+  const tierName = matchedTier?.name || legacyLabelMap[tier] || tier;
+
+  const createdTickets: Array<{ id: string; qrCode: string }> = [];
+
+  const ticketPromises = Array.from({ length: qty }, async () => {
     const ticketId = crypto.randomUUID();
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://dreamteamafrica.com";
-    const qrData = `${baseUrl}/check/${ticketId}`;
+    const qrUrl = `${baseUrl}/check/${ticketId}`;
 
-    const qrCode = await QRCode.toDataURL(qrData, {
-      width: 600,
-      margin: 3,
-      errorCorrectionLevel: "H",
-      color: { dark: "#000000", light: "#FFFFFF" },
-    });
+    const qrBuffer = await QRCode.toBuffer(qrUrl, { width: 600, margin: 2 });
+    const { url: qrCdnUrl } = await uploadBuffer(
+      Buffer.from(qrBuffer),
+      `qrcodes/tickets/${ticketId}.png`,
+    );
 
-    return prisma.ticket.create({
+    const ticket = await prisma.ticket.create({
       data: {
         id: ticketId,
         eventId,
         userId,
         tier,
-        price,
-        qrCode,
+        price: unitPriceNum,
+        qrCode: qrCdnUrl,
         stripeSessionId: session.id,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        email: email || null,
+        phone: phone || null,
+        visitDate: visitDate ? new Date(visitDate) : null,
       },
     });
+
+    createdTickets.push({ id: ticket.id, qrCode: qrCdnUrl });
+    return ticket;
   });
 
   await Promise.all(ticketPromises);
   console.log(`Created ${qty} ticket(s) for event ${eventId}, user ${userId}`);
 
+  // Send confirmation email
+  try {
+    if (event) {
+      await sendTicketConfirmationEmail({
+        to: email || user?.email || "",
+        guestName: `${firstName || ""} ${lastName || ""}`.trim() || user?.name || user?.email || "",
+        eventTitle: event.title,
+        eventVenue: event.venue,
+        eventAddress: event.address,
+        eventDate: visitDate ? new Date(visitDate) : event.date,
+        eventCoverImage: event.coverImage,
+        tier: tierName,
+        price: unitPriceNum,
+        quantity: qty,
+        tickets: createdTickets,
+      });
+    }
+  } catch (emailErr) {
+    console.error("Ticket confirmation email failed:", emailErr);
+  }
+
   // Send WhatsApp confirmation if user has a phone number
   try {
-    const user = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, phone: true } });
-    const event = await prisma.event.findUnique({ where: { id: eventId }, select: { title: true, date: true, venue: true } });
-    if (user?.phone && event) {
+    const whatsappPhone = phone || user?.phone;
+    const customerName = `${firstName || ""} ${lastName || ""}`.trim() || user?.name || "Client";
+    if (whatsappPhone && event) {
       await sendTicketConfirmationWhatsApp({
-        phone: user.phone,
-        customerName: user.name ?? "Client",
+        phone: whatsappPhone,
+        customerName,
         eventTitle: event.title,
         tier,
         quantity: qty,
-        totalPrice: price * qty,
-        eventDate: new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(event.date),
+        totalPrice: unitPriceNum * qty,
+        eventDate: new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(visitDate ? new Date(visitDate) : event.date),
         eventVenue: event.venue,
       });
     }

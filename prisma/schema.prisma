@@ -653,11 +653,15 @@ model ContactMessage {
   company    String?
   message    String   @db.Text
   read       Boolean  @default(false)
+  status     String   @default("NOUVEAU") // NOUVEAU, CONTACTE, INTERESSE, ACOMPTE, CONFIRME, PERDU
+  notes      String?  @db.Text
   createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
   replies    ContactReply[]
 
   @@index([category])
   @@index([read])
+  @@index([status])
   @@index([createdAt])
 }
 

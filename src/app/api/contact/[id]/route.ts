@@ -15,9 +15,14 @@ export async function PATCH(
   const { id } = await params;
   const body = await request.json();
 
+  const data: any = {};
+  if (typeof body.read === "boolean") data.read = body.read;
+  if (body.status) data.status = body.status;
+  if (body.notes !== undefined) data.notes = body.notes || null;
+
   const updated = await prisma.contactMessage.update({
     where: { id },
-    data: { read: body.read ?? true },
+    data,
   });
 
   return NextResponse.json(updated);

@@ -508,6 +508,31 @@ model EventReservation {
   @@index([email])
 }
 
+// ─── PROSPECTS EXPOSANTS ──────────────────────────────
+
+model ExposantLead {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  brand       String
+  sector      String
+  phone       String
+  email       String
+  eventName   String
+  // Suivi
+  status      String   @default("SENT")  // SENT, DEPOSIT_PAID, QUOTED, CONFIRMED, CANCELLED
+  depositPaidAt DateTime?
+  bookingId   String?  // lien vers ExhibitorBooking après paiement
+  stripeSessionId String?
+  remindedAt  DateTime? // date de relance 24h
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
+}
+
 // ─── BILLETTERIE EXPOSANTS ─────────────────────────────
 
 model ExhibitorBooking {

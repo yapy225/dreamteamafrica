@@ -160,6 +160,7 @@ export async function POST(request: Request) {
       // ── Single full payment ──
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
+        payment_method_types: ["card", "paypal"],
         customer_email: email.trim(),
         line_items: [
           {
@@ -197,6 +198,7 @@ export async function POST(request: Request) {
       // Step 1: Create Stripe checkout for the deposit only
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
+        payment_method_types: ["card", "paypal"],
         customer_email: email.trim(),
         line_items: [
           {

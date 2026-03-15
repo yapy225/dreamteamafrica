@@ -5,9 +5,11 @@ import { prisma } from "@/lib/db";
 import QRCode from "qrcode";
 import { uploadBuffer } from "@/lib/bunny";
 import { sendThankYouEmail, sendTicketConfirmationEmail } from "@/lib/email";
-import { sendTicketConfirmationWhatsApp } from "@/lib/whatsapp";
+import { sendTicketConfirmationWhatsApp, sendWhatsAppText } from "@/lib/whatsapp";
 import { generateInvoicePDF, generateInvoiceNumber } from "@/lib/generate-invoice";
 import { DEPOSIT_AMOUNT } from "@/lib/exhibitor-events";
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -43,6 +45,8 @@ export async function POST(request: Request) {
       await handleExhibitorBooking(session);
     } else if (metadata?.type === "exhibitor_early_payment") {
       await handleExhibitorEarlyPayment(session);
+    } else if (metadata?.type === "exposant_deposit") {
+      await handleExposantDeposit(session);
     }
   }
 
@@ -487,4 +491,90 @@ async function generateInvoiceOnCompletion(bookingId: string) {
   } catch (err) {
     console.error(`[INVOICE] Failed to generate for ${bookingId}:`, err);
   }
+}
+
+/* ── Exposant Deposit (50 €) ────────────────────────────── */
+async function handleExposantDeposit(session: Stripe.Checkout.Session) {
+  const metadata = session.metadata!;
+  const leadId = metadata.leadId;
+
+  const lead = await prisma.exposantLead.findUnique({ where: { id: leadId } });
+  if (!lead) {
+    console.error(`[exposant-deposit] Lead ${leadId} not found`);
+    return;
+  }
+
+  if (lead.status === "DEPOSIT_PAID") {
+    console.log(`[exposant-deposit] Lead ${leadId} already processed`);
+    return;
+  }
+
+  // Generate a random password
+  const rawPassword = crypto.randomBytes(4).toString("hex"); // 8 chars
+  const hashedPassword = await bcrypt.hash(rawPassword, 10);
+
+  // Upsert user account
+  const user = await prisma.user.upsert({
+    where: { email: lead.email },
+    create: {
+      email: lead.email,
+      name: `${lead.firstName} ${lead.lastName}`,
+      phone: lead.phone,
+      password: hashedPassword,
+    },
+    update: {
+      // Don't overwrite existing password if user already has one
+      name: `${lead.firstName} ${lead.lastName}`,
+      phone: lead.phone,
+    },
+  });
+
+  // Check if user already had a password (existing account)
+  const existingUser = await prisma.user.findUnique({
+    where: { email: lead.email },
+    select: { password: true },
+  });
+  const isNewAccount = !existingUser?.password || existingUser.password === hashedPassword;
+
+  // Update lead status
+  await prisma.exposantLead.update({
+    where: { id: leadId },
+    data: {
+      status: "DEPOSIT_PAID",
+      depositPaidAt: new Date(),
+    },
+  });
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+  // Send WhatsApp with credentials
+  try {
+    const lines = [
+      `Bonjour ${lead.firstName} !`,
+      ``,
+      `Votre acompte de 50 € pour "${lead.eventName}" a bien été reçu. Merci !`,
+      ``,
+      ...(isNewAccount
+        ? [
+            `Votre espace client a été créé :`,
+            `Email : ${lead.email}`,
+            `Mot de passe : ${rawPassword}`,
+            `Connexion : ${appUrl}/login`,
+            ``,
+          ]
+        : [
+            `Connectez-vous avec votre compte existant : ${appUrl}/login`,
+            ``,
+          ]),
+      `Nous vous enverrons votre devis personnalisé très rapidement.`,
+      ``,
+      `L'équipe Dream Team Africa`,
+    ];
+
+    await sendWhatsAppText(lead.phone, lines.join("\n"));
+  } catch (err) {
+    console.error(`[exposant-deposit] WhatsApp send failed for ${lead.phone}:`, err);
+  }
+
+  console.log(`[exposant-deposit] Lead ${leadId} processed — user ${user.id} — deposit paid`);
 }

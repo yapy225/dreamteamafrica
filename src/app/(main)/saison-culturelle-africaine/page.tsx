@@ -1,9 +1,9 @@
-import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, MapPin, Users, Ticket, ArrowRight, Newspaper, ShoppingBag, Store } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
+import ExposantButton from "@/components/ExposantButton";
 
 export const revalidate = 60;
 
@@ -160,25 +160,24 @@ export default async function EvenementsPage() {
 
       {/* ── B. Featured Event Hero + Sidebar ─────────────── */}
       {featuredEvent && (
-        <div className="mb-14 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
-          <Link
-            href={`/saison-culturelle-africaine/${featuredEvent.slug}`}
-            className="group block rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)]"
-          >
+        <div className="mb-14">
+          <div className="group rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:shadow-[var(--shadow-card-hover)]">
             <div className="grid grid-cols-1 md:grid-cols-2">
               {/* Image */}
-              <div className="relative aspect-square overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-accent/20 to-dta-sand md:aspect-auto md:min-h-[400px] md:rounded-l-[var(--radius-card)] md:rounded-tr-none">
-                {featuredEvent.coverImage && (
-                  <Image
-                    src={featuredEvent.coverImage}
-                    alt={featuredEvent.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    priority
-                  />
-                )}
-              </div>
+              <Link href={`/saison-culturelle-africaine/${featuredEvent.slug}`}>
+                <div className="relative aspect-square overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-accent/20 to-dta-sand md:aspect-auto md:min-h-[400px] md:rounded-l-[var(--radius-card)] md:rounded-tr-none">
+                  {featuredEvent.coverImage && (
+                    <Image
+                      src={featuredEvent.coverImage}
+                      alt={featuredEvent.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
+                      priority
+                    />
+                  )}
+                </div>
+              </Link>
 
               {/* Details */}
               <div className="flex flex-col justify-center p-8">
@@ -199,9 +198,11 @@ export default async function EvenementsPage() {
                   </span>
                 </div>
 
-                <h2 className="font-serif text-2xl font-bold leading-tight text-dta-dark transition-colors group-hover:text-dta-accent sm:text-3xl">
-                  {featuredEvent.title}
-                </h2>
+                <Link href={`/saison-culturelle-africaine/${featuredEvent.slug}`}>
+                  <h2 className="font-serif text-2xl font-bold leading-tight text-dta-dark transition-colors group-hover:text-dta-accent sm:text-3xl">
+                    {featuredEvent.title}
+                  </h2>
+                </Link>
 
                 <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-dta-char/70">
                   {featuredEvent.description}
@@ -248,26 +249,24 @@ export default async function EvenementsPage() {
                   </div>
                 )}
 
-                {/* CTA */}
+                {/* CTA — side by side */}
                 <div className="mt-6 flex items-center gap-3">
-                  <span className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors group-hover:bg-dta-accent-dark">
+                  <Link
+                    href={`/saison-culturelle-africaine/${featuredEvent.slug}`}
+                    className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-dta-accent-dark"
+                  >
                     Réserver
                     <Ticket size={15} />
-                  </span>
+                  </Link>
+                  <ExposantButton
+                    eventName={featuredEvent.title}
+                    className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-fuchsia-700"
+                    size={15}
+                  />
                 </div>
               </div>
             </div>
-          </Link>
-          <div className="mt-3 flex justify-end lg:justify-start">
-            <Link
-              href="/exposants/reservation"
-              className="inline-flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-dta-accent px-5 py-2.5 text-sm font-semibold text-dta-accent transition-all hover:bg-dta-accent hover:text-white"
-            >
-              <Store size={15} />
-              Exposer
-            </Link>
           </div>
-
         </div>
       )}
 
@@ -278,103 +277,100 @@ export default async function EvenementsPage() {
             Prochains événements
           </h3>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {upcomingEvents.map((event, index) => (
-              <React.Fragment key={event.id}>
-              <Link
-                href={`/saison-culturelle-africaine/${event.slug}`}
+            {upcomingEvents.map((event) => (
+              <div
+                key={event.id}
                 className="group rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card-hover)]"
               >
                 {/* Cover image with date badge overlay */}
-                <div className="relative aspect-square overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-beige to-dta-sand">
-                  {event.coverImage && (
-                    <Image
-                      src={event.coverImage}
-                      alt={event.title}
-                      fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                  )}
-                  {/* Date badge on image */}
-                  <div className="absolute left-3 top-3 rounded-[var(--radius-button)] bg-white/90 px-3 py-1.5 text-center shadow-sm backdrop-blur-sm">
-                    <span className="block text-xs font-semibold uppercase text-dta-accent">
-                      {new Date(event.date).toLocaleDateString("fr-FR", {
-                        month: "short",
-                      })}
-                    </span>
-                    <span className="block font-serif text-xl font-bold text-dta-dark">
-                      {new Date(event.date).getDate()}
-                    </span>
+                <Link href={`/saison-culturelle-africaine/${event.slug}`}>
+                  <div className="relative aspect-square overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-dta-beige to-dta-sand">
+                    {event.coverImage && (
+                      <Image
+                        src={event.coverImage}
+                        alt={event.title}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    )}
+                    {/* Date badge on image */}
+                    <div className="absolute left-3 top-3 rounded-[var(--radius-button)] bg-white/90 px-3 py-1.5 text-center shadow-sm backdrop-blur-sm">
+                      <span className="block text-xs font-semibold uppercase text-dta-accent">
+                        {new Date(event.date).toLocaleDateString("fr-FR", {
+                          month: "short",
+                        })}
+                      </span>
+                      <span className="block font-serif text-xl font-bold text-dta-dark">
+                        {new Date(event.date).getDate()}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                </Link>
 
                 <div className="p-5">
-                  <h3 className="font-serif text-lg font-semibold leading-snug text-dta-dark transition-colors group-hover:text-dta-accent">
-                    {event.title}
-                  </h3>
-                  <p className="mt-2 line-clamp-2 text-sm text-dta-char/70">
-                    {event.description}
-                  </p>
-
-                  {/* Venue + date */}
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-dta-taupe">
-                    <span className="flex items-center gap-1">
-                      <MapPin size={13} />
-                      {event.venue}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar size={13} />
-                      {formatDate(event.date)}
-                    </span>
-                  </div>
-
-                  {/* Price + remaining */}
-                  <div className="mt-4 flex items-center justify-between">
-                    <p className="text-xs text-dta-char/70">
-                      À partir de{" "}
-                      <span className="font-serif text-base font-bold text-dta-accent">
-                        {formatPrice(lowestPrice(event))}
-                      </span>
+                  <Link href={`/saison-culturelle-africaine/${event.slug}`}>
+                    <h3 className="font-serif text-lg font-semibold leading-snug text-dta-dark transition-colors group-hover:text-dta-accent">
+                      {event.title}
+                    </h3>
+                    <p className="mt-2 line-clamp-2 text-sm text-dta-char/70">
+                      {event.description}
                     </p>
-                    {event.showCapacity && event.capacity > 0 && (
-                      <span className="flex items-center gap-1 rounded-[var(--radius-full)] bg-dta-beige px-2.5 py-1 text-xs font-medium text-dta-char">
-                        <Ticket size={12} />
-                        {remainingPlaces(event)} places
+
+                    {/* Venue + date */}
+                    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-dta-taupe">
+                      <span className="flex items-center gap-1">
+                        <MapPin size={13} />
+                        {event.venue}
                       </span>
-                    )}
-                  </div>
-
-                  {/* Capacity bar */}
-                  {event.showCapacity && event.capacity > 0 && (
-                    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-[var(--radius-full)] bg-dta-beige">
-                      <div
-                        className="h-full rounded-[var(--radius-full)] bg-dta-accent/70 transition-all"
-                        style={{
-                          width: `${Math.min(capacityPercent(event), 100)}%`,
-                        }}
-                      />
+                      <span className="flex items-center gap-1">
+                        <Calendar size={13} />
+                        {formatDate(event.date)}
+                      </span>
                     </div>
-                  )}
 
-                  {/* Buttons */}
+                    {/* Price + remaining */}
+                    <div className="mt-4 flex items-center justify-between">
+                      <p className="text-xs text-dta-char/70">
+                        À partir de{" "}
+                        <span className="font-serif text-base font-bold text-dta-accent">
+                          {formatPrice(lowestPrice(event))}
+                        </span>
+                      </p>
+                      {event.showCapacity && event.capacity > 0 && (
+                        <span className="flex items-center gap-1 rounded-[var(--radius-full)] bg-dta-beige px-2.5 py-1 text-xs font-medium text-dta-char">
+                          <Ticket size={12} />
+                          {remainingPlaces(event)} places
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Capacity bar */}
+                    {event.showCapacity && event.capacity > 0 && (
+                      <div className="mt-3 h-1.5 w-full overflow-hidden rounded-[var(--radius-full)] bg-dta-beige">
+                        <div
+                          className="h-full rounded-[var(--radius-full)] bg-dta-accent/70 transition-all"
+                          style={{
+                            width: `${Math.min(capacityPercent(event), 100)}%`,
+                          }}
+                        />
+                      </div>
+                    )}
+                  </Link>
+
+                  {/* Buttons — side by side */}
                   <div className="mt-4 flex items-center gap-2">
-                    <span className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-button)] bg-dta-accent px-3 py-2 text-xs font-semibold text-white transition-colors group-hover:bg-dta-accent-dark">
+                    <Link
+                      href={`/saison-culturelle-africaine/${event.slug}`}
+                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-button)] bg-dta-accent px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-dta-accent-dark"
+                    >
                       <Ticket size={13} />
                       Réserver
-                    </span>
+                    </Link>
+                    <ExposantButton eventName={event.title} />
                   </div>
                 </div>
-              </Link>
-              <div className="mt-2">
-                <Link
-                  href="/exposants/reservation"
-                  className="flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-button)] border border-dta-accent px-3 py-2 text-xs font-semibold text-dta-accent transition-all hover:bg-dta-accent hover:text-white"
-                >
-                  <Store size={13} />
-                  Exposer
-                </Link>
               </div>
-              </React.Fragment>
             ))}
           </div>
         </>

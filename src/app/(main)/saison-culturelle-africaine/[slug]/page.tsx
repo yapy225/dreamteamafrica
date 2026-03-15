@@ -8,6 +8,7 @@ import { formatDate, formatPrice } from "@/lib/utils";
 import TicketSelector from "./TicketSelector";
 import TicketSectionClient from "./TicketSectionClient";
 import FreeReservationForm from "@/components/events/FreeReservationForm";
+import ExposantButton from "@/components/ExposantButton";
 import SocialProofBanner from "./SocialProofBanner";
 import ShareButton from "./ShareButton";
 
@@ -647,13 +648,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
             <p className="text-sm text-dta-char/70">
               Vous êtes artisan, créateur ou entrepreneur ?
             </p>
-            <Link
-              href="/exposants/reservation"
-              className="mt-3 inline-flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-dta-accent bg-transparent px-6 py-3 text-sm font-semibold text-dta-accent transition-all duration-200 hover:bg-dta-accent hover:text-white"
-            >
-              <Store size={16} />
-              Devenir exposant
-            </Link>
+            <div className="mt-3">
+              <ExposantButton
+                eventName={event.title}
+                className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-fuchsia-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-fuchsia-700"
+                size={16}
+              />
+            </div>
           </div>
         </div>
       </div>

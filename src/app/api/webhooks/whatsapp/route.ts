@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
+import { sendWhatsAppText } from "@/lib/whatsapp";
 
 const VERIFY_TOKEN = process.env.FB_LEADS_VERIFY_TOKEN ?? process.env.CRON_SECRET!;
 const APP_SECRET = process.env.WHATSAPP_APP_SECRET!;
@@ -186,6 +187,44 @@ export async function POST(request: Request) {
           });
         } catch (dbErr) {
           console.error("WhatsApp message save error:", dbErr);
+        }
+
+        // Auto-reply for exposant leads
+        if (messageBody.toLowerCase().includes("devenir exposant")) {
+          try {
+            // Normalize phone: "from" is like "33782801852", we search with variations
+            const phoneSuffix = from.replace(/^33/, "");
+            const lead = await prisma.exposantLead.findFirst({
+              where: {
+                phone: { contains: phoneSuffix },
+                status: "SENT",
+              },
+              orderBy: { createdAt: "desc" },
+            });
+
+            if (lead) {
+              const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+              const depositUrl = `${appUrl}/exposants/devis/${lead.id}?t=${Date.now()}`;
+
+              const reply = [
+                `Bonjour ${lead.firstName} !`,
+                ``,
+                `Merci pour votre intérêt à exposer à ${lead.eventName}.`,
+                ``,
+                `Cliquez sur le lien ci-dessous pour accéder à votre devis personnalisé et sécurisé.`,
+                ``,
+                `👉 ${depositUrl}`,
+                ``,
+                `À très vite !`,
+                `L'équipe Dream Team Africa`,
+              ].join("\n");
+
+              await sendWhatsAppText(from, reply);
+              console.log(`[WhatsApp] Auto-reply sent to ${from} for lead ${lead.id}`);
+            }
+          } catch (autoErr) {
+            console.error("[WhatsApp] Auto-reply error:", autoErr);
+          }
         }
       }
 

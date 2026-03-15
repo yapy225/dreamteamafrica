@@ -194,6 +194,7 @@ export async function POST(request: Request) {
 
     const checkoutSession = await getStripe().checkout.sessions.create({
       mode: "payment",
+      payment_method_types: ["card", "paypal"],
       customer_email: trimmedEmail,
       line_items: [
         {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import TicketSelector from "./TicketSelector";
+import SocialProofBanner from "./SocialProofBanner";
 
 interface ProgramSession {
   date: string;
@@ -167,7 +168,15 @@ export default function TicketSectionClient({
         </div>
       )}
 
-      {/* Ticket tiers — always 3 tiers */}
+      {/* Social proof banner for Early Bird urgency */}
+      {(() => {
+        const eb = tiers.find((t) => t.id === "EARLY_BIRD" && t.quota != null);
+        return eb && eb.quota! - eb.sold > 0 ? (
+          <SocialProofBanner sold={eb.sold} quota={eb.quota!} />
+        ) : null;
+      })()}
+
+      {/* Ticket tiers */}
       <div className="mt-10">
         {soldOut ? (
           <div className="mx-auto max-w-md rounded-[var(--radius-card)] bg-white p-8 text-center shadow-[var(--shadow-card)]">

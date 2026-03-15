@@ -8,6 +8,7 @@ import { formatDate, formatPrice } from "@/lib/utils";
 import TicketSelector from "./TicketSelector";
 import TicketSectionClient from "./TicketSectionClient";
 import FreeReservationForm from "@/components/events/FreeReservationForm";
+import SocialProofBanner from "./SocialProofBanner";
 import ShareButton from "./ShareButton";
 
 const FREE_EVENT_IDS = [
@@ -66,7 +67,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   const soldOut = remaining <= 0;
   const progressPercent = Math.min(100, Math.round((soldCount / event.capacity) * 100));
 
-  const customTiers = event.tiers as Array<{ id: string; name: string; price: number; description: string; features: string[]; highlight: boolean; quota?: number; onSiteOnly?: boolean }> | null;
+  const customTiers = event.tiers as Array<{ id: string; name: string; price: number; description: string; features: string[]; highlight: boolean; quota?: number; onSiteOnly?: boolean; soldOffset?: number }> | null;
 
   // Count tickets sold per tier for quota tracking
   const ticketsByTier = await prisma.ticket.groupBy({
@@ -88,7 +89,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
         features: t.features,
         highlight: t.highlight,
         quota: t.quota ?? null,
-        sold: soldByTier[t.id] ?? 0,
+        sold: (soldByTier[t.id] ?? 0) + (t.soldOffset ?? 0),
         onSiteOnly: t.onSiteOnly ?? false,
       }))
     : [
@@ -574,6 +575,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                   sessions={(event.program as Array<{date:string;time:string;venue:string;address:string;title:string;type:string;pricing:string}>)}
                 />
               ) : (
+                <>
+                {(() => {
+                  const eb = tiers.find((t) => t.id === "EARLY_BIRD" && t.quota != null);
+                  return eb && eb.quota! - eb.sold > 0 ? (
+                    <SocialProofBanner sold={eb.sold} quota={eb.quota!} />
+                  ) : null;
+                })()}
                 <div className="mt-10">
                   {soldOut ? (
                     <div className="mx-auto max-w-md rounded-[var(--radius-card)] bg-white p-8 text-center shadow-[var(--shadow-card)]">
@@ -629,6 +637,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                     </div>
                   )}
                 </div>
+                </>
               )}
             </>
             );

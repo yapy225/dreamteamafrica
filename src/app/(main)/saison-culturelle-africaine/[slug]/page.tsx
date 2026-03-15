@@ -642,6 +642,19 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
             </>
             );
           })()}
+          {/* Bouton Exposant */}
+          <div className="mx-auto mt-10 max-w-md text-center">
+            <p className="text-sm text-dta-char/70">
+              Vous êtes artisan, créateur ou entrepreneur ?
+            </p>
+            <Link
+              href="/exposants/reservation"
+              className="mt-3 inline-flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-dta-accent bg-transparent px-6 py-3 text-sm font-semibold text-dta-accent transition-all duration-200 hover:bg-dta-accent hover:text-white"
+            >
+              <Store size={16} />
+              Devenir exposant
+            </Link>
+          </div>
         </div>
       </div>
 

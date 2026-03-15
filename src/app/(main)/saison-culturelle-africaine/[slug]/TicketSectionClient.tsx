@@ -23,6 +23,7 @@ interface Tier {
   highlight: boolean;
   quota: number | null;
   sold: number;
+  onSiteOnly?: boolean;
 }
 
 interface TicketSectionClientProps {
@@ -228,7 +229,11 @@ export default function TicketSectionClient({
                     </li>
                   ))}
                 </ul>
-                {tierSoldOut ? (
+                {tier.onSiteOnly ? (
+                  <div className="mt-4 rounded-[var(--radius-button)] bg-dta-accent/10 py-3 text-center text-sm font-semibold text-dta-accent">
+                    Réservation sur place — {fmtPrice(tier.price)}
+                  </div>
+                ) : tierSoldOut ? (
                   <div className="mt-4 rounded-[var(--radius-button)] bg-gray-100 py-3 text-center text-sm font-medium text-gray-500">
                     Places épuisées
                   </div>

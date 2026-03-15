@@ -82,6 +82,10 @@ export default function TicketSectionClient({
     ? `${selected.title} — ${formatSessionDateLong(selected.date)}${selected.time ? ` à ${selected.time.replace(":", "h")}` : ""}`
     : undefined;
 
+  /* When sessions and tiers match 1:1, show only the tier for the selected session */
+  const oneToOne = sessions.length > 0 && sessions.length === tiers.length;
+  const visibleTiers = oneToOne ? [tiers[selectedIdx]] : tiers;
+
   return (
     <div>
       {/* Session selector */}
@@ -176,8 +180,8 @@ export default function TicketSectionClient({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {tiers.map((tier) => {
+          <div className={`grid grid-cols-1 gap-6 ${visibleTiers.length === 1 ? "mx-auto max-w-md" : visibleTiers.length === 2 ? "md:grid-cols-2 max-w-2xl mx-auto" : "md:grid-cols-3"}`}>
+            {visibleTiers.map((tier) => {
               const tierRemaining = tier.quota != null ? tier.quota - tier.sold : null;
               const tierSoldOut = tierRemaining != null && tierRemaining <= 0;
 

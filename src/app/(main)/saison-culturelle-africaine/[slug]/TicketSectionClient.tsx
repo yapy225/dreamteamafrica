@@ -244,6 +244,7 @@ export default function TicketSectionClient({
                     eventDate={eventDate}
                     eventEndDate={eventEndDate}
                     sessionLabel={sessionLabel}
+                    fixedVisitDate={selected?.date ? `${selected.date}T12:00:00Z` : undefined}
                     maxQuantity={tierRemaining != null ? Math.min(10, tierRemaining) : 10}
                   />
                 )}

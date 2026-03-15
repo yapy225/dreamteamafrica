@@ -14,6 +14,7 @@ interface TicketSelectorProps {
   eventDate: string;
   eventEndDate?: string;
   sessionLabel?: string;
+  fixedVisitDate?: string;
   maxQuantity?: number;
 }
 
@@ -28,6 +29,7 @@ export default function TicketSelector({
   eventDate,
   eventEndDate,
   sessionLabel,
+  fixedVisitDate,
 }: TicketSelectorProps) {
   const [open, setOpen] = useState(false);
 
@@ -41,11 +43,10 @@ export default function TicketSelector({
             : "bg-dta-dark text-white hover:bg-dta-char"
         }`}
       >
-        Réserver —{" "}
-        {new Intl.NumberFormat("fr-FR", {
+        {price === 0 ? "Réserver gratuitement" : `Réserver — ${new Intl.NumberFormat("fr-FR", {
           style: "currency",
           currency: "EUR",
-        }).format(price)}
+        }).format(price)}`}
       </button>
 
       <PurchasePanel
@@ -56,7 +57,8 @@ export default function TicketSelector({
         tier={{ id: tier, name: tierName, price }}
         eventTitle={eventTitle}
         eventDate={eventDate}
-        eventEndDate={eventEndDate}
+        eventEndDate={fixedVisitDate ? undefined : eventEndDate}
+        fixedVisitDate={fixedVisitDate}
       />
     </>
   );

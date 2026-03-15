@@ -12,6 +12,7 @@ interface PurchasePanelProps {
   eventTitle: string;
   eventDate: string;
   eventEndDate?: string;
+  fixedVisitDate?: string;
 }
 
 const inputClass =
@@ -61,6 +62,7 @@ export default function PurchasePanel({
   eventTitle,
   eventDate,
   eventEndDate,
+  fixedVisitDate,
 }: PurchasePanelProps) {
   /* ── state ───────────────────────────────────────────── */
   const [visible, setVisible] = useState(false);
@@ -71,12 +73,12 @@ export default function PurchasePanel({
     email: "",
     phone: "",
   });
-  const [selectedDate, setSelectedDate] = useState<string>(eventDate);
+  const [selectedDate, setSelectedDate] = useState<string>(fixedVisitDate || eventDate);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   /* ── multi-day dates ─────────────────────────────────── */
-  const isMultiDay = !!eventEndDate;
+  const isMultiDay = !!eventEndDate && !fixedVisitDate;
   const days = isMultiDay ? getDaysBetween(eventDate, eventEndDate!) : [];
 
   /* ── animation: delay the translate so the backdrop fades in first ── */

@@ -249,15 +249,24 @@ export default async function EvenementsPage() {
                 )}
 
                 {/* CTA */}
-                <div className="mt-6">
+                <div className="mt-6 flex items-center gap-3">
                   <span className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors group-hover:bg-dta-accent-dark">
                     Réserver
-                    <ArrowRight size={16} />
+                    <Ticket size={15} />
                   </span>
                 </div>
               </div>
             </div>
           </Link>
+          <div className="mt-3 flex justify-end lg:justify-start">
+            <Link
+              href="/exposants/reservation"
+              className="inline-flex items-center gap-2 rounded-[var(--radius-button)] border-2 border-dta-accent px-5 py-2.5 text-sm font-semibold text-dta-accent transition-all hover:bg-dta-accent hover:text-white"
+            >
+              <Store size={15} />
+              Exposer
+            </Link>
+          </div>
 
         </div>
       )}
@@ -346,8 +355,25 @@ export default async function EvenementsPage() {
                       />
                     </div>
                   )}
+
+                  {/* Buttons */}
+                  <div className="mt-4 flex items-center gap-2">
+                    <span className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-button)] bg-dta-accent px-3 py-2 text-xs font-semibold text-white transition-colors group-hover:bg-dta-accent-dark">
+                      <Ticket size={13} />
+                      Réserver
+                    </span>
+                  </div>
                 </div>
               </Link>
+              <div className="mt-2">
+                <Link
+                  href="/exposants/reservation"
+                  className="flex w-full items-center justify-center gap-1.5 rounded-[var(--radius-button)] border border-dta-accent px-3 py-2 text-xs font-semibold text-dta-accent transition-all hover:bg-dta-accent hover:text-white"
+                >
+                  <Store size={13} />
+                  Exposer
+                </Link>
+              </div>
               </React.Fragment>
             ))}
           </div>

@@ -49,7 +49,23 @@ export async function PATCH(
   if (typeof body.isRead === "boolean") data.isRead = body.isRead;
   if (typeof body.isArchived === "boolean") data.isArchived = body.isArchived;
   if (typeof body.isStarred === "boolean") data.isStarred = body.isStarred;
+  if (body.label !== undefined) data.label = body.label || null;
 
   const updated = await prisma.email.update({ where: { id }, data });
   return NextResponse.json(updated);
+}
+
+/** DELETE — Delete an email */
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  await prisma.email.delete({ where: { id } });
+  return NextResponse.json({ ok: true });
 }

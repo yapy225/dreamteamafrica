@@ -17,10 +17,16 @@ export async function GET(request: Request) {
   const limit = Math.min(100, Math.max(1, Number(url.searchParams.get("limit")) || 30));
   const search = url.searchParams.get("search") || "";
 
+  const label = url.searchParams.get("label") || "";
+  const starred = url.searchParams.get("starred") === "true";
+
   const where: any = {
     isArchived: archived,
     folder: { in: ["INBOX", "Sent"] },
   };
+
+  if (label) where.label = label;
+  if (starred) where.isStarred = true;
 
   if (search) {
     where.OR = [

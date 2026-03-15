@@ -792,3 +792,125 @@ export async function sendContactNotificationEmail(opts: {
     throw new Error(`Failed to send contact notification: ${error.message}`);
   }
 }
+
+// ─── PROSPECT EMAIL (Foire d'Afrique) ───────────────────
+
+export async function sendProspectEmail(opts: {
+  to: string;
+  firstName: string;
+  lastName: string;
+  company?: string | null;
+  category?: string;
+}) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
+  const coverImage = "https://dreamteamafricamedia.b-cdn.net/saisonculturelleafricaine/foiredafriqueparis/foiredafriqueparis.png";
+  const eventTitle = "Foire d'Afrique Paris — 6ème Édition";
+  const eventDate = "1er & 2 mai 2026";
+  const eventVenue = "Espace Mas";
+  const eventAddress = "10 rue des terres au curé, Paris";
+
+  const exposerUrl = `${appUrl}/saison-culturelle-africaine/foire-dafrique-paris?exposer=1&utm_source=email&utm_medium=prospect`;
+  const whatsappUrl = `https://wa.me/33782801852?text=${encodeURIComponent(`Bonjour, je suis ${opts.firstName} ${opts.lastName}${opts.company ? ` de ${opts.company}` : ""}. Je souhaite en savoir plus sur l'exposition à la Foire d'Afrique Paris.`)}`;
+
+  const html = `
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#FAF8F5;font-family:system-ui,-apple-system,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF8F5;padding:20px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+
+<!-- Cover Image -->
+<tr><td>
+  <a href="${exposerUrl}" style="display:block;">
+    <img src="${coverImage}" alt="${eventTitle}" width="600" style="display:block;width:100%;height:auto;border-radius:12px 12px 0 0;" />
+  </a>
+</td></tr>
+
+<!-- Event Info -->
+<tr><td style="padding:30px 30px 0;">
+  <h1 style="margin:0;font-size:24px;font-weight:700;color:#2D2A26;">${eventTitle}</h1>
+  <p style="margin:8px 0 0;font-size:14px;color:#8B7E74;">
+    📅 ${eventDate} &nbsp;|&nbsp; 📍 ${eventVenue}, ${eventAddress}
+  </p>
+</td></tr>
+
+<!-- Message -->
+<tr><td style="padding:20px 30px;">
+  <p style="margin:0;font-size:15px;line-height:1.6;color:#4A4540;">
+    Bonjour <strong>${opts.firstName}</strong>,
+  </p>
+  <p style="margin:12px 0 0;font-size:15px;line-height:1.6;color:#4A4540;">
+    Le plus grand marché africain de Paris revient pour sa <strong>6ème édition</strong> les <strong>${eventDate}</strong> !
+  </p>
+  <p style="margin:12px 0 0;font-size:15px;line-height:1.6;color:#4A4540;">
+    Nous serions ravis de vous accueillir en tant qu'<strong>exposant</strong>. C'est l'occasion idéale de présenter vos produits à des milliers de visiteurs passionnés par la culture africaine.
+  </p>
+  <p style="margin:12px 0 0;font-size:15px;line-height:1.6;color:#4A4540;">
+    <strong>Réservez votre stand dès maintenant avec seulement 50 €</strong> d'acompte.
+  </p>
+</td></tr>
+
+<!-- CTA Buttons -->
+<tr><td style="padding:0 30px 10px;" align="center">
+  <a href="${exposerUrl}" style="display:inline-block;background:#C4704B;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 36px;border-radius:8px;margin:0 6px;">
+    🎪 Devenir Exposant — 50 €
+  </a>
+</td></tr>
+
+<tr><td style="padding:10px 30px 25px;" align="center">
+  <a href="${whatsappUrl}" style="display:inline-block;background:#25D366;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;padding:12px 28px;border-radius:8px;">
+    💬 Répondre sur WhatsApp
+  </a>
+</td></tr>
+
+<!-- Highlights -->
+<tr><td style="padding:0 30px 25px;">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td width="33%" style="text-align:center;padding:15px 5px;background:#FAF8F5;border-radius:8px;">
+        <p style="margin:0;font-size:22px;font-weight:700;color:#C4704B;">2</p>
+        <p style="margin:4px 0 0;font-size:11px;color:#8B7E74;">JOURS</p>
+      </td>
+      <td width="33%" style="text-align:center;padding:15px 5px;background:#FAF8F5;border-radius:8px;">
+        <p style="margin:0;font-size:22px;font-weight:700;color:#C4704B;">5000+</p>
+        <p style="margin:4px 0 0;font-size:11px;color:#8B7E74;">VISITEURS</p>
+      </td>
+      <td width="33%" style="text-align:center;padding:15px 5px;background:#FAF8F5;border-radius:8px;">
+        <p style="margin:0;font-size:22px;font-weight:700;color:#C4704B;">50 €</p>
+        <p style="margin:4px 0 0;font-size:11px;color:#8B7E74;">ACOMPTE</p>
+      </td>
+    </tr>
+  </table>
+</td></tr>
+
+<!-- Footer -->
+<tr><td style="padding:20px 30px;background:#FAF8F5;text-align:center;border-top:1px solid #E8E2DB;">
+  <p style="margin:0;font-size:12px;color:#8B7E74;">
+    Dream Team Africa — La culture africaine à Paris
+  </p>
+  <p style="margin:6px 0 0;font-size:11px;color:#B0A89F;">
+    <a href="${appUrl}" style="color:#C4704B;text-decoration:none;">dreamteamafrica.com</a>
+  </p>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+
+  const resend = getResend();
+  const { error } = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `🎪 ${opts.firstName}, exposez à la Foire d'Afrique Paris — Réservez avec 50 €`,
+    html,
+  });
+
+  if (error) {
+    console.error("Prospect email error:", error);
+    throw new Error(`Failed to send prospect email: ${error.message}`);
+  }
+}

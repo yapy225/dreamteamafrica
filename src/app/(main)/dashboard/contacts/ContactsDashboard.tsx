@@ -13,6 +13,10 @@ import {
   Send,
   Trash2,
   StickyNote,
+  Megaphone,
+  Loader2,
+  CheckSquare,
+  Square,
   Eye,
   EyeOff,
   ExternalLink,
@@ -81,6 +85,9 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
   const [notesText, setNotesText] = useState("");
   const [editingNotes, setEditingNotes] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [prospectSending, setProspectSending] = useState(false);
+  const [prospectResult, setProspectResult] = useState<string | null>(null);
 
   // ─── Filtered list ───
   const filtered = useMemo(() => {
@@ -165,6 +172,55 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
     if (!selected) return;
     await updateContact(selected.id, { notes: notesText });
     setEditingNotes(false);
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((m) => m.id)));
+    }
+  };
+
+  const sendProspectEmails = async (ids: string[]) => {
+    if (prospectSending || ids.length === 0) return;
+    setProspectSending(true);
+    setProspectResult(null);
+    try {
+      const res = await fetch("/api/contact/prospect-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setProspectResult(`${data.sent} email(s) envoye(s)${data.errors ? `, ${data.errors} erreur(s)` : ""}`);
+        // Update local status
+        setMessages((prev) =>
+          prev.map((m) =>
+            ids.includes(m.id) && m.status === "NOUVEAU"
+              ? { ...m, status: "CONTACTE" }
+              : m
+          )
+        );
+        setSelectedIds(new Set());
+        setTimeout(() => setProspectResult(null), 4000);
+      } else {
+        setProspectResult(data.error || "Erreur");
+      }
+    } catch {
+      setProspectResult("Erreur reseau");
+    }
+    setProspectSending(false);
   };
 
   const openContact = (m: Contact) => {
@@ -324,6 +380,24 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
             </div>
           )}
 
+          {/* Prospect email CTA */}
+          <div className="border-b px-6 py-4">
+            <button
+              onClick={() => sendProspectEmails([selected.id])}
+              disabled={prospectSending}
+              className="flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-dta-accent/90 disabled:opacity-50"
+            >
+              {prospectSending ? <Loader2 size={14} className="animate-spin" /> : <Megaphone size={14} />}
+              {prospectSending ? "Envoi..." : "Envoyer email Foire d'Afrique"}
+            </button>
+            {prospectResult && (
+              <p className="mt-2 text-sm text-green-600">{prospectResult}</p>
+            )}
+            <p className="mt-1.5 text-xs text-dta-taupe">
+              Envoie la page de garde de la Foire d'Afrique avec bouton "Exposer" + "Repondre sur WhatsApp"
+            </p>
+          </div>
+
           {/* Reply form */}
           <div className="px-6 py-4">
             <h3 className="mb-2 text-xs font-medium uppercase text-dta-taupe">Repondre par email</h3>
@@ -422,11 +496,45 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
         </span>
       </div>
 
+      {/* Selection bar */}
+      {selectedIds.size > 0 && (
+        <div className="mt-4 flex items-center gap-3 rounded-lg bg-dta-accent/10 px-4 py-3">
+          <span className="text-sm font-medium text-dta-dark">
+            {selectedIds.size} selectionne{selectedIds.size > 1 ? "s" : ""}
+          </span>
+          <button
+            onClick={() => sendProspectEmails(Array.from(selectedIds))}
+            disabled={prospectSending}
+            className="flex items-center gap-1.5 rounded-[var(--radius-button)] bg-dta-accent px-4 py-2 text-sm font-medium text-white hover:bg-dta-accent/90 disabled:opacity-50"
+          >
+            {prospectSending ? <Loader2 size={14} className="animate-spin" /> : <Megaphone size={14} />}
+            {prospectSending ? "Envoi..." : "Envoyer email prospect"}
+          </button>
+          <button onClick={() => setSelectedIds(new Set())} className="text-xs text-dta-taupe hover:text-dta-dark">
+            Deselectionner
+          </button>
+        </div>
+      )}
+
+      {/* Prospect result toast */}
+      {prospectResult && (
+        <div className="mt-2 rounded-lg bg-green-50 px-4 py-2 text-sm text-green-700">
+          {prospectResult}
+        </div>
+      )}
+
       {/* Table */}
       <div className="mt-4 overflow-x-auto rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)]">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-dta-sand bg-dta-bg text-xs uppercase text-dta-taupe">
             <tr>
+              <th className="px-3 py-3 w-8">
+                <button onClick={toggleSelectAll} className="text-dta-taupe hover:text-dta-accent">
+                  {selectedIds.size === filtered.length && filtered.length > 0
+                    ? <CheckSquare size={16} />
+                    : <Square size={16} />}
+                </button>
+              </th>
               <th className="px-4 py-3">Statut</th>
               <th className="px-4 py-3">Profil</th>
               <th className="px-4 py-3">Nom / Entreprise</th>
@@ -448,6 +556,11 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
                     !m.read ? "bg-dta-accent/5 hover:bg-dta-accent/10" : "hover:bg-dta-bg/50"
                   }`}
                 >
+                  <td className="px-3 py-3 w-8" onClick={(e) => e.stopPropagation()}>
+                    <button onClick={() => toggleSelect(m.id)} className="text-dta-taupe hover:text-dta-accent">
+                      {selectedIds.has(m.id) ? <CheckSquare size={16} className="text-dta-accent" /> : <Square size={16} />}
+                    </button>
+                  </td>
                   <td className="whitespace-nowrap px-4 py-3">
                     <select
                       value={m.status}
@@ -503,7 +616,7 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-dta-taupe">
+                <td colSpan={8} className="px-4 py-12 text-center text-dta-taupe">
                   Aucun contact trouve.
                 </td>
               </tr>

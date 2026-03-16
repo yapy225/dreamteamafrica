@@ -35,7 +35,7 @@ export const metadata = {
     description: "7 rendez-vous exceptionnels célébrant la culture africaine à Paris. Festivals, foires, salons — d'avril à décembre 2026.",
     type: "website",
     url: `${siteUrl}/saison-culturelle-africaine`,
-    images: [{ url: `${siteUrl}/logo-dta.png`, width: 800, height: 800, alt: "Dream Team Africa" }],
+    images: [{ url: `${siteUrl}/og-saison-culturelle.jpg`, width: 1200, height: 630, alt: "Saison Culturelle Africaine 2026 — 7 événements à Paris d'avril à décembre" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -79,7 +79,16 @@ export default async function EvenementsPage() {
     "@type": "EventSeries",
     name: "Saison Culturelle Africaine 2026",
     description: "7 événements culturels africains à Paris d'avril à décembre 2026",
-    organizer: { "@type": "Organization", name: "Dream Team Africa", url: siteUrl },
+    organizer: {
+      "@type": "Organization",
+      name: "Dream Team Africa",
+      url: siteUrl,
+      sameAs: [
+        "https://www.facebook.com/dreamteamafrica",
+        "https://www.instagram.com/dreamteamafrica",
+        "https://www.tiktok.com/@dreamteamafrica",
+      ],
+    },
     location: { "@type": "City", name: "Paris", addressCountry: "FR" },
     startDate: events[0]?.date.toISOString(),
     endDate: events[events.length - 1]?.date.toISOString(),
@@ -134,7 +143,7 @@ export default async function EvenementsPage() {
           </li>
           <li className="text-dta-sand">/</li>
           <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-            <span itemProp="name" className="font-medium text-dta-dark">Saison Culturelle Africaine</span>
+            <span itemProp="name" aria-current="page" className="font-medium text-dta-dark">Saison Culturelle Africaine</span>
             <meta itemProp="position" content="2" />
           </li>
         </ol>

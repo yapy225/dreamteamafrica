@@ -27,22 +27,36 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const event = await prisma.event.findUnique({ where: { slug } });
   if (!event) return { title: "Événement introuvable" };
-  const description = event.description.slice(0, 160);
+  const eventDate = new Date(event.date);
+  const dateStr = eventDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  const description = `${event.title} le ${dateStr} à ${event.venue}, Paris. ${event.description.slice(0, 100).trim()}… Réservez vos places.`;
+  const altText = `${event.title} — ${event.venue}, ${dateStr}`;
   return {
     title: `${event.title} — Saison Culturelle Africaine 2026`,
-    description,
-    keywords: [event.title, "événement africain Paris", event.venue, "saison culturelle africaine 2026", "billetterie"],
+    description: description.slice(0, 160),
+    keywords: [
+      event.title,
+      "événement africain Paris",
+      event.venue,
+      "saison culturelle africaine 2026",
+      "billetterie",
+      "festival africain Paris 2026",
+      "culture africaine Paris",
+      "sortir à Paris",
+      `${event.venue} Paris`,
+      "réserver billet événement africain",
+    ],
     openGraph: {
       title: event.title,
-      description,
-      type: "website",
+      description: description.slice(0, 160),
+      type: "article",
       url: `${siteUrl}/saison-culturelle-africaine/${slug}`,
-      ...(event.coverImage && { images: [{ url: event.coverImage, width: 1200, height: 630, alt: event.title }] }),
+      ...(event.coverImage && { images: [{ url: event.coverImage, width: 1200, height: 630, alt: altText }] }),
     },
     twitter: {
       card: "summary_large_image",
       title: event.title,
-      description,
+      description: description.slice(0, 160),
       ...(event.coverImage && { images: [event.coverImage] }),
     },
     alternates: {
@@ -147,6 +161,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
     offers: isFreeEvent
       ? {
           "@type": "Offer",
+          name: "Entrée gratuite",
+          description: `Accès gratuit à ${event.title}`,
           price: 0,
           priceCurrency: "EUR",
           url: eventUrl,
@@ -157,12 +173,22 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           "@type": "AggregateOffer",
           lowPrice: Math.min(event.priceEarly, event.priceStd, event.priceVip),
           highPrice: Math.max(event.priceEarly, event.priceStd, event.priceVip),
+          offerCount: 3,
           priceCurrency: "EUR",
           url: eventUrl,
           validFrom: event.createdAt ? event.createdAt.toISOString() : "2026-01-01T00:00:00Z",
           availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
         },
-    organizer: { "@type": "Organization", name: "Dream Team Africa", url: siteUrl },
+    organizer: {
+      "@type": "Organization",
+      name: "Dream Team Africa",
+      url: siteUrl,
+      sameAs: [
+        "https://www.facebook.com/dreamteamafrica",
+        "https://www.instagram.com/dreamteamafrica",
+        "https://www.tiktok.com/@dreamteamafrica",
+      ],
+    },
   };
 
   return (
@@ -208,7 +234,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           </li>
           <li className="text-dta-sand">/</li>
           <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-            <span itemProp="name" className="line-clamp-1 max-w-[200px] font-medium text-dta-dark">
+            <span itemProp="name" aria-current="page" className="line-clamp-1 max-w-[200px] font-medium text-dta-dark">
               {event.title}
             </span>
             <meta itemProp="position" content="3" />
@@ -221,7 +247,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
         {event.coverImage ? (
           <Image
             src={event.coverImage}
-            alt={event.title}
+            alt={`${event.title} — ${event.venue}`}
             fill
             className="object-cover opacity-60"
             priority

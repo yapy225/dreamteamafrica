@@ -8,7 +8,9 @@ import { formatDate, formatPrice } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Confirmation de réservation",
+  title: "Réservation confirmée — Dream Team Africa",
+  description: "Votre billet est prêt. Consultez votre confirmation et présentez votre QR code à l'entrée de l'événement.",
+  robots: { index: false, follow: false },
 };
 
 const tierLabels: Record<string, string> = {

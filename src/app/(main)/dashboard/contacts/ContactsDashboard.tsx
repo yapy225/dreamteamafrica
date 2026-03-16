@@ -20,6 +20,8 @@ import {
   Eye,
   EyeOff,
   ExternalLink,
+  Archive,
+  ArchiveRestore,
 } from "lucide-react";
 
 // ─── Constants ───
@@ -31,6 +33,7 @@ const STATUSES = [
   { id: "ACOMPTE", label: "Acompte", color: "bg-yellow-100 text-yellow-700", dot: "bg-yellow-500" },
   { id: "CONFIRME", label: "Confirme", color: "bg-green-100 text-green-700", dot: "bg-green-500" },
   { id: "PERDU", label: "Perdu", color: "bg-red-100 text-red-700", dot: "bg-red-500" },
+  { id: "ARCHIVE", label: "Archive", color: "bg-slate-100 text-slate-500", dot: "bg-slate-400" },
 ] as const;
 
 const CATEGORIES = [
@@ -92,10 +95,14 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [prospectSending, setProspectSending] = useState(false);
   const [prospectResult, setProspectResult] = useState<string | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkArchiving, setBulkArchiving] = useState(false);
 
   // ─── Filtered list ───
   const filtered = useMemo(() => {
     return messages.filter((m) => {
+      if (!showArchived && m.status === "ARCHIVE" && filterStatus !== "ARCHIVE") return false;
       if (filterCategory && m.category !== filterCategory) return false;
       if (filterStatus && m.status !== filterStatus) return false;
       if (search) {
@@ -193,6 +200,53 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
     } else {
       setSelectedIds(new Set(filtered.map((m) => m.id)));
     }
+  };
+
+  const bulkArchive = async (ids: string[]) => {
+    if (bulkArchiving || ids.length === 0) return;
+    setBulkArchiving(true);
+    await Promise.all(
+      ids.map((id) =>
+        fetch(`/api/contact/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "ARCHIVE" }),
+        })
+      )
+    );
+    setMessages((prev) =>
+      prev.map((m) => (ids.includes(m.id) ? { ...m, status: "ARCHIVE" } : m))
+    );
+    setSelectedIds(new Set());
+    setBulkArchiving(false);
+  };
+
+  const bulkDelete = async (ids: string[]) => {
+    if (bulkDeleting || ids.length === 0) return;
+    if (!confirm(`Supprimer ${ids.length} contact(s) definitivement ?`)) return;
+    setBulkDeleting(true);
+    await Promise.all(
+      ids.map((id) => fetch(`/api/contact/${id}`, { method: "DELETE" }))
+    );
+    setMessages((prev) => prev.filter((m) => !ids.includes(m.id)));
+    setSelectedIds(new Set());
+    setBulkDeleting(false);
+  };
+
+  const bulkUnarchive = async (ids: string[]) => {
+    await Promise.all(
+      ids.map((id) =>
+        fetch(`/api/contact/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "NOUVEAU" }),
+        })
+      )
+    );
+    setMessages((prev) =>
+      prev.map((m) => (ids.includes(m.id) ? { ...m, status: "NOUVEAU" } : m))
+    );
+    setSelectedIds(new Set());
   };
 
   const sendProspectEmails = async (ids: string[]) => {
@@ -340,6 +394,24 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
                     <option key={s.id} value={s.id}>{s.label}</option>
                   ))}
                 </select>
+                {/* Archive / Unarchive */}
+                {selected.status === "ARCHIVE" ? (
+                  <button
+                    onClick={() => { updateContact(selected.id, { status: "NOUVEAU" }); }}
+                    className="flex items-center gap-1 rounded-full px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-100"
+                    title="Desarchiver"
+                  >
+                    <ArchiveRestore size={14} /> Desarchiver
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { updateContact(selected.id, { status: "ARCHIVE" }); setSelectedId(null); }}
+                    className="rounded-full p-1.5 hover:bg-slate-100"
+                    title="Archiver"
+                  >
+                    <Archive size={16} className="text-gray-400 hover:text-slate-600" />
+                  </button>
+                )}
                 {/* Delete */}
                 {showDeleteConfirm ? (
                   <div className="flex items-center gap-1">
@@ -617,6 +689,17 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
             <X size={12} /> Effacer filtres
           </button>
         )}
+        <button
+          onClick={() => setShowArchived(!showArchived)}
+          className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-colors ${
+            showArchived
+              ? "border-slate-400 bg-slate-100 text-slate-700"
+              : "border-dta-taupe/30 bg-white text-dta-taupe hover:bg-gray-50"
+          }`}
+        >
+          {showArchived ? <ArchiveRestore size={13} /> : <Archive size={13} />}
+          {showArchived ? "Masquer archives" : "Voir archives"}
+        </button>
         <span className="text-xs text-dta-taupe">
           {filtered.length} resultat{filtered.length > 1 ? "s" : ""}
         </span>
@@ -624,10 +707,26 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
 
       {/* Selection bar */}
       {selectedIds.size > 0 && (
-        <div className="mt-4 flex items-center gap-3 rounded-lg bg-dta-accent/10 px-4 py-3">
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg bg-dta-accent/10 px-4 py-3">
           <span className="text-sm font-medium text-dta-dark">
             {selectedIds.size} selectionne{selectedIds.size > 1 ? "s" : ""}
           </span>
+          <button
+            onClick={() => bulkArchive(Array.from(selectedIds))}
+            disabled={bulkArchiving}
+            className="flex items-center gap-1.5 rounded-[var(--radius-button)] bg-slate-600 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+          >
+            {bulkArchiving ? <Loader2 size={14} className="animate-spin" /> : <Archive size={14} />}
+            {bulkArchiving ? "Archivage..." : "Archiver"}
+          </button>
+          <button
+            onClick={() => bulkDelete(Array.from(selectedIds))}
+            disabled={bulkDeleting}
+            className="flex items-center gap-1.5 rounded-[var(--radius-button)] bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+          >
+            {bulkDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+            {bulkDeleting ? "Suppression..." : "Supprimer"}
+          </button>
           <button
             onClick={() => sendProspectEmails(Array.from(selectedIds))}
             disabled={prospectSending}

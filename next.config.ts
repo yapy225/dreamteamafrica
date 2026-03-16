@@ -76,6 +76,46 @@ const nextConfig: NextConfig = {
       { source: "/sortir-a-paris/:slug*", destination: "/lafropeen", permanent: true },
       // Sitemap cassé
       { source: "/dreamteamafrica.com/sitemap.xml", destination: "/sitemap.xml", permanent: true },
+
+      // ── Anciennes URLs WordPress 404 (Google Search Console) ──
+      // Pages d'accueil
+      { source: "/accueil", destination: "/", permanent: true },
+      { source: "/accueil/", destination: "/", permanent: true },
+      { source: "/index.html", destination: "/", permanent: true },
+      { source: "/$", destination: "/", permanent: true },
+
+      // Archives WordPress
+      { source: "/2025/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/2024/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/page/:path*", destination: "/saison-culturelle-africaine", permanent: true },
+
+      // Anciens événements supprimés
+      { source: "/africa-bbq-fontenay-sous-bois-2026", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/africa-bbq-fontenay-sous-bois-2026/", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/festival-du-conte-africain-paris", destination: "/saison-culturelle-africaine/festival-conte-africain", permanent: true },
+      { source: "/festival-du-conte-africain-paris/", destination: "/saison-culturelle-africaine/festival-conte-africain", permanent: true },
+      { source: "/festival-du-conte-africain-paris-2025", destination: "/saison-culturelle-africaine/festival-conte-africain", permanent: true },
+      { source: "/festival-du-conte-africain-paris-2025/", destination: "/saison-culturelle-africaine/festival-conte-africain", permanent: true },
+      { source: "/salon-made-in-africa-paris", destination: "/saison-culturelle-africaine/salon-made-in-africa", permanent: true },
+      { source: "/salon-made-in-africa-paris/", destination: "/saison-culturelle-africaine/salon-made-in-africa", permanent: true },
+
+      // Anciens packs exposants
+      { source: "/pack-exposants-foire-dafrique-paris", destination: "/exposants", permanent: true },
+      { source: "/pack-exposants-foire-dafrique-paris/", destination: "/exposants", permanent: true },
+      { source: "/event/pack-professionnel-fashion-week-africa", destination: "/exposants", permanent: true },
+      { source: "/event/pack-professionnel-fashion-week-africa/", destination: "/exposants", permanent: true },
+
+      // Anciennes pages légales/cookies
+      { source: "/politiques-de-cookies", destination: "/politique-de-confidentialite", permanent: true },
+      { source: "/politiques-de-cookies/", destination: "/politique-de-confidentialite", permanent: true },
+
+      // Ancien blog WordPress
+      { source: "/beurre-de-vache/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/categorie/:path*", destination: "/lafropeen", permanent: true },
+
+      // Ancien festival-du-conte-africain event avec UTM (le base path gère les query params)
+      { source: "/event/festival-du-conte-africain", destination: "/saison-culturelle-africaine/festival-conte-africain", permanent: true },
+      { source: "/event/festival-du-conte-africain/", destination: "/saison-culturelle-africaine/festival-conte-africain", permanent: true },
     ];
   },
 };

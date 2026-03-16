@@ -828,8 +828,31 @@ export async function sendProspectEmail(opts: {
   </a>
 </td></tr>
 
+<!-- Event Info + Message -->
+<tr><td style="padding:24px 28px 0;">
+  <h2 style="margin:0;font-size:20px;font-weight:700;color:#2D2A26;">${eventTitle}</h2>
+  <p style="margin:8px 0 0;font-size:13px;color:#8B7E74;">
+    📅 ${eventDate} &nbsp;|&nbsp; 📍 ${eventVenue}, ${eventAddress}
+  </p>
+</td></tr>
+
+<tr><td style="padding:16px 28px 0;">
+  <p style="margin:0;font-size:14px;line-height:1.6;color:#4A4540;">
+    Bonjour <strong>${opts.firstName}</strong>,
+  </p>
+  <p style="margin:10px 0 0;font-size:14px;line-height:1.6;color:#4A4540;">
+    Le plus grand marché africain de Paris revient pour sa <strong>6ème édition</strong> les <strong>${eventDate}</strong> !
+  </p>
+  <p style="margin:10px 0 0;font-size:14px;line-height:1.6;color:#4A4540;">
+    Nous serions ravis de vous accueillir en tant qu'<strong>exposant</strong>. C'est l'occasion idéale de présenter vos produits à des milliers de visiteurs passionnés par la culture africaine.
+  </p>
+  <p style="margin:10px 0 0;font-size:14px;line-height:1.6;color:#4A4540;">
+    <strong>Réservez votre stand dès maintenant avec seulement 50 €</strong> d'acompte.
+  </p>
+</td></tr>
+
 <!-- Bouton Exposer -->
-<tr><td style="padding:20px 30px 24px;" align="center">
+<tr><td style="padding:20px 28px 24px;" align="center">
   <a href="${exposerUrl}" style="display:block;background:#C026D3;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 0;border-radius:10px;text-align:center;">
     🏪 Devenir exposant
   </a>

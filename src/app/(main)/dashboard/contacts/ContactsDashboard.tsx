@@ -267,7 +267,7 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
         await fetch(`/api/contact/${selected.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ notes: selected.notes }),
+          body: JSON.stringify({ draftReply: "" }),
         });
         setDraftText("");
         setEditingDraft(false);

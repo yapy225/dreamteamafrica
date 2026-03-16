@@ -19,6 +19,7 @@ export async function PATCH(
   if (typeof body.read === "boolean") data.read = body.read;
   if (body.status) data.status = body.status;
   if (body.notes !== undefined) data.notes = body.notes || null;
+  if (body.draftReply !== undefined) data.draftReply = body.draftReply || null;
 
   const updated = await prisma.contactMessage.update({
     where: { id },

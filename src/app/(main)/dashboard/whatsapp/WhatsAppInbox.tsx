@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Send, ArrowLeft, RefreshCw, MessageCircle } from "lucide-react";
+import { Send, ArrowLeft, RefreshCw, MessageCircle, Archive, ArchiveRestore, Trash2 } from "lucide-react";
 
 interface Conversation {
   from: string;
@@ -9,6 +9,7 @@ interface Conversation {
   body: string;
   createdAt: string;
   unreadCount: number;
+  archived: boolean;
 }
 
 interface Message {
@@ -105,21 +106,45 @@ export default function WhatsAppInbox() {
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showArchived, setShowArchived] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevMessageCountRef = useRef<number>(0);
   const isFirstLoadRef = useRef<boolean>(true);
 
   // Load conversations
-  const loadConversations = async () => {
+  const loadConversations = async (archived = showArchived) => {
     setLoading(true);
     try {
-      const res = await fetch("/api/whatsapp/messages");
+      const res = await fetch(`/api/whatsapp/messages?archived=${archived}`);
       const data = await res.json();
       setConversations(Array.isArray(data) ? data : []);
     } catch {
       console.error("Failed to load conversations");
     }
     setLoading(false);
+  };
+
+  // Archive/unarchive a conversation
+  const archiveConversation = async (phone: string, archived: boolean) => {
+    await fetch("/api/whatsapp/conversations", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone, archived }),
+    });
+    setConversations((prev) => prev.filter((c) => c.from !== phone));
+    setDeleteConfirm(null);
+  };
+
+  // Delete a conversation
+  const deleteConversation = async (phone: string) => {
+    await fetch("/api/whatsapp/conversations", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone }),
+    });
+    setConversations((prev) => prev.filter((c) => c.from !== phone));
+    setDeleteConfirm(null);
   };
 
   // Load messages for a phone
@@ -164,8 +189,8 @@ export default function WhatsAppInbox() {
   };
 
   useEffect(() => {
-    loadConversations();
-  }, []);
+    loadConversations(showArchived);
+  }, [showArchived]);
 
   useEffect(() => {
     if (selectedPhone) {
@@ -193,13 +218,28 @@ export default function WhatsAppInbox() {
     return (
       <div className="rounded-[var(--radius-card)] bg-white shadow-[var(--shadow-card)] overflow-hidden">
         <div className="flex items-center justify-between border-b px-6 py-4">
-          <h2 className="font-semibold text-dta-dark">Conversations</h2>
-          <button
-            onClick={loadConversations}
-            className="rounded-full p-2 text-dta-taupe hover:bg-gray-100 transition-colors"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          </button>
+          <h2 className="font-semibold text-dta-dark">
+            {showArchived ? "Archives" : "Conversations"}
+          </h2>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs transition-colors ${
+                showArchived
+                  ? "bg-slate-100 text-slate-700"
+                  : "text-dta-taupe hover:bg-gray-100"
+              }`}
+            >
+              {showArchived ? <ArchiveRestore size={13} /> : <Archive size={13} />}
+              {showArchived ? "Voir actives" : "Voir archives"}
+            </button>
+            <button
+              onClick={() => loadConversations(showArchived)}
+              className="rounded-full p-2 text-dta-taupe hover:bg-gray-100 transition-colors"
+            >
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            </button>
+          </div>
         </div>
 
         {loading && conversations.length === 0 ? (
@@ -216,7 +256,7 @@ export default function WhatsAppInbox() {
         ) : (
           <ul className="divide-y">
             {conversations.map((conv) => (
-              <li key={conv.from}>
+              <li key={conv.from} className="group relative">
                 <button
                   onClick={() => setSelectedPhone(conv.from)}
                   className="flex w-full items-center gap-4 px-6 py-4 text-left hover:bg-gray-50 transition-colors"
@@ -251,6 +291,41 @@ export default function WhatsAppInbox() {
                     </p>
                   </div>
                 </button>
+
+                {/* Actions (visible on hover) */}
+                {deleteConfirm === conv.from ? (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 bg-white rounded-lg shadow-md px-2 py-1.5 z-10">
+                    <button
+                      onClick={() => deleteConversation(conv.from)}
+                      className="rounded bg-red-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-red-700"
+                    >
+                      Confirmer
+                    </button>
+                    <button
+                      onClick={() => setDeleteConfirm(null)}
+                      className="rounded bg-gray-100 px-2.5 py-1 text-xs text-gray-700 hover:bg-gray-200"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                ) : (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-1 bg-white rounded-lg shadow-sm px-1 py-1">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); archiveConversation(conv.from, !showArchived); }}
+                      className="rounded-full p-1.5 hover:bg-slate-100 transition-colors"
+                      title={showArchived ? "Desarchiver" : "Archiver"}
+                    >
+                      {showArchived ? <ArchiveRestore size={15} className="text-slate-500" /> : <Archive size={15} className="text-slate-500" />}
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm(conv.from); }}
+                      className="rounded-full p-1.5 hover:bg-red-50 transition-colors"
+                      title="Supprimer"
+                    >
+                      <Trash2 size={15} className="text-gray-400 hover:text-red-500" />
+                    </button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -278,9 +353,30 @@ export default function WhatsAppInbox() {
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 text-white font-bold">
           {contactName.charAt(0).toUpperCase()}
         </div>
-        <div>
+        <div className="flex-1">
           <p className="font-semibold text-dta-dark">{contactName}</p>
           <p className="text-xs text-dta-taupe">{formatPhone(selectedPhone)}</p>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => { archiveConversation(selectedPhone, true); setSelectedPhone(null); }}
+            className="rounded-full p-2 hover:bg-green-100 transition-colors"
+            title="Archiver"
+          >
+            <Archive size={16} className="text-gray-500" />
+          </button>
+          <button
+            onClick={() => {
+              if (confirm("Supprimer cette conversation ?")) {
+                deleteConversation(selectedPhone);
+                setSelectedPhone(null);
+              }
+            }}
+            className="rounded-full p-2 hover:bg-red-50 transition-colors"
+            title="Supprimer"
+          >
+            <Trash2 size={16} className="text-gray-400 hover:text-red-500" />
+          </button>
         </div>
       </div>
 

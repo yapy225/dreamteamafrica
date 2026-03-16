@@ -15,6 +15,7 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const phone = url.searchParams.get("phone");
+  const showArchived = url.searchParams.get("archived") === "true";
 
   if (phone) {
     // Get messages for a specific conversation
@@ -49,9 +50,11 @@ export async function GET(request: Request) {
       m."contactName",
       m."body",
       m."createdAt",
+      m."archived",
       (SELECT COUNT(*) FROM "WhatsAppMessage" WHERE "from" = m."from" AND "read" = false AND "direction" = 'inbound')::int as "unreadCount"
     FROM "WhatsAppMessage" m
     WHERE m."direction" = 'inbound'
+      AND m."archived" = ${showArchived}
     ORDER BY m."from", m."createdAt" DESC
   `;
 

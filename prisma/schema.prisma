@@ -795,12 +795,14 @@ model WhatsAppMessage {
   mediaUrl       String?
   status         String?  // sent, delivered, read (for outbound)
   read           Boolean  @default(false)
+  archived       Boolean  @default(false)
   createdAt      DateTime @default(now())
 
   @@index([from])
   @@index([direction])
   @@index([read])
   @@index([createdAt])
+  @@index([archived])
 }
 
 // ─── EMAIL INBOX ──────────────────────────────────────

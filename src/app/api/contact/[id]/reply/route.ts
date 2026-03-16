@@ -25,11 +25,17 @@ export async function POST(
   }
 
   // Send email
-  await sendContactReplyEmail({
-    to: contact.email,
-    firstName: contact.firstName,
-    replyBody: body.trim(),
-  });
+  try {
+    await sendContactReplyEmail({
+      to: contact.email,
+      firstName: contact.firstName,
+      replyBody: body.trim(),
+    });
+  } catch (emailErr: unknown) {
+    console.error("Erreur envoi email reply:", emailErr);
+    const msg = emailErr instanceof Error ? emailErr.message : "Erreur inconnue";
+    return NextResponse.json({ error: `Échec de l'envoi : ${msg}` }, { status: 502 });
+  }
 
   // Save reply and mark as read
   const [reply] = await prisma.$transaction([

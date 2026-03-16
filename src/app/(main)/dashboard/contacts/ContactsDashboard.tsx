@@ -246,20 +246,21 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
   };
 
   const sendDraft = async () => {
-    if (!draftText.trim() || !selected || sending) return;
+    const textToSend = draftText.trim() || selected?.draftReply?.trim() || "";
+    if (!textToSend || !selected || sending) return;
     setSending(true);
     try {
       const res = await fetch(`/api/contact/${selected.id}/reply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: draftText }),
+        body: JSON.stringify({ body: textToSend }),
       });
+      const data = await res.json();
       if (res.ok) {
-        const reply = await res.json();
         setMessages((prev) =>
           prev.map((m) =>
             m.id === selected.id
-              ? { ...m, read: true, draftReply: null, replies: [reply, ...m.replies] }
+              ? { ...m, read: true, draftReply: null, replies: [data, ...m.replies] }
               : m
           )
         );
@@ -274,9 +275,11 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
         if (selected.status === "NOUVEAU") {
           updateContact(selected.id, { status: "CONTACTE" });
         }
+      } else {
+        alert(data.error || "Erreur lors de l'envoi du brouillon");
       }
     } catch {
-      alert("Erreur d'envoi");
+      alert("Erreur réseau lors de l'envoi");
     }
     setSending(false);
   };
@@ -480,7 +483,7 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
                 <div className="flex items-center gap-2">
                   <button
                     onClick={sendDraft}
-                    disabled={!draftText.trim() || sending}
+                    disabled={(!draftText.trim() && !selected.draftReply?.trim()) || sending}
                     className="flex items-center gap-1.5 rounded-[var(--radius-button)] bg-dta-accent px-4 py-2 text-sm font-medium text-white hover:bg-dta-accent/90 disabled:opacity-50"
                   >
                     <Send size={14} />

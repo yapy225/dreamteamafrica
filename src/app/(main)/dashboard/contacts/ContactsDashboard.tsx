@@ -68,6 +68,7 @@ interface Contact {
   read: boolean;
   status: string;
   notes: string | null;
+  draftReply: string | null;
   createdAt: string;
   replies: Reply[];
 }
@@ -85,6 +86,9 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
   const [notesText, setNotesText] = useState("");
   const [editingNotes, setEditingNotes] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [draftText, setDraftText] = useState("");
+  const [editingDraft, setEditingDraft] = useState(false);
+  const [generatingDraft, setGeneratingDraft] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [prospectSending, setProspectSending] = useState(false);
   const [prospectResult, setProspectResult] = useState<string | null>(null);
@@ -223,11 +227,67 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
     setProspectSending(false);
   };
 
+  const generateDraft = async (contact: Contact) => {
+    setGeneratingDraft(true);
+    try {
+      const res = await fetch(`/api/contact/${contact.id}/draft`, { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.draft) {
+        setDraftText(data.draft);
+        setEditingDraft(true);
+        setMessages((prev) =>
+          prev.map((m) => (m.id === contact.id ? { ...m, draftReply: data.draft } : m))
+        );
+      }
+    } catch {
+      alert("Erreur de generation");
+    }
+    setGeneratingDraft(false);
+  };
+
+  const sendDraft = async () => {
+    if (!draftText.trim() || !selected || sending) return;
+    setSending(true);
+    try {
+      const res = await fetch(`/api/contact/${selected.id}/reply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: draftText }),
+      });
+      if (res.ok) {
+        const reply = await res.json();
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === selected.id
+              ? { ...m, read: true, draftReply: null, replies: [reply, ...m.replies] }
+              : m
+          )
+        );
+        // Clear draft from DB
+        await fetch(`/api/contact/${selected.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notes: selected.notes }),
+        });
+        setDraftText("");
+        setEditingDraft(false);
+        if (selected.status === "NOUVEAU") {
+          updateContact(selected.id, { status: "CONTACTE" });
+        }
+      }
+    } catch {
+      alert("Erreur d'envoi");
+    }
+    setSending(false);
+  };
+
   const openContact = (m: Contact) => {
     setSelectedId(m.id);
     setReplyText("");
     setEditingNotes(false);
     setNotesText(m.notes || "");
+    setDraftText(m.draftReply || "");
+    setEditingDraft(false);
     setShowDeleteConfirm(false);
     if (!m.read) updateContact(m.id, { read: true });
   };
@@ -379,6 +439,69 @@ export default function ContactsDashboard({ messages: initial }: { messages: Con
               </div>
             </div>
           )}
+
+          {/* AI Draft Reply */}
+          <div className="border-b px-6 py-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xs font-medium uppercase text-dta-taupe flex items-center gap-1.5">
+                🤖 Brouillon IA
+              </h3>
+              <button
+                onClick={() => generateDraft(selected)}
+                disabled={generatingDraft}
+                className="flex items-center gap-1 text-xs text-dta-accent hover:underline disabled:opacity-50"
+              >
+                {generatingDraft ? (
+                  <><Loader2 size={12} className="animate-spin" /> Generation...</>
+                ) : (
+                  selected.draftReply ? "Regenerer" : "Generer un brouillon"
+                )}
+              </button>
+            </div>
+
+            {(draftText || selected.draftReply) ? (
+              <div className="space-y-3">
+                {editingDraft ? (
+                  <textarea
+                    value={draftText}
+                    onChange={(e) => setDraftText(e.target.value)}
+                    rows={6}
+                    className="w-full rounded-lg border border-dta-accent/30 bg-dta-accent/5 px-3 py-2 text-sm outline-none focus:border-dta-accent focus:ring-1 focus:ring-dta-accent resize-y"
+                  />
+                ) : (
+                  <div
+                    onClick={() => { setDraftText(selected.draftReply || ""); setEditingDraft(true); }}
+                    className="cursor-pointer rounded-lg bg-dta-accent/5 border border-dta-accent/20 px-4 py-3 text-sm text-dta-char whitespace-pre-wrap hover:border-dta-accent/40 transition-colors"
+                  >
+                    {selected.draftReply}
+                    <p className="mt-2 text-[10px] text-dta-taupe italic">Cliquez pour modifier</p>
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={sendDraft}
+                    disabled={!draftText.trim() || sending}
+                    className="flex items-center gap-1.5 rounded-[var(--radius-button)] bg-dta-accent px-4 py-2 text-sm font-medium text-white hover:bg-dta-accent/90 disabled:opacity-50"
+                  >
+                    <Send size={14} />
+                    {sending ? "Envoi..." : "Envoyer ce brouillon"}
+                  </button>
+                  {editingDraft && (
+                    <button
+                      onClick={() => setEditingDraft(false)}
+                      className="rounded-[var(--radius-button)] bg-gray-100 px-3 py-2 text-sm text-dta-char hover:bg-gray-200"
+                    >
+                      Apercu
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-dta-char/50 italic">
+                Aucun brouillon. Cliquez sur "Generer un brouillon" pour que l'IA redige une reponse.
+              </p>
+            )}
+          </div>
 
           {/* Prospect email CTA */}
           <div className="border-b px-6 py-4">

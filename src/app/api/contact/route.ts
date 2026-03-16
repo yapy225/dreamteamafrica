@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendContactNotificationEmail } from "@/lib/email";
+import { generateDraftReply } from "@/lib/ai-draft";
 
 const VALID_CATEGORIES = [
   "EXPOSANT",
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
     const trimmedCompany = company?.trim() || null;
     const trimmedMessage = (message || "").trim();
 
-    await prisma.contactMessage.create({
+    const contact = await prisma.contactMessage.create({
       data: {
         category,
         firstName: trimmedFirstName,
@@ -58,6 +59,25 @@ export async function POST(request: NextRequest) {
         message: trimmedMessage,
       },
     });
+
+    // Generate AI draft reply (non-blocking)
+    try {
+      const draft = await generateDraftReply({
+        firstName: trimmedFirstName,
+        lastName: trimmedLastName,
+        company: trimmedCompany,
+        category: categoryLabels[category] || category,
+        message: trimmedMessage,
+      });
+      if (draft) {
+        await prisma.contactMessage.update({
+          where: { id: contact.id },
+          data: { draftReply: draft },
+        });
+      }
+    } catch (draftErr) {
+      console.error("AI draft generation failed (non-blocking):", draftErr);
+    }
 
     // Send notification email so it appears in the inbox
     try {

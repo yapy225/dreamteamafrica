@@ -803,7 +803,7 @@ export async function sendProspectEmail(opts: {
   category?: string;
 }) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
-  const coverImage = `${appUrl}/foire-afrique.png`;
+  const coverImage = `${appUrl}/foire-afrique.jpg`;
   const eventTitle = "Foire d'Afrique Paris — 6ème Édition";
   const eventDate = "1er & 2 mai 2026";
   const eventVenue = "Espace Mas";

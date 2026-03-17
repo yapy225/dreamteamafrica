@@ -116,6 +116,82 @@ const nextConfig: NextConfig = {
       // Ancien festival-du-conte-africain event avec UTM (le base path gère les query params)
       { source: "/event/festival-du-conte-africain", destination: "/saison-culturelle-africaine/festival-conte-africain", permanent: true },
       { source: "/event/festival-du-conte-africain/", destination: "/saison-culturelle-africaine/festival-conte-africain", permanent: true },
+
+      // Slugs inexistants redirigés par /event/:slug vers /saison-culturelle-africaine/:slug
+      { source: "/saison-culturelle-africaine/pack-professionnel-fashion-week-africa", destination: "/exposants", permanent: true },
+      { source: "/saison-culturelle-africaine/billets-le-grand-defile-zulu", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/saison-culturelle-africaine/billets-salon-made-in-africa", destination: "/saison-culturelle-africaine/salon-made-in-africa", permanent: true },
+
+      // ── Wildcards blog WordPress (cosmétique, art, lifestyle) → /lafropeen ──
+      { source: "/huile-de-chebe/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/huile-de-coco/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/beurre-de-karite/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/beurre-de-cacao/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/cosmetique-afrique/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/art-africain/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/balade-sur-la-seine/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/dream-team-africa/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/posts/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/post/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/blog", destination: "/lafropeen", permanent: true },
+      { source: "/blog/", destination: "/lafropeen", permanent: true },
+      { source: "/blog/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/hello-world", destination: "/lafropeen", permanent: true },
+      { source: "/hello-world/", destination: "/lafropeen", permanent: true },
+
+      // Pages individuelles ancien blog
+      { source: "/huile-de-chebe", destination: "/lafropeen", permanent: true },
+      { source: "/huile-de-coco", destination: "/lafropeen", permanent: true },
+      { source: "/beurre-de-karite", destination: "/lafropeen", permanent: true },
+      { source: "/beurre-de-cacao", destination: "/lafropeen", permanent: true },
+      { source: "/cosmetique-afrique", destination: "/lafropeen", permanent: true },
+      { source: "/art-africain", destination: "/lafropeen", permanent: true },
+      { source: "/balade-sur-la-seine", destination: "/lafropeen", permanent: true },
+
+      // ── Wildcards événements anciens → pages correspondantes ──
+      { source: "/salon-made-in-africa/:path*", destination: "/saison-culturelle-africaine/salon-made-in-africa", permanent: true },
+      { source: "/foire-dafrique-paris/:path*", destination: "/saison-culturelle-africaine/foire-dafrique-paris", permanent: true },
+      { source: "/fashion-week-africa-paris/:path*", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/festival-du-conte-africain/:path*", destination: "/saison-culturelle-africaine/festival-conte-africain", permanent: true },
+      { source: "/juste-une-danse/:path*", destination: "/saison-culturelle-africaine/juste-une-danse", permanent: true },
+      { source: "/africa-bbq/:path*", destination: "/saison-culturelle-africaine", permanent: true },
+
+      // ── Billetterie & paiement anciens ──
+      { source: "/billetterie-en-ligne", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/billetterie-en-ligne/", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/billetterie-en-ligne/:path*", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/paiement-carte-fashion-week-africa", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/paiement-carte-fashion-week-africa/", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/paiement-carte-fashion-week-africa/:path*", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/recuperer-mon-billet", destination: "/dashboard/tickets", permanent: true },
+      { source: "/recuperer-mon-billet/", destination: "/dashboard/tickets", permanent: true },
+      { source: "/commande-de-stands", destination: "/exposants", permanent: true },
+      { source: "/commande-de-stands/", destination: "/exposants", permanent: true },
+
+      // ── Anciennes pages diverses ──
+      { source: "/activite/:path*", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/nos-activites-planifiees", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/nos-activites-planifiees/", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/election-miss-diaspora-paris", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/election-miss-diaspora-paris/", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/evasion-paris-lusury/:path*", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/foire-de-paris/:path*", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/contactez-nous", destination: "/nous-contacter", permanent: true },
+      { source: "/contactez-nous/", destination: "/nous-contacter", permanent: true },
+
+      // ── Layouts / WordPress system / shop ──
+      { source: "/layouts/:path*", destination: "/", permanent: true },
+      { source: "/shop", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/shop/", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/shop/:path*", destination: "/saison-culturelle-africaine", permanent: true },
+      { source: "/tf_header_footer/:path*", destination: "/", permanent: true },
+      { source: "/wp-content/:path*", destination: "/", permanent: true },
+
+      // ── Archives année supplémentaires ──
+      { source: "/2023/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/2022/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/2021/:path*", destination: "/lafropeen", permanent: true },
+      { source: "/2020/:path*", destination: "/lafropeen", permanent: true },
     ];
   },
 };

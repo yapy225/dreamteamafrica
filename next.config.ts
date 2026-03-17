@@ -55,8 +55,12 @@ const nextConfig: NextConfig = {
     return {
       beforeFiles: [
         {
-          source: "/letthemusicplay/:path*",
-          destination: "https://letthemusicplay.vercel.app/letthemusicplay/:path*",
+          source: "/letthemusicplay",
+          destination: "https://letthemusicplay.vercel.app/letthemusicplay",
+        },
+        {
+          source: "/letthemusicplay/:path+",
+          destination: "https://letthemusicplay.vercel.app/letthemusicplay/:path+",
         },
       ],
     };

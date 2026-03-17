@@ -168,11 +168,13 @@ export default function TicketSectionClient({
         </div>
       )}
 
-      {/* Social proof banner for Early Bird urgency */}
+      {/* Social proof banner — cascades to next tier when current is sold out */}
       {(() => {
-        const eb = tiers.find((t) => t.id === "EARLY_BIRD" && t.quota != null);
-        return eb && eb.quota! - eb.sold > 0 ? (
-          <SocialProofBanner sold={eb.sold} quota={eb.quota!} />
+        const available = tiers.find(
+          (t) => t.quota != null && t.quota > 0 && t.quota - t.sold > 0 && !t.onSiteOnly,
+        );
+        return available ? (
+          <SocialProofBanner sold={available.sold} quota={available.quota!} tierName={available.name} />
         ) : null;
       })()}
 

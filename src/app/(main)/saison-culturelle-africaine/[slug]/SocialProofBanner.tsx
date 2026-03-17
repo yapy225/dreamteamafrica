@@ -35,9 +35,10 @@ const PURCHASES: Purchase[] = [
 interface SocialProofBannerProps {
   sold: number;
   quota: number;
+  tierName?: string;
 }
 
-export default function SocialProofBanner({ sold, quota }: SocialProofBannerProps) {
+export default function SocialProofBanner({ sold, quota, tierName = "Early Bird" }: SocialProofBannerProps) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const remaining = quota - sold;
   const percent = Math.round((sold / quota) * 100);
@@ -61,7 +62,7 @@ export default function SocialProofBanner({ sold, quota }: SocialProofBannerProp
           <div className="flex items-center gap-2">
             <Flame size={18} className="text-orange-500" />
             <span className="text-sm font-bold text-orange-800">
-              Early Bird — Plus que {remaining} place{remaining > 1 ? "s" : ""} !
+              {tierName} — Plus que {remaining} place{remaining > 1 ? "s" : ""} !
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-xs font-semibold text-orange-600">
@@ -78,7 +79,7 @@ export default function SocialProofBanner({ sold, quota }: SocialProofBannerProp
           />
         </div>
         <p className="mt-1.5 text-center text-[11px] font-medium text-orange-600/80">
-          {percent}% des billets Early Bird vendus
+          {percent}% des billets {tierName} vendus
         </p>
       </div>
 

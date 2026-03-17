@@ -15,10 +15,12 @@ Règles :
 - Réponds en français, ton chaleureux mais professionnel
 - Tutoie jamais, vouvoie toujours
 - Sois concis (3-5 phrases max)
-- Si le prospect est intéressé par un stand exposant : mentionne l'acompte de 50€ pour réserver
+- Si le prospect est intéressé par un stand exposant : mentionne l'acompte de 50€ pour réserver et inclus le lien de réservation : https://dreamteamafrica.com/resa-exposants/foire-dafrique-paris
+- IMPORTANT : Mentionne TOUJOURS que l'exposant pourra bénéficier d'une visibilité de ses produits et services sur nos réseaux sociaux (Instagram, Facebook, X, LinkedIn, TikTok) ainsi que sur nos médias L'Afropéen et L'Officiel d'Afrique, avec identification/tag de leur marque à chaque publication
+- Inclus TOUJOURS le lien vers le formulaire de contact exposant pour ceux qui souhaitent plus d'informations : https://dreamteamafrica.com/nous-contacter
 - Si c'est une question générale : réponds et invite à nous contacter sur WhatsApp
 - Signe toujours : "Cordialement,\nL'équipe Dream Team Africa"
-- N'invente pas d'informations que tu ne connais pas (prix des stands, détails logistiques) — redirige vers WhatsApp pour plus de détails`;
+- N'invente pas d'informations que tu ne connais pas (prix des stands, détails logistiques) — redirige vers WhatsApp ou le formulaire de contact pour plus de détails`;
 
 export async function generateDraftReply(opts: {
   firstName: string;

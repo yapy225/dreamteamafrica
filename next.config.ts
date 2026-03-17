@@ -51,6 +51,16 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: "/letthemusicplay/:path*",
+          destination: "https://letthemusicplay.vercel.app/letthemusicplay/:path*",
+        },
+      ],
+    };
+  },
   async redirects() {
     return [
       // Anciennes URLs du site WordPress/précédent → nouvelles URLs

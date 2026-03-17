@@ -304,10 +304,10 @@ Règles :
 - Commence par une accroche engageante (pas "Découvrez" à chaque fois, varie les formules)
 - Mentionne le nom de l'entreprise et son secteur
 - Intègre un extrait de la description si pertinent
-- Tag les réseaux sociaux de l'exposant si disponibles
+- IMPORTANT : Tag/identifie les réseaux sociaux de l'exposant dans le post (@ sur Instagram/Twitter/TikTok, tag sur Facebook/LinkedIn)
 - Inclus 3-5 hashtags pertinents dont #FoiredAfrique #DreamTeamAfrica
 - En français
-- Longueur adaptée au réseau social (court pour Twitter, plus détaillé pour LinkedIn/Facebook)
+- Longueur adaptée au réseau social (court pour Twitter/TikTok, plus détaillé pour LinkedIn/Facebook)
 
 Réponds UNIQUEMENT en JSON valide (pas de markdown, pas de backticks) :
 {
@@ -354,7 +354,7 @@ export async function generateExhibitorDrafts(profileId?: string): Promise<{
   }
 
   const results: { platform: string; content: string; companyName: string }[] = [];
-  const platforms: SocialPlatform[] = ["TWITTER", "FACEBOOK", "INSTAGRAM", "LINKEDIN"];
+  const platforms: SocialPlatform[] = ["TWITTER", "FACEBOOK", "INSTAGRAM", "LINKEDIN", "TIKTOK"];
 
   for (const profile of profiles) {
     const companyName = profile.companyName || profile.booking.companyName;
@@ -366,6 +366,9 @@ export async function generateExhibitorDrafts(profileId?: string): Promise<{
     const socialParts: string[] = [];
     if (profile.facebook) socialParts.push(`Facebook: ${profile.facebook}`);
     if (profile.instagram) socialParts.push(`Instagram: ${profile.instagram}`);
+    if (profile.twitter) socialParts.push(`X/Twitter: ${profile.twitter}`);
+    if (profile.linkedin) socialParts.push(`LinkedIn: ${profile.linkedin}`);
+    if (profile.tiktok) socialParts.push(`TikTok: ${profile.tiktok}`);
     const socialLinks = socialParts.join(", ");
 
     // Pick image URL (first available)
@@ -382,8 +385,9 @@ export async function generateExhibitorDrafts(profileId?: string): Promise<{
 
     if (existing > 0) continue; // Skip if already generated
 
-    for (const platform of platforms) {
-      try {
+    // Generate all platforms in parallel for speed
+    const platformResults = await Promise.allSettled(
+      platforms.map(async (platform) => {
         const response = await getOpenAI().chat.completions.create({
           model: "gpt-4o-mini",
           messages: [
@@ -407,11 +411,11 @@ export async function generateExhibitorDrafts(profileId?: string): Promise<{
         const jsonMatch = raw.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
           console.error(`[SOCIAL-DRAFTS] GPT invalid JSON for exposant ${companyName} on ${platform}`);
-          continue;
+          return null;
         }
 
         const parsed = JSON.parse(jsonMatch[0]) as { content: string };
-        if (!parsed.content) continue;
+        if (!parsed.content) return null;
 
         await prisma.socialDraft.create({
           data: {
@@ -424,10 +428,15 @@ export async function generateExhibitorDrafts(profileId?: string): Promise<{
           },
         });
 
-        results.push({ platform, content: parsed.content, companyName });
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : "Erreur inconnue";
-        console.error(`[SOCIAL-DRAFTS] Erreur exposant ${companyName} ${platform}:`, message);
+        return { platform, content: parsed.content, companyName };
+      }),
+    );
+
+    for (const r of platformResults) {
+      if (r.status === "fulfilled" && r.value) {
+        results.push(r.value);
+      } else if (r.status === "rejected") {
+        console.error(`[SOCIAL-DRAFTS] Erreur exposant ${companyName}:`, r.reason);
       }
     }
   }

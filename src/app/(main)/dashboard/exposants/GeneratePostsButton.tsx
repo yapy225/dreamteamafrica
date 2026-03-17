@@ -9,22 +9,28 @@ export default function GeneratePostsButton() {
 
   const handleClick = async () => {
     setStatus("loading");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 55000);
     try {
       const res = await fetch("/api/admin/social-drafts/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "exposant" }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       const data = await res.json();
       if (res.ok) {
         setCount(data.generated || 0);
         setStatus("done");
         setTimeout(() => setStatus("idle"), 5000);
       } else {
+        setCount(0);
         setStatus("error");
         setTimeout(() => setStatus("idle"), 3000);
       }
     } catch {
+      clearTimeout(timeout);
       setStatus("error");
       setTimeout(() => setStatus("idle"), 3000);
     }

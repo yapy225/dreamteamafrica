@@ -12,14 +12,17 @@ export default function ValidateProfileButton({ profileId }: { profileId: string
   const handleClick = async () => {
     setStatus("loading");
     setMessage("Génération des posts...");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 55000);
 
     try {
-      // Generate social posts for this exhibitor
       const res = await fetch("/api/admin/social-drafts/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "exposant", profileId }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
 
       const data = await res.json();
 
@@ -34,7 +37,8 @@ export default function ValidateProfileButton({ profileId }: { profileId: string
         setTimeout(() => setStatus("idle"), 3000);
       }
     } catch {
-      setMessage("Erreur réseau");
+      clearTimeout(timeout);
+      setMessage("Timeout ou erreur réseau");
       setStatus("error");
       setTimeout(() => setStatus("idle"), 3000);
     }

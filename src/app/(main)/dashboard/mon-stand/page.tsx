@@ -17,6 +17,7 @@ import {
   ExternalLink,
   AlertCircle,
   Download,
+  Megaphone,
 } from "lucide-react";
 import ExhibitorProfileClientForm from "./ExhibitorProfileClientForm";
 import EarlyPaymentButton from "../../exposants/confirmation/[id]/EarlyPaymentButton";
@@ -112,6 +113,25 @@ export default async function MonStandPage() {
       },
     });
   }
+
+  // Publications (visibility tracking)
+  const publications = profile
+    ? await prisma.exhibitorPublication.findMany({
+        where: { profileId: profile.id },
+      })
+    : [];
+
+  const VISIBILITY_PLATFORMS = [
+    { id: "facebook", label: "Facebook", icon: "f", color: "bg-blue-600" },
+    { id: "instagram", label: "Instagram", icon: "ig", color: "bg-gradient-to-br from-purple-600 to-pink-500" },
+    { id: "twitter", label: "X (Twitter)", icon: "𝕏", color: "bg-black" },
+    { id: "linkedin", label: "LinkedIn", icon: "in", color: "bg-blue-700" },
+    { id: "tiktok", label: "TikTok", icon: "tk", color: "bg-gray-900" },
+    { id: "lafropeen", label: "L'Afropéen", icon: "AF", color: "bg-dta-accent" },
+    { id: "officiel", label: "L'Officiel d'Afrique", icon: "OA", color: "bg-dta-dark" },
+  ] as const;
+
+  const pubMap = new Map(publications.map((p) => [p.platform, p]));
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
@@ -480,6 +500,75 @@ export default async function MonStandPage() {
               </div>
             </div>
           </div>
+
+          {/* Visibilité & Réseaux */}
+          {profile && (
+            <div className="rounded-[var(--radius-card)] border border-dta-sand bg-white p-5 shadow-[var(--shadow-card)]">
+              <h3 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-dta-taupe mb-3">
+                <Megaphone size={14} className="text-dta-accent" />
+                Visibilit&eacute;
+              </h3>
+              {!profile.submittedAt ? (
+                <p className="text-xs text-dta-char/60">
+                  Compl&eacute;tez votre{" "}
+                  <a href="#fiche-exposant" className="text-dta-accent underline">
+                    fiche exposant
+                  </a>{" "}
+                  pour activer votre visibilit&eacute; sur nos r&eacute;seaux.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {VISIBILITY_PLATFORMS.map((pl) => {
+                    const pub = pubMap.get(pl.id);
+                    const status = pub?.status || "PENDING";
+                    return (
+                      <div key={pl.id} className="flex items-center gap-2.5">
+                        <span
+                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[9px] font-bold text-white ${pl.color}`}
+                        >
+                          {pl.icon}
+                        </span>
+                        <span className="flex-1 text-sm text-dta-dark truncate">
+                          {pl.label}
+                        </span>
+                        {status === "POSTED" ? (
+                          pub?.postUrl ? (
+                            <a
+                              href={pub.postUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700 hover:bg-green-200 transition-colors"
+                            >
+                              <CheckCircle size={10} />
+                              Publi&eacute;
+                            </a>
+                          ) : (
+                            <span className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700">
+                              <CheckCircle size={10} />
+                              Publi&eacute;
+                            </span>
+                          )
+                        ) : status === "SCHEDULED" ? (
+                          <span className="flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700">
+                            <Clock size={10} />
+                            Programm&eacute;
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
+                            <Clock size={10} />
+                            En attente
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                  <p className="mt-2 text-[10px] text-dta-char/50 leading-relaxed">
+                    Votre marque sera identifi&eacute;e/taggu&eacute;e sur chaque publication.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Actions */}
           <div className="rounded-[var(--radius-card)] border border-dta-sand bg-white p-5 shadow-[var(--shadow-card)]">

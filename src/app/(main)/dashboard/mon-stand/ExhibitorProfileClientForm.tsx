@@ -24,6 +24,9 @@ interface ProfileData {
   email: string;
   facebook: string;
   instagram: string;
+  twitter: string;
+  linkedin: string;
+  tiktok: string;
   description: string;
   logoUrl: string | null;
   image1Url: string | null;
@@ -303,7 +306,10 @@ export default function ExhibitorProfileClientForm({
         <legend className="text-sm font-semibold uppercase tracking-wider text-dta-accent px-2">
           R&eacute;seaux sociaux
         </legend>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mt-4">
+        <p className="text-sm text-dta-taupe mt-2 mb-4">
+          Vos comptes seront identifi&eacute;s/taggu&eacute;s dans chaque publication.
+        </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mt-4">
           <div>
             <label className="block text-sm font-medium text-dta-dark mb-1">
               Facebook
@@ -322,6 +328,39 @@ export default function ExhibitorProfileClientForm({
             <input
               name="instagram"
               defaultValue={data.instagram}
+              placeholder="@votre_compte"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-dta-accent focus:ring-1 focus:ring-dta-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-dta-dark mb-1">
+              X (Twitter)
+            </label>
+            <input
+              name="twitter"
+              defaultValue={data.twitter}
+              placeholder="@votre_compte"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-dta-accent focus:ring-1 focus:ring-dta-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-dta-dark mb-1">
+              LinkedIn
+            </label>
+            <input
+              name="linkedin"
+              defaultValue={data.linkedin}
+              placeholder="URL de votre page ou profil"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-dta-accent focus:ring-1 focus:ring-dta-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-dta-dark mb-1">
+              TikTok
+            </label>
+            <input
+              name="tiktok"
+              defaultValue={data.tiktok}
               placeholder="@votre_compte"
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-dta-accent focus:ring-1 focus:ring-dta-accent"
             />

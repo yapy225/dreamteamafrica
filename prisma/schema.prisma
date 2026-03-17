@@ -615,6 +615,9 @@ model ExhibitorProfile {
   // Réseaux sociaux
   facebook      String?
   instagram     String?
+  twitter       String?
+  linkedin      String?
+  tiktok        String?
 
   // Description
   description   String?  @db.Text
@@ -634,11 +637,27 @@ model ExhibitorProfile {
   submittedAt   DateTime?
   promoStatus   String   @default("PENDING") // PENDING, SCHEDULED, POSTED
 
+  publications  ExhibitorPublication[]
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@index([token])
   @@index([bookingId])
+}
+
+model ExhibitorPublication {
+  id          String    @id @default(cuid())
+  profileId   String
+  profile     ExhibitorProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  platform    String    // facebook, instagram, twitter, linkedin, tiktok, lafropeen, officiel
+  status      String    @default("PENDING") // PENDING, SCHEDULED, POSTED
+  postUrl     String?
+  postedAt    DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([profileId, platform])
+  @@index([profileId])
 }
 
 // ─── MESSAGES DE CONTACT ──────────────────────────────

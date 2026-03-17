@@ -7,6 +7,7 @@ import ResendQuoteButton from "./ResendQuoteButton";
 import GeneratePostsButton from "./GeneratePostsButton";
 import ValidateProfileButton from "./ValidateProfileButton";
 import CashPaymentButton from "./CashPaymentButton";
+import PublicationTracker from "./PublicationTracker";
 import SearchFilter from "./SearchFilter";
 import { DEPOSIT_AMOUNT } from "@/lib/exhibitor-events";
 
@@ -35,7 +36,12 @@ export default async function ExposantsDashboardPage({
   const bookings = await prisma.exhibitorBooking.findMany({
     include: {
       user: { select: { name: true, email: true } },
-      profile: { select: { id: true, token: true, submittedAt: true, logoUrl: true, description: true } },
+      profile: {
+        select: {
+          id: true, token: true, submittedAt: true, logoUrl: true, description: true,
+          publications: { select: { platform: true, status: true, postUrl: true } },
+        },
+      },
     },
     orderBy: [
       { paidInstallments: "desc" },
@@ -258,30 +264,36 @@ export default async function ExposantsDashboardPage({
                   </td>
                   <td className="px-4 py-3">
                     {b.profile ? (
-                      b.profile.submittedAt ? (
-                        <div className="space-y-1.5">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-                            Soumise
+                      <div className="space-y-2">
+                        {b.profile.submittedAt ? (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
+                                Fiche soumise
+                              </span>
+                              <ValidateProfileButton profileId={b.profile.id} />
+                            </div>
+                            <PublicationTracker
+                              profileId={b.profile.id}
+                              publications={b.profile.publications}
+                            />
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                            Fiche en attente
                           </span>
-                          <ValidateProfileButton profileId={b.profile.id} />
-                        </div>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-                          En attente
-                        </span>
-                      )
+                        )}
+                        <a
+                          href={`/exposants/profil/${b.profile.token}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-xs text-dta-accent underline"
+                        >
+                          Voir fiche
+                        </a>
+                      </div>
                     ) : (
                       <span className="text-xs text-dta-taupe">&mdash;</span>
-                    )}
-                    {b.profile && (
-                      <a
-                        href={`/exposants/profil/${b.profile.token}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-1 block text-xs text-dta-accent underline"
-                      >
-                        Voir fiche
-                      </a>
                     )}
                   </td>
                   <td className="px-4 py-3">

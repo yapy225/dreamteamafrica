@@ -1,9 +1,20 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting — 5 attempts per 15 minutes
+    const ip = getClientIp(request);
+    const rl = rateLimit(`register:${ip}`, RATE_LIMITS.auth);
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: "Trop de tentatives. Réessayez dans quelques minutes." },
+        { status: 429 },
+      );
+    }
+
     const { name, email, password, role } = await request.json();
 
     if (!name || !email || !password) {
@@ -13,9 +24,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (password.length < 6) {
+    if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
       return NextResponse.json(
-        { error: "Le mot de passe doit contenir au moins 6 caractères." },
+        { error: "Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre." },
         { status: 400 }
       );
     }

@@ -22,10 +22,30 @@ export function getCdnUrl(path: string): string {
   return `${CDN_URL}/${clean}`;
 }
 
+const ALLOWED_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/avif",
+  "application/pdf",
+]);
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
 export async function uploadFile(
   file: File,
   folder = "",
 ): Promise<{ url: string; path: string }> {
+  // Validate file type
+  if (!ALLOWED_MIME_TYPES.has(file.type)) {
+    throw new Error(`Type de fichier non autorisé : ${file.type}`);
+  }
+  // Validate file size
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(`Fichier trop volumineux (max ${MAX_FILE_SIZE / 1024 / 1024} Mo)`);
+  }
+
   const safeName = sanitizeFileName(file.name);
   const timestamp = Date.now();
   const filePath = folder

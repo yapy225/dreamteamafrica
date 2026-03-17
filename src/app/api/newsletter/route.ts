@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rl = rateLimit(`newsletter:${ip}`, RATE_LIMITS.form);
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: "Trop de tentatives. Réessayez dans quelques minutes." },
+        { status: 429 },
+      );
+    }
+
     const { email } = await request.json();
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -39,8 +49,8 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
+    if (!session?.user?.id || (session.user as { role?: string }).role !== "ADMIN") {
+      return NextResponse.json({ error: "Accès réservé aux administrateurs." }, { status: 403 });
     }
 
     const subscribers = await prisma.newsletterSubscriber.findMany({

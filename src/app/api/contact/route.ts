@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendContactNotificationEmail } from "@/lib/email";
 import { generateDraftReply } from "@/lib/ai-draft";
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 const VALID_CATEGORIES = [
   "EXPOSANT",
@@ -25,6 +26,15 @@ const categoryLabels: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const rl = rateLimit(`contact:${ip}`, RATE_LIMITS.form);
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: "Trop de soumissions. Réessayez dans quelques minutes." },
+        { status: 429 },
+      );
+    }
+
     const { category, firstName, lastName, email, phone, company, message } =
       await request.json();
 

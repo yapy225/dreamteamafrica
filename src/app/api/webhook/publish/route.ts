@@ -8,6 +8,7 @@
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { prisma } from "@/lib/db";
 import { marked } from "marked";
 import { generateCoverImage } from "@/lib/generate-cover-image";
@@ -198,12 +199,27 @@ export async function POST(request: NextRequest) {
     }
     const body = mapped as unknown as WebhookPayload;
 
-    // 2. Verifier la cle secrete
+    // 2. Verifier la cle secrete (timing-safe)
     const SECRET = process.env.WEBHOOK_SECRET_KEY;
-    if (!SECRET || body.secret_key !== SECRET) {
+    if (!SECRET || !body.secret_key) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
+      );
+    }
+    try {
+      const a = Buffer.from(String(body.secret_key));
+      const b = Buffer.from(SECRET);
+      if (a.length !== b.length || !timingSafeEqual(a, b)) {
+        return NextResponse.json(
+          { success: false, message: "Unauthorized" },
+          { status: 401 },
+        );
+      }
+    } catch {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 },
       );
     }
 

@@ -6,8 +6,15 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
+  // Verify caller is an authenticated admin
+  const session = await auth();
+  if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+
   const code = request.nextUrl.searchParams.get("code");
   const error = request.nextUrl.searchParams.get("error");
 

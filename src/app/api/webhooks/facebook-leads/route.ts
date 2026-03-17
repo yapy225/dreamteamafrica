@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { sendWhatsAppTemplate } from "@/lib/whatsapp";
 import { prisma } from "@/lib/db";
 
-const VERIFY_TOKEN = process.env.FB_LEADS_VERIFY_TOKEN ?? process.env.CRON_SECRET!;
+const VERIFY_TOKEN = process.env.FB_LEADS_VERIFY_TOKEN;
 const FB_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN!;
 
 // Event slug mapping for lead follow-up URLs
@@ -19,7 +20,16 @@ export async function GET(request: Request) {
   const token = url.searchParams.get("hub.verify_token");
   const challenge = url.searchParams.get("hub.challenge");
 
-  if (mode === "subscribe" && token === VERIFY_TOKEN) {
+  if (mode === "subscribe" && VERIFY_TOKEN && token) {
+    try {
+      const a = Buffer.from(token);
+      const b = Buffer.from(VERIFY_TOKEN);
+      if (a.length !== b.length || !timingSafeEqual(a, b)) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    } catch {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     console.log("Facebook Leads webhook verified");
     return new Response(challenge, { status: 200 });
   }

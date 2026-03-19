@@ -9,6 +9,8 @@ import ValidateProfileButton from "./ValidateProfileButton";
 import CashPaymentButton from "./CashPaymentButton";
 import PublicationTracker from "./PublicationTracker";
 import SearchFilter from "./SearchFilter";
+import SendInvitesButton from "./SendInvitesButton";
+import PublishButton from "./PublishButton";
 import { DEPOSIT_AMOUNT } from "@/lib/exhibitor-events";
 
 export const dynamic = "force-dynamic";
@@ -95,6 +97,7 @@ export default async function ExposantsDashboardPage({
         </p>
         <div className="flex items-center gap-3">
           <SearchFilter />
+          <SendInvitesButton />
           <GeneratePostsButton />
         </div>
       </div>
@@ -271,7 +274,7 @@ export default async function ExposantsDashboardPage({
                               <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
                                 Fiche soumise
                               </span>
-                              <ValidateProfileButton profileId={b.profile.id} />
+                              <PublishButton profileId={b.profile.id} />
                             </div>
                             <PublicationTracker
                               profileId={b.profile.id}

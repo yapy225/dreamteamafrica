@@ -878,3 +878,101 @@ export async function sendProspectEmail(opts: {
     throw new Error(`Failed to send prospect email: ${error.message}`);
   }
 }
+
+// ─── EXHIBITOR PROFILE INVITE ──────────────────────────
+
+export async function sendExhibitorProfileInviteEmail(opts: {
+  to: string;
+  contactName: string;
+  companyName: string;
+  profileToken: string;
+}) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
+  const profileUrl = `${appUrl}/exposants/profil/${opts.profileToken}`;
+  const firstName = opts.contactName.split(" ")[0];
+
+  const html = `
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#FAF8F5;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF8F5;padding:30px 0;">
+<tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+
+<!-- Header -->
+<tr><td style="background:#1A1A1A;padding:30px 32px;text-align:center;">
+  <h1 style="margin:0;color:#d4af37;font-size:22px;">Dream Team Africa</h1>
+  <p style="margin:8px 0 0;font-size:12px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.6);">Foire d'Afrique Paris 2026</p>
+</td></tr>
+
+<!-- Body -->
+<tr><td style="padding:32px;">
+  <p style="margin:0 0 16px;font-size:15px;color:#1A1A1A;">
+    Bonjour <strong>${firstName}</strong>,
+  </p>
+
+  <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#444;">
+    Merci pour votre réservation de stand pour <strong>${opts.companyName}</strong> !
+  </p>
+
+  <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#444;">
+    Pour préparer votre <strong>visibilité</strong> sur nos réseaux sociaux et dans notre journal <strong>L'Afropéen</strong>, nous avons besoin de vos visuels et informations.
+  </p>
+
+  <div style="background:#FDF8F0;border:1px solid #E8DFD3;border-radius:10px;padding:20px;margin:24px 0;">
+    <p style="margin:0 0 12px;font-size:14px;font-weight:bold;color:#8B6F4E;">Ce que nous vous demandons :</p>
+    <ul style="margin:0;padding-left:18px;font-size:14px;color:#555;line-height:2;">
+      <li><strong>Logo</strong> de votre entreprise</li>
+      <li><strong>1 à 3 photos</strong> de vos produits / activité</li>
+      <li><strong>Vidéo promo</strong> (optionnel, 30s-1min)</li>
+      <li><strong>Description</strong> de votre activité (4 lignes max)</li>
+      <li><strong>Réseaux sociaux</strong> (Instagram, Facebook...)</li>
+    </ul>
+  </div>
+
+  <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#444;">
+    Cliquez sur le bouton ci-dessous pour remplir votre fiche. Cela prend <strong>5 minutes</strong>.
+  </p>
+
+  <div style="text-align:center;margin:32px 0;">
+    <a href="${profileUrl}" style="display:inline-block;background:#A0522D;color:#fff;text-decoration:none;padding:16px 40px;border-radius:10px;font-weight:bold;font-size:16px;">
+      Remplir ma fiche exposant
+    </a>
+  </div>
+
+  <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:16px;margin:24px 0;">
+    <p style="margin:0;font-size:13px;color:#166534;line-height:1.6;">
+      <strong>Ce que vous y gagnez :</strong> Vos visuels seront utilisés pour créer des posts promotionnels sur <strong>Facebook, Instagram, X, LinkedIn et TikTok</strong>, ainsi qu'un article dédié dans <strong>L'Afropéen</strong>. Maximisez votre visibilité avant l'événement !
+    </p>
+  </div>
+
+  <p style="margin:0;font-size:13px;color:#999;">
+    Si vous avez des questions, répondez directement à cet email.
+  </p>
+</td></tr>
+
+<!-- Footer -->
+<tr><td style="background:#FAF8F5;padding:16px 32px;text-align:center;border-top:1px solid #E8DFD3;">
+  <p style="margin:0;color:#999;font-size:11px;">&copy; 2026 Dream Team Africa &mdash; hello@dreamteamafrica.com</p>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    replyTo: "hello@dreamteamafrica.com",
+    subject: `${firstName}, complétez votre fiche exposant — Foire d'Afrique Paris 2026`,
+    html,
+  });
+
+  if (error) {
+    console.error("Exhibitor invite email error:", error);
+    throw new Error(`Failed to send exhibitor invite: ${error.message}`);
+  }
+}

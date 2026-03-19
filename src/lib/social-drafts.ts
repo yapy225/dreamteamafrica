@@ -838,3 +838,210 @@ export async function publishApprovedDraft(
 
   return result;
 }
+
+// ── Option B: Generate + Publish directly for one exhibitor ──
+
+const EXPOSANT_PUBLISH_PROMPT = (
+  companyName: string,
+  sector: string,
+  description: string,
+  socialLinks: string,
+  eventName: string,
+  platform: string,
+) => `Tu es le community manager de Dream Team Africa.
+
+Rédige 1 post promotionnel pour présenter l'exposant "${companyName}" à la ${eventName} (1er & 2 mai 2026, Espace MAS, Paris 13e).
+
+Exposant :
+- Entreprise : ${companyName}
+- Secteur : ${sector}
+- Description : ${description}
+${socialLinks ? `- Réseaux sociaux : ${socialLinks}` : ""}
+
+Plateforme cible : ${platform}
+
+RÈGLES STRICTES par plateforme :
+${platform === "TWITTER" ? `- Max 280 caractères
+- Accroche percutante et directe
+- 2-3 hashtags max
+- Mentionne @DreamTeamAfrica` : ""}
+${platform === "FACEBOOK" ? `- 3-5 lignes engageantes
+- Ton chaleureux et communautaire
+- Termine par un appel à l'action (venez découvrir...)
+- 3-5 hashtags en fin de post
+- Mentionne @DreamTeamAfrica` : ""}
+${platform === "INSTAGRAM" ? `- Légende engageante de 4-6 lignes
+- Emojis pertinents (pas trop)
+- 10-15 hashtags séparés par un saut de ligne
+- Mentionne @dreamteamafrica` : ""}
+${platform === "LINKEDIN" ? `- Post professionnel de 5-8 lignes
+- Ton business / networking
+- Met en valeur l'expertise et le savoir-faire
+- 3-5 hashtags professionnels
+- Format storytelling avec accroche forte` : ""}
+${platform === "TIKTOK" ? `- Légende courte et percutante (2-3 lignes)
+- Langage dynamique, jeune
+- Emojis et énergie
+- 5-8 hashtags tendance dont #FYP #PourToi
+- Mentionne @dreamteamafrica` : ""}
+
+Règles générales :
+- En français
+- Tag/identifie les réseaux sociaux de l'exposant quand disponibles
+- Inclus #FoiredAfrique #DreamTeamAfrica
+- Ne commence JAMAIS par "Découvrez", varie les accroches
+
+Réponds UNIQUEMENT en JSON valide (pas de markdown) :
+{
+  "content": "le contenu du post"
+}`;
+
+export async function generateAndPublishExhibitorPosts(profileId: string): Promise<{
+  generated: number;
+  published: number;
+  failed: number;
+  details: Array<{ platform: string; status: string; postUrl?: string; error?: string }>;
+}> {
+  const profile = await prisma.exhibitorProfile.findUnique({
+    where: { id: profileId },
+    include: {
+      booking: { select: { companyName: true, events: true } },
+    },
+  });
+
+  if (!profile) {
+    throw new Error("Profil introuvable");
+  }
+
+  const companyName = profile.companyName || profile.booking.companyName;
+  const sector = profile.sector || "";
+  const description = profile.description || companyName;
+  const eventName = "Foire d'Afrique Paris 2026";
+
+  // Build social links
+  const socialParts: string[] = [];
+  if (profile.facebook) socialParts.push(`Facebook: ${profile.facebook}`);
+  if (profile.instagram) socialParts.push(`Instagram: @${profile.instagram.replace(/^@/, "")}`);
+  if (profile.twitter) socialParts.push(`X/Twitter: @${profile.twitter.replace(/^@/, "")}`);
+  if (profile.linkedin) socialParts.push(`LinkedIn: ${profile.linkedin}`);
+  if (profile.tiktok) socialParts.push(`TikTok: @${profile.tiktok.replace(/^@/, "")}`);
+  const socialLinks = socialParts.join(", ");
+
+  const imageUrl = profile.image1Url || profile.image2Url || profile.image3Url || profile.logoUrl;
+
+  // Platforms that support auto-publish
+  const publishablePlatforms: Array<{ platform: SocialPlatform; canPublish: boolean }> = [
+    { platform: "TWITTER", canPublish: true },
+    { platform: "FACEBOOK", canPublish: true },
+    { platform: "INSTAGRAM", canPublish: false }, // Instagram doesn't support promo auto-publish
+    { platform: "LINKEDIN", canPublish: true },
+    { platform: "TIKTOK", canPublish: false }, // TikTok doesn't support text posts
+  ];
+
+  const details: Array<{ platform: string; status: string; postUrl?: string; error?: string }> = [];
+  let generated = 0;
+  let published = 0;
+  let failed = 0;
+
+  for (const { platform, canPublish } of publishablePlatforms) {
+    try {
+      // Generate content via AI
+      const response = await getOpenAI().chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "user",
+            content: EXPOSANT_PUBLISH_PROMPT(
+              companyName,
+              sector,
+              description,
+              socialLinks,
+              eventName,
+              platform,
+            ),
+          },
+        ],
+        max_tokens: 600,
+        temperature: 0.85,
+      });
+
+      const raw = response.choices[0]?.message?.content || "";
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        failed++;
+        details.push({ platform, status: "error", error: "IA: JSON invalide" });
+        continue;
+      }
+
+      const parsed = JSON.parse(jsonMatch[0]) as { content: string };
+      if (!parsed.content) {
+        failed++;
+        details.push({ platform, status: "error", error: "IA: contenu vide" });
+        continue;
+      }
+
+      generated++;
+
+      // Create draft with APPROVED status (ready to publish)
+      const draft = await prisma.socialDraft.create({
+        data: {
+          platform,
+          type: "PROMO",
+          status: canPublish ? "APPROVED" : "DRAFT",
+          content: parsed.content,
+          imageUrl: imageUrl || null,
+          section: "exposant",
+        },
+      });
+
+      if (canPublish) {
+        // Publish directly
+        const publishResult = await publishApprovedDraft(draft.id);
+
+        if (publishResult.success) {
+          published++;
+          // Update ExhibitorPublication
+          await prisma.exhibitorPublication.upsert({
+            where: { profileId_platform: { profileId, platform: platform.toLowerCase() } },
+            create: {
+              profileId,
+              platform: platform.toLowerCase(),
+              status: "POSTED",
+              postUrl: publishResult.postUrl || null,
+              postedAt: new Date(),
+            },
+            update: {
+              status: "POSTED",
+              postUrl: publishResult.postUrl || null,
+              postedAt: new Date(),
+            },
+          });
+          details.push({ platform, status: "published", postUrl: publishResult.postUrl });
+        } else {
+          failed++;
+          details.push({ platform, status: "failed", error: publishResult.error });
+        }
+      } else {
+        // Save as draft for manual publishing (Instagram, TikTok)
+        details.push({ platform, status: "draft", error: `${platform} ne supporte pas la publication auto — brouillon sauvegardé` });
+      }
+
+      // Rate limit between API calls
+      await new Promise((r) => setTimeout(r, 500));
+    } catch (err) {
+      failed++;
+      const msg = err instanceof Error ? err.message : String(err);
+      details.push({ platform, status: "error", error: msg });
+    }
+  }
+
+  // Update profile promo status
+  if (published > 0) {
+    await prisma.exhibitorProfile.update({
+      where: { id: profileId },
+      data: { promoStatus: "POSTED" },
+    });
+  }
+
+  return { generated, published, failed, details };
+}

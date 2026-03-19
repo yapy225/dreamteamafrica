@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const token = searchParams.get("token") || "";
   const email = searchParams.get("email") || "";
+  const redirectTo = searchParams.get("redirect") || "";
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -43,6 +46,18 @@ function ResetPasswordForm() {
       if (!res.ok) {
         setError(data.error || "Une erreur est survenue.");
       } else {
+        // Auto-connect and redirect
+        if (redirectTo) {
+          const signInResult = await signIn("credentials", {
+            email,
+            password,
+            redirect: false,
+          });
+          if (signInResult?.ok) {
+            router.push(redirectTo);
+            return;
+          }
+        }
         setSuccess(true);
       }
     } catch {

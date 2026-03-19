@@ -9,6 +9,17 @@ function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }
 
+function sanitizeHtml(html: string): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, "")
+    .replace(/\son\w+\s*=\s*[^\s>]*/gi, "")
+    .replace(/javascript\s*:/gi, "blocked:")
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+    .replace(/<embed\b[^>]*>/gi, "")
+    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "");
+}
+
 // GET: liste les exposants avec leur statut article
 export async function GET() {
   const session = await auth();
@@ -153,7 +164,7 @@ CONTENT:
       title,
       slug,
       excerpt,
-      content,
+      content: sanitizeHtml(content),
       category: "BUSINESS",
       coverImage,
       gradientClass: coverImage ? null : "g3",

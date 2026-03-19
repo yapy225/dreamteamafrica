@@ -4,6 +4,17 @@ import { slugify } from "@/lib/utils";
 import { generateCoverImage } from "@/lib/generate-cover-image";
 import OpenAI from "openai";
 
+function sanitizeHtml(html: string): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, "")
+    .replace(/\son\w+\s*=\s*[^\s>]*/gi, "")
+    .replace(/javascript\s*:/gi, "blocked:")
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
+    .replace(/<embed\b[^>]*>/gi, "")
+    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "");
+}
+
 const BATCH_SIZE = 6;
 
 export async function GET(request: Request) {
@@ -112,7 +123,7 @@ CONTENT:
           title,
           slug,
           excerpt,
-          content,
+          content: sanitizeHtml(content),
           category: "BUSINESS",
           coverImage,
           gradientClass: coverImage ? null : "g3",

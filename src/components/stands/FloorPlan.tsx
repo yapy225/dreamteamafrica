@@ -36,7 +36,7 @@ interface StandDef {
 
 // Layout dimensions
 const SVG_W = 600;
-const SVG_H = 660;
+const SVG_H = 700;
 const STAND_W = 44;
 const STAND_H = 34;
 const STAND_GAP = 3;
@@ -65,7 +65,7 @@ function buildLayout(): {
     hall2Stands.push({
       number: i + 5,
       x: 25 + i * (sw + gap),
-      y: 575,
+      y: 615,
       w: sw,
       h: sh,
     });
@@ -77,7 +77,7 @@ function buildLayout(): {
     hall1Stands.push({
       number: i + 1,
       x: 310 + i * (sw + gap),
-      y: 575,
+      y: 615,
       w: sw,
       h: sh,
     });
@@ -92,7 +92,7 @@ function buildLayout(): {
   // Rangée D: stands 36-44 → dos à dos avec rangée C
   // Rangée E (mur droit): stands 45-53 → dos au mur
   const hall3Stands: StandDef[] = [];
-  const h3baseY = 100; // décalé pour laisser place à la scène
+  const h3baseY = 140; // décalé pour scène + chaises masterclass
   const corridorW = 26; // couloir de circulation
 
   // Rangée A — Mur gauche (stands 9-17) → dos au mur
@@ -176,7 +176,7 @@ function buildLayout(): {
     hall4Stands.push({
       number: 54 + i,
       x: h4x,
-      y: 100 + i * (sh + gap + 24),
+      y: 140 + i * (sh + gap + 24),
       w: sw + 16,
       h: sh + 18,
       label: `T${i + 1}`,
@@ -191,7 +191,7 @@ function buildLayout(): {
         x: 12,
         y: 40,
         w: hall3W + 12,
-        h: 9 * (sh + gap) + 75,
+        h: 9 * (sh + gap) + 115,
         fill: "#fefce8",
         stroke: "#ca8a04",
         stands: hall3Stands,
@@ -211,7 +211,7 @@ function buildLayout(): {
         name: "Hall 2",
         subtitle: "4 stands",
         x: 12,
-        y: 530,
+        y: 570,
         w: 210,
         h: 100,
         fill: "#eff6ff",
@@ -222,7 +222,7 @@ function buildLayout(): {
         name: "Hall 1 — Accueil",
         subtitle: "4 stands",
         x: 280,
-        y: 530,
+        y: 570,
         w: 225,
         h: 100,
         fill: "#f0fdf4",
@@ -546,7 +546,7 @@ export default function FloorPlan({
           {/* Connecting corridor between halls */}
           <rect
             x={12}
-            y={495}
+            y={535}
             width={495}
             height={28}
             rx={4}
@@ -557,7 +557,7 @@ export default function FloorPlan({
           />
           <text
             x={260}
-            y={513}
+            y={553}
             textAnchor="middle"
             fontSize={9}
             fill="#a8a29e"
@@ -611,6 +611,42 @@ export default function FloorPlan({
                   letterSpacing={2}
                 >
                   SCENE
+                </text>
+                {/* 4 lignes de chaises pour masterclass */}
+                {[0, 1, 2, 3].map((row) => {
+                  const chairY = hall3.y + 36 + row * 12;
+                  const chairCount = 12;
+                  const chairW = 8;
+                  const chairGap = 4;
+                  const totalChairsW = chairCount * (chairW + chairGap) - chairGap;
+                  const chairStartX = hall3.x + (hall3.w - totalChairsW) / 2;
+                  return (
+                    <g key={row}>
+                      {Array.from({ length: chairCount }, (_, i) => (
+                        <rect
+                          key={i}
+                          x={chairStartX + i * (chairW + chairGap)}
+                          y={chairY}
+                          width={chairW}
+                          height={8}
+                          rx={2}
+                          fill="#ddd6fe"
+                          stroke="#a78bfa"
+                          strokeWidth={0.5}
+                        />
+                      ))}
+                    </g>
+                  );
+                })}
+                <text
+                  x={hall3.x + hall3.w / 2}
+                  y={hall3.y + 92}
+                  textAnchor="middle"
+                  fontSize={7}
+                  fill="#7c3aed"
+                  opacity={0.6}
+                >
+                  Masterclass — 48 places assises
                 </text>
               </>
             );

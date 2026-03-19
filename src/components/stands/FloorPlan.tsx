@@ -23,7 +23,7 @@ interface FloorPlanProps {
 // Hall 2: 5-8
 // Hall 3 (Salle Loffon): 9-53 (45 stands)
 // Hall 4 (Restauration): 54-57 (4 traiteurs)
-const TOTAL_STANDS = 57;
+const TOTAL_STANDS = 66;
 
 interface StandDef {
   number: number;
@@ -35,8 +35,12 @@ interface StandDef {
 }
 
 // Layout dimensions
-const SVG_W = 550;
-const SVG_H = 630;
+const SVG_W = 600;
+const SVG_H = 640;
+const STAND_W = 44;
+const STAND_H = 34;
+const STAND_GAP = 3;
+const CORRIDOR_W = 26;
 
 function buildLayout(): {
   halls: Array<{
@@ -80,18 +84,19 @@ function buildLayout(): {
   }
 
   // ── HALL 3 — Salle Emile Loffon ──
-  // Layout: 5 rangées avec couloirs de circulation
+  // 6 rangées avec couloirs de circulation
   // Rangée A (mur gauche): stands 9-17 → dos au mur
-  // Rangée B (centre gauche): stands 18-26 → face aux visiteurs
-  // Rangée C (centre): stands 27-35 → dos à dos avec rangée D
-  // Rangée D (centre droit): stands 36-44 → dos à dos avec rangée C
+  // Rangée B: stands 18-26 → dos à dos avec rangée F
+  // Rangée F (nouvelle): stands 58-66 → dos à dos avec rangée B
+  // Rangée C: stands 27-35 → dos à dos avec rangée D
+  // Rangée D: stands 36-44 → dos à dos avec rangée C
   // Rangée E (mur droit): stands 45-53 → dos au mur
   const hall3Stands: StandDef[] = [];
   const h3baseY = 80;
-  const corridorW = 30; // couloir de circulation
+  const corridorW = 26; // couloir de circulation
 
-  // Rangée A — Mur gauche (stands 9-17)
-  const colAx = 22;
+  // Rangée A — Mur gauche (stands 9-17) → dos au mur
+  const colAx = 20;
   for (let i = 0; i < 9; i++) {
     hall3Stands.push({
       number: 9 + i,
@@ -102,7 +107,7 @@ function buildLayout(): {
     });
   }
 
-  // Rangée B — Centre gauche (stands 18-26)
+  // Rangée B (stands 18-26) → dos à dos avec F
   const colBx = colAx + sw + corridorW;
   for (let i = 0; i < 9; i++) {
     hall3Stands.push({
@@ -114,8 +119,20 @@ function buildLayout(): {
     });
   }
 
-  // Rangée C — Centre (stands 27-35), dos à dos avec D
-  const colCx = colBx + sw + gap;
+  // Rangée F — NOUVELLE (stands 58-66) → dos à dos avec B
+  const colFx = colBx + sw + gap;
+  for (let i = 0; i < 9; i++) {
+    hall3Stands.push({
+      number: 58 + i,
+      x: colFx,
+      y: h3baseY + i * (sh + gap),
+      w: sw,
+      h: sh,
+    });
+  }
+
+  // Rangée C (stands 27-35) → dos à dos avec D
+  const colCx = colFx + sw + corridorW;
   for (let i = 0; i < 9; i++) {
     hall3Stands.push({
       number: 27 + i,
@@ -126,8 +143,8 @@ function buildLayout(): {
     });
   }
 
-  // Rangée D — Centre droit (stands 36-44), dos à dos avec C
-  const colDx = colCx + sw + corridorW;
+  // Rangée D (stands 36-44) → dos à dos avec C
+  const colDx = colCx + sw + gap;
   for (let i = 0; i < 9; i++) {
     hall3Stands.push({
       number: 36 + i,
@@ -138,8 +155,8 @@ function buildLayout(): {
     });
   }
 
-  // Rangée E — Mur droit (stands 45-53)
-  const colEx = colDx + sw + gap;
+  // Rangée E — Mur droit (stands 45-53) → dos au mur
+  const colEx = colDx + sw + corridorW;
   for (let i = 0; i < 9; i++) {
     hall3Stands.push({
       number: 45 + i,
@@ -170,7 +187,7 @@ function buildLayout(): {
     halls: [
       {
         name: "Hall 3 — Salle Emile Loffon",
-        subtitle: "45 stands",
+        subtitle: "54 stands",
         x: 12,
         y: 40,
         w: hall3W + 12,
@@ -494,28 +511,37 @@ export default function FloorPlan({
           ))}
 
           {/* Couloirs de circulation dans Hall 3 */}
-          {/* Couloir entre mur gauche (9-17) et centre gauche (18-26) */}
-          <rect x={68} y={78} width={28} height={9 * 37 - 3} rx={2} fill="#fff9db" stroke="#fbbf24" strokeWidth={0.5} strokeDasharray="3 2" opacity={0.5} />
-          <text x={82} y={260} textAnchor="middle" fontSize={6} fill="#b45309" transform="rotate(-90, 82, 260)">
-            Circulation
-          </text>
-
-          {/* Indication dos à dos entre C (27-35) et D (36-44) */}
-          <line x1={166} y1={85} x2={166} y2={405} stroke="#d97706" strokeWidth={1.5} strokeDasharray="4 3" />
-
-          {/* Couloir entre D (36-44) et mur droit (45-53) */}
-          <rect x={244} y={78} width={28} height={9 * 37 - 3} rx={2} fill="#fff9db" stroke="#fbbf24" strokeWidth={0.5} strokeDasharray="3 2" opacity={0.5} />
-          <text x={258} y={260} textAnchor="middle" fontSize={6} fill="#b45309" transform="rotate(-90, 258, 260)">
-            Circulation
-          </text>
-
-          {/* Annotations */}
-          <text x={22} y={420} fontSize={6} fill="#92400e" opacity={0.6}>
-            Mur &larr;
-          </text>
-          <text x={302} y={420} fontSize={6} fill="#92400e" opacity={0.6} textAnchor="end">
-            &rarr; Mur
-          </text>
+          {(() => {
+            const hallStands = LAYOUT.halls[0].stands;
+            const colA = hallStands.find(s => s.number === 9);
+            const colB = hallStands.find(s => s.number === 18);
+            const colF = hallStands.find(s => s.number === 58);
+            const colC = hallStands.find(s => s.number === 27);
+            const colD = hallStands.find(s => s.number === 36);
+            const colE = hallStands.find(s => s.number === 45);
+            if (!colA || !colB || !colF || !colC || !colD || !colE) return null;
+            const rowH = 9 * (STAND_H + STAND_GAP) - STAND_GAP;
+            const cColor = "#fff9db";
+            const cStroke = "#fbbf24";
+            const dosColor = "#d97706";
+            return (
+              <>
+                {/* Couloir A-B */}
+                <rect x={colA.x + STAND_W + 2} y={78} width={CORRIDOR_W - 4} height={rowH} rx={2} fill={cColor} stroke={cStroke} strokeWidth={0.5} strokeDasharray="3 2" opacity={0.5} />
+                {/* Dos à dos B-F */}
+                <line x1={colB.x + STAND_W + 1} y1={82} x2={colB.x + STAND_W + 1} y2={78 + rowH} stroke={dosColor} strokeWidth={1.5} strokeDasharray="4 3" />
+                {/* Couloir F-C */}
+                <rect x={colF.x + STAND_W + 2} y={78} width={CORRIDOR_W - 4} height={rowH} rx={2} fill={cColor} stroke={cStroke} strokeWidth={0.5} strokeDasharray="3 2" opacity={0.5} />
+                {/* Dos à dos C-D */}
+                <line x1={colC.x + STAND_W + 1} y1={82} x2={colC.x + STAND_W + 1} y2={78 + rowH} stroke={dosColor} strokeWidth={1.5} strokeDasharray="4 3" />
+                {/* Couloir D-E */}
+                <rect x={colD.x + STAND_W + 2} y={78} width={CORRIDOR_W - 4} height={rowH} rx={2} fill={cColor} stroke={cStroke} strokeWidth={0.5} strokeDasharray="3 2" opacity={0.5} />
+                {/* Annotations murs */}
+                <text x={colA.x} y={78 + rowH + 14} fontSize={7} fill="#92400e" opacity={0.6}>Mur &larr;</text>
+                <text x={colE.x + STAND_W} y={78 + rowH + 14} fontSize={7} fill="#92400e" opacity={0.6} textAnchor="end">&rarr; Mur</text>
+              </>
+            );
+          })()}
 
           {/* Connecting corridor between halls */}
           <rect

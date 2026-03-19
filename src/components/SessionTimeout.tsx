@@ -5,7 +5,7 @@ import { signOut } from "next-auth/react";
 
 const CHECK_INTERVAL = 60_000; // 60 seconds
 const WARNING_THRESHOLD = 60; // Show warning when <=60 seconds remain
-const SESSION_MAX_AGE = 900; // 15 minutes (must match auth.ts)
+const SESSION_MAX_AGE = 1800; // 30 minutes (must match auth.ts)
 
 export default function SessionTimeout() {
   const [showWarning, setShowWarning] = useState(false);

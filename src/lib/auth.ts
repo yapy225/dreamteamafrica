@@ -68,7 +68,7 @@ async function linkExhibitorBookings(userId: string, email: string) {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma) as never,
-  session: { strategy: "jwt", maxAge: 900 },
+  session: { strategy: "jwt", maxAge: 1800 },
   pages: {
     signIn: "/auth/signin",
   },

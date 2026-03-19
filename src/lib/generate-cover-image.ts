@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import sharp from "sharp";
 import { uploadBuffer } from "./bunny";
+import { searchPexelsPhoto, buildPexelsQuery } from "./pexels";
 
 function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -57,9 +58,41 @@ function buildFallbackPrompt(title: string, category: string): string {
 }
 
 /**
- * Generate a cover image inspired by the original article photo.
- * 1. If originalImageUrl is provided → GPT-4o describes it → DALL-E recreates it
- * 2. If no original image → DALL-E generates from title + category
+ * Download an image from URL, optimize it, and upload to Bunny CDN.
+ */
+async function downloadAndUpload(
+  imageUrl: string,
+  slug: string,
+): Promise<string | null> {
+  const imgRes = await fetch(imageUrl);
+  if (!imgRes.ok) return null;
+
+  const rawBuffer = Buffer.from(await imgRes.arrayBuffer());
+
+  // Convert to WebP (80% quality) + resize to 1200px wide
+  const webpBuffer = await sharp(rawBuffer)
+    .resize(1200, undefined, { withoutEnlargement: true })
+    .webp({ quality: 80 })
+    .toBuffer();
+
+  const filePath = `articles/${slug}.webp`;
+  const { url } = await uploadBuffer(
+    Buffer.from(webpBuffer),
+    filePath,
+    "image/webp",
+  );
+
+  return url;
+}
+
+/**
+ * Generate a cover image for an article.
+ *
+ * Strategy:
+ * 1. If originalImageUrl is provided → GPT-4o describes it → DALL-E recreates
+ * 2. Otherwise → search Pexels for a real photo (FREE, fast)
+ * 3. If Pexels finds nothing → fallback to DALL-E generation
+ *
  * Returns the Bunny CDN URL, or null on failure.
  */
 export async function generateCoverImage(
@@ -69,16 +102,50 @@ export async function generateCoverImage(
   originalImageUrl?: string | null,
 ): Promise<string | null> {
   try {
-    let prompt: string;
-
+    // Strategy 1: Original image provided → describe + recreate with DALL-E
     if (originalImageUrl) {
-      console.log(`[COVER IMAGE] Analyzing original image: ${originalImageUrl}`);
+      console.log(
+        `[COVER] Analyzing original image: ${originalImageUrl}`,
+      );
       const description = await describeImage(originalImageUrl, title);
-      console.log(`[COVER IMAGE] Description: ${description}`);
-      prompt = buildPrompt(description);
-    } else {
-      prompt = buildFallbackPrompt(title, category);
+      const prompt = buildPrompt(description);
+
+      const response = await getOpenAI().images.generate({
+        model: "dall-e-3",
+        prompt,
+        n: 1,
+        size: "1792x1024",
+        response_format: "url",
+      });
+
+      const dalleUrl = response.data?.[0]?.url;
+      if (dalleUrl) {
+        const cdnUrl = await downloadAndUpload(dalleUrl, slug);
+        if (cdnUrl) {
+          console.log(`[COVER] DALL-E recreated → ${cdnUrl}`);
+          return cdnUrl;
+        }
+      }
     }
+
+    // Strategy 2: Search Pexels (free, fast, real photos)
+    const query = buildPexelsQuery(title, category);
+    console.log(`[COVER] Searching Pexels: "${query}"`);
+
+    const pexelsResult = await searchPexelsPhoto(query);
+    if (pexelsResult) {
+      const cdnUrl = await downloadAndUpload(pexelsResult.url, slug);
+      if (cdnUrl) {
+        console.log(
+          `[COVER] Pexels photo by ${pexelsResult.photographer} → ${cdnUrl}`,
+        );
+        return cdnUrl;
+      }
+    }
+
+    // Strategy 3: Fallback to DALL-E (if Pexels found nothing)
+    console.log(`[COVER] Pexels: no result, falling back to DALL-E`);
+    const prompt = buildFallbackPrompt(title, category);
 
     const response = await getOpenAI().images.generate({
       model: "dall-e-3",
@@ -88,27 +155,16 @@ export async function generateCoverImage(
       response_format: "url",
     });
 
-    const imageUrl = response.data?.[0]?.url;
-    if (!imageUrl) return null;
+    const dalleUrl = response.data?.[0]?.url;
+    if (!dalleUrl) return null;
 
-    const imgRes = await fetch(imageUrl);
-    if (!imgRes.ok) return null;
-
-    const rawBuffer = Buffer.from(await imgRes.arrayBuffer());
-
-    // Convert to WebP (80% quality) + resize to 1200px wide → ~80-120 KB vs ~670 KB PNG
-    const webpBuffer = await sharp(rawBuffer)
-      .resize(1200, undefined, { withoutEnlargement: true })
-      .webp({ quality: 80 })
-      .toBuffer();
-
-    const filePath = `articles/${slug}.webp`;
-    const { url } = await uploadBuffer(Buffer.from(webpBuffer), filePath, "image/webp");
-
-    console.log(`[COVER IMAGE] Generated and uploaded: ${url}`);
-    return url;
+    const cdnUrl = await downloadAndUpload(dalleUrl, slug);
+    if (cdnUrl) {
+      console.log(`[COVER] DALL-E fallback → ${cdnUrl}`);
+    }
+    return cdnUrl;
   } catch (error) {
-    console.error("[COVER IMAGE] Generation failed:", error);
+    console.error("[COVER] Generation failed:", error);
     return null;
   }
 }

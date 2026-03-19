@@ -36,7 +36,7 @@ interface StandDef {
 
 // Layout dimensions
 const SVG_W = 680;
-const SVG_H = 700;
+const SVG_H = 750;
 const STAND_W = 44;
 const STAND_H = 34;
 const STAND_GAP = 3;
@@ -59,13 +59,19 @@ function buildLayout(): {
   const sh = 34;
   const gap = 3;
 
+  // Pré-calcul des positions bas de page
+  const preHall3H = (140 - 40) + 8 * (sh + gap) + 30;
+  const preHall4Y = 40 + preHall3H + 15;
+  const preCorrY = preHall4Y + 100;
+  const preBottomY = preCorrY + 35;
+
   // ── HALL 2 (bottom left — inversé) ──
   const hall2Stands: StandDef[] = [];
   for (let i = 0; i < 4; i++) {
     hall2Stands.push({
       number: i + 5,
       x: 25 + i * (sw + gap),
-      y: 615,
+      y: preBottomY + 40,
       w: sw,
       h: sh,
     });
@@ -77,7 +83,7 @@ function buildLayout(): {
     hall1Stands.push({
       number: i + 1,
       x: 310 + i * (sw + gap),
-      y: 615,
+      y: preBottomY + 40,
       w: sw,
       h: sh,
     });
@@ -134,19 +140,27 @@ function buildLayout(): {
 
   const hall3W = colFx + sw - colAx + 20;
 
-  // ── HALL 4 — Espace Restauration (right side) ──
+  // Calcul de la hauteur de la salle Loffon
+  const hall3H = h3baseY - 40 + 8 * (sh + gap) + 30;
+
+  // ── HALL 4 — Espace Restauration (sous la salle, à droite) ──
   const hall4Stands: StandDef[] = [];
-  const h4x = colFx + sw + 40;
+  const hall4Y = 40 + hall3H + 15; // sous le Hall 3
+  const hall4X = hall3W - 80;
   for (let i = 0; i < 4; i++) {
     hall4Stands.push({
       number: 57 + i,
-      x: h4x,
-      y: 140 + i * (sh + gap + 24),
-      w: sw + 16,
-      h: sh + 18,
+      x: hall4X + 15 + i * (sw + gap + 8),
+      y: hall4Y + 35,
+      w: sw + 8,
+      h: sh + 14,
       label: `T${i + 1}`,
     });
   }
+
+  // Positions bas de page
+  const corridorY = hall4Y + 100;
+  const bottomHallY = corridorY + 35;
 
   return {
     halls: [
@@ -156,7 +170,7 @@ function buildLayout(): {
         x: 12,
         y: 40,
         w: hall3W + 12,
-        h: 9 * (sh + gap) + 115,
+        h: hall3H,
         fill: "#fefce8",
         stroke: "#ca8a04",
         stands: hall3Stands,
@@ -164,19 +178,30 @@ function buildLayout(): {
       {
         name: "Hall 4 — Restauration",
         subtitle: "4 traiteurs",
-        x: h4x - 15,
-        y: 40,
-        w: sw + 46,
-        h: 4 * (sh + gap + 24) + 30,
+        x: hall4X,
+        y: hall4Y,
+        w: 4 * (sw + gap + 8) + 20,
+        h: 90,
         fill: "#fef2f2",
         stroke: "#dc2626",
         stands: hall4Stands,
       },
       {
+        name: "Cuisine",
+        subtitle: "",
+        x: 12,
+        y: hall4Y,
+        w: hall4X - 25,
+        h: 50,
+        fill: "#e5e7eb",
+        stroke: "#9ca3af",
+        stands: [],
+      },
+      {
         name: "Hall 2",
         subtitle: "4 stands",
         x: 12,
-        y: 570,
+        y: bottomHallY,
         w: 210,
         h: 100,
         fill: "#eff6ff",
@@ -187,7 +212,7 @@ function buildLayout(): {
         name: "Hall 1 — Accueil",
         subtitle: "4 stands",
         x: 280,
-        y: 570,
+        y: bottomHallY,
         w: 225,
         h: 100,
         fill: "#f0fdf4",
@@ -510,47 +535,35 @@ export default function FloorPlan({
           })()}
 
           {/* Connecting corridor between halls */}
-          <rect
-            x={12}
-            y={535}
-            width={495}
-            height={28}
-            rx={4}
-            fill="#f5f5f4"
-            stroke="#d6d3d1"
-            strokeWidth={1}
-            strokeDasharray="4 2"
-          />
-          <text
-            x={260}
-            y={553}
-            textAnchor="middle"
-            fontSize={9}
-            fill="#a8a29e"
-          >
-            Couloir &amp; circulation
-          </text>
-
-          {/* Kitchen area */}
-          <rect
-            x={LAYOUT.halls[1].x}
-            y={LAYOUT.halls[1].y + LAYOUT.halls[1].h + 10}
-            width={LAYOUT.halls[1].w}
-            height={40}
-            rx={4}
-            fill="#e5e7eb"
-            stroke="#9ca3af"
-            strokeWidth={1}
-          />
-          <text
-            x={LAYOUT.halls[1].x + LAYOUT.halls[1].w / 2}
-            y={LAYOUT.halls[1].y + LAYOUT.halls[1].h + 35}
-            textAnchor="middle"
-            fontSize={10}
-            fill="#6b7280"
-          >
-            Cuisine
-          </text>
+          {(() => {
+            const hall3 = LAYOUT.halls[0];
+            const hall4 = LAYOUT.halls[1];
+            const corrY = hall4.y + hall4.h + 8;
+            return (
+              <>
+                <rect
+                  x={12}
+                  y={corrY}
+                  width={hall3.w + 12}
+                  height={28}
+                  rx={4}
+                  fill="#f5f5f4"
+                  stroke="#d6d3d1"
+                  strokeWidth={1}
+                  strokeDasharray="4 2"
+                />
+                <text
+                  x={(hall3.w + 12) / 2 + 6}
+                  y={corrY + 18}
+                  textAnchor="middle"
+                  fontSize={9}
+                  fill="#a8a29e"
+                >
+                  Couloir &amp; circulation
+                </text>
+              </>
+            );
+          })()}
 
           {/* Scène au fond de la salle (haut du Hall 3) */}
           {(() => {

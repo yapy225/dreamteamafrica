@@ -401,15 +401,14 @@ export default function FloorPlan({
         </div>
       </div>
 
-      {/* Tooltip */}
-      {tooltipInfo && (
-        <div className="rounded-lg bg-dta-dark px-3 py-1.5 text-xs font-medium text-white text-center">
-          {tooltipInfo}
-        </div>
-      )}
-
       {/* Floor plan SVG */}
       <div className="relative overflow-auto rounded-xl border border-dta-sand bg-white p-3">
+        {/* Tooltip — position absolute pour ne pas décaler le layout */}
+        <div
+          className={`pointer-events-none absolute left-1/2 top-2 z-10 -translate-x-1/2 rounded-lg bg-dta-dark px-3 py-1.5 text-xs font-medium text-white text-center transition-opacity duration-150 ${tooltipInfo ? "opacity-100" : "opacity-0"}`}
+        >
+          {tooltipInfo || "\u00A0"}
+        </div>
         <svg
           viewBox={`0 0 ${SVG_W} ${SVG_H}`}
           className="mx-auto w-full"

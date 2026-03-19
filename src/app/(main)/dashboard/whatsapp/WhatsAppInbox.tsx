@@ -389,11 +389,18 @@ export default function WhatsAppInbox() {
           >
             <div
               className={`max-w-[75%] rounded-2xl px-4 py-2 shadow-sm ${
-                msg.direction === "outbound"
-                  ? "bg-[#dcf8c6] rounded-tr-sm"
-                  : "bg-white rounded-tl-sm"
+                msg.status === "draft"
+                  ? "bg-amber-100 border-2 border-dashed border-amber-400 rounded-tr-sm"
+                  : msg.direction === "outbound"
+                    ? "bg-[#dcf8c6] rounded-tr-sm"
+                    : "bg-white rounded-tl-sm"
               }`}
             >
+              {msg.status === "draft" && (
+                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-600 mb-1">
+                  Brouillon IA
+                </p>
+              )}
               {msg.mediaUrl && <MediaBubble url={msg.mediaUrl} type={msg.type} body={msg.body} />}
               {!msg.mediaUrl && (
                 <p className="text-sm whitespace-pre-wrap break-words">{msg.body || `[${msg.type}]`}</p>
@@ -401,11 +408,48 @@ export default function WhatsAppInbox() {
               {msg.mediaUrl && msg.body && !["[Image]", "[Video]", "[Audio]", "[Sticker]"].includes(msg.body) && (
                 <p className="text-sm whitespace-pre-wrap break-words mt-1">{msg.body}</p>
               )}
+              {msg.status === "draft" && (
+                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-amber-300">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setSending(true);
+                      try {
+                        const res = await fetch("/api/whatsapp/send", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ to: selectedPhone, message: msg.body, draftId: msg.id }),
+                        });
+                        if (res.ok) loadMessages(selectedPhone!);
+                      } catch {}
+                      setSending(false);
+                    }}
+                    className="rounded-full bg-green-500 px-3 py-1 text-xs font-semibold text-white hover:bg-green-600"
+                  >
+                    Envoyer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReply(msg.body || "");
+                      // Delete draft
+                      fetch("/api/whatsapp/send", {
+                        method: "DELETE",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ draftId: msg.id }),
+                      }).then(() => loadMessages(selectedPhone!));
+                    }}
+                    className="rounded-full border border-amber-400 px-3 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-200"
+                  >
+                    Modifier
+                  </button>
+                </div>
+              )}
               <div className="flex items-center justify-end gap-1 mt-1">
                 <span className="text-[10px] text-gray-500">
                   {formatTime(msg.createdAt)}
                 </span>
-                {msg.direction === "outbound" && msg.status && (
+                {msg.direction === "outbound" && msg.status && msg.status !== "draft" && (
                   <span className="text-[10px] text-gray-400">
                     {msg.status === "read" ? "✓✓" : msg.status === "delivered" ? "✓✓" : "✓"}
                   </span>

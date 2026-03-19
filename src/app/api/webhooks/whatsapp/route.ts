@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { sendWhatsAppText } from "@/lib/whatsapp";
+import { generateAndStoreDraft } from "@/lib/whatsapp-ai";
 
 const VERIFY_TOKEN = process.env.FB_LEADS_VERIFY_TOKEN ?? process.env.CRON_SECRET!;
 const APP_SECRET = process.env.WHATSAPP_APP_SECRET!;
@@ -187,6 +188,13 @@ export async function POST(request: Request) {
           });
         } catch (dbErr) {
           console.error("WhatsApp message save error:", dbErr);
+        }
+
+        // Generate AI draft reply (Claude) — non-blocking
+        if (messageBody && messageBody.length > 1) {
+          generateAndStoreDraft(from, messageBody, contactName).catch((err) =>
+            console.error("[WhatsApp AI] Draft error:", err),
+          );
         }
 
         // Auto-reply for exposant leads

@@ -46,20 +46,35 @@ export default async function ExposantsDashboardPage({
       },
     },
     orderBy: [
-      { paidInstallments: "desc" },
-      { createdAt: "desc" },
+      { totalPrice: "desc" },
     ],
   });
 
+  // Sort: CONFIRMED first, then by paid amount descending
+  const statusOrder: Record<string, number> = { CONFIRMED: 0, PARTIAL: 1, PENDING: 2, CANCELLED: 3 };
+  const sorted = [...bookings].sort((a, b) => {
+    const sa = statusOrder[a.status] ?? 9;
+    const sb = statusOrder[b.status] ?? 9;
+    if (sa !== sb) return sa - sb;
+    // Within same status, sort by paid amount descending
+    const paidA = a.installments === 1
+      ? (a.paidInstallments > 0 ? a.totalPrice : 0)
+      : (a.paidInstallments > 0 ? Math.min(DEPOSIT_AMOUNT, a.totalPrice) : 0) + Math.max(0, a.paidInstallments - 1) * a.installmentAmount;
+    const paidB = b.installments === 1
+      ? (b.paidInstallments > 0 ? b.totalPrice : 0)
+      : (b.paidInstallments > 0 ? Math.min(DEPOSIT_AMOUNT, b.totalPrice) : 0) + Math.max(0, b.paidInstallments - 1) * b.installmentAmount;
+    return paidB - paidA;
+  });
+
   const filtered = search
-    ? bookings.filter((b) =>
+    ? sorted.filter((b) =>
         b.companyName.toLowerCase().includes(search) ||
         b.contactName.toLowerCase().includes(search) ||
         b.email.toLowerCase().includes(search) ||
         b.phone.includes(search) ||
         b.sector.toLowerCase().includes(search)
       )
-    : bookings;
+    : sorted;
 
   const stats = {
     total: bookings.length,

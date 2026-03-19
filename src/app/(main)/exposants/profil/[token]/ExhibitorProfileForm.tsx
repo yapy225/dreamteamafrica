@@ -127,6 +127,21 @@ export default function ExhibitorProfileForm({ token }: { token: string }) {
     setSubmitting(true);
     setError("");
 
+    // Validate required files (logo, image1, image2, image3)
+    const requiredFiles = ["logo", "image1", "image2", "image3"];
+    for (const key of requiredFiles) {
+      const hasExisting = key === "logo" ? data.logoUrl
+        : key === "image1" ? data.image1Url
+        : key === "image2" ? data.image2Url
+        : data.image3Url;
+      if (!files[key] && !hasExisting) {
+        const labels: Record<string, string> = { logo: "Logo", image1: "Image 1", image2: "Image 2", image3: "Image 3" };
+        setError(`Le champ "${labels[key]}" est obligatoire.`);
+        setSubmitting(false);
+        return;
+      }
+    }
+
     const formData = new FormData(e.currentTarget);
     formData.set("token", token);
 
@@ -312,22 +327,24 @@ export default function ExhibitorProfileForm({ token }: { token: string }) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mt-4">
             <div>
               <label className="block text-sm font-medium text-dta-dark mb-1">
-                Facebook
+                Facebook *
               </label>
               <input
                 name="facebook"
                 defaultValue={data.facebook}
+                required
                 placeholder="Nom de page ou lien"
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-dta-accent focus:ring-1 focus:ring-dta-accent"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-dta-dark mb-1">
-                Instagram
+                Instagram *
               </label>
               <input
                 name="instagram"
                 defaultValue={data.instagram}
+                required
                 placeholder="@votre_compte"
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-dta-accent focus:ring-1 focus:ring-dta-accent"
               />
@@ -386,7 +403,7 @@ export default function ExhibitorProfileForm({ token }: { token: string }) {
               onChange={(f) => setFiles((p) => ({ ...p, image1: f }))}
             />
             <FileUploadField
-              label="Image 2"
+              label="Image 2 *"
               name="image2"
               accept="image/*"
               icon={Camera}
@@ -394,7 +411,7 @@ export default function ExhibitorProfileForm({ token }: { token: string }) {
               onChange={(f) => setFiles((p) => ({ ...p, image2: f }))}
             />
             <FileUploadField
-              label="Image 3"
+              label="Image 3 *"
               name="image3"
               accept="image/*"
               icon={Camera}

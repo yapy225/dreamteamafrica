@@ -302,9 +302,10 @@ Objectif : donner envie aux visiteurs de venir découvrir cet exposant à l'év�
 Règles :
 - Adapte le ton à ${platform}
 - Commence par une accroche engageante (pas "Découvrez" à chaque fois, varie les formules)
-- Mentionne le nom de l'entreprise et son secteur
+- IDENTIFIE CLAIREMENT l'exposant : mentionne "${companyName}" en MAJUSCULES ou en gras
 - Intègre un extrait de la description si pertinent
-- IMPORTANT : Tag/identifie les réseaux sociaux de l'exposant dans le post (@ sur Instagram/Twitter/TikTok, tag sur Facebook/LinkedIn)
+- IMPORTANT : Tag/identifie OBLIGATOIREMENT les réseaux sociaux de l'exposant dans le post (@ sur Instagram/Twitter/TikTok, tag sur Facebook/LinkedIn)
+- Le lecteur doit immédiatement savoir QUI est présenté et CE QU'IL FAIT
 - Inclus 3-5 hashtags pertinents dont #FoiredAfrique #DreamTeamAfrica
 - En français
 - Longueur adaptée au réseau social (court pour Twitter/TikTok, plus détaillé pour LinkedIn/Facebook)
@@ -887,9 +888,11 @@ ${platform === "TIKTOK" ? `- Légende courte et percutante (2-3 lignes)
 
 Règles générales :
 - En français
-- Tag/identifie les réseaux sociaux de l'exposant quand disponibles
+- IDENTIFIE CLAIREMENT l'exposant : mentionne le nom de l'entreprise "${companyName}" en GRAS ou majuscules dans le post
+- Tag/mentionne OBLIGATOIREMENT les réseaux sociaux de l'exposant (@ sur Insta/Twitter/TikTok, nom de page sur Facebook, lien sur LinkedIn)
 - Inclus #FoiredAfrique #DreamTeamAfrica
 - Ne commence JAMAIS par "Découvrez", varie les accroches
+- Le lecteur doit immédiatement savoir QUI est présenté et CE QU'IL FAIT
 
 Réponds UNIQUEMENT en JSON valide (pas de markdown) :
 {

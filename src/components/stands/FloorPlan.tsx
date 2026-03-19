@@ -644,51 +644,6 @@ export default function FloorPlan({
           >
             &uarr; ENTR&Eacute;E PRINCIPALE &uarr;
           </text>
-
-          {/* Portes et entrées */}
-          {(() => {
-            const hall3 = LAYOUT.halls[0];
-            const h3Bottom = hall3.y + hall3.h;
-            const h3Right = hall3.x + hall3.w;
-            const doorW = 8;
-            const doorH = 20;
-            const doorColor = "#d946ef"; // magenta/rose
-
-            // Halls du bas
-            const hallBas1 = LAYOUT.halls[3]; // Hall 2
-            const hallBas2 = LAYOUT.halls[4]; // Hall 1
-
-            return (
-              <>
-                {/* Portes Salle Loffon — bas gauche */}
-                <rect x={hall3.x + 30} y={h3Bottom - 3} width={doorW} height={doorH} rx={2} fill={doorColor} />
-                {/* Portes Salle Loffon — bas droite */}
-                <rect x={h3Right - 38} y={h3Bottom - 3} width={doorW} height={doorH} rx={2} fill={doorColor} />
-                {/* Porte Salle Loffon — droite milieu (vers restauration) */}
-                <rect x={h3Right - 3} y={hall3.y + hall3.h / 2 - 10} width={doorH} height={doorW} rx={2} fill={doorColor} />
-                {/* Porte Salle Loffon — droite bas (vers restauration) */}
-                <rect x={h3Right - 3} y={hall3.y + hall3.h - 60} width={doorH} height={doorW} rx={2} fill={doorColor} />
-
-                {/* Porte Hall 2 — haut */}
-                {hallBas1 && (
-                  <rect x={hallBas1.x + hallBas1.w / 2 - 4} y={hallBas1.y - 5} width={doorW} height={doorH - 8} rx={2} fill={doorColor} />
-                )}
-                {/* Porte Hall 2 — droite */}
-                {hallBas1 && (
-                  <rect x={hallBas1.x + hallBas1.w - 3} y={hallBas1.y + hallBas1.h / 2 - 4} width={doorH - 8} height={doorW} rx={2} fill={doorColor} />
-                )}
-
-                {/* Porte Hall 1 — haut */}
-                {hallBas2 && (
-                  <rect x={hallBas2.x + hallBas2.w / 2 - 4} y={hallBas2.y - 5} width={doorW} height={doorH - 8} rx={2} fill={doorColor} />
-                )}
-                {/* Porte Hall 1 — gauche */}
-                {hallBas2 && (
-                  <rect x={hallBas2.x - 9} y={hallBas2.y + hallBas2.h / 2 - 4} width={doorH - 8} height={doorW} rx={2} fill={doorColor} />
-                )}
-              </>
-            );
-          })()}
         </svg>
 
         {actionLoading && (

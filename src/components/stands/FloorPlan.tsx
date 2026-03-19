@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Loader2 } from "lucide-react";
 
 interface StandInfo {
@@ -248,10 +248,13 @@ export default function FloorPlan({
   const [hoveredStand, setHoveredStand] = useState<number | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [tooltipInfo, setTooltipInfo] = useState<string | null>(null);
+  const clickLockRef = useRef(false); // prevent double-clicks
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchStands = useCallback(async () => {
     try {
       const res = await fetch("/api/stands");
+      if (!res.ok) return;
       const data = await res.json();
       const enriched: Record<number, StandInfo> = {};
       for (const [key, info] of Object.entries(data.stands) as [
@@ -274,59 +277,73 @@ export default function FloorPlan({
 
   useEffect(() => {
     fetchStands();
+    return () => {
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    };
   }, [fetchStands]);
 
   const handleStandClick = async (standNumber: number) => {
+    if (clickLockRef.current || actionLoading) return; // prevent double-click
     const info = stands[standNumber];
     if (!info) return;
 
-    if (isAdmin) {
-      setActionLoading(true);
-      const action =
-        info.status === "blocked"
-          ? "unblock"
-          : info.status === "available"
-            ? "block"
-            : info.status === "reserved" || info.status === "mine"
-              ? "free"
-              : null;
-      if (action) {
-        await fetch("/api/admin/stands", {
+    clickLockRef.current = true;
+    setActionLoading(true);
+
+    try {
+      if (isAdmin) {
+        const action =
+          info.status === "blocked"
+            ? "unblock"
+            : info.status === "available"
+              ? "block"
+              : info.status === "reserved" || info.status === "mine"
+                ? "free"
+                : null;
+        if (action) {
+          await fetch("/api/admin/stands", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ standNumber, action }),
+          });
+          await fetchStands();
+        }
+      } else if (info.status === "available" && bookingId) {
+        const res = await fetch("/api/stands", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ standNumber, action }),
+          body: JSON.stringify({ standNumber, bookingId }),
         });
-        await fetchStands();
+        const result = await res.json();
+        if (result.ok) {
+          await fetchStands();
+          onStandSelected?.(standNumber);
+        }
       }
+    } finally {
       setActionLoading(false);
-      return;
-    }
-
-    if (info.status === "available" && bookingId) {
-      setActionLoading(true);
-      const res = await fetch("/api/stands", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ standNumber, bookingId }),
-      });
-      const result = await res.json();
-      if (result.ok) {
-        await fetchStands();
-        onStandSelected?.(standNumber);
-      }
-      setActionLoading(false);
+      clickLockRef.current = false;
     }
   };
 
-  const getTooltip = (standNumber: number) => {
-    const info = stands[standNumber];
-    let text = `Stand n°${standNumber}`;
-    if (info?.status === "reserved")
-      text += ` — ${info.companyName || "Réservé"}`;
-    if (info?.status === "mine") text += " — Votre stand";
-    if (info?.status === "blocked") text += " — Indisponible";
-    if (info?.status === "available") text += " — Disponible";
-    return text;
+  // Debounced hover to prevent tooltip flickering
+  const handleHover = (standNumber: number | null) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    if (standNumber === null) {
+      hoverTimeoutRef.current = setTimeout(() => {
+        setHoveredStand(null);
+        setTooltipInfo(null);
+      }, 50);
+    } else {
+      setHoveredStand(standNumber);
+      const info = stands[standNumber];
+      let text = `Stand n°${standNumber}`;
+      if (info?.status === "reserved") text += ` — ${info.companyName || "Réservé"}`;
+      if (info?.status === "mine") text += " — Votre stand";
+      if (info?.status === "blocked") text += " — Indisponible";
+      if (info?.status === "available") text += " — Disponible";
+      setTooltipInfo(text);
+    }
   };
 
   if (loading) {
@@ -458,17 +475,9 @@ export default function FloorPlan({
                   <g
                     key={stand.number}
                     onClick={() => handleStandClick(stand.number)}
-                    onMouseEnter={() => {
-                      setHoveredStand(stand.number);
-                      setTooltipInfo(getTooltip(stand.number));
-                    }}
-                    onMouseLeave={() => {
-                      setHoveredStand(null);
-                      setTooltipInfo(null);
-                    }}
-                    onTouchStart={() => {
-                      setTooltipInfo(getTooltip(stand.number));
-                    }}
+                    onMouseEnter={() => handleHover(stand.number)}
+                    onMouseLeave={() => handleHover(null)}
+                    onTouchStart={() => handleHover(stand.number)}
                     style={{
                       cursor:
                         status === "available" || isAdmin

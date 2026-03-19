@@ -579,6 +579,7 @@ model ExhibitorBooking {
 
   @@index([userId])
   @@index([status])
+  @@index([email])
 }
 
 // ─── STANDS (blocage admin) ─────────────────────────────

@@ -427,6 +427,29 @@ export default async function MonStandPage() {
               </div>
             )}
 
+            {/* Deadline warning */}
+            {booking.status !== "CONFIRMED" && remainingBalance > 0 && (() => {
+              const eventDate = events[0]?.date ? new Date(events[0].date + "T12:00:00") : null;
+              const deadline = eventDate ? new Date(eventDate.getTime() - 7 * 24 * 60 * 60 * 1000) : null;
+              const daysLeft = deadline ? Math.ceil((deadline.getTime() - Date.now()) / (24 * 60 * 60 * 1000)) : null;
+              return deadline ? (
+                <div className={`mt-4 flex items-start gap-3 rounded-xl p-4 ${daysLeft !== null && daysLeft <= 14 ? "bg-red-50 border border-red-200" : "bg-amber-50 border border-amber-200"}`}>
+                  <AlertCircle size={18} className={`shrink-0 mt-0.5 ${daysLeft !== null && daysLeft <= 14 ? "text-red-500" : "text-amber-500"}`} />
+                  <div>
+                    <p className={`text-sm font-medium ${daysLeft !== null && daysLeft <= 14 ? "text-red-800" : "text-amber-800"}`}>
+                      Votre stand doit &ecirc;tre sold&eacute; avant le{" "}
+                      {deadline.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                    </p>
+                    <p className={`text-xs mt-1 ${daysLeft !== null && daysLeft <= 14 ? "text-red-600" : "text-amber-600"}`}>
+                      {daysLeft !== null && daysLeft > 0
+                        ? `Il vous reste ${daysLeft} jour${daysLeft > 1 ? "s" : ""} pour régler le solde de ${formatter.format(remainingBalance)}.`
+                        : `Le délai est dépassé. Veuillez régler le solde de ${formatter.format(remainingBalance)} au plus vite.`}
+                    </p>
+                  </div>
+                </div>
+              ) : null;
+            })()}
+
             {/* Early payment CTA */}
             {booking.installments > 1 &&
               booking.status !== "CONFIRMED" &&

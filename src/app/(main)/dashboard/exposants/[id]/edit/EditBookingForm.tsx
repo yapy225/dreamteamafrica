@@ -18,6 +18,7 @@ interface BookingData {
   pack: string;
   events: string[];
   totalDays: number;
+  stands: number;
   totalPrice: number;
   installments: number;
   installmentAmount: number;
@@ -37,6 +38,8 @@ export default function EditBookingForm({ booking }: { booking: BookingData }) {
     phone: booking.phone,
     sector: booking.sector,
     pack: booking.pack,
+    totalDays: booking.totalDays,
+    stands: booking.stands,
     totalPrice: booking.totalPrice.toString(),
     installments: booking.installments,
     paidInstallments: booking.paidInstallments,
@@ -154,6 +157,32 @@ export default function EditBookingForm({ booking }: { booking: BookingData }) {
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Jours & Stands */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label className="mb-1 block text-sm font-medium text-dta-char">Nombre de jours</label>
+          <select
+            value={form.totalDays}
+            onChange={(e) => setForm({ ...form, totalDays: Number(e.target.value) })}
+            className={inputClass}
+          >
+            <option value={1}>1 jour</option>
+            <option value={2}>2 jours</option>
+          </select>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-dta-char">Nombre de stands</label>
+          <input
+            type="number"
+            min="1"
+            max="10"
+            value={form.stands}
+            onChange={(e) => setForm({ ...form, stands: Number(e.target.value) })}
+            className={inputClass}
+          />
+        </div>
       </div>
 
       {/* Prix total */}

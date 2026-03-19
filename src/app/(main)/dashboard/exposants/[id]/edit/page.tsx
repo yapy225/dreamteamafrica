@@ -36,6 +36,7 @@ export default async function EditBookingPage({
             pack: booking.pack,
             events: booking.events,
             totalDays: booking.totalDays,
+            stands: booking.stands ?? 1,
             totalPrice: booking.totalPrice,
             installments: booking.installments,
             installmentAmount: booking.installmentAmount,

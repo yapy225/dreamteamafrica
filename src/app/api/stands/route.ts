@@ -5,13 +5,8 @@ import { prisma } from "@/lib/db";
 const EVENT_ID = "cmm767c1m0005ti794z61tzux"; // Foire d'Afrique Paris 2026
 const MAX_STAND = 60;
 
-// GET: get all stands status (auth required)
+// GET: get all stands status (public — data is not sensitive)
 export async function GET() {
-  const session = await auth();
-  if (!session) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-  }
-
   const [bookings, blocked] = await Promise.all([
     prisma.exhibitorBooking.findMany({
       where: {

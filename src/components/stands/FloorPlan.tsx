@@ -254,7 +254,10 @@ export default function FloorPlan({
   const fetchStands = useCallback(async () => {
     try {
       const res = await fetch("/api/stands");
-      if (!res.ok) return;
+      if (!res.ok) {
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
       const enriched: Record<number, StandInfo> = {};
       for (const [key, info] of Object.entries(data.stands) as [

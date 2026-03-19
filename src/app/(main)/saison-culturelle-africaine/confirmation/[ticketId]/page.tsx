@@ -4,6 +4,7 @@ import Script from "next/script";
 import { CheckCircle, Calendar, MapPin, Download, ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
+import { sendTicketConfirmationEmail } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -85,6 +86,35 @@ export default async function ConfirmationPage({
   const totalAmount = finalTickets.reduce((sum, t) => sum + t.price, 0);
   const eventDate = new Date(event.date);
   const holderName = `${finalTickets[0].firstName ?? ""} ${finalTickets[0].lastName ?? ""}`.trim();
+
+  // Backup: send confirmation email only if ticket was purchased within the last 5 minutes
+  // This prevents email spam on page refresh while ensuring delivery on first visit
+  const recipientEmail = finalTickets[0].email;
+  const purchaseAge = Date.now() - new Date(finalTickets[0].purchasedAt).getTime();
+  const FIVE_MINUTES = 5 * 60 * 1000;
+
+  if (recipientEmail && purchaseAge < FIVE_MINUTES) {
+    const customTiers = event.tiers as Array<{ id: string; name: string }> | null;
+    const matched = Array.isArray(customTiers)
+      ? customTiers.find((t) => t.id === finalTickets[0].tier)
+      : null;
+    const legacyMap: Record<string, string> = { EARLY_BIRD: "Early Bird", STANDARD: "Standard", VIP: "VIP" };
+    const tierLabel = matched?.name || legacyMap[finalTickets[0].tier] || finalTickets[0].tier;
+
+    sendTicketConfirmationEmail({
+      to: recipientEmail,
+      guestName: holderName || recipientEmail,
+      eventTitle: event.title,
+      eventVenue: event.venue,
+      eventAddress: event.address,
+      eventDate: finalTickets[0].visitDate || event.date,
+      eventCoverImage: event.coverImage,
+      tier: tierLabel,
+      price: finalTickets[0].price,
+      quantity: finalTickets.length,
+      tickets: finalTickets.map((t) => ({ id: t.id, qrCode: t.qrCode })),
+    }).catch((err) => console.error("Backup confirmation email failed:", err));
+  }
 
   return (
     <>

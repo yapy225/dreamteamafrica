@@ -152,6 +152,15 @@ export default function SignInPage() {
             Créer un compte
           </Link>
         </p>
+
+        <p className="mt-3 text-center text-sm text-dta-char/70">
+          <Link
+            href="/mes-billets"
+            className="font-medium text-dta-accent hover:text-dta-accent-dark"
+          >
+            Retrouver mes billets par email
+          </Link>
+        </p>
       </div>
     </div>
   );

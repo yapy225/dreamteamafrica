@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
   const { standNumber, action, reason } = await request.json();
 
-  if (!standNumber || standNumber < 1 || standNumber > 57) {
+  if (!standNumber || standNumber < 1 || standNumber > 60) {
     return NextResponse.json({ error: "Numéro de stand invalide" }, { status: 400 });
   }
 

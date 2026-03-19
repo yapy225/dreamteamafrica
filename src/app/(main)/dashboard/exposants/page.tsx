@@ -9,7 +9,7 @@ import ValidateProfileButton from "./ValidateProfileButton";
 import CashPaymentButton from "./CashPaymentButton";
 import PublicationTracker from "./PublicationTracker";
 import SearchFilter from "./SearchFilter";
-import SendInvitesButton from "./SendInvitesButton";
+import SendInviteButton from "./SendInviteButton";
 import PublishButton from "./PublishButton";
 import { DEPOSIT_AMOUNT } from "@/lib/exhibitor-events";
 
@@ -97,7 +97,6 @@ export default async function ExposantsDashboardPage({
         </p>
         <div className="flex items-center gap-3">
           <SearchFilter />
-          <SendInvitesButton />
           <GeneratePostsButton />
         </div>
       </div>
@@ -301,6 +300,17 @@ export default async function ExposantsDashboardPage({
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col gap-1.5">
+                      {b.profile && !b.profile.submittedAt && (
+                        <SendInviteButton
+                          email={b.email}
+                          contactName={b.contactName}
+                          companyName={b.companyName}
+                          profileToken={b.profile.token}
+                        />
+                      )}
+                      {b.profile?.submittedAt && (
+                        <PublishButton profileId={b.profile.id} />
+                      )}
                       <CashPaymentButton
                         bookingId={b.id}
                         paidInstallments={b.paidInstallments}

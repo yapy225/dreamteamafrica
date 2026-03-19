@@ -128,6 +128,46 @@ export async function POST(request: Request) {
       },
     });
 
+    // Create or update DirectoryEntry in L'Officiel d'Afrique
+    try {
+      const existingEntry = await prisma.directoryEntry.findFirst({
+        where: {
+          OR: [
+            { email: updated.email || "" },
+            { companyName: updated.companyName || "" },
+          ],
+        },
+      });
+
+      const entryData = {
+        companyName: updated.companyName || null,
+        contactName: `${updated.firstName || ""} ${updated.lastName || ""}`.trim(),
+        category: "Exposant",
+        city: "Paris",
+        country: "France",
+        phone: updated.phone || null,
+        email: updated.email || null,
+        facebook: updated.facebook || null,
+        instagram: updated.instagram || null,
+        tiktok: updated.tiktok || null,
+        linkedin: updated.linkedin || null,
+        description: updated.description || updated.companyName || "",
+        event: "Foire d'Afrique Paris 2026",
+        published: true,
+      };
+
+      if (existingEntry) {
+        await prisma.directoryEntry.update({
+          where: { id: existingEntry.id },
+          data: entryData,
+        });
+      } else {
+        await prisma.directoryEntry.create({ data: entryData });
+      }
+    } catch (dirErr) {
+      console.error("DirectoryEntry creation failed (non-blocking):", dirErr);
+    }
+
     // Newsletter subscription
     const newsletterOpt = formData.get("newsletter");
     if (newsletterOpt === "true" && updated.email) {

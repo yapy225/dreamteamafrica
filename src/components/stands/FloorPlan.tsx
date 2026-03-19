@@ -23,7 +23,7 @@ interface FloorPlanProps {
 // Hall 2: 5-8
 // Hall 3 (Salle Loffon): 9-53 (45 stands)
 // Hall 4 (Restauration): 54-57 (4 traiteurs)
-const TOTAL_STANDS = 66;
+const TOTAL_STANDS = 57; // 45 salle + 4 hall1 + 4 hall2 + 4 traiteurs
 
 interface StandDef {
   number: number;
@@ -84,16 +84,15 @@ function buildLayout(): {
   }
 
   // ── HALL 3 — Salle Emile Loffon ──
-  // 6 rangées avec couloirs de circulation
+  // 5 rangées avec couloirs de circulation = 45 stands
   // Rangée A (mur gauche): stands 9-17 → dos au mur
-  // Rangée B: stands 18-26 → dos à dos avec rangée F
-  // Rangée F (nouvelle): stands 58-66 → dos à dos avec rangée B
-  // Rangée C: stands 27-35 → dos à dos avec rangée D
-  // Rangée D: stands 36-44 → dos à dos avec rangée C
+  // Rangée B: stands 18-26 → dos à dos avec rangée C
+  // Rangée C: stands 27-35 → dos à dos avec rangée B
+  // Rangée D: stands 36-44 → dos à dos avec rangée E
   // Rangée E (mur droit): stands 45-53 → dos au mur
   const hall3Stands: StandDef[] = [];
   const h3baseY = 140; // décalé pour scène + chaises masterclass
-  const corridorW = 26; // couloir de circulation
+  const corridorW = 28; // couloir de circulation
 
   // Rangée A — Mur gauche (stands 9-17) → dos au mur
   const colAx = 20;
@@ -107,7 +106,7 @@ function buildLayout(): {
     });
   }
 
-  // Rangée B (stands 18-26) → dos à dos avec F
+  // Rangée B (stands 18-26) → dos à dos avec C
   const colBx = colAx + sw + corridorW;
   for (let i = 0; i < 9; i++) {
     hall3Stands.push({
@@ -119,20 +118,8 @@ function buildLayout(): {
     });
   }
 
-  // Rangée F — NOUVELLE (stands 58-66) → dos à dos avec B
-  const colFx = colBx + sw + gap;
-  for (let i = 0; i < 9; i++) {
-    hall3Stands.push({
-      number: 58 + i,
-      x: colFx,
-      y: h3baseY + i * (sh + gap),
-      w: sw,
-      h: sh,
-    });
-  }
-
-  // Rangée C (stands 27-35) → dos à dos avec D
-  const colCx = colFx + sw + corridorW;
+  // Rangée C (stands 27-35) → dos à dos avec B
+  const colCx = colBx + sw + gap;
   for (let i = 0; i < 9; i++) {
     hall3Stands.push({
       number: 27 + i,
@@ -143,8 +130,8 @@ function buildLayout(): {
     });
   }
 
-  // Rangée D (stands 36-44) → dos à dos avec C
-  const colDx = colCx + sw + gap;
+  // Rangée D (stands 36-44) → dos à dos avec E
+  const colDx = colCx + sw + corridorW;
   for (let i = 0; i < 9; i++) {
     hall3Stands.push({
       number: 36 + i,
@@ -156,7 +143,7 @@ function buildLayout(): {
   }
 
   // Rangée E — Mur droit (stands 45-53) → dos au mur
-  const colEx = colDx + sw + corridorW;
+  const colEx = colDx + sw + gap;
   for (let i = 0; i < 9; i++) {
     hall3Stands.push({
       number: 45 + i,
@@ -187,7 +174,7 @@ function buildLayout(): {
     halls: [
       {
         name: "Hall 3 — Salle Emile Loffon",
-        subtitle: "54 stands",
+        subtitle: "45 stands",
         x: 12,
         y: 40,
         w: hall3W + 12,
@@ -515,30 +502,28 @@ export default function FloorPlan({
             const hallStands = LAYOUT.halls[0].stands;
             const colA = hallStands.find(s => s.number === 9);
             const colB = hallStands.find(s => s.number === 18);
-            const colF = hallStands.find(s => s.number === 58);
             const colC = hallStands.find(s => s.number === 27);
             const colD = hallStands.find(s => s.number === 36);
             const colE = hallStands.find(s => s.number === 45);
-            if (!colA || !colB || !colF || !colC || !colD || !colE) return null;
+            if (!colA || !colB || !colC || !colD || !colE) return null;
             const rowH = 9 * (STAND_H + STAND_GAP) - STAND_GAP;
+            const topY = colA.y - 2;
             const cColor = "#fff9db";
             const cStroke = "#fbbf24";
             const dosColor = "#d97706";
             return (
               <>
                 {/* Couloir A-B */}
-                <rect x={colA.x + STAND_W + 2} y={78} width={CORRIDOR_W - 4} height={rowH} rx={2} fill={cColor} stroke={cStroke} strokeWidth={0.5} strokeDasharray="3 2" opacity={0.5} />
-                {/* Dos à dos B-F */}
-                <line x1={colB.x + STAND_W + 1} y1={82} x2={colB.x + STAND_W + 1} y2={78 + rowH} stroke={dosColor} strokeWidth={1.5} strokeDasharray="4 3" />
-                {/* Couloir F-C */}
-                <rect x={colF.x + STAND_W + 2} y={78} width={CORRIDOR_W - 4} height={rowH} rx={2} fill={cColor} stroke={cStroke} strokeWidth={0.5} strokeDasharray="3 2" opacity={0.5} />
-                {/* Dos à dos C-D */}
-                <line x1={colC.x + STAND_W + 1} y1={82} x2={colC.x + STAND_W + 1} y2={78 + rowH} stroke={dosColor} strokeWidth={1.5} strokeDasharray="4 3" />
-                {/* Couloir D-E */}
-                <rect x={colD.x + STAND_W + 2} y={78} width={CORRIDOR_W - 4} height={rowH} rx={2} fill={cColor} stroke={cStroke} strokeWidth={0.5} strokeDasharray="3 2" opacity={0.5} />
+                <rect x={colA.x + STAND_W + 2} y={topY} width={CORRIDOR_W - 4} height={rowH} rx={2} fill={cColor} stroke={cStroke} strokeWidth={0.5} strokeDasharray="3 2" opacity={0.5} />
+                {/* Dos à dos B-C */}
+                <line x1={colB.x + STAND_W + 1} y1={topY + 4} x2={colB.x + STAND_W + 1} y2={topY + rowH} stroke={dosColor} strokeWidth={1.5} strokeDasharray="4 3" />
+                {/* Couloir C-D */}
+                <rect x={colC.x + STAND_W + 2} y={topY} width={CORRIDOR_W - 4} height={rowH} rx={2} fill={cColor} stroke={cStroke} strokeWidth={0.5} strokeDasharray="3 2" opacity={0.5} />
+                {/* Dos à dos D-E */}
+                <line x1={colD.x + STAND_W + 1} y1={topY + 4} x2={colD.x + STAND_W + 1} y2={topY + rowH} stroke={dosColor} strokeWidth={1.5} strokeDasharray="4 3" />
                 {/* Annotations murs */}
-                <text x={colA.x} y={78 + rowH + 14} fontSize={7} fill="#92400e" opacity={0.6}>Mur &larr;</text>
-                <text x={colE.x + STAND_W} y={78 + rowH + 14} fontSize={7} fill="#92400e" opacity={0.6} textAnchor="end">&rarr; Mur</text>
+                <text x={colA.x} y={topY + rowH + 14} fontSize={7} fill="#92400e" opacity={0.6}>Mur &larr;</text>
+                <text x={colE.x + STAND_W} y={topY + rowH + 14} fontSize={7} fill="#92400e" opacity={0.6} textAnchor="end">&rarr; Mur</text>
               </>
             );
           })()}

@@ -34,6 +34,15 @@ const footerSections = [
     ],
   },
   {
+    title: "Mon compte",
+    links: [
+      { href: "/mes-billets", label: "Retrouver mes billets" },
+      { href: "/auth/signin", label: "Se connecter" },
+      { href: "/auth/forgot-password", label: "Mot de passe oublié" },
+      { href: "/dashboard", label: "Espace client" },
+    ],
+  },
+  {
     title: "Professionnels",
     links: [
       { href: "/exposants", label: "Tous les packs exposants" },
@@ -47,7 +56,7 @@ export default function Footer() {
   return (
     <footer aria-label="Pied de page" className="border-t border-dta-sand/50 bg-dta-beige">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-6">
           {/* Brand */}
           <div>
             <Link href="/" className="inline-block">

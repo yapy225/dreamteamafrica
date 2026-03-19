@@ -2,6 +2,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import GlobalSections from "@/components/sections/GlobalSections";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
+import SessionTimeout from "@/components/SessionTimeout";
 
 export default function MainLayout({
   children,
@@ -20,6 +21,7 @@ export default function MainLayout({
       <GlobalSections />
       <Footer />
       <WhatsAppButton />
+      <SessionTimeout />
     </div>
   );
 }

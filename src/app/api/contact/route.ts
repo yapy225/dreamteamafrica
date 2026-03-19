@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     const trimmedLastName = lastName.trim();
     const trimmedPhone = phone?.trim() || null;
     const trimmedCompany = company?.trim() || null;
-    const trimmedMessage = (message || "").trim();
+    const trimmedMessage = (message || "").trim().slice(0, 5000);
 
     const contact = await prisma.contactMessage.create({
       data: {

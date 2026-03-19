@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import nodemailer from "nodemailer";
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 const ADMIN_EMAIL = "yapy.mambo@gmail.com";
 
@@ -127,8 +128,17 @@ async function sendConfirmation(inscription: {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const rl = rateLimit(`inscription:${ip}`, RATE_LIMITS.form);
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: "Trop de soumissions. Réessayez dans quelques minutes." },
+        { status: 429 },
+      );
+    }
+
     const body = await request.json();
 
     const required = [

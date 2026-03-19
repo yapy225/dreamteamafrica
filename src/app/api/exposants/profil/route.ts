@@ -92,11 +92,31 @@ export async function POST(request: Request) {
     // Upload files if present
     const folder = `exposants/${profile.id}`;
     const fileFields = ["logo", "image1", "image2", "image3", "video"] as const;
+    const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
+    const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB
     const uploadedUrls: Record<string, string | null> = {};
 
     for (const field of fileFields) {
       const file = formData.get(field) as File | null;
       if (file && file.size > 0) {
+        const isVideo = field === "video";
+        const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
+        const expectedType = isVideo ? "video/" : "image/";
+
+        if (file.size > maxSize) {
+          return NextResponse.json(
+            { error: `Le fichier "${field}" dépasse la taille maximale autorisée (${isVideo ? "100 Mo" : "10 Mo"}).` },
+            { status: 400 },
+          );
+        }
+
+        if (!file.type.startsWith(expectedType)) {
+          return NextResponse.json(
+            { error: `Le fichier "${field}" doit être de type ${isVideo ? "vidéo" : "image"}.` },
+            { status: 400 },
+          );
+        }
+
         const result = await uploadFile(file, folder);
         uploadedUrls[field] = result.url;
       }

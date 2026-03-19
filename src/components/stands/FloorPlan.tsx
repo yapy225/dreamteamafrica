@@ -403,12 +403,6 @@ export default function FloorPlan({
 
       {/* Floor plan SVG */}
       <div className="relative overflow-auto rounded-xl border border-dta-sand bg-white p-3">
-        {/* Tooltip — position absolute pour ne pas décaler le layout */}
-        <div
-          className={`pointer-events-none absolute left-1/2 top-2 z-10 -translate-x-1/2 rounded-lg bg-dta-dark px-3 py-1.5 text-xs font-medium text-white text-center transition-opacity duration-150 ${tooltipInfo ? "opacity-100" : "opacity-0"}`}
-        >
-          {tooltipInfo || "\u00A0"}
-        </div>
         <svg
           viewBox={`0 0 ${SVG_W} ${SVG_H}`}
           className="mx-auto w-full"
@@ -655,6 +649,38 @@ export default function FloorPlan({
           >
             &uarr; ENTR&Eacute;E PRINCIPALE &uarr;
           </text>
+
+          {/* Tooltip intégré dans le SVG */}
+          {tooltipInfo && hoveredStand && (() => {
+            const allStands = LAYOUT.halls.flatMap(h => h.stands);
+            const stand = allStands.find(s => s.number === hoveredStand);
+            if (!stand) return null;
+            const tx = stand.x + stand.w / 2;
+            const ty = stand.y - 8;
+            return (
+              <g pointerEvents="none">
+                <rect
+                  x={tx - 70}
+                  y={ty - 18}
+                  width={140}
+                  height={20}
+                  rx={4}
+                  fill="#1a1a1a"
+                  opacity={0.9}
+                />
+                <text
+                  x={tx}
+                  y={ty - 5}
+                  textAnchor="middle"
+                  fontSize={9}
+                  fontWeight="bold"
+                  fill="#fff"
+                >
+                  {tooltipInfo}
+                </text>
+              </g>
+            );
+          })()}
         </svg>
 
         {actionLoading && (

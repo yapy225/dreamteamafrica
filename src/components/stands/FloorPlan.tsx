@@ -35,7 +35,7 @@ interface StandDef {
 }
 
 // Layout dimensions
-const SVG_W = 600;
+const SVG_W = 680;
 const SVG_H = 700;
 const STAND_W = 44;
 const STAND_H = 34;
@@ -136,10 +136,10 @@ function buildLayout(): {
 
   // ── HALL 4 — Espace Restauration (right side) ──
   const hall4Stands: StandDef[] = [];
-  const h4x = colEx + sw + 40;
+  const h4x = colFx + sw + 40;
   for (let i = 0; i < 4; i++) {
     hall4Stands.push({
-      number: 54 + i,
+      number: 57 + i,
       x: h4x,
       y: 140 + i * (sh + gap + 24),
       w: sw + 16,

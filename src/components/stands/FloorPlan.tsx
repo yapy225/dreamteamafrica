@@ -35,8 +35,8 @@ interface StandDef {
 }
 
 // Layout dimensions
-const SVG_W = 520;
-const SVG_H = 620;
+const SVG_W = 550;
+const SVG_H = 630;
 
 function buildLayout(): {
   halls: Array<{
@@ -51,60 +51,117 @@ function buildLayout(): {
     stands: StandDef[];
   }>;
 } {
-  const sw = 48;
-  const sh = 36;
-  const gap = 4;
+  const sw = 44;
+  const sh = 34;
+  const gap = 3;
 
-  // ── HALL 1 — Accueil (bottom left) ──
-  const hall1Stands: StandDef[] = [];
-  for (let i = 0; i < 4; i++) {
-    hall1Stands.push({
-      number: i + 1,
-      x: 20 + i * (sw + gap),
-      y: 545,
-      w: sw,
-      h: sh,
-    });
-  }
-
-  // ── HALL 2 (bottom right) ──
+  // ── HALL 2 (bottom left — inversé) ──
   const hall2Stands: StandDef[] = [];
   for (let i = 0; i < 4; i++) {
     hall2Stands.push({
       number: i + 5,
-      x: 310 + i * (sw + gap),
-      y: 545,
+      x: 25 + i * (sw + gap),
+      y: 555,
       w: sw,
       h: sh,
     });
   }
 
-  // ── HALL 3 — Salle Emile Loffon (main room, center) ──
-  // 45 stands: 5 columns x 9 rows
-  const hall3Stands: StandDef[] = [];
-  const h3x = 30;
-  const h3y = 80;
-  for (let col = 0; col < 5; col++) {
-    for (let row = 0; row < 9; row++) {
-      hall3Stands.push({
-        number: 9 + col * 9 + row,
-        x: h3x + col * (sw + gap),
-        y: h3y + row * (sh + gap),
-        w: sw,
-        h: sh,
-      });
-    }
+  // ── HALL 1 — Accueil (bottom right — inversé) ──
+  const hall1Stands: StandDef[] = [];
+  for (let i = 0; i < 4; i++) {
+    hall1Stands.push({
+      number: i + 1,
+      x: 310 + i * (sw + gap),
+      y: 555,
+      w: sw,
+      h: sh,
+    });
   }
+
+  // ── HALL 3 — Salle Emile Loffon ──
+  // Layout: 5 rangées avec couloirs de circulation
+  // Rangée A (mur gauche): stands 9-17 → dos au mur
+  // Rangée B (centre gauche): stands 18-26 → face aux visiteurs
+  // Rangée C (centre): stands 27-35 → dos à dos avec rangée D
+  // Rangée D (centre droit): stands 36-44 → dos à dos avec rangée C
+  // Rangée E (mur droit): stands 45-53 → dos au mur
+  const hall3Stands: StandDef[] = [];
+  const h3baseY = 80;
+  const corridorW = 30; // couloir de circulation
+
+  // Rangée A — Mur gauche (stands 9-17)
+  const colAx = 22;
+  for (let i = 0; i < 9; i++) {
+    hall3Stands.push({
+      number: 9 + i,
+      x: colAx,
+      y: h3baseY + i * (sh + gap),
+      w: sw,
+      h: sh,
+    });
+  }
+
+  // Rangée B — Centre gauche (stands 18-26)
+  const colBx = colAx + sw + corridorW;
+  for (let i = 0; i < 9; i++) {
+    hall3Stands.push({
+      number: 18 + i,
+      x: colBx,
+      y: h3baseY + i * (sh + gap),
+      w: sw,
+      h: sh,
+    });
+  }
+
+  // Rangée C — Centre (stands 27-35), dos à dos avec D
+  const colCx = colBx + sw + gap;
+  for (let i = 0; i < 9; i++) {
+    hall3Stands.push({
+      number: 27 + i,
+      x: colCx,
+      y: h3baseY + i * (sh + gap),
+      w: sw,
+      h: sh,
+    });
+  }
+
+  // Rangée D — Centre droit (stands 36-44), dos à dos avec C
+  const colDx = colCx + sw + corridorW;
+  for (let i = 0; i < 9; i++) {
+    hall3Stands.push({
+      number: 36 + i,
+      x: colDx,
+      y: h3baseY + i * (sh + gap),
+      w: sw,
+      h: sh,
+    });
+  }
+
+  // Rangée E — Mur droit (stands 45-53)
+  const colEx = colDx + sw + gap;
+  for (let i = 0; i < 9; i++) {
+    hall3Stands.push({
+      number: 45 + i,
+      x: colEx,
+      y: h3baseY + i * (sh + gap),
+      w: sw,
+      h: sh,
+    });
+  }
+
+  const hall3W = colEx + sw - colAx + 20;
 
   // ── HALL 4 — Espace Restauration (right side) ──
   const hall4Stands: StandDef[] = [];
+  const h4x = colEx + sw + 40;
   for (let i = 0; i < 4; i++) {
     hall4Stands.push({
       number: 54 + i,
-      x: 350,
-      y: 80 + i * (sh + gap + 20),
-      w: sw + 20,
-      h: sh + 16,
+      x: h4x,
+      y: 80 + i * (sh + gap + 24),
+      w: sw + 16,
+      h: sh + 18,
       label: `T${i + 1}`,
     });
   }
@@ -114,10 +171,10 @@ function buildLayout(): {
       {
         name: "Hall 3 — Salle Emile Loffon",
         subtitle: "45 stands",
-        x: 15,
+        x: 12,
         y: 40,
-        w: 280,
-        h: 420,
+        w: hall3W + 12,
+        h: 9 * (sh + gap) + 55,
         fill: "#fefce8",
         stroke: "#ca8a04",
         stands: hall3Stands,
@@ -125,35 +182,35 @@ function buildLayout(): {
       {
         name: "Hall 4 — Restauration",
         subtitle: "4 traiteurs",
-        x: 320,
+        x: h4x - 15,
         y: 40,
-        w: 185,
-        h: 280,
+        w: sw + 46,
+        h: 4 * (sh + gap + 24) + 30,
         fill: "#fef2f2",
         stroke: "#dc2626",
         stands: hall4Stands,
       },
       {
-        name: "Hall 1 — Accueil",
-        subtitle: "4 stands",
-        x: 15,
-        y: 500,
-        w: 220,
-        h: 100,
-        fill: "#f0fdf4",
-        stroke: "#16a34a",
-        stands: hall1Stands,
-      },
-      {
         name: "Hall 2",
         subtitle: "4 stands",
-        x: 280,
-        y: 500,
-        w: 225,
+        x: 12,
+        y: 510,
+        w: 210,
         h: 100,
         fill: "#eff6ff",
         stroke: "#2563eb",
         stands: hall2Stands,
+      },
+      {
+        name: "Hall 1 — Accueil",
+        subtitle: "4 stands",
+        x: 280,
+        y: 510,
+        w: 225,
+        h: 100,
+        fill: "#f0fdf4",
+        stroke: "#16a34a",
+        stands: hall1Stands,
       },
     ],
   };
@@ -436,12 +493,36 @@ export default function FloorPlan({
             </g>
           ))}
 
+          {/* Couloirs de circulation dans Hall 3 */}
+          {/* Couloir entre mur gauche (9-17) et centre gauche (18-26) */}
+          <rect x={68} y={78} width={28} height={9 * 37 - 3} rx={2} fill="#fff9db" stroke="#fbbf24" strokeWidth={0.5} strokeDasharray="3 2" opacity={0.5} />
+          <text x={82} y={260} textAnchor="middle" fontSize={6} fill="#b45309" transform="rotate(-90, 82, 260)">
+            Circulation
+          </text>
+
+          {/* Indication dos à dos entre C (27-35) et D (36-44) */}
+          <line x1={166} y1={85} x2={166} y2={405} stroke="#d97706" strokeWidth={1.5} strokeDasharray="4 3" />
+
+          {/* Couloir entre D (36-44) et mur droit (45-53) */}
+          <rect x={244} y={78} width={28} height={9 * 37 - 3} rx={2} fill="#fff9db" stroke="#fbbf24" strokeWidth={0.5} strokeDasharray="3 2" opacity={0.5} />
+          <text x={258} y={260} textAnchor="middle" fontSize={6} fill="#b45309" transform="rotate(-90, 258, 260)">
+            Circulation
+          </text>
+
+          {/* Annotations */}
+          <text x={22} y={420} fontSize={6} fill="#92400e" opacity={0.6}>
+            Mur &larr;
+          </text>
+          <text x={302} y={420} fontSize={6} fill="#92400e" opacity={0.6} textAnchor="end">
+            &rarr; Mur
+          </text>
+
           {/* Connecting corridor between halls */}
           <rect
-            x={15}
-            y={465}
-            width={490}
-            height={30}
+            x={12}
+            y={475}
+            width={495}
+            height={28}
             rx={4}
             fill="#f5f5f4"
             stroke="#d6d3d1"
@@ -449,8 +530,8 @@ export default function FloorPlan({
             strokeDasharray="4 2"
           />
           <text
-            x={SVG_W / 2}
-            y={484}
+            x={260}
+            y={493}
             textAnchor="middle"
             fontSize={9}
             fill="#a8a29e"
@@ -460,18 +541,18 @@ export default function FloorPlan({
 
           {/* Kitchen area */}
           <rect
-            x={320}
-            y={340}
-            width={185}
-            height={50}
+            x={LAYOUT.halls[1].x}
+            y={LAYOUT.halls[1].y + LAYOUT.halls[1].h + 10}
+            width={LAYOUT.halls[1].w}
+            height={40}
             rx={4}
             fill="#e5e7eb"
             stroke="#9ca3af"
             strokeWidth={1}
           />
           <text
-            x={412}
-            y={370}
+            x={LAYOUT.halls[1].x + LAYOUT.halls[1].w / 2}
+            y={LAYOUT.halls[1].y + LAYOUT.halls[1].h + 35}
             textAnchor="middle"
             fontSize={10}
             fill="#6b7280"

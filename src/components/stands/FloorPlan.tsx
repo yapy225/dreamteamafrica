@@ -61,9 +61,7 @@ function buildLayout(): {
 
   // Pré-calcul des positions bas de page
   const preHall3H = (140 - 40) + 8 * (sh + gap) + 30;
-  const preHall4Y = 40 + preHall3H + 15;
-  const preCorrY = preHall4Y + 100;
-  const preBottomY = preCorrY + 35;
+  const preBottomY = 40 + preHall3H + 15 + 35;
 
   // ── HALL 2 (bottom left — inversé) ──
   const hall2Stands: StandDef[] = [];
@@ -142,24 +140,30 @@ function buildLayout(): {
 
   // Calcul de la hauteur de la salle Loffon
   const hall3H = h3baseY - 40 + 8 * (sh + gap) + 30;
+  const hall3Right = hall3W + 12 + 12; // bord droit de la salle
 
-  // ── HALL 4 — Espace Restauration (sous la salle, à droite) ──
+  // ── Cuisine (à droite en haut) ──
+  const cuisineX = hall3Right + 5;
+  const cuisineW = 110;
+  const cuisineH = 80;
+
+  // ── HALL 4 — Espace Restauration (à droite, sous la cuisine) ──
   const hall4Stands: StandDef[] = [];
-  const hall4Y = 40 + hall3H + 15; // sous le Hall 3
-  const hall4X = hall3W - 80;
+  const hall4Y = 40 + cuisineH + 10;
   for (let i = 0; i < 4; i++) {
     hall4Stands.push({
       number: 57 + i,
-      x: hall4X + 15 + i * (sw + gap + 8),
-      y: hall4Y + 35,
-      w: sw + 8,
+      x: cuisineX + 15,
+      y: hall4Y + 40 + i * (sh + gap + 20),
+      w: cuisineW - 30,
       h: sh + 14,
       label: `T${i + 1}`,
     });
   }
 
   // Positions bas de page
-  const corridorY = hall4Y + 100;
+  const bottomSectionY = 40 + hall3H + 15;
+  const corridorY = bottomSectionY;
   const bottomHallY = corridorY + 35;
 
   return {
@@ -176,26 +180,26 @@ function buildLayout(): {
         stands: hall3Stands,
       },
       {
-        name: "Hall 4 — Restauration",
-        subtitle: "4 traiteurs",
-        x: hall4X,
-        y: hall4Y,
-        w: 4 * (sw + gap + 8) + 20,
-        h: 90,
-        fill: "#fef2f2",
-        stroke: "#dc2626",
-        stands: hall4Stands,
-      },
-      {
         name: "Cuisine",
         subtitle: "",
-        x: 12,
-        y: hall4Y,
-        w: hall4X - 25,
-        h: 50,
+        x: cuisineX,
+        y: 40,
+        w: cuisineW,
+        h: cuisineH,
         fill: "#e5e7eb",
         stroke: "#9ca3af",
         stands: [],
+      },
+      {
+        name: "Espace",
+        subtitle: "Restauration",
+        x: cuisineX,
+        y: 40 + cuisineH + 5,
+        w: cuisineW,
+        h: hall3H - cuisineH - 5,
+        fill: "#f5f0ff",
+        stroke: "#7c3aed",
+        stands: hall4Stands,
       },
       {
         name: "Hall 2",
@@ -537,14 +541,13 @@ export default function FloorPlan({
           {/* Connecting corridor between halls */}
           {(() => {
             const hall3 = LAYOUT.halls[0];
-            const hall4 = LAYOUT.halls[1];
-            const corrY = hall4.y + hall4.h + 8;
+            const corrY = hall3.y + hall3.h + 5;
             return (
               <>
                 <rect
                   x={12}
                   y={corrY}
-                  width={hall3.w + 12}
+                  width={hall3.w}
                   height={28}
                   rx={4}
                   fill="#f5f5f4"
@@ -553,7 +556,7 @@ export default function FloorPlan({
                   strokeDasharray="4 2"
                 />
                 <text
-                  x={(hall3.w + 12) / 2 + 6}
+                  x={12 + hall3.w / 2}
                   y={corrY + 18}
                   textAnchor="middle"
                   fontSize={9}

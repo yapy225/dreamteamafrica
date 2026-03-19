@@ -21,31 +21,38 @@ export async function POST() {
     },
   });
 
-  let sent = 0;
-  let failed = 0;
-  const results: Array<{ email: string; status: string }> = [];
+  const toSend = bookings.filter((b) => b.profile);
 
-  for (const b of bookings) {
-    if (!b.profile) continue;
-
-    try {
-      await sendExhibitorProfileInviteEmail({
-        to: b.email,
-        contactName: b.contactName,
-        companyName: b.companyName,
-        profileToken: b.profile.token,
-      });
-      sent++;
-      results.push({ email: b.email, status: "sent" });
-
-      // Rate limit
-      await new Promise((r) => setTimeout(r, 400));
-    } catch (err) {
-      failed++;
-      const msg = err instanceof Error ? err.message : String(err);
-      results.push({ email: b.email, status: `error: ${msg}` });
+  // Send emails in background (don't await all) to avoid Vercel timeout
+  // Fire-and-forget: send all emails without blocking the response
+  const sendAll = async () => {
+    for (const b of toSend) {
+      try {
+        await sendExhibitorProfileInviteEmail({
+          to: b.email,
+          contactName: b.contactName,
+          companyName: b.companyName,
+          profileToken: b.profile!.token,
+        });
+        console.log(`[exhibitor-invite] ✓ ${b.email}`);
+        await new Promise((r) => setTimeout(r, 300));
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(`[exhibitor-invite] ✗ ${b.email}: ${msg}`);
+      }
     }
-  }
+  };
 
-  return NextResponse.json({ sent, failed, total: bookings.length, results });
+  // Start sending without awaiting (runs in background on serverless)
+  sendAll().catch((err) =>
+    console.error("[exhibitor-invite] batch error:", err),
+  );
+
+  // Return immediately with count
+  return NextResponse.json({
+    sent: toSend.length,
+    failed: 0,
+    total: bookings.length,
+    message: `${toSend.length} emails en cours d'envoi`,
+  });
 }

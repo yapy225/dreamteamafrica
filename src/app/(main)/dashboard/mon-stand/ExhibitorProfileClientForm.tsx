@@ -27,6 +27,7 @@ interface ProfileData {
   twitter: string;
   linkedin: string;
   tiktok: string;
+  website: string;
   description: string;
   logoUrl: string | null;
   image1Url: string | null;
@@ -126,10 +127,13 @@ export default function ExhibitorProfileClientForm({
   const [data, setData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
   const [newsletter, setNewsletter] = useState(true);
   const [files, setFiles] = useState<Record<string, File | null>>({});
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     fetch(`/api/exposants/profil?token=${token}`)
@@ -142,31 +146,60 @@ export default function ExhibitorProfileClientForm({
       .finally(() => setLoading(false));
   }, [token]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!data) return;
-    setSubmitting(true);
-    setError("");
-
-    const formData = new FormData(e.currentTarget);
+  const buildFormData = (form: HTMLFormElement, isDraft: boolean) => {
+    const formData = new FormData(form);
     formData.set("token", token);
+    if (isDraft) formData.set("draft", "true");
 
-    // Add files
     for (const [key, file] of Object.entries(files)) {
       if (file) formData.set(key, file);
     }
 
-    // Newsletter opt-in
     formData.set("newsletter", newsletter ? "true" : "false");
 
-    // Ensure daysPresent is sent
-    const checkboxes = e.currentTarget.querySelectorAll<HTMLInputElement>(
+    const checkboxes = form.querySelectorAll<HTMLInputElement>(
       'input[name="daysPresent"]'
     );
     formData.delete("daysPresent");
     checkboxes.forEach((cb) => {
       if (cb.checked) formData.append("daysPresent", cb.value);
     });
+
+    return formData;
+  };
+
+  const handleSaveDraft = async () => {
+    if (!data || !formRef.current) return;
+    setSaving(true);
+    setSaved(false);
+    setError("");
+
+    try {
+      const formData = buildFormData(formRef.current, true);
+      const res = await fetch("/api/exposants/profil", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await res.json();
+      if (result.success) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        setError(result.error || "Erreur lors de la sauvegarde.");
+      }
+    } catch {
+      setError("Erreur de connexion.");
+    }
+    setSaving(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!data) return;
+    setSubmitting(true);
+    setError("");
+
+    const formData = buildFormData(e.currentTarget, false);
 
     try {
       const res = await fetch("/api/exposants/profil", {
@@ -223,7 +256,7 @@ export default function ExhibitorProfileClientForm({
   if (!data) return null;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
       {/* Identité */}
       <fieldset className="rounded-2xl bg-white p-6 shadow-[var(--shadow-card)]">
         <legend className="text-sm font-semibold uppercase tracking-wider text-dta-accent px-2">
@@ -362,6 +395,18 @@ export default function ExhibitorProfileClientForm({
               name="tiktok"
               defaultValue={data.tiktok}
               placeholder="@votre_compte"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-dta-accent focus:ring-1 focus:ring-dta-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-dta-dark mb-1">
+              Site internet
+            </label>
+            <input
+              name="website"
+              defaultValue={data.website || ""}
+              placeholder="https://votre-site.com"
+              type="url"
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-dta-accent focus:ring-1 focus:ring-dta-accent"
             />
           </div>
@@ -523,24 +568,49 @@ export default function ExhibitorProfileClientForm({
         </div>
       )}
 
-      {/* Submit */}
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full rounded-full bg-dta-accent px-6 py-3.5 font-semibold text-white transition-all hover:bg-dta-accent/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-      >
-        {submitting ? (
-          <>
-            <Loader2 size={18} className="animate-spin" />
-            Envoi en cours...
-          </>
-        ) : (
-          <>
-            <Send size={18} />
-            Envoyer ma fiche pour validation
-          </>
-        )}
-      </button>
+      {/* Actions */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <button
+          type="button"
+          onClick={handleSaveDraft}
+          disabled={saving || submitting}
+          className="flex-1 rounded-full border-2 border-dta-sand px-6 py-3.5 font-semibold text-dta-dark transition-all hover:border-dta-accent/40 hover:bg-dta-accent/5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {saving ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              Sauvegarde...
+            </>
+          ) : saved ? (
+            <>
+              <Check size={18} className="text-green-600" />
+              Brouillon sauvegard&eacute;
+            </>
+          ) : (
+            <>
+              <Upload size={18} />
+              Enregistrer le brouillon
+            </>
+          )}
+        </button>
+        <button
+          type="submit"
+          disabled={submitting || saving}
+          className="flex-1 rounded-full bg-dta-accent px-6 py-3.5 font-semibold text-white transition-all hover:bg-dta-accent/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {submitting ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              Envoi en cours...
+            </>
+          ) : (
+            <>
+              <Send size={18} />
+              Envoyer ma fiche
+            </>
+          )}
+        </button>
+      </div>
 
       <p className="text-center text-xs text-dta-taupe">
         En soumettant ce formulaire, vous autorisez Dream Team Africa &agrave;

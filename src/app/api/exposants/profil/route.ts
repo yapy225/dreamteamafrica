@@ -53,6 +53,7 @@ export async function GET(request: Request) {
     twitter: profile.twitter || "",
     linkedin: profile.linkedin || "",
     tiktok: profile.tiktok || "",
+    website: profile.website || "",
     description: profile.description || "",
     logoUrl: profile.logoUrl,
     image1Url: profile.image1Url,
@@ -101,6 +102,9 @@ export async function POST(request: Request) {
       }
     }
 
+    // Check if this is a draft save
+    const isDraft = formData.get("draft") === "true";
+
     // Update profile with text fields + uploaded URLs
     const updated = await prisma.exhibitorProfile.update({
       where: { token },
@@ -116,6 +120,7 @@ export async function POST(request: Request) {
         twitter: (formData.get("twitter") as string) || profile.twitter,
         linkedin: (formData.get("linkedin") as string) || profile.linkedin,
         tiktok: (formData.get("tiktok") as string) || profile.tiktok,
+        website: (formData.get("website") as string) || profile.website,
         description: (formData.get("description") as string) || profile.description,
         masterclass: formData.get("masterclass") === "true",
         daysPresent: formData.getAll("daysPresent") as string[],
@@ -124,9 +129,14 @@ export async function POST(request: Request) {
         ...(uploadedUrls.image2 && { image2Url: uploadedUrls.image2 }),
         ...(uploadedUrls.image3 && { image3Url: uploadedUrls.image3 }),
         ...(uploadedUrls.video && { videoUrl: uploadedUrls.video }),
-        submittedAt: new Date(),
+        ...(!isDraft && { submittedAt: new Date() }),
       },
     });
+
+    // If draft, return early without notifications or directory entry
+    if (isDraft) {
+      return NextResponse.json({ success: true, id: updated.id, draft: true });
+    }
 
     // Create or update DirectoryEntry in L'Officiel d'Afrique
     try {
@@ -151,6 +161,7 @@ export async function POST(request: Request) {
         instagram: updated.instagram || null,
         tiktok: updated.tiktok || null,
         linkedin: updated.linkedin || null,
+        website: updated.website || null,
         description: updated.description || updated.companyName || "",
         event: "Foire d'Afrique Paris 2026",
         published: true,

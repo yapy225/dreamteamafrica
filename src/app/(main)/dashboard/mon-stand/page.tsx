@@ -511,15 +511,19 @@ export default async function MonStandPage() {
               )}
               <div className="flex justify-between">
                 <span className="text-dta-char/70">Fiche exposant</span>
-                <span
-                  className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                    profile?.submittedAt
-                      ? "bg-green-100 text-green-700"
-                      : "bg-gray-100 text-gray-500"
-                  }`}
-                >
-                  {profile?.submittedAt ? "Envoyée" : "À compléter"}
-                </span>
+                {profile?.submittedAt ? (
+                  <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-700">
+                    Envoy&eacute;e
+                  </span>
+                ) : profile?.description || profile?.logoUrl ? (
+                  <a href="#fiche-exposant" className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors">
+                    Brouillon — Envoyer
+                  </a>
+                ) : (
+                  <a href="#fiche-exposant" className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+                    &Agrave; compl&eacute;ter
+                  </a>
+                )}
               </div>
             </div>
           </div>

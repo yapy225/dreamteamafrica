@@ -618,6 +618,7 @@ model ExhibitorProfile {
   twitter       String?
   linkedin      String?
   tiktok        String?
+  website       String?
 
   // Description
   description   String?  @db.Text

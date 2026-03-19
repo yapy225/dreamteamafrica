@@ -3,6 +3,17 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { slugify } from "@/lib/utils";
 
+function sanitizeHtml(html: string): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '')
+    .replace(/\son\w+\s*=\s*[^\s>]*/gi, '')
+    .replace(/javascript\s*:/gi, 'blocked:')
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+    .replace(/<embed\b[^>]*>/gi, '')
+    .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '');
+}
+
 export async function POST(request: Request) {
   try {
     const session = await auth();
@@ -40,7 +51,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Catégorie invalide." }, { status: 400 });
     }
 
-    const readingTimeMin = Math.max(1, Math.ceil(content.split(/\s+/).filter(Boolean).length / 200));
+    const sanitizedContent = sanitizeHtml(content);
+
+    const readingTimeMin = Math.max(1, Math.ceil(sanitizedContent.split(/\s+/).filter(Boolean).length / 200));
 
     let slug = slugify(title);
     const existing = await prisma.article.findUnique({ where: { slug } });
@@ -53,7 +66,7 @@ export async function POST(request: Request) {
         title,
         slug,
         excerpt,
-        content,
+        content: sanitizedContent,
         category,
         coverImage: coverImage || null,
         gradientClass: gradientClass || null,

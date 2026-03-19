@@ -8,18 +8,27 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session?.user?.id || (session.user as { role?: string }).role !== "ADMIN") {
-    return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
+  if (!session?.user?.id || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
 
   const { id } = await params;
   const body = await request.json();
 
-  const data: any = {};
+  const allowedStatuses = ["NEW", "READ", "REPLIED", "ARCHIVED"];
+
+  const data: {
+    read?: boolean;
+    status?: string;
+    notes?: string | null;
+    draftReply?: string | null;
+  } = {};
   if (typeof body.read === "boolean") data.read = body.read;
-  if (body.status) data.status = body.status;
-  if (body.notes !== undefined) data.notes = body.notes || null;
-  if (body.draftReply !== undefined) data.draftReply = body.draftReply || null;
+  if (typeof body.status === "string" && allowedStatuses.includes(body.status)) {
+    data.status = body.status;
+  }
+  if (body.notes !== undefined) data.notes = typeof body.notes === "string" ? body.notes : null;
+  if (body.draftReply !== undefined) data.draftReply = typeof body.draftReply === "string" ? body.draftReply : null;
 
   const updated = await prisma.contactMessage.update({
     where: { id },
@@ -35,8 +44,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session?.user?.id || (session.user as { role?: string }).role !== "ADMIN") {
-    return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
+  if (!session?.user?.id || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
 
   const { id } = await params;

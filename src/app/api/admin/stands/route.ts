@@ -7,7 +7,7 @@ const EVENT_ID = "cmm767c1m0005ti794z61tzux";
 // POST: block/unblock a stand (admin only)
 export async function POST(request: NextRequest) {
   const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session?.user?.id || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
 

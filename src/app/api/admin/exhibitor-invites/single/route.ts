@@ -4,7 +4,7 @@ import { sendExhibitorProfileInviteEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session?.user?.id || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
 

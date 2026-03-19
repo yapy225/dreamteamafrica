@@ -6,7 +6,7 @@ import { sendExhibitorProfileInviteEmail } from "@/lib/email";
 // POST: send profile invite emails to all exhibitors who haven't submitted
 export async function POST() {
   const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session?.user?.id || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 import OpenAI from "openai";
 
 export const maxDuration = 30;
@@ -117,10 +118,27 @@ interface ChatMessage {
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting
+    const ip = getClientIp(request);
+    const rl = rateLimit(`chat:${ip}`, RATE_LIMITS.api);
+    if (!rl.success) {
+      return NextResponse.json({ error: "Trop de requêtes. Réessayez plus tard." }, { status: 429 });
+    }
+
     const { messages } = (await request.json()) as { messages: ChatMessage[] };
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json({ error: "Messages requis" }, { status: 400 });
+    }
+
+    // Input validation: limit total messages and individual message length
+    if (messages.length > 10) {
+      return NextResponse.json({ error: "Trop de messages dans la conversation." }, { status: 400 });
+    }
+    for (const msg of messages) {
+      if (typeof msg.content !== "string" || msg.content.length > 2000) {
+        return NextResponse.json({ error: "Message trop long (max 2000 caractères)." }, { status: 400 });
+      }
     }
 
     // Limit conversation history to last 10 messages

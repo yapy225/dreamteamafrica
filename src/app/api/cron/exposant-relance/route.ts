@@ -11,8 +11,9 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com"
  */
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
   const now = new Date();

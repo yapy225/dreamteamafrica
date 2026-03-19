@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function GET() {
   try {
@@ -17,6 +18,16 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting
+    const ip = getClientIp(request);
+    const rl = rateLimit(`comments:${ip}`, RATE_LIMITS.form);
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: "Trop de requêtes. Réessayez plus tard." },
+        { status: 429 }
+      );
+    }
+
     const { name, email, rating, message } = await request.json();
 
     if (!name?.trim() || !email?.trim() || !message?.trim()) {
@@ -29,6 +40,20 @@ export async function POST(request: Request) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json(
         { error: "Adresse email invalide." },
+        { status: 400 }
+      );
+    }
+
+    // Input length validation
+    if (name.trim().length > 100) {
+      return NextResponse.json(
+        { error: "Le nom ne doit pas dépasser 100 caractères." },
+        { status: 400 }
+      );
+    }
+    if (message.trim().length > 2000) {
+      return NextResponse.json(
+        { error: "Le message ne doit pas dépasser 2000 caractères." },
         { status: 400 }
       );
     }

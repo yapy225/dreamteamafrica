@@ -273,7 +273,6 @@ export default async function ExposantsDashboardPage({
                               <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
                                 Fiche soumise
                               </span>
-                              <PublishButton profileId={b.profile.id} />
                             </div>
                             <PublicationTracker
                               profileId={b.profile.id}
@@ -309,7 +308,10 @@ export default async function ExposantsDashboardPage({
                         />
                       )}
                       {b.profile?.submittedAt && (
-                        <PublishButton profileId={b.profile.id} />
+                        <>
+                          <ValidateProfileButton profileId={b.profile.id} />
+                          <PublishButton profileId={b.profile.id} />
+                        </>
                       )}
                       <CashPaymentButton
                         bookingId={b.id}

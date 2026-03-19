@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import ExhibitorProfileClientForm from "./ExhibitorProfileClientForm";
 import EarlyPaymentButton from "../../exposants/confirmation/[id]/EarlyPaymentButton";
+import FloorPlan from "@/components/stands/FloorPlan";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Mon espace exposant | Dashboard" };
@@ -638,6 +639,25 @@ export default async function MonStandPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ── Floor plan section ── */}
+      <div className="mt-10">
+        <h2 className="font-serif text-2xl font-bold text-dta-dark mb-2">
+          Plan de la salle &mdash; Choisir mon emplacement
+        </h2>
+        <p className="text-sm text-dta-char/70 mb-6">
+          Cliquez sur un stand disponible pour r&eacute;server votre emplacement.
+          {booking.standNumber && (
+            <span className="ml-1 font-medium text-blue-600">
+              Votre stand actuel : n&deg;{booking.standNumber}
+            </span>
+          )}
+        </p>
+        <FloorPlan
+          bookingId={booking.id}
+          userId={session.user.id}
+        />
       </div>
 
       {/* ── Profile form section ── */}

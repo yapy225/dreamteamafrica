@@ -569,6 +569,8 @@ model ExhibitorBooking {
   // Statut
   status               BookingStatus  @default(PENDING)
 
+  standNumber          Int?
+
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
 
@@ -577,6 +579,19 @@ model ExhibitorBooking {
 
   @@index([userId])
   @@index([status])
+}
+
+// ─── STANDS (blocage admin) ─────────────────────────────
+
+model StandBlock {
+  id          String  @id @default(cuid())
+  eventId     String
+  standNumber Int
+  reason      String?
+  createdAt   DateTime @default(now())
+
+  @@unique([eventId, standNumber])
+  @@index([eventId])
 }
 
 model ExhibitorPayment {

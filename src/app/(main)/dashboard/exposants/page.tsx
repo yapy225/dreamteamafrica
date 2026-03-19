@@ -11,6 +11,7 @@ import PublicationTracker from "./PublicationTracker";
 import SearchFilter from "./SearchFilter";
 import SendInviteButton from "./SendInviteButton";
 import PublishButton from "./PublishButton";
+import FloorPlan from "@/components/stands/FloorPlan";
 import { DEPOSIT_AMOUNT } from "@/lib/exhibitor-events";
 
 export const dynamic = "force-dynamic";
@@ -138,6 +139,14 @@ export default async function ExposantsDashboardPage({
           <p className="text-xs font-medium text-dta-taupe">CA attendu</p>
           <p className="mt-1 font-serif text-2xl font-bold text-dta-accent">{formatter.format(stats.expected)}</p>
         </div>
+      </div>
+
+      {/* Floor Plan (admin) */}
+      <div className="mb-8 rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)]">
+        <h2 className="font-serif text-lg font-bold text-dta-dark mb-4">
+          Plan de salle &mdash; Gestion des stands
+        </h2>
+        <FloorPlan isAdmin userId={session.user.id} />
       </div>
 
       {/* Table */}

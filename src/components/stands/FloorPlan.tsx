@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Loader2, Lock, Check, X } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Loader2 } from "lucide-react";
 
 interface StandInfo {
   status: "available" | "reserved" | "blocked" | "mine";
@@ -12,83 +12,154 @@ interface StandInfo {
 }
 
 interface FloorPlanProps {
-  bookingId?: string; // Current user's booking ID (exhibitor mode)
-  userId?: string; // Current user ID
+  bookingId?: string;
+  userId?: string;
   isAdmin?: boolean;
   onStandSelected?: (standNumber: number) => void;
 }
 
-// Stand layout: 45 stands arranged in the main room
-// 5 columns x 9 rows grid
-const STAND_LAYOUT: Array<{
+// Total: 57 emplacements
+// Hall 1 (Accueil): 1-4
+// Hall 2: 5-8
+// Hall 3 (Salle Loffon): 9-53 (45 stands)
+// Hall 4 (Restauration): 54-57 (4 traiteurs)
+const TOTAL_STANDS = 57;
+
+interface StandDef {
   number: number;
   x: number;
   y: number;
   w: number;
   h: number;
-}> = (() => {
-  const stands: typeof STAND_LAYOUT = [];
-  const sw = 52; // stand width
-  const sh = 40; // stand height
+  label?: string;
+}
+
+// Layout dimensions
+const SVG_W = 520;
+const SVG_H = 620;
+
+function buildLayout(): {
+  halls: Array<{
+    name: string;
+    subtitle: string;
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    fill: string;
+    stroke: string;
+    stands: StandDef[];
+  }>;
+} {
+  const sw = 48;
+  const sh = 36;
   const gap = 4;
 
-  // Left wall stands (1-9): vertical column along left wall
-  for (let i = 0; i < 9; i++) {
-    stands.push({
+  // ── HALL 1 — Accueil (bottom left) ──
+  const hall1Stands: StandDef[] = [];
+  for (let i = 0; i < 4; i++) {
+    hall1Stands.push({
       number: i + 1,
-      x: 20,
-      y: 60 + i * (sh + gap),
+      x: 20 + i * (sw + gap),
+      y: 545,
       w: sw,
       h: sh,
     });
   }
 
-  // Center-left column (10-18)
-  for (let i = 0; i < 9; i++) {
-    stands.push({
-      number: i + 10,
-      x: 20 + (sw + gap) * 1,
-      y: 60 + i * (sh + gap),
+  // ── HALL 2 (bottom right) ──
+  const hall2Stands: StandDef[] = [];
+  for (let i = 0; i < 4; i++) {
+    hall2Stands.push({
+      number: i + 5,
+      x: 310 + i * (sw + gap),
+      y: 545,
       w: sw,
       h: sh,
     });
   }
 
-  // Center column (19-27)
-  for (let i = 0; i < 9; i++) {
-    stands.push({
-      number: i + 19,
-      x: 20 + (sw + gap) * 2,
-      y: 60 + i * (sh + gap),
-      w: sw,
-      h: sh,
+  // ── HALL 3 — Salle Emile Loffon (main room, center) ──
+  // 45 stands: 5 columns x 9 rows
+  const hall3Stands: StandDef[] = [];
+  const h3x = 30;
+  const h3y = 80;
+  for (let col = 0; col < 5; col++) {
+    for (let row = 0; row < 9; row++) {
+      hall3Stands.push({
+        number: 9 + col * 9 + row,
+        x: h3x + col * (sw + gap),
+        y: h3y + row * (sh + gap),
+        w: sw,
+        h: sh,
+      });
+    }
+  }
+
+  // ── HALL 4 — Espace Restauration (right side) ──
+  const hall4Stands: StandDef[] = [];
+  for (let i = 0; i < 4; i++) {
+    hall4Stands.push({
+      number: 54 + i,
+      x: 350,
+      y: 80 + i * (sh + gap + 20),
+      w: sw + 20,
+      h: sh + 16,
+      label: `T${i + 1}`,
     });
   }
 
-  // Center-right column (28-36)
-  for (let i = 0; i < 9; i++) {
-    stands.push({
-      number: i + 28,
-      x: 20 + (sw + gap) * 3,
-      y: 60 + i * (sh + gap),
-      w: sw,
-      h: sh,
-    });
-  }
+  return {
+    halls: [
+      {
+        name: "Hall 3 — Salle Emile Loffon",
+        subtitle: "45 stands",
+        x: 15,
+        y: 40,
+        w: 280,
+        h: 420,
+        fill: "#fefce8",
+        stroke: "#ca8a04",
+        stands: hall3Stands,
+      },
+      {
+        name: "Hall 4 — Restauration",
+        subtitle: "4 traiteurs",
+        x: 320,
+        y: 40,
+        w: 185,
+        h: 280,
+        fill: "#fef2f2",
+        stroke: "#dc2626",
+        stands: hall4Stands,
+      },
+      {
+        name: "Hall 1 — Accueil",
+        subtitle: "4 stands",
+        x: 15,
+        y: 500,
+        w: 220,
+        h: 100,
+        fill: "#f0fdf4",
+        stroke: "#16a34a",
+        stands: hall1Stands,
+      },
+      {
+        name: "Hall 2",
+        subtitle: "4 stands",
+        x: 280,
+        y: 500,
+        w: 225,
+        h: 100,
+        fill: "#eff6ff",
+        stroke: "#2563eb",
+        stands: hall2Stands,
+      },
+    ],
+  };
+}
 
-  // Right column (37-45)
-  for (let i = 0; i < 9; i++) {
-    stands.push({
-      number: i + 37,
-      x: 20 + (sw + gap) * 4,
-      y: 60 + i * (sh + gap),
-      w: sw,
-      h: sh,
-    });
-  }
-
-  return stands;
-})();
+const LAYOUT = buildLayout();
 
 const COLORS = {
   available: { fill: "#22c55e", stroke: "#16a34a", text: "#fff" },
@@ -107,19 +178,13 @@ export default function FloorPlan({
   const [stands, setStands] = useState<Record<number, StandInfo>>({});
   const [loading, setLoading] = useState(true);
   const [hoveredStand, setHoveredStand] = useState<number | null>(null);
-  const [selectedStand, setSelectedStand] = useState<number | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const [tooltip, setTooltip] = useState<{
-    x: number;
-    y: number;
-    text: string;
-  } | null>(null);
+  const [tooltipInfo, setTooltipInfo] = useState<string | null>(null);
 
-  const fetchStands = async () => {
+  const fetchStands = useCallback(async () => {
     try {
       const res = await fetch("/api/stands");
       const data = await res.json();
-      // Mark user's own stands
       const enriched: Record<number, StandInfo> = {};
       for (const [key, info] of Object.entries(data.stands) as [
         string,
@@ -128,7 +193,6 @@ export default function FloorPlan({
         const n = parseInt(key);
         if (info.status === "reserved" && info.userId === userId) {
           enriched[n] = { ...info, status: "mine" };
-          setSelectedStand(n);
         } else {
           enriched[n] = info;
         }
@@ -138,17 +202,16 @@ export default function FloorPlan({
       console.error("Failed to load stands");
     }
     setLoading(false);
-  };
+  }, [userId]);
 
   useEffect(() => {
     fetchStands();
-  }, []);
+  }, [fetchStands]);
 
   const handleStandClick = async (standNumber: number) => {
     const info = stands[standNumber];
     if (!info) return;
 
-    // Admin mode: block/unblock
     if (isAdmin) {
       setActionLoading(true);
       const action =
@@ -159,7 +222,6 @@ export default function FloorPlan({
             : info.status === "reserved" || info.status === "mine"
               ? "free"
               : null;
-
       if (action) {
         await fetch("/api/admin/stands", {
           method: "POST",
@@ -172,7 +234,6 @@ export default function FloorPlan({
       return;
     }
 
-    // Exhibitor mode: select available stand
     if (info.status === "available" && bookingId) {
       setActionLoading(true);
       const res = await fetch("/api/stands", {
@@ -189,21 +250,15 @@ export default function FloorPlan({
     }
   };
 
-  const handleMouseEnter = (
-    standNumber: number,
-    e: React.MouseEvent<SVGRectElement>,
-  ) => {
-    setHoveredStand(standNumber);
+  const getTooltip = (standNumber: number) => {
     const info = stands[standNumber];
-    let text = `Stand ${standNumber}`;
+    let text = `Stand n°${standNumber}`;
     if (info?.status === "reserved")
       text += ` — ${info.companyName || "Réservé"}`;
     if (info?.status === "mine") text += " — Votre stand";
     if (info?.status === "blocked") text += " — Indisponible";
     if (info?.status === "available") text += " — Disponible";
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    setTooltip({ x: rect.left + rect.width / 2, y: rect.top - 10, text });
+    return text;
   };
 
   if (loading) {
@@ -214,8 +269,6 @@ export default function FloorPlan({
     );
   }
 
-  const totalW = 300;
-  const totalH = 480;
   const available = Object.values(stands).filter(
     (s) => s.status === "available",
   ).length;
@@ -260,192 +313,207 @@ export default function FloorPlan({
         </div>
       </div>
 
-      {/* Floor plan SVG */}
-      <div className="relative overflow-auto rounded-xl border border-dta-sand bg-white p-2">
-        <svg
-          viewBox={`0 0 ${totalW} ${totalH}`}
-          className="mx-auto w-full max-w-md"
-          style={{ minHeight: 400 }}
-        >
-          {/* Room outline */}
-          <rect
-            x={10}
-            y={10}
-            width={totalW - 20}
-            height={totalH - 60}
-            rx={4}
-            fill="#fefce8"
-            stroke="#ca8a04"
-            strokeWidth={2}
-          />
+      {/* Tooltip */}
+      {tooltipInfo && (
+        <div className="rounded-lg bg-dta-dark px-3 py-1.5 text-xs font-medium text-white text-center">
+          {tooltipInfo}
+        </div>
+      )}
 
-          {/* Room label */}
+      {/* Floor plan SVG */}
+      <div className="relative overflow-auto rounded-xl border border-dta-sand bg-white p-3">
+        <svg
+          viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+          className="mx-auto w-full"
+          style={{ minHeight: 450, maxWidth: 600 }}
+        >
+          {/* Title */}
           <text
-            x={totalW / 2}
-            y={35}
+            x={SVG_W / 2}
+            y={22}
             textAnchor="middle"
-            fontSize={13}
+            fontSize={14}
             fontWeight="bold"
             fontStyle="italic"
-            fill="#92400e"
+            fill="#1a1a1a"
           >
-            Salle Emile Loffon
-          </text>
-          <text
-            x={totalW / 2}
-            y={50}
-            textAnchor="middle"
-            fontSize={9}
-            fill="#a16207"
-          >
-            45 stands — Rez-de-chauss&eacute;e
+            Rez-de-chauss&eacute;e — Espace MAS
           </text>
 
-          {/* Stands */}
-          {STAND_LAYOUT.map((stand) => {
-            const info = stands[stand.number];
-            const status = info?.status || "available";
-            const isHovered = hoveredStand === stand.number;
-            const colors = isHovered && status === "available"
-              ? COLORS.hover
-              : COLORS[status];
-
-            return (
-              <g
-                key={stand.number}
-                onClick={() => handleStandClick(stand.number)}
-                onMouseEnter={(e) =>
-                  handleMouseEnter(
-                    stand.number,
-                    e as unknown as React.MouseEvent<SVGRectElement>,
-                  )
-                }
-                onMouseLeave={() => {
-                  setHoveredStand(null);
-                  setTooltip(null);
-                }}
-                style={{
-                  cursor:
-                    status === "available" || isAdmin
-                      ? "pointer"
-                      : "default",
-                }}
+          {/* Halls */}
+          {LAYOUT.halls.map((hall) => (
+            <g key={hall.name}>
+              {/* Hall background */}
+              <rect
+                x={hall.x}
+                y={hall.y}
+                width={hall.w}
+                height={hall.h}
+                rx={6}
+                fill={hall.fill}
+                stroke={hall.stroke}
+                strokeWidth={2}
+              />
+              {/* Hall label */}
+              <text
+                x={hall.x + hall.w / 2}
+                y={hall.y + 18}
+                textAnchor="middle"
+                fontSize={10}
+                fontWeight="bold"
+                fill={hall.stroke}
               >
-                <rect
-                  x={stand.x}
-                  y={stand.y}
-                  width={stand.w}
-                  height={stand.h}
-                  rx={3}
-                  fill={colors.fill}
-                  stroke={colors.stroke}
-                  strokeWidth={1.5}
-                  opacity={isHovered ? 0.9 : 1}
-                />
-                <text
-                  x={stand.x + stand.w / 2}
-                  y={stand.y + stand.h / 2 + 1}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fontSize={11}
-                  fontWeight="bold"
-                  fill={colors.text}
-                >
-                  {stand.number}
-                </text>
-                {status === "blocked" && (
-                  <Lock
-                    x={stand.x + stand.w - 12}
-                    y={stand.y + 2}
-                    size={10}
-                    color="#fff"
-                  />
-                )}
-              </g>
-            );
-          })}
+                {hall.name}
+              </text>
+              <text
+                x={hall.x + hall.w / 2}
+                y={hall.y + 30}
+                textAnchor="middle"
+                fontSize={8}
+                fill={hall.stroke}
+                opacity={0.7}
+              >
+                {hall.subtitle}
+              </text>
 
-          {/* Hall area */}
+              {/* Stands */}
+              {hall.stands.map((stand) => {
+                const info = stands[stand.number];
+                const status = info?.status || "available";
+                const isHovered = hoveredStand === stand.number;
+                const colors =
+                  isHovered && status === "available"
+                    ? COLORS.hover
+                    : COLORS[status];
+
+                return (
+                  <g
+                    key={stand.number}
+                    onClick={() => handleStandClick(stand.number)}
+                    onMouseEnter={() => {
+                      setHoveredStand(stand.number);
+                      setTooltipInfo(getTooltip(stand.number));
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredStand(null);
+                      setTooltipInfo(null);
+                    }}
+                    onTouchStart={() => {
+                      setTooltipInfo(getTooltip(stand.number));
+                    }}
+                    style={{
+                      cursor:
+                        status === "available" || isAdmin
+                          ? "pointer"
+                          : "default",
+                    }}
+                  >
+                    <rect
+                      x={stand.x}
+                      y={stand.y}
+                      width={stand.w}
+                      height={stand.h}
+                      rx={4}
+                      fill={colors.fill}
+                      stroke={colors.stroke}
+                      strokeWidth={1.5}
+                      opacity={isHovered ? 0.85 : 1}
+                    />
+                    <text
+                      x={stand.x + stand.w / 2}
+                      y={stand.y + stand.h / 2 + 1}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fontSize={stand.label ? 10 : 11}
+                      fontWeight="bold"
+                      fill={colors.text}
+                    >
+                      {stand.label || stand.number}
+                    </text>
+                  </g>
+                );
+              })}
+            </g>
+          ))}
+
+          {/* Connecting corridor between halls */}
           <rect
-            x={10}
-            y={totalH - 48}
-            width={totalW - 20}
-            height={38}
+            x={15}
+            y={465}
+            width={490}
+            height={30}
             rx={4}
             fill="#f5f5f4"
-            stroke="#a8a29e"
+            stroke="#d6d3d1"
             strokeWidth={1}
+            strokeDasharray="4 2"
           />
           <text
-            x={totalW / 2}
-            y={totalH - 28}
+            x={SVG_W / 2}
+            y={484}
             textAnchor="middle"
-            fontSize={10}
-            fill="#78716c"
+            fontSize={9}
+            fill="#a8a29e"
           >
-            Hall — Accueil &amp; Entr&eacute;e
+            Couloir &amp; circulation
           </text>
 
-          {/* Kitchen label */}
+          {/* Kitchen area */}
           <rect
-            x={totalW - 70}
-            y={14}
-            width={50}
-            height={25}
-            rx={3}
+            x={320}
+            y={340}
+            width={185}
+            height={50}
+            rx={4}
             fill="#e5e7eb"
             stroke="#9ca3af"
             strokeWidth={1}
           />
           <text
-            x={totalW - 45}
-            y={30}
+            x={412}
+            y={370}
             textAnchor="middle"
-            fontSize={8}
+            fontSize={10}
             fill="#6b7280"
           >
             Cuisine
           </text>
+
+          {/* Entrance arrow */}
+          <text
+            x={SVG_W / 2}
+            y={SVG_H - 4}
+            textAnchor="middle"
+            fontSize={10}
+            fill="#78716c"
+          >
+            &uarr; ENTR&Eacute;E PRINCIPALE &uarr;
+          </text>
         </svg>
 
-        {/* Tooltip */}
-        {tooltip && (
-          <div
-            className="pointer-events-none fixed z-50 rounded-lg bg-dta-dark px-3 py-1.5 text-xs font-medium text-white shadow-lg"
-            style={{
-              left: tooltip.x,
-              top: tooltip.y,
-              transform: "translate(-50%, -100%)",
-            }}
-          >
-            {tooltip.text}
-          </div>
-        )}
-
         {actionLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-xl">
+          <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-white/60">
             <Loader2 size={24} className="animate-spin text-dta-accent" />
           </div>
         )}
       </div>
 
-      {/* Admin instructions */}
-      {isAdmin && (
+      {/* Instructions */}
+      {isAdmin ? (
         <p className="text-xs text-dta-taupe">
-          Cliquez sur un stand vert pour le <strong>bloquer</strong>, gris pour
-          le <strong>d&eacute;bloquer</strong>, rouge pour le{" "}
-          <strong>lib&eacute;rer</strong>.
+          <strong>Admin :</strong> Cliquez sur un stand{" "}
+          <strong className="text-green-600">vert</strong> pour le bloquer,{" "}
+          <strong className="text-gray-500">gris</strong> pour le d&eacute;bloquer,{" "}
+          <strong className="text-red-600">rouge</strong> pour le lib&eacute;rer.
         </p>
-      )}
-
-      {/* Exhibitor instructions */}
-      {!isAdmin && bookingId && (
+      ) : bookingId ? (
         <p className="text-xs text-dta-taupe">
-          Cliquez sur un stand <strong className="text-green-600">vert</strong>{" "}
-          pour le r&eacute;server. Votre stand appara&icirc;tra en{" "}
+          Cliquez sur un stand{" "}
+          <strong className="text-green-600">vert</strong> pour le
+          r&eacute;server. Votre stand appara&icirc;tra en{" "}
           <strong className="text-blue-600">bleu</strong>.
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

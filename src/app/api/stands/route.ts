@@ -40,7 +40,7 @@ export async function GET() {
   > = {};
 
   // Initialize all 45 stands as available
-  for (let i = 1; i <= 45; i++) {
+  for (let i = 1; i <= 57; i++) {
     stands[i] = { status: "available" };
   }
 
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 
   const { standNumber, bookingId } = await request.json();
 
-  if (!standNumber || standNumber < 1 || standNumber > 45) {
+  if (!standNumber || standNumber < 1 || standNumber > 57) {
     return NextResponse.json({ error: "Numéro de stand invalide" }, { status: 400 });
   }
 

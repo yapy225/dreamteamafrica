@@ -1,10 +1,9 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { prisma } from "./db";
 
-let _client: Anthropic | null = null;
+let _client: OpenAI | null = null;
 function getClient() {
-  if (!_client)
-    _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  if (!_client) _client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   return _client;
 }
 
@@ -14,7 +13,6 @@ const APP_URL = "https://dreamteamafrica.com";
  * Build system prompt with live data (tickets sold, stands available).
  */
 async function buildSystemPrompt(): Promise<string> {
-  // Données en temps réel
   const [earlyBirdSold, standardSold, totalTickets, standsReserved, standsBlocked] =
     await Promise.all([
       prisma.ticket.count({
@@ -90,7 +88,7 @@ Foire d'Afrique Paris — 6ème édition
 }
 
 /**
- * Generate a WhatsApp auto-reply draft using Claude Haiku.
+ * Generate a WhatsApp auto-reply draft using GPT-4o-mini.
  */
 export async function generateWhatsAppDraft(
   incomingMessage: string,
@@ -103,7 +101,9 @@ export async function generateWhatsAppDraft(
   try {
     const systemPrompt = await buildSystemPrompt();
 
-    const messages: Anthropic.MessageParam[] = [];
+    const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+      { role: "system", content: systemPrompt },
+    ];
 
     if (conversationHistory?.length) {
       const recent = conversationHistory.slice(-5);
@@ -117,20 +117,14 @@ export async function generateWhatsAppDraft(
       content: `[Message de ${contactName}] ${incomingMessage}`,
     });
 
-    const response = await getClient().messages.create({
-      model: "claude-haiku-4-5",
+    const response = await getClient().chat.completions.create({
+      model: "gpt-4o-mini",
       max_tokens: 400,
-      system: systemPrompt,
+      temperature: 0.7,
       messages,
     });
 
-    for (const block of response.content) {
-      if (block.type === "text") {
-        return block.text;
-      }
-    }
-
-    return null;
+    return response.choices[0]?.message?.content || null;
   } catch (err) {
     console.error("[WhatsApp AI] Draft generation failed:", err);
     return null;

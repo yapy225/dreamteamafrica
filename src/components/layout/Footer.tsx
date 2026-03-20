@@ -27,6 +27,7 @@ const footerSections = [
   {
     title: "Devenir Exposant",
     links: [
+      { href: "/billetterie-exposants", label: "Tous les événements" },
       { href: "/resa-exposants/foire-dafrique-paris", label: "Foire d'Afrique Paris" },
       { href: "/resa-exposants/juste-une-danse", label: "Juste Une Danse" },
       { href: "/resa-exposants/festival-conte-africain", label: "Festival du Conte Africain" },

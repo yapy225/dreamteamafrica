@@ -18,7 +18,23 @@ export const metadata = {
     description: "Tous les articles archivés du journal de la diaspora africaine.",
     type: "website",
     url: `${siteUrl}/lafropeen/archives`,
+    images: [
+      {
+        url: `${siteUrl}/foire-afrique.jpg`,
+        width: 1200,
+        height: 630,
+        alt: "Archives — L'Afropéen",
+      },
+    ],
   },
+  keywords: [
+    "archives diaspora africaine",
+    "articles culture africaine",
+    "journal afropéen archives",
+    "actualité africaine archives",
+    "diaspora africaine Europe",
+    "média africain France",
+  ],
   alternates: {
     canonical: `${siteUrl}/lafropeen/archives`,
   },

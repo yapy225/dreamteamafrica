@@ -49,14 +49,35 @@ export async function generateMetadata({
   const config = CATEGORY_CONFIG[category];
   const title = `${config?.label ?? cat} — L'Afropéen | Journal Diaspora Africaine`;
   const description = CATEGORY_DESCRIPTIONS[category];
+  const categoryKeywords: Record<string, string[]> = {
+    ACTUALITE: ["actualité africaine", "news Afrique", "politique africaine", "société africaine"],
+    CULTURE: ["culture africaine", "arts africains", "littérature africaine", "patrimoine africain"],
+    CINEMA: ["cinéma africain", "films africains", "réalisateurs africains", "festivals cinéma Afrique"],
+    MUSIQUE: ["musique africaine", "afrobeats", "artistes africains", "concerts africains"],
+    SPORT: ["sport africain", "football africain", "athlétisme Afrique", "NBA Afrique"],
+    DIASPORA: ["diaspora africaine", "diaspora Europe", "communauté africaine France", "vie diaspora"],
+    BUSINESS: ["business africain", "entrepreneuriat Afrique", "investissement Afrique", "startups africaines"],
+    LIFESTYLE: ["lifestyle africain", "mode africaine", "gastronomie africaine", "bien-être africain"],
+    OPINION: ["opinion Afrique", "tribune africaine", "analyse diaspora", "point de vue Afrique"],
+  };
+
   return {
     title,
     description,
+    keywords: categoryKeywords[category] ?? [config?.label ?? cat, "diaspora africaine", "journal afropéen"],
     openGraph: {
       title,
       description,
       type: "website",
       url: `${siteUrl}/lafropeen/categorie/${cat}`,
+      images: [
+        {
+          url: `${siteUrl}/foire-afrique.jpg`,
+          width: 1200,
+          height: 630,
+          alt: `${config?.label ?? cat} — L'Afropéen`,
+        },
+      ],
     },
     twitter: {
       card: "summary",

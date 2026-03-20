@@ -51,6 +51,14 @@ export const metadata = {
     description: "Actualités, culture, business et lifestyle de la diaspora africaine en Europe.",
     type: "website",
     url: `${siteUrl}/lafropeen`,
+    images: [
+      {
+        url: `${siteUrl}/foire-afrique.jpg`,
+        width: 1200,
+        height: 630,
+        alt: "L'Afropéen — Journal de la Diaspora Africaine",
+      },
+    ],
   },
   alternates: {
     canonical: `${siteUrl}/lafropeen`,
@@ -108,6 +116,16 @@ export default async function JournalPage() {
     },
     inLanguage: "fr-FR",
     numberOfItems: publishedArticles.length + archivedArticles.length,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: publishedArticles.length,
+      itemListElement: publishedArticles.slice(0, 10).map((article, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `${siteUrl}/lafropeen/${article.slug}`,
+        name: article.title,
+      })),
+    },
   };
 
   return (
@@ -120,6 +138,10 @@ export default async function JournalPage() {
       <JournalNav />
 
       <div className="mx-auto max-w-7xl space-y-12 px-4 py-8 sm:px-6 lg:px-8">
+        <h1 className="font-serif text-2xl font-bold text-dta-dark sm:text-3xl lg:text-4xl">
+          L&apos;Afropéen — Journal de la Diaspora Africaine
+        </h1>
+
         {/* Hero: UNE + FACE_UNE */}
         <HeroCarousel
           uneArticles={(zones.UNE.length > 0 ? zones.UNE : zones.FACE_UNE).slice(0, 3)}

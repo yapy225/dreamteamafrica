@@ -43,7 +43,7 @@ export async function generateMetadata({
     description,
     keywords: article.seoKeywords.length > 0 ? article.seoKeywords : undefined,
     openGraph: {
-      title: article.title,
+      title: article.metaTitle || article.title,
       description,
       type: "article",
       publishedTime: article.publishedAt.toISOString(),
@@ -334,11 +334,13 @@ export default async function ArticleDetailPage({
         {/* Background */}
         {article.coverImage ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={article.coverImage}
               alt={article.title}
-              className="absolute inset-0 h-full w-full object-cover opacity-20"
+              fill
+              priority={true}
+              sizes="100vw"
+              className="object-cover opacity-20"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-dta-dark via-dta-dark/60 to-transparent" />
           </>

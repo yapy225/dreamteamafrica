@@ -51,8 +51,11 @@ export function TotalRevenueChart({ data }: TotalRevenueChartProps) {
               name={s.label}
               stroke={s.color}
               strokeWidth={s.key === "total" ? 3 : 2}
-              dot={{ r: 4 }}
-              activeDot={{ r: 6 }}
+              dot={{ r: 4, strokeWidth: 2 }}
+              activeDot={{ r: 8, strokeWidth: 0, fill: s.color }}
+              isAnimationActive={true}
+              animationDuration={1500}
+              animationEasing="ease-in-out"
             />
           ))}
         </LineChart>

@@ -425,32 +425,20 @@ export default async function EvenementsPage() {
       {/* ── E. Cross-links — Maillage interne ────────── */}
       <div className="mt-16 border-t border-dta-sand pt-12">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
-          {/* Link to journal */}
+          {/* Link to exposants */}
           <div>
             <div className="mb-3 flex items-center gap-2">
-              <Newspaper size={18} className="text-dta-accent" />
-              <h3 className="font-serif text-lg font-bold text-dta-dark">L&apos;Afropeen</h3>
+              <Store size={18} className="text-dta-accent" />
+              <h3 className="font-serif text-lg font-bold text-dta-dark">Devenir exposant</h3>
             </div>
             <p className="mb-3 text-sm text-dta-char/70">
-              Suivez l&apos;actualit&eacute; de la culture africaine dans notre journal.
+              R&eacute;servez votre stand pour la saison 2026. &Agrave; partir de 50&euro; d&apos;acompte.
             </p>
-            <ul className="space-y-1.5">
-              {recentArticles.map((a) => (
-                <li key={a.slug}>
-                  <Link
-                    href={`/lafropeen/${a.slug}`}
-                    className="line-clamp-1 text-sm text-dta-char/80 transition-colors hover:text-dta-accent"
-                  >
-                    {a.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
             <Link
-              href="/lafropeen"
+              href="/billetterie-exposants"
               className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-dta-accent hover:text-dta-accent-dark"
             >
-              Tous les articles <ArrowRight size={14} />
+              Voir les packs exposants <ArrowRight size={14} />
             </Link>
           </div>
 

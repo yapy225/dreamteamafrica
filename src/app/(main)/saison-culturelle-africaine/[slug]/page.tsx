@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
 import { notFound } from "next/navigation";
-import { Calendar, MapPin, Users, Clock, ArrowLeft, ArrowRight, ExternalLink, Film, Music, Mic2, Newspaper, Store } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, ArrowLeft, ArrowRight, ExternalLink, Film, Music, Mic2, Ticket, Store } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
 import TicketSelector from "./TicketSelector";
@@ -748,20 +748,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
             {/* Journal */}
             <div className="rounded-[var(--radius-card)] border border-dta-sand/50 p-5">
               <div className="mb-2 flex items-center gap-2">
-                <Newspaper size={16} className="text-dta-accent" />
-                <h3 className="text-sm font-bold text-dta-dark">L&apos;Afropeen</h3>
+                <Ticket size={16} className="text-dta-accent" />
+                <h3 className="text-sm font-bold text-dta-dark">Billetterie</h3>
               </div>
-              <ul className="space-y-1">
-                {relatedArticles.map((a) => (
-                  <li key={a.slug}>
-                    <Link href={`/lafropeen/${a.slug}`} className="line-clamp-1 text-xs text-dta-char/70 hover:text-dta-accent">
-                      {a.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/lafropeen" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-dta-accent">
-                Lire le journal <ArrowRight size={12} />
+              <p className="text-xs text-dta-char/70 mb-2">
+                R&eacute;servez vos billets pour nos &eacute;v&eacute;nements.
+              </p>
+              <Link href="/saison-culturelle-africaine" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-dta-accent">
+                Voir les &eacute;v&eacute;nements <ArrowRight size={12} />
               </Link>
             </div>
 

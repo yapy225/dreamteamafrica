@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, User, Eye, Clock, MapPin, ArrowRight } from "lucide-react";
+import { Calendar, User, Eye, Clock, MapPin, ArrowRight, Newspaper, BookOpen } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 import {
@@ -490,36 +490,31 @@ export default async function ArticleDetailPage({
         </div>
       )}
 
-      {/* Cross-links to upcoming events */}
-      {upcomingEvents.length > 0 && (
-        <section className="bg-dta-accent/5 px-4 py-10">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="font-serif text-lg font-bold text-dta-dark">
-              Nos prochains &eacute;v&eacute;nements
-            </h2>
-            <div className="mt-4 space-y-3">
-              {upcomingEvents.map((evt) => (
-                <Link
-                  key={evt.slug}
-                  href={`/saison-culturelle-africaine/${evt.slug}`}
-                  className="flex items-center justify-between rounded-[var(--radius-card)] bg-white px-5 py-3 shadow-sm transition-all hover:shadow-[var(--shadow-card)] hover:-translate-y-0.5"
-                >
-                  <span className="font-medium text-dta-dark">{evt.title}</span>
-                  <span className="shrink-0 text-sm text-dta-taupe">
-                    {new Date(evt.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
-                  </span>
-                </Link>
-              ))}
-            </div>
-            <Link
-              href="/saison-culturelle-africaine"
-              className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-dta-accent hover:text-dta-accent-dark"
-            >
-              Voir tous les &eacute;v&eacute;nements <ArrowRight size={14} />
-            </Link>
+      {/* Maillage interne L'Afropéen — Catégories populaires */}
+      <section className="bg-dta-accent/5 px-4 py-10">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="font-serif text-lg font-bold text-dta-dark">
+            Explorer nos rubriques
+          </h2>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {["ACTUALITE", "CULTURE", "MUSIQUE", "CINEMA", "SPORT", "DIASPORA", "BUSINESS", "LIFESTYLE"].map((cat) => (
+              <Link
+                key={cat}
+                href={`/lafropeen/categorie/${cat.toLowerCase()}`}
+                className="rounded-full bg-white px-4 py-2 text-sm font-medium text-dta-dark shadow-sm transition-all hover:shadow-[var(--shadow-card)] hover:-translate-y-0.5"
+              >
+                {cat === "ACTUALITE" ? "Actualit\u00e9" : cat === "CINEMA" ? "Cin\u00e9ma" : cat.charAt(0) + cat.slice(1).toLowerCase()}
+              </Link>
+            ))}
           </div>
-        </section>
-      )}
+          <Link
+            href="/lafropeen/archives"
+            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-dta-accent hover:text-dta-accent-dark"
+          >
+            Toutes les archives <ArrowRight size={14} />
+          </Link>
+        </div>
+      </section>
 
       {/* Author Card */}
       <section className="bg-dta-beige px-4 py-14">
@@ -625,32 +620,32 @@ export default async function ArticleDetailPage({
         </section>
       )}
 
-      {/* Cross-links — Maillage interne saison + marketplace */}
+      {/* Maillage interne L'Afropéen */}
       <section className="border-t border-dta-sand/50 bg-white px-4 py-12">
         <div className="mx-auto grid max-w-3xl grid-cols-1 gap-6 sm:grid-cols-3">
           <Link
-            href="/saison-culturelle-africaine"
+            href="/lafropeen"
             className="rounded-[var(--radius-card)] border border-dta-sand/50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
           >
-            <Calendar size={18} className="mb-2 text-dta-accent" />
-            <h3 className="text-sm font-bold text-dta-dark">Saison Culturelle 2026</h3>
-            <p className="mt-1 text-xs text-dta-char/60">7 événements africains à Paris</p>
+            <Newspaper size={18} className="mb-2 text-dta-accent" />
+            <h3 className="text-sm font-bold text-dta-dark">Derni&egrave;res actualit&eacute;s</h3>
+            <p className="mt-1 text-xs text-dta-char/60">Les articles &agrave; la une</p>
           </Link>
           <Link
-            href="/made-in-africa"
+            href="/lafropeen/archives"
             className="rounded-[var(--radius-card)] border border-dta-sand/50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
           >
-            <span className="mb-2 block text-lg">🛍️</span>
-            <h3 className="text-sm font-bold text-dta-dark">Made in Africa</h3>
-            <p className="mt-1 text-xs text-dta-char/60">Artisanat africain authentique</p>
+            <BookOpen size={18} className="mb-2 text-dta-accent" />
+            <h3 className="text-sm font-bold text-dta-dark">Archives</h3>
+            <p className="mt-1 text-xs text-dta-char/60">Tous nos articles</p>
           </Link>
           <Link
-            href="/exposants"
+            href="/lafropeen/categorie/culture"
             className="rounded-[var(--radius-card)] border border-dta-sand/50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card)]"
           >
-            <span className="mb-2 block text-lg">🏪</span>
-            <h3 className="text-sm font-bold text-dta-dark">Devenir exposant</h3>
-            <p className="mt-1 text-xs text-dta-char/60">Réservez votre stand</p>
+            <span className="mb-2 block text-lg">🌍</span>
+            <h3 className="text-sm font-bold text-dta-dark">Culture africaine</h3>
+            <p className="mt-1 text-xs text-dta-char/60">Art, musique, cin&eacute;ma, litt&eacute;rature</p>
           </Link>
         </div>
       </section>

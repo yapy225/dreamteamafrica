@@ -959,27 +959,35 @@ ${allExhibitors}
 Plateforme cible : ${platform}
 
 RÈGLES STRICTES par plateforme :
-${platform === "TWITTER" ? `- Max 280 caractères
-- Accroche percutante et directe
-- 2-3 hashtags max
+${platform === "TWITTER" ? `FORMAT X/TWITTER STRICT :
+- Max 280 caractères TOTAL (très important)
+- 1 accroche percutante + nom exposant en MAJUSCULES
+- 2-3 hashtags max (#FoiredAfrique #DreamTeamAfrica)
+- Pas de lien (l'image sera jointe automatiquement)` : ""}
+${platform === "FACEBOOK" ? `FORMAT FACEBOOK STRICT :
+- Accroche engageante sur la 1ère ligne avec 1 emoji
+- Sépare CHAQUE paragraphe par une ligne vide (\\n\\n dans le JSON)
+- 3-4 paragraphes courts
+- Identifie les autres exposants par leur NOM DE PAGE Facebook quand disponible
+- Termine par un call-to-action + lien : https://dreamteamafrica.com/saison-culturelle-africaine/foire-dafrique-paris
+- 3-5 hashtags sur la dernière ligne
 - Mentionne @DreamTeamAfrica` : ""}
-${platform === "FACEBOOK" ? `- 3-5 lignes engageantes
-- Ton chaleureux et communautaire
-- Termine par un appel à l'action (venez découvrir...)
-- 3-5 hashtags en fin de post
-- Mentionne @DreamTeamAfrica
-- Mentionne/identifie les autres exposants de la foire quand c'est pertinent` : ""}
 ${platform === "INSTAGRAM" ? `- Légende engageante de 4-6 lignes
 - Emojis pertinents (pas trop)
 - 10-15 hashtags séparés par un saut de ligne
 - Mentionne @dreamteamafrica
 - Mentionne 3-5 autres exposants avec leur @ Instagram` : ""}
-${platform === "LINKEDIN" ? `- Post professionnel de 5-8 lignes
-- Ton business / networking
-- Met en valeur l'expertise et le savoir-faire
-- 3-5 hashtags professionnels
-- Format storytelling avec accroche forte
-- Mentionne que l'exposant rejoint X autres entreprises à la Foire` : ""}
+${platform === "LINKEDIN" ? `FORMAT LINKEDIN STRICT :
+- 1ère ligne : accroche forte avec 1 emoji (ex: "🎪 RENTAVOYAGE débarque à la Foire d'Afrique Paris !")
+- Sépare CHAQUE paragraphe par une ligne vide (utilise \\n\\n dans le JSON)
+- 3-4 paragraphes courts (2 phrases max chacun)
+- NE PAS utiliser @ (les @ ne fonctionnent PAS sur LinkedIn)
+- Mentionner les autres exposants par leur NOM EN MAJUSCULES (ex: "aux côtés de MAISON NIMBA, BY KÈMI, SANAA CREATION")
+- Avant-dernier paragraphe : call-to-action avec le lien COMPLET sur sa propre ligne :
+  https://dreamteamafrica.com/saison-culturelle-africaine/foire-dafrique-paris
+- Dernière ligne : 3-4 hashtags séparés par des espaces
+- Ton professionnel mais chaleureux
+- PAS de lien Facebook/Instagram/TikTok dans le post LinkedIn` : ""}
 ${platform === "TIKTOK" ? `- Légende courte et percutante (2-3 lignes)
 - Langage dynamique, jeune
 - Emojis et énergie

@@ -849,15 +849,19 @@ const EXPOSANT_PUBLISH_PROMPT = (
   socialLinks: string,
   eventName: string,
   platform: string,
+  allExhibitors: string,
 ) => `Tu es le community manager de Dream Team Africa.
 
 Rédige 1 post promotionnel pour présenter l'exposant "${companyName}" à la ${eventName} (1er & 2 mai 2026, Espace MAS, Paris 13e).
 
-Exposant :
+Exposant mis en avant :
 - Entreprise : ${companyName}
 - Secteur : ${sector}
 - Description : ${description}
 ${socialLinks ? `- Réseaux sociaux : ${socialLinks}` : ""}
+
+═══ TOUS LES EXPOSANTS DE LA FOIRE ═══
+${allExhibitors}
 
 Plateforme cible : ${platform}
 
@@ -870,16 +874,19 @@ ${platform === "FACEBOOK" ? `- 3-5 lignes engageantes
 - Ton chaleureux et communautaire
 - Termine par un appel à l'action (venez découvrir...)
 - 3-5 hashtags en fin de post
-- Mentionne @DreamTeamAfrica` : ""}
+- Mentionne @DreamTeamAfrica
+- Mentionne/identifie les autres exposants de la foire quand c'est pertinent` : ""}
 ${platform === "INSTAGRAM" ? `- Légende engageante de 4-6 lignes
 - Emojis pertinents (pas trop)
 - 10-15 hashtags séparés par un saut de ligne
-- Mentionne @dreamteamafrica` : ""}
+- Mentionne @dreamteamafrica
+- Mentionne 3-5 autres exposants avec leur @ Instagram` : ""}
 ${platform === "LINKEDIN" ? `- Post professionnel de 5-8 lignes
 - Ton business / networking
 - Met en valeur l'expertise et le savoir-faire
 - 3-5 hashtags professionnels
-- Format storytelling avec accroche forte` : ""}
+- Format storytelling avec accroche forte
+- Mentionne que l'exposant rejoint X autres entreprises à la Foire` : ""}
 ${platform === "TIKTOK" ? `- Légende courte et percutante (2-3 lignes)
 - Langage dynamique, jeune
 - Emojis et énergie
@@ -888,11 +895,12 @@ ${platform === "TIKTOK" ? `- Légende courte et percutante (2-3 lignes)
 
 Règles générales :
 - En français
-- IDENTIFIE CLAIREMENT l'exposant : mentionne le nom de l'entreprise "${companyName}" en GRAS ou majuscules dans le post
-- Tag/mentionne OBLIGATOIREMENT les réseaux sociaux de l'exposant (@ sur Insta/Twitter/TikTok, nom de page sur Facebook, lien sur LinkedIn)
+- IDENTIFIE CLAIREMENT l'exposant principal : mentionne "${companyName}" en MAJUSCULES
+- Tag/mentionne OBLIGATOIREMENT les réseaux sociaux de l'exposant
+- MENTIONNE aussi les autres exposants de la foire (surtout ceux du même secteur) pour créer une dynamique collective
 - Inclus #FoiredAfrique #DreamTeamAfrica
 - Ne commence JAMAIS par "Découvrez", varie les accroches
-- Le lecteur doit immédiatement savoir QUI est présenté et CE QU'IL FAIT
+- Le lecteur doit savoir QUI est présenté, CE QU'IL FAIT, et qu'il y a PLEIN D'AUTRES EXPOSANTS à découvrir
 
 Réponds UNIQUEMENT en JSON valide (pas de markdown) :
 {
@@ -920,6 +928,29 @@ export async function generateAndPublishExhibitorPosts(profileId: string): Promi
   const sector = profile.sector || "";
   const description = profile.description || companyName;
   const eventName = "Foire d'Afrique Paris 2026";
+
+  // Load all exhibitors for cross-promotion
+  const allProfiles = await prisma.exhibitorProfile.findMany({
+    where: {
+      booking: { status: { in: ["PARTIAL", "CONFIRMED"] } },
+    },
+    include: {
+      booking: { select: { companyName: true, sector: true } },
+    },
+  });
+
+  const allExhibitors = allProfiles
+    .map((p) => {
+      const name = p.companyName || p.booking.companyName;
+      const sec = p.sector || p.booking.sector;
+      const socials = [
+        p.instagram ? `IG: @${p.instagram.replace(/^@/, "")}` : "",
+        p.facebook ? `FB: ${p.facebook}` : "",
+        p.tiktok ? `TK: @${p.tiktok.replace(/^@/, "")}` : "",
+      ].filter(Boolean).join(", ");
+      return `- ${name} (${sec})${socials ? ` — ${socials}` : ""}`;
+    })
+    .join("\n");
 
   // Build social links
   const socialParts: string[] = [];
@@ -961,6 +992,7 @@ export async function generateAndPublishExhibitorPosts(profileId: string): Promi
               socialLinks,
               eventName,
               platform,
+              allExhibitors,
             ),
           },
         ],

@@ -7,6 +7,7 @@
 import { prisma } from "@/lib/db";
 import OpenAI from "openai";
 import type { SocialPlatform, SocialDraftType } from "@prisma/client";
+import { createBrandedImage } from "@/lib/brand-image";
 
 // ── OpenAI (lazy) ──────────────────────────────────────────
 
@@ -447,10 +448,70 @@ export async function generateExhibitorDrafts(profileId?: string): Promise<{
 
 // ── Publication des brouillons approuvés ───────────────────
 
+async function uploadTwitterMedia(
+  imageUrl: string,
+  apiKey: string,
+  apiSecret: string,
+  accessToken: string,
+  accessSecret: string,
+): Promise<string | null> {
+  try {
+    const { createHmac, randomBytes } = await import("crypto");
+
+    // Download image
+    const imgRes = await fetch(imageUrl);
+    if (!imgRes.ok) return null;
+    const imgBuffer = Buffer.from(await imgRes.arrayBuffer());
+    const base64 = imgBuffer.toString("base64");
+
+    // Upload to Twitter media (v1.1 API)
+    const mediaUrl = "https://upload.twitter.com/1.1/media/upload.json";
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const nonce = randomBytes(16).toString("hex");
+
+    const oauthParams: Record<string, string> = {
+      oauth_consumer_key: apiKey,
+      oauth_nonce: nonce,
+      oauth_signature_method: "HMAC-SHA1",
+      oauth_timestamp: timestamp,
+      oauth_token: accessToken,
+      oauth_version: "1.0",
+    };
+
+    const paramString = Object.keys(oauthParams)
+      .sort()
+      .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(oauthParams[k])}`)
+      .join("&");
+
+    const baseString = `POST&${encodeURIComponent(mediaUrl)}&${encodeURIComponent(paramString)}`;
+    const signingKey = `${encodeURIComponent(apiSecret)}&${encodeURIComponent(accessSecret)}`;
+    const signature = createHmac("sha1", signingKey).update(baseString).digest("base64");
+
+    oauthParams.oauth_signature = signature;
+    const authHeader = "OAuth " + Object.keys(oauthParams).sort()
+      .map((k) => `${encodeURIComponent(k)}="${encodeURIComponent(oauthParams[k])}"`)
+      .join(", ");
+
+    const formData = new URLSearchParams({ media_data: base64 });
+    const res = await fetch(mediaUrl, {
+      method: "POST",
+      headers: { Authorization: authHeader },
+      body: formData,
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.media_id_string || null;
+  } catch {
+    return null;
+  }
+}
+
 async function postTwitterComment(
   content: string,
   targetPostId: string | null,
   isPromo: boolean,
+  imageUrl?: string | null,
 ): Promise<PublishResult> {
   const apiKey = process.env.TWITTER_API_KEY;
   const apiSecret = process.env.TWITTER_API_SECRET;
@@ -464,6 +525,14 @@ async function postTwitterComment(
   const { createHmac, randomBytes } = await import("crypto");
 
   const body: Record<string, unknown> = { text: content };
+
+  // Upload image if available
+  if (imageUrl && isPromo) {
+    const mediaId = await uploadTwitterMedia(imageUrl, apiKey, apiSecret, accessToken, accessSecret);
+    if (mediaId) {
+      body.media = { media_ids: [mediaId] };
+    }
+  }
 
   // Si c'est un commentaire/reply et qu'on a un targetPostId, répondre au tweet
   if (!isPromo && targetPostId) {
@@ -535,6 +604,7 @@ async function postFacebookComment(
   content: string,
   targetPostId: string | null,
   isPromo: boolean,
+  imageUrl?: string | null,
 ): Promise<PublishResult> {
   const pageId = process.env.FB_PAGE_ID;
   const accessToken = process.env.FB_PAGE_ACCESS_TOKEN;
@@ -549,11 +619,16 @@ async function postFacebookComment(
   });
 
   if (isPromo || !targetPostId) {
-    // Post autonome sur la page
-    endpoint = `https://graph.facebook.com/v23.0/${pageId}/feed`;
-    params.set("message", content);
+    // Post avec image si disponible
+    if (imageUrl) {
+      endpoint = `https://graph.facebook.com/v23.0/${pageId}/photos`;
+      params.set("caption", content);
+      params.set("url", imageUrl);
+    } else {
+      endpoint = `https://graph.facebook.com/v23.0/${pageId}/feed`;
+      params.set("message", content);
+    }
   } else {
-    // Commentaire sur un post existant
     endpoint = `https://graph.facebook.com/v23.0/${targetPostId}/comments`;
     params.set("message", content);
   }
@@ -569,7 +644,7 @@ async function postFacebookComment(
   }
 
   const data = await res.json();
-  const postId = data.id;
+  const postId = data.id || data.post_id;
 
   return {
     success: true,
@@ -628,6 +703,7 @@ async function postLinkedInComment(
   targetPostId: string | null,
   targetPostUrl: string | null,
   isPromo: boolean,
+  imageUrl?: string | null,
 ): Promise<PublishResult> {
   // Récupérer les credentials LinkedIn (même pattern que social-media.ts)
   const cred = await prisma.socialCredential.findUnique({
@@ -656,14 +732,28 @@ async function postLinkedInComment(
     // Post autonome
     const author = `urn:li:person:${memberId}`;
 
+    const shareContent: Record<string, unknown> = {
+      shareCommentary: { text: content },
+      shareMediaCategory: imageUrl ? "ARTICLE" : "NONE",
+    };
+
+    // Add image as article share if available
+    if (imageUrl) {
+      shareContent.shareMediaCategory = "ARTICLE";
+      shareContent.media = [
+        {
+          status: "READY",
+          originalUrl: imageUrl,
+          description: { text: "Foire d'Afrique Paris 2026" },
+        },
+      ];
+    }
+
     const body = {
       author,
       lifecycleState: "PUBLISHED",
       specificContent: {
-        "com.linkedin.ugc.ShareContent": {
-          shareCommentary: { text: content },
-          shareMediaCategory: "NONE",
-        },
+        "com.linkedin.ugc.ShareContent": shareContent,
       },
       visibility: {
         "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC",
@@ -768,6 +858,7 @@ export async function publishApprovedDraft(
           content,
           draft.targetPostId,
           isPromo,
+          draft.imageUrl,
         );
         break;
 
@@ -776,6 +867,7 @@ export async function publishApprovedDraft(
           content,
           draft.targetPostId,
           isPromo,
+          draft.imageUrl,
         );
         break;
 
@@ -793,6 +885,7 @@ export async function publishApprovedDraft(
           draft.targetPostId,
           draft.targetPostUrl,
           isPromo,
+          draft.imageUrl,
         );
         break;
 
@@ -961,7 +1054,27 @@ export async function generateAndPublishExhibitorPosts(profileId: string): Promi
   if (profile.tiktok) socialParts.push(`TikTok: @${profile.tiktok.replace(/^@/, "")}`);
   const socialLinks = socialParts.join(", ");
 
-  const imageUrl = profile.image1Url || profile.image2Url || profile.image3Url || profile.logoUrl;
+  const originalImageUrl = profile.image1Url || profile.image2Url || profile.image3Url || profile.logoUrl;
+
+  // Create branded image (logo Foire d'Afrique + bandeau)
+  let imageUrl = originalImageUrl;
+  if (originalImageUrl) {
+    try {
+      const slug = companyName
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+      imageUrl = await createBrandedImage(
+        originalImageUrl,
+        `exposants/branded/${slug}-${Date.now()}.webp`,
+      );
+      console.log(`[SOCIAL] Branded image: ${imageUrl}`);
+    } catch (err) {
+      console.error("[SOCIAL] Branded image failed, using original:", err);
+    }
+  }
 
   // Platforms that support auto-publish
   const publishablePlatforms: Array<{ platform: SocialPlatform; canPublish: boolean }> = [

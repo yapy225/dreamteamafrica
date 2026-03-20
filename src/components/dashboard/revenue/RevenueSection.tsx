@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { RevenueSummary } from "@/lib/revenue";
 import { KpiCards } from "./KpiCards";
+import { TodayProgress } from "./TodayProgress";
 import { TotalRevenueChart } from "./TotalRevenueChart";
 import { RevenueBreakdownCharts } from "./RevenueBreakdownCharts";
 
@@ -47,6 +48,7 @@ export function RevenueSection({ data: initialData }: RevenueSectionProps) {
         </div>
       </div>
       <KpiCards totals={data.totals} />
+      <TodayProgress today={data.today} />
       <TotalRevenueChart data={data.monthly} />
       <RevenueBreakdownCharts data={data.monthly} />
     </section>

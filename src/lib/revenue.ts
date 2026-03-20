@@ -12,6 +12,14 @@ export type MonthlyRevenue = {
   total: number;
 };
 
+export type TodayStats = {
+  tickets: { count: number; revenue: number };
+  exposants: { count: number; revenue: number };
+  total: number;
+  hourly: Array<{ hour: string; total: number }>;
+  lastSale: { time: string; amount: number; type: "billet" | "exposant" } | null;
+};
+
 export type RevenueSummary = {
   monthly: MonthlyRevenue[];
   totals: {
@@ -19,6 +27,7 @@ export type RevenueSummary = {
     exposants: number;
     total: number;
   };
+  today: TodayStats;
 };
 
 export async function getRevenueData(): Promise<RevenueSummary> {
@@ -76,5 +85,52 @@ export async function getRevenueData(): Promise<RevenueSummary> {
     { tickets: 0, exposants: 0, total: 0 },
   );
 
-  return { monthly, totals };
+  // Stats du jour
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayTickets = tickets.filter((t) => t.purchasedAt >= todayStart);
+  const todayExhibitor = exhibitorPayments.filter((p) => p.paidAt >= todayStart);
+
+  const todayTicketRev = todayTickets.reduce((s, t) => s + t.price, 0);
+  const todayExposantRev = todayExhibitor.reduce((s, p) => s + p.amount, 0);
+
+  // Progression heure par heure aujourd'hui
+  const hourly: Array<{ hour: string; total: number }> = [];
+  for (let h = 0; h <= now.getHours(); h++) {
+    const hStart = new Date(todayStart);
+    hStart.setHours(h);
+    const hEnd = new Date(todayStart);
+    hEnd.setHours(h + 1);
+
+    const hTickets = todayTickets
+      .filter((t) => t.purchasedAt >= hStart && t.purchasedAt < hEnd)
+      .reduce((s, t) => s + t.price, 0);
+    const hExpo = todayExhibitor
+      .filter((p) => p.paidAt >= hStart && p.paidAt < hEnd)
+      .reduce((s, p) => s + p.amount, 0);
+
+    hourly.push({
+      hour: `${h}h`,
+      total: Math.round((hTickets + hExpo) * 100) / 100,
+    });
+  }
+
+  // Dernière vente
+  const allSales = [
+    ...todayTickets.map((t) => ({ at: t.purchasedAt, amount: t.price, type: "billet" as const })),
+    ...todayExhibitor.map((p) => ({ at: p.paidAt, amount: p.amount, type: "exposant" as const })),
+  ].sort((a, b) => b.at.getTime() - a.at.getTime());
+
+  const lastSale = allSales[0] || null;
+
+  const today = {
+    tickets: { count: todayTickets.length, revenue: Math.round(todayTicketRev * 100) / 100 },
+    exposants: { count: todayExhibitor.length, revenue: Math.round(todayExposantRev * 100) / 100 },
+    total: Math.round((todayTicketRev + todayExposantRev) * 100) / 100,
+    hourly,
+    lastSale: lastSale
+      ? { time: lastSale.at.toISOString(), amount: lastSale.amount, type: lastSale.type }
+      : null,
+  };
+
+  return { monthly, totals, today };
 }

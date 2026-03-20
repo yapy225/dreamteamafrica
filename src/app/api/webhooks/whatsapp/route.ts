@@ -190,12 +190,12 @@ export async function POST(request: Request) {
           console.error("WhatsApp message save error:", dbErr);
         }
 
-        // Generate AI draft reply (Claude) — non-blocking
-        if (messageBody && messageBody.length > 1) {
-          generateAndStoreDraft(from, messageBody, contactName).catch((err) =>
-            console.error("[WhatsApp AI] Draft error:", err),
-          );
-        }
+        // AI auto-reply drafts — DISABLED
+        // if (messageBody && messageBody.length > 1) {
+        //   generateAndStoreDraft(from, messageBody, contactName).catch((err) =>
+        //     console.error("[WhatsApp AI] Draft error:", err),
+        //   );
+        // }
 
         // Auto-reply for exposant leads
         if (messageBody.toLowerCase().includes("devenir exposant")) {

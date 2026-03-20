@@ -146,7 +146,7 @@ export default async function ExposantsDashboardPage({
         <h2 className="font-serif text-lg font-bold text-dta-dark mb-4">
           Plan de salle &mdash; Gestion des stands
         </h2>
-        <FloorPlan isAdmin userId={session.user.id} />
+        <FloorPlan isAdmin />
       </div>
 
       {/* Table */}

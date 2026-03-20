@@ -656,7 +656,7 @@ export default async function MonStandPage() {
         </p>
         <FloorPlan
           bookingId={booking.id}
-          userId={session.user.id}
+          myStandNumber={booking.standNumber ?? undefined}
         />
       </div>
 

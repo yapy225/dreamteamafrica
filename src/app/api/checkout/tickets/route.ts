@@ -5,9 +5,19 @@ import QRCode from "qrcode";
 import { uploadBuffer } from "@/lib/bunny";
 import { sendTicketConfirmationEmail } from "@/lib/email";
 import { sendTicketConfirmationWhatsApp } from "@/lib/whatsapp";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rl = rateLimit(`checkout:${ip}`, { limit: 10, windowSec: 60 });
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: "Trop de tentatives. Réessayez dans quelques minutes." },
+        { status: 429 },
+      );
+    }
+
     const { eventId, tier, quantity, sessionLabel, firstName, lastName, email, phone, visitDate } =
       await request.json();
 
@@ -231,10 +241,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("Checkout error:", message, error);
+    console.error("Checkout error:", error);
     return NextResponse.json(
-      { error: `Erreur: ${message}` },
+      { error: "Une erreur est survenue lors du paiement. Veuillez réessayer." },
       { status: 500 },
     );
   }

@@ -6,14 +6,12 @@ import { Loader2 } from "lucide-react";
 interface StandInfo {
   status: "available" | "reserved" | "blocked" | "mine";
   companyName?: string;
-  bookingId?: string;
-  userId?: string;
   reason?: string;
 }
 
 interface FloorPlanProps {
   bookingId?: string;
-  userId?: string;
+  myStandNumber?: number;
   isAdmin?: boolean;
   onStandSelected?: (standNumber: number) => void;
 }
@@ -239,7 +237,7 @@ const COLORS = {
 
 export default function FloorPlan({
   bookingId,
-  userId,
+  myStandNumber,
   isAdmin = false,
   onStandSelected,
 }: FloorPlanProps) {
@@ -265,7 +263,7 @@ export default function FloorPlan({
         StandInfo,
       ][]) {
         const n = parseInt(key);
-        if (info.status === "reserved" && info.userId === userId) {
+        if (info.status === "reserved" && myStandNumber === n) {
           enriched[n] = { ...info, status: "mine" };
         } else {
           enriched[n] = info;
@@ -276,7 +274,7 @@ export default function FloorPlan({
       console.error("Failed to load stands");
     }
     setLoading(false);
-  }, [userId]);
+  }, [myStandNumber]);
 
   useEffect(() => {
     fetchStands();

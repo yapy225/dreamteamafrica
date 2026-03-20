@@ -15,11 +15,8 @@ export async function GET() {
         standNumber: { not: null },
       },
       select: {
-        id: true,
         standNumber: true,
         companyName: true,
-        status: true,
-        userId: true,
       },
     }),
     prisma.standBlock.findMany({
@@ -33,8 +30,6 @@ export async function GET() {
     {
       status: "available" | "reserved" | "blocked";
       companyName?: string;
-      bookingId?: string;
-      userId?: string;
       reason?: string;
     }
   > = {};
@@ -48,8 +43,6 @@ export async function GET() {
       stands[b.standNumber] = {
         status: "reserved",
         companyName: b.companyName,
-        bookingId: b.id,
-        userId: b.userId,
       };
     }
   }

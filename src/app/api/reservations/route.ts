@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import QRCode from "qrcode";
 import { uploadBuffer } from "@/lib/bunny";
 import { sendFreeTicketEmail } from "@/lib/email";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 // IDs des événements gratuits
 const FREE_EVENT_IDS = [
@@ -12,6 +13,15 @@ const FREE_EVENT_IDS = [
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const rl = rateLimit(`reservation:${ip}`, { limit: 5, windowSec: 10 * 60 });
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: "Trop de tentatives. Réessayez dans quelques minutes." },
+        { status: 429 },
+      );
+    }
+
     const { eventId, firstName, lastName, email, phone, guests } =
       await request.json();
 

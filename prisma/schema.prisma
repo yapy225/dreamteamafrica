@@ -582,6 +582,26 @@ model ExhibitorBooking {
   @@index([email])
 }
 
+// ─── COUPONS (stands gratuits associations) ──────────────
+
+model Coupon {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  type        String    @default("FREE_STAND") // FREE_STAND, PERCENTAGE, FIXED
+  value       Float     @default(0)            // 0 = gratuit, ou % ou montant fixe
+  label       String                           // "Stand gratuit — Association"
+  maxUses     Int       @default(1)
+  usedCount   Int       @default(0)
+  usedBy      String?                          // email de l'utilisateur
+  bookingId   String?                          // réservation liée
+  expiresAt   DateTime?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  @@index([code])
+  @@index([active])
+}
+
 // ─── STANDS (blocage admin) ─────────────────────────────
 
 model StandBlock {

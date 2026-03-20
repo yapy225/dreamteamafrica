@@ -18,14 +18,15 @@ const allProjects = [
     icon: ShoppingBag,
     color: "bg-emerald-100 text-emerald-600",
   },
-  {
-    id: "journal",
-    href: "/lafropeen",
-    label: "L'Afropéen",
-    description: "Le journal de la diaspora africaine en Europe",
-    icon: Newspaper,
-    color: "bg-amber-100 text-amber-600",
-  },
+  // L'Afropéen dissocié — accessible via lafropeen.com uniquement
+  // {
+  //   id: "journal",
+  //   href: "/lafropeen",
+  //   label: "L'Afropéen",
+  //   description: "Le journal de la diaspora africaine en Europe",
+  //   icon: Newspaper,
+  //   color: "bg-amber-100 text-amber-600",
+  // },
   {
     id: "officiel",
     href: "/lofficiel-dafrique",

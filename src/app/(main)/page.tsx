@@ -390,15 +390,7 @@ export default async function Home() {
               </span>
             </Link>
             */}
-            <Link
-              href="/lafropeen"
-              className="flex flex-col items-center gap-2 text-dta-taupe transition-colors hover:text-dta-accent"
-            >
-              <Newspaper size={22} />
-              <span className="text-[10px] uppercase tracking-wider">
-                Journal
-              </span>
-            </Link>
+            {/* L'Afropéen dissocié */}
           </div>
         </div>
       </section>
@@ -585,74 +577,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ══ 6. L'Afropéen — Articles ══ */}
-      <section className="bg-dta-beige px-4 py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          {/* Editorial header */}
-          <div className="mb-12">
-            <div className="mb-4 h-px w-16 bg-dta-accent" />
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-dta-accent">
-              L&apos;Afropéen
-            </p>
-            <div className="flex items-end justify-between">
-              <div>
-                <h2 className="mt-3 font-serif text-4xl font-bold text-dta-dark sm:text-5xl">
-                  Le journal
-                </h2>
-                <p className="mt-3 font-serif italic text-dta-char/70">
-                  Actualités, culture et lifestyle de la diaspora
-                </p>
-              </div>
-              <Link
-                href="/lafropeen"
-                className="hidden items-center gap-1 text-sm font-medium text-dta-accent transition-colors hover:text-dta-accent-dark sm:flex"
-              >
-                Lire le journal <ArrowRight size={14} />
-              </Link>
-            </div>
-          </div>
-
-          {articles.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-              {/* Featured article — hero variant */}
-              {featuredArticle && (
-                <div className="lg:col-span-3">
-                  <ArticleCard
-                    article={featuredArticle}
-                    variant="hero"
-                    showLifecycleDay
-                  />
-                </div>
-              )}
-
-              {/* Side articles */}
-              <div className="flex flex-col gap-4 lg:col-span-2">
-                {sideArticles.map((article) => (
-                  <ArticleCard
-                    key={article.id}
-                    article={article}
-                    variant="side"
-                    showLifecycleDay
-                  />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <p className="mt-10 text-center text-dta-char/60">
-              Les articles arrivent bientôt.
-            </p>
-          )}
-
-          <div className="mt-8 text-center sm:hidden">
-            <Link
-              href="/lafropeen"
-              className="text-sm font-medium text-dta-accent"
-            >
-              Lire le journal &rarr;
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* L'Afropéen dissocié — section masquée, SEO intact via lafropeen.com */}
 
       {/* ══ 7. L'Officiel d'Afrique ══ */}
       <section className="bg-dta-dark px-4 py-20 sm:py-28">

@@ -4,8 +4,8 @@ import { RevenueChart } from "./RevenueChart";
 import type { MonthlyRevenue } from "@/lib/revenue";
 
 const SOURCES = [
-  { key: "tickets" as const, title: "Billetterie", color: "#8B6F4E" },
-  { key: "orders" as const, title: "Commandes Marketplace", color: "#6B8FA0" },
+  { key: "tickets" as const, title: "Billetterie événements", color: "#8B6F4E" },
+  { key: "exposants" as const, title: "Stands exposants", color: "#7c3aed" },
 ] as const;
 
 type RevenueBreakdownChartsProps = {

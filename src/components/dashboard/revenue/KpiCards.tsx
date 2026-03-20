@@ -5,7 +5,7 @@ import { formatPrice } from "@/lib/utils";
 type KpiCardsProps = {
   totals: {
     tickets: number;
-    orders: number;
+    exposants: number;
     total: number;
   };
 };
@@ -13,7 +13,7 @@ type KpiCardsProps = {
 const SOURCES = [
   { key: "total" as const, label: "Revenu total", color: "bg-dta-accent/10 text-dta-accent" },
   { key: "tickets" as const, label: "Billetterie", color: "bg-[#8B6F4E]/10 text-[#8B6F4E]" },
-  { key: "orders" as const, label: "Commandes", color: "bg-[#6B8FA0]/10 text-[#6B8FA0]" },
+  { key: "exposants" as const, label: "Stands exposants", color: "bg-[#7c3aed]/10 text-[#7c3aed]" },
 ] as const;
 
 export function KpiCards({ totals }: KpiCardsProps) {

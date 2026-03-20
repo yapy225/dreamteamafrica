@@ -16,10 +16,13 @@ const INSTALLMENT_OPTIONS = Array.from({ length: MAX_INSTALLMENTS }, (_, i) => i
 const inputClass =
   "w-full rounded-[var(--radius-input)] border border-dta-sand bg-dta-bg px-4 py-2.5 text-sm text-dta-dark placeholder:text-dta-taupe focus:border-dta-accent focus:outline-none focus:ring-1 focus:ring-dta-accent";
 
-const SINGLE_PACKS = EXHIBITOR_PACKS;
-
 export default function ResaForm({ event }: { event: ExhibitorEvent }) {
-  const [pack, setPack] = useState<ExhibitorPackInfo>(SINGLE_PACKS[0]);
+  // Pour les événements 1 jour : uniquement pack 1 jour + restauration
+  const availablePacks = event.days === 1
+    ? EXHIBITOR_PACKS.filter((p) => p.id === "ENTREPRENEUR_1J" || p.id === "RESTAURATION")
+    : EXHIBITOR_PACKS;
+
+  const [pack, setPack] = useState<ExhibitorPackInfo>(availablePacks[0]);
   const [stands, setStands] = useState(1);
   const [installments, setInstallments] = useState(1);
   const [form, setForm] = useState({
@@ -148,7 +151,7 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
           1. Choisissez votre formule
         </legend>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {SINGLE_PACKS.map((p) => {
+          {availablePacks.map((p) => {
             const days = p.id === "ENTREPRENEUR_1J" ? 1 : event.days;
             const price = days * p.pricePerDay;
             const selected = pack.id === p.id;

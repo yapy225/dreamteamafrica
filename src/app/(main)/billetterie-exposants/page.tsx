@@ -148,7 +148,7 @@ export default async function BilletterieExposantsPage() {
                     <span className="text-sm font-medium text-dta-accent">
                       &agrave; partir de {fmt.format(
                         event.days === 1
-                          ? EXHIBITOR_PACKS[0].pricePerDay
+                          ? 190
                           : EXHIBITOR_PACKS[1].pricePerDay * event.days,
                       )}
                     </span>

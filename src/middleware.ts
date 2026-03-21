@@ -130,6 +130,10 @@ const PATH_REDIRECTS: Record<string, string> = {
   "/hello-world": "/",
   "/hello-world/": "/",
 
+  // ── Variantes sans tiret ──
+  "/lofficieldafrique": "/lofficiel-dafrique",
+  "/lofficieldafrique/": "/lofficiel-dafrique",
+
   // ── Old legal pages ──
   "/conditions-generales-de-ventes": "/conditions-generales",
   "/conditions-generales-de-ventes/": "/conditions-generales",

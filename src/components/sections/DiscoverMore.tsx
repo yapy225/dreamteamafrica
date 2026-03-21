@@ -27,14 +27,15 @@ const allProjects = [
   //   icon: Newspaper,
   //   color: "bg-amber-100 text-amber-600",
   // },
-  {
-    id: "officiel",
-    href: "/lofficiel-dafrique",
-    label: "L'Officiel d'Afrique",
-    description: "L'annuaire des professionnels africains à Paris",
-    icon: Building2,
-    color: "bg-purple-100 text-purple-600",
-  },
+  // L'Officiel d'Afrique dissocié — accessible via lofficieldafrique.fr
+  // {
+  //   id: "officiel",
+  //   href: "/lofficiel-dafrique",
+  //   label: "L'Officiel d'Afrique",
+  //   description: "L'annuaire des professionnels africains à Paris",
+  //   icon: Building2,
+  //   color: "bg-purple-100 text-purple-600",
+  // },
 ];
 
 interface DiscoverMoreProps {

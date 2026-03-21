@@ -7,8 +7,8 @@ const footerSections = [
     links: [
       { href: "/saison-culturelle-africaine", label: "Événements" },
       // { href: "/made-in-africa", label: "Marketplace" }, // Masquée — réactiver quand prête
-      // { href: "/lafropeen", label: "L'Afropéen" }, // Dissocié — fonctionne via lafropeen.com
-      { href: "/lofficiel-dafrique", label: "L'Officiel d'Afrique" },
+      // { href: "/lafropeen", label: "L'Afropéen" }, // Dissocié
+      // { href: "/lofficiel-dafrique", label: "L'Officiel d'Afrique" }, // Dissocié
     ],
   },
   {

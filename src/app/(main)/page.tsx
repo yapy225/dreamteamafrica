@@ -20,7 +20,7 @@ const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com"
 export const metadata = {
   title: "Accueil — Culture africaine à Paris",
   description:
-    "Événements culturels, marketplace artisanale, journal L'Afropéen et L'Officiel d'Afrique. La plateforme de référence pour la culture africaine à Paris.",
+    "Événements culturels africains à Paris. Billetterie, exposants, saison culturelle 2026. La plateforme de référence pour la culture africaine à Paris.",
   openGraph: {
     title: "Dream Team Africa — Culture africaine à Paris",
     description:
@@ -71,7 +71,7 @@ export default async function Home() {
     url: siteUrl,
     logo: `${siteUrl}/logo-dta.png`,
     description:
-      "Plateforme de promotion de la culture africaine à Paris : événements, marketplace artisanale, journal L'Afropéen et annuaire professionnel L'Officiel d'Afrique.",
+      "Plateforme de promotion de la culture africaine à Paris : événements culturels, billetterie, saison culturelle africaine 2026.",
     foundingDate: "2024",
     address: {
       "@type": "PostalAddress",
@@ -579,41 +579,7 @@ export default async function Home() {
 
       {/* L'Afropéen dissocié — section masquée, SEO intact via lafropeen.com */}
 
-      {/* ══ 7. L'Officiel d'Afrique ══ */}
-      <section className="bg-dta-dark px-4 py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-5">
-            {/* Text — left 60% */}
-            <div className="lg:col-span-3">
-              <span className="inline-block rounded-full bg-dta-accent/20 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-dta-accent">
-                Nouveau
-              </span>
-              <h2 className="mt-6 font-serif text-4xl font-bold text-white sm:text-5xl">
-                L&apos;Officiel d&apos;Afrique 2026
-              </h2>
-              <p className="mt-4 max-w-lg font-serif text-lg italic leading-relaxed text-dta-sand/80">
-                Le premier annuaire professionnel de la diaspora africaine à
-                Paris. Référencez votre entreprise gratuitement auprès de
-                milliers de professionnels et particuliers.
-              </p>
-              <Link
-                href="/lofficiel-dafrique"
-                className="mt-8 inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-dta-accent-dark hover:shadow-lg"
-              >
-                Inscrire mon entreprise
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-
-            {/* Decorative watermark — right */}
-            <div className="hidden select-none lg:col-span-2 lg:flex lg:items-center lg:justify-center">
-              <span className="font-serif text-[180px] font-bold leading-none text-white/[0.03]">
-                2026
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* L'Officiel d'Afrique dissocié — SEO intact via lofficieldafrique.fr */}
 
       {/* ══ 8. Newsletter ══ */}
       <Newsletter />

@@ -309,12 +309,12 @@ export default async function AnnuairePage({
 
                       {/* CTA contact */}
                       <div className="mt-3">
-                        <Link
-                          href={`/nous-contacter?ref=annuaire&name=${encodeURIComponent(entry.contactName)}`}
+                        <a
+                          href={`mailto:hello@dreamteamafrica.com?subject=Contact%20annuaire%20-%20${encodeURIComponent(entry.contactName)}`}
                           className="inline-flex items-center gap-1.5 rounded-lg bg-[#2C2C2C] px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#C4704B]"
                         >
                           <Mail size={11} /> Contacter
-                        </Link>
+                        </a>
                       </div>
                     </div>
                   );

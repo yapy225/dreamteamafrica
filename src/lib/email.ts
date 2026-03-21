@@ -853,7 +853,7 @@ export async function sendProspectEmail(opts: {
 
 <!-- Bouton Exposer -->
 <tr><td style="padding:20px 28px 24px;" align="center">
-  <a href="${exposerUrl}" style="display:block;background:#C026D3;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 0;border-radius:10px;text-align:center;">
+  <a href="${exposerUrl}" style="display:block;background:#A0522D;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:14px 0;border-radius:10px;text-align:center;">
     🏪 Devenir exposant
   </a>
 </td></tr>

@@ -52,8 +52,8 @@ export default function DevisClient({ lead }: { lead: Lead }) {
     <div className="mx-auto max-w-lg px-4 py-16 sm:px-6">
       {/* Header */}
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-fuchsia-100">
-          <Store size={28} className="text-fuchsia-600" />
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-dta-accent/10">
+          <Store size={28} className="text-dta-accent" />
         </div>
         <h1 className="font-serif text-2xl font-bold text-dta-dark">
           Votre demande d&apos;exposition
@@ -115,13 +115,13 @@ export default function DevisClient({ lead }: { lead: Lead }) {
           </p>
         </div>
       ) : (
-        <div className="mt-6 rounded-[var(--radius-card)] border-2 border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-white p-6 shadow-[var(--shadow-card)]">
+        <div className="mt-6 rounded-[var(--radius-card)] border-2 border-dta-accent/30 bg-gradient-to-br from-dta-accent/5 to-white p-6 shadow-[var(--shadow-card)]">
           <p className="font-serif text-lg font-bold text-dta-dark">
             Réservez votre stand
           </p>
           <p className="mt-2 text-sm text-dta-char/70">
             Bloquez votre place avec un acompte de{" "}
-            <span className="font-bold text-fuchsia-600">{fmt.format(50)}</span>.
+            <span className="font-bold text-dta-accent">{fmt.format(50)}</span>.
             Le solde sera ajusté selon votre devis final.
           </p>
 
@@ -134,7 +134,7 @@ export default function DevisClient({ lead }: { lead: Lead }) {
           <button
             onClick={handleDeposit}
             disabled={loading}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-fuchsia-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-fuchsia-700 disabled:opacity-50"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-dta-accent-dark disabled:opacity-50"
           >
             {loading ? (
               <>

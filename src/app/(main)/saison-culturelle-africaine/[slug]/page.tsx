@@ -679,7 +679,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
             <div className="mt-3">
               <ExposantButton
                 eventName={event.title}
-                className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-fuchsia-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-fuchsia-700"
+                className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-dta-accent-dark"
                 size={16}
               />
             </div>

@@ -152,7 +152,7 @@ export default function ExposantPanel({ onClose, eventName }: ExposantPanelProps
         {/* header */}
         <div className="flex items-center justify-between border-b border-dta-sand px-5 py-4">
           <div className="flex items-center gap-2">
-            <Store size={18} className="text-fuchsia-600" />
+            <Store size={18} className="text-dta-accent" />
             <h2 className="font-serif text-lg font-bold text-dta-dark">
               {step === "form" ? "Devenir exposant" : "Demande envoyée"}
             </h2>
@@ -365,13 +365,13 @@ export default function ExposantPanel({ onClose, eventName }: ExposantPanelProps
               <div className="h-px flex-1 bg-dta-sand" />
             </div>
 
-            <div className="rounded-[var(--radius-card)] border-2 border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-white p-5">
+            <div className="rounded-[var(--radius-card)] border-2 border-dta-accent/30 bg-gradient-to-br from-dta-accent/5 to-white p-5">
               <p className="font-serif text-base font-bold text-dta-dark">
                 Réservez dès maintenant !
               </p>
               <p className="mt-1 text-sm text-dta-char/70">
                 Bloquez votre stand avec un acompte de{" "}
-                <span className="font-bold text-fuchsia-600">50,00 €</span>.
+                <span className="font-bold text-dta-accent">50,00 €</span>.
                 Le solde sera ajusté selon votre devis final.
               </p>
 
@@ -384,7 +384,7 @@ export default function ExposantPanel({ onClose, eventName }: ExposantPanelProps
               <button
                 onClick={handleDeposit}
                 disabled={depositLoading}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-fuchsia-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-fuchsia-700 disabled:opacity-50"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-dta-accent-dark disabled:opacity-50"
               >
                 {depositLoading ? (
                   <>

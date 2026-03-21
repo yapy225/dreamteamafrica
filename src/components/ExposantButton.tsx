@@ -16,7 +16,7 @@ interface ExposantButtonProps {
 
 export default function ExposantButton({
   eventName,
-  className = "inline-flex flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-button)] bg-fuchsia-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-fuchsia-700",
+  className = "inline-flex flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-button)] bg-dta-accent px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-dta-accent-dark",
   size = 13,
   autoOpen = false,
 }: ExposantButtonProps) {

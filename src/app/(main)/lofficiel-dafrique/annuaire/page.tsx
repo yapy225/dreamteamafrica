@@ -269,9 +269,9 @@ export default async function AnnuairePage({
                             <span className="rounded bg-[#F5F0EB] px-2 py-0.5 text-[10px] font-semibold text-[#C4704B]">
                               {entry.description?.slice(0, 40) || entry.category}
                             </span>
-                            {entry.country && (
+                            {(entry.city || entry.country) && (
                               <span className="rounded bg-[#F5F0EB] px-2 py-0.5 text-[10px] font-semibold text-[#6B6B6B]">
-                                {entry.country}
+                                {entry.city}{entry.city && entry.country ? ", " : ""}{entry.country}
                               </span>
                             )}
                           </div>

@@ -5,37 +5,35 @@ const allProjects = [
   {
     id: "evenements",
     href: "/saison-culturelle-africaine",
-    label: "Événements",
-    description: "Festivals, concerts et rencontres culturelles à Paris",
+    label: "Saison Culturelle",
+    description: "7 événements, billetterie, 60 exposants",
     icon: Calendar,
     color: "bg-blue-100 text-blue-600",
   },
   {
+    id: "journal",
+    href: "/lafropeen",
+    label: "L'Afropéen",
+    description: "Le journal de la diaspora africaine en Europe",
+    icon: Newspaper,
+    color: "bg-amber-100 text-amber-600",
+  },
+  {
+    id: "officiel",
+    href: "/lofficiel-dafrique",
+    label: "L'Officiel d'Afrique",
+    description: "L'annuaire des professionnels africains à Paris",
+    icon: Building2,
+    color: "bg-purple-100 text-purple-600",
+  },
+  {
     id: "marketplace",
     href: "/made-in-africa",
-    label: "Marketplace",
-    description: "Artisanat africain authentique — mode, déco, bijoux",
+    label: "Made In Africa",
+    description: "Produits naturels & artisanat africain — bientôt",
     icon: ShoppingBag,
     color: "bg-emerald-100 text-emerald-600",
   },
-  // L'Afropéen dissocié — accessible via lafropeen.com uniquement
-  // {
-  //   id: "journal",
-  //   href: "/lafropeen",
-  //   label: "L'Afropéen",
-  //   description: "Le journal de la diaspora africaine en Europe",
-  //   icon: Newspaper,
-  //   color: "bg-amber-100 text-amber-600",
-  // },
-  // L'Officiel d'Afrique dissocié — accessible via lofficieldafrique.fr
-  // {
-  //   id: "officiel",
-  //   href: "/lofficiel-dafrique",
-  //   label: "L'Officiel d'Afrique",
-  //   description: "L'annuaire des professionnels africains à Paris",
-  //   icon: Building2,
-  //   color: "bg-purple-100 text-purple-600",
-  // },
 ];
 
 interface DiscoverMoreProps {
@@ -47,7 +45,7 @@ export default function DiscoverMore({
   exclude,
   title = "Découvrir aussi",
 }: DiscoverMoreProps) {
-  const projects = allProjects.filter((p) => p.id !== exclude && p.id !== "marketplace");
+  const projects = allProjects.filter((p) => p.id !== exclude);
 
   return (
     <div className="bg-dta-bg py-16">
@@ -55,7 +53,7 @@ export default function DiscoverMore({
         <h2 className="text-center font-serif text-2xl font-bold text-dta-dark">
           {title}
         </h2>
-        <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {projects.map((p) => (
             <Link
               key={p.id}

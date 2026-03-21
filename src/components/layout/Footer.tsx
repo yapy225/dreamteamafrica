@@ -5,10 +5,10 @@ const footerSections = [
   {
     title: "Découvrir",
     links: [
-      { href: "/saison-culturelle-africaine", label: "Événements" },
-      // { href: "/made-in-africa", label: "Marketplace" }, // Masquée — réactiver quand prête
-      // { href: "/lafropeen", label: "L'Afropéen" }, // Dissocié
-      // { href: "/lofficiel-dafrique", label: "L'Officiel d'Afrique" }, // Dissocié
+      { href: "/saison-culturelle-africaine", label: "Saison Culturelle" },
+      { href: "/lafropeen", label: "L'Afropéen" },
+      { href: "/lofficiel-dafrique", label: "L'Officiel d'Afrique" },
+      { href: "/made-in-africa", label: "Made In Africa" },
     ],
   },
   {

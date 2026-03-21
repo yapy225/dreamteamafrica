@@ -1,270 +1,135 @@
-import { redirect } from "next/navigation";
-import React from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { prisma } from "@/lib/db";
-import { formatPrice } from "@/lib/utils";
-import MarketplaceFilters from "./MarketplaceFilters";
-import DiscoverMore from "@/components/sections/DiscoverMore";
-
-export const revalidate = 60;
-
-// Marketplace masquée — rediriger vers l'accueil
-const MARKETPLACE_ENABLED = false;
+import { ArrowRight } from "lucide-react";
+import NewsletterSection from "@/components/sections/NewsletterSection";
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
 
 export const metadata = {
-  title: "Made in Africa — Marketplace Artisanat Africain en Ligne",
+  title: "Made in Africa — Marketplace Artisanat & Produits Naturels Africains",
   description:
-    "Achetez des produits naturels africains en ligne : beurre de karité, huile de chébé, savon noir, artisanat, cosmétiques bio. Livraison en France.",
+    "Bientôt : achetez des produits naturels africains en ligne. Beurre de karité, cosmétiques, artisanat, mode, bijoux. Marketplace Dream Team Africa.",
   keywords: [
     "produits naturels africains",
     "artisanat africain en ligne",
     "beurre de karité pur africain",
-    "huile de chébé",
-    "savon noir africain",
     "cosmétiques naturels africains",
     "boutique produits africains en ligne",
+    "marketplace africaine Paris",
   ],
   openGraph: {
-    title: "Made in Africa — Artisanat & Cosmétiques Africains",
-    description: "Produits naturels africains authentiques : karité, chébé, savon noir, art africain. Marketplace Dream Team Africa.",
+    title: "Made in Africa — Artisanat & Produits Naturels Africains",
+    description:
+      "Bientôt : la marketplace de produits naturels et d'artisanat africain authentique.",
     type: "website",
     url: `${siteUrl}/made-in-africa`,
+    images: [{ url: `${siteUrl}/foire-afrique.jpg`, width: 1200, height: 630 }],
   },
   alternates: {
     canonical: `${siteUrl}/made-in-africa`,
   },
 };
 
-interface SearchParams {
-  q?: string;
-  category?: string;
-  country?: string;
-  minPrice?: string;
-  maxPrice?: string;
-  sort?: string;
-}
+const CATEGORIES = [
+  { emoji: "🧴", label: "Cosmétiques naturels" },
+  { emoji: "👗", label: "Mode africaine" },
+  { emoji: "💎", label: "Bijoux" },
+  { emoji: "🎨", label: "Artisanat" },
+  { emoji: "🍯", label: "Épicerie fine" },
+  { emoji: "🏺", label: "Décoration" },
+];
 
-export default async function MarketplacePage({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}) {
-  if (!MARKETPLACE_ENABLED) redirect("/");
-  const params = await searchParams;
-
-  /* ── Build Prisma query ── */
-  const where: Record<string, unknown> = { published: true };
-
-  if (params.category) where.category = params.category;
-  if (params.country) where.country = params.country;
-
-  if (params.q) {
-    where.OR = [
-      { name: { contains: params.q, mode: "insensitive" } },
-      { description: { contains: params.q, mode: "insensitive" } },
-      { category: { contains: params.q, mode: "insensitive" } },
-    ];
-  }
-
-  if (params.minPrice || params.maxPrice) {
-    where.price = {};
-    if (params.minPrice)
-      (where.price as Record<string, number>).gte = parseFloat(params.minPrice);
-    if (params.maxPrice)
-      (where.price as Record<string, number>).lte = parseFloat(params.maxPrice);
-  }
-
-  const orderBy: Record<string, string> =
-    params.sort === "price_asc"
-      ? { price: "asc" }
-      : params.sort === "price_desc"
-        ? { price: "desc" }
-        : params.sort === "popular"
-          ? { stock: "asc" }
-          : { createdAt: "desc" };
-
-  const [products, featuredProduct] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      include: { artisan: { select: { name: true, country: true } } },
-      orderBy,
-    }),
-    prisma.product.findFirst({
-      where: { published: true },
-      include: { artisan: { select: { name: true, country: true } } },
-      orderBy: { createdAt: "desc" },
-    }),
-  ]);
-
-  /* ── Distinct values for filter pills ── */
-  const allProducts = await prisma.product.findMany({
-    where: { published: true },
-    select: { category: true, country: true },
-  });
-  const categories = [...new Set(allProducts.map((p) => p.category))].sort();
-  const countries = [...new Set(allProducts.map((p) => p.country))].sort();
-
-  /* ── Badge logic ── */
-  const now = Date.now();
-  const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
-
-  function getBadge(product: { stock: number; createdAt: Date }) {
-    if (now - new Date(product.createdAt).getTime() < THIRTY_DAYS)
-      return { label: "Nouveau", color: "bg-[#5A7A62]" };
-    if (product.stock <= 5 && product.stock > 0)
-      return { label: "Meilleures ventes", color: "bg-[#C4704B]" };
-    return null;
-  }
-
+export default function MadeInAfricaPage() {
   return (
-    <div className="min-h-screen bg-[#FAFAF7]">
-      {/* ── Featured Product Hero (2-column) ── */}
-      {featuredProduct && (
-        <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
-          <Link
-            href={`/made-in-africa/${featuredProduct.slug}`}
-            className="group block overflow-hidden rounded-2xl"
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-[1.2fr_1fr]">
-              {/* Product image */}
-              <div className="relative min-h-[280px] overflow-hidden bg-[#F5F0EB] sm:min-h-[400px]">
-                {featuredProduct.images[0] && (
-                  <Image
-                    src={featuredProduct.images[0]}
-                    alt={featuredProduct.name}
-                    fill
-                    className="object-contain transition-transform duration-500 group-hover:scale-105"
-                    sizes="(max-width: 640px) 100vw, 60vw"
-                    priority
-                  />
-                )}
-              </div>
-              {/* Product info */}
-              <div className="flex flex-col justify-center bg-[#2C2C2C] p-8 sm:p-12">
-                <span className="inline-block w-fit rounded bg-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/80">
-                  {featuredProduct.category}
-                </span>
-                <h2 className="mt-5 font-serif text-2xl font-bold leading-tight text-white sm:text-3xl lg:text-4xl">
-                  {featuredProduct.name}
-                </h2>
-                <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-white/70">
-                  {featuredProduct.description}
-                </p>
-                <div className="mt-6">
-                  <span className="inline-flex items-center rounded-full border border-white/30 px-7 py-3 text-sm font-medium text-white transition-colors group-hover:border-white group-hover:bg-white group-hover:text-[#2C2C2C]">
-                    D&eacute;couvrir
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Link>
-        </section>
-      )}
-
-      {/* ── Filters ── */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="-mt-6 relative z-10">
-          <MarketplaceFilters
-            categories={categories}
-            countries={countries}
-            currentCategory={params.category}
-            currentCountry={params.country}
-            currentSort={params.sort}
-            currentQ={params.q}
-            resultCount={products.length}
-          />
+    <div>
+      {/* Hero */}
+      <section className="relative bg-[#0A0A0A] px-4 py-28 sm:py-36">
+        <div className="mx-auto max-w-3xl text-center">
+          <span className="inline-block rounded-full bg-[#16A34A]/20 px-5 py-2 text-xs font-semibold uppercase tracking-wider text-[#16A34A] mb-6">
+            Bient&ocirc;t disponible
+          </span>
+          <h1 className="font-serif text-5xl font-bold text-white sm:text-6xl">
+            Made In Africa
+          </h1>
+          <p className="mt-6 font-serif text-xl italic text-white/60 leading-relaxed">
+            Produits naturels &amp; artisanat africain authentique.
+            La marketplace de Dream Team Africa arrive bient&ocirc;t.
+          </p>
         </div>
-      </div>
-
-      {/* ── Product Grid ── */}
-      <section className="mx-auto max-w-7xl px-4 pb-20 pt-8 sm:px-6 lg:px-8">
-        {products.length === 0 ? (
-          <div className="rounded-2xl bg-white p-16 text-center shadow-sm">
-            <p className="font-serif text-2xl font-bold text-[#2C2C2C]">
-              Aucun produit trouv&eacute;
-            </p>
-            <p className="mt-3 text-sm text-[#6B6B6B]">
-              Essayez de modifier vos filtres ou votre recherche.
-            </p>
-            <Link
-              href="/made-in-africa"
-              className="mt-6 inline-block rounded-full bg-[#C4704B] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#A85D3B]"
-            >
-              Voir tous les produits
-            </Link>
-          </div>
-        ) : (
-          <>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {products.map((product) => {
-              const badge = getBadge(product);
-              return (<React.Fragment key={product.id}>
-                <Link
-                  href={`/made-in-africa/${product.slug}`}
-                  className="group rounded-2xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-                >
-                  {/* Image + Badge */}
-                  <div className="relative aspect-square overflow-hidden rounded-t-2xl bg-[#F5F0EB]">
-                    {product.images[0] && (
-                      <Image
-                        src={product.images[0]}
-                        alt={product.name}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      />
-                    )}
-                    {badge && (
-                      <span
-                        className={`absolute left-3 top-3 rounded-full ${badge.color} px-3 py-1 text-xs font-semibold text-white shadow-sm`}
-                      >
-                        {badge.label}
-                      </span>
-                    )}
-                    {product.stock === 0 && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                        <span className="rounded-full bg-white/90 px-4 py-1.5 text-xs font-semibold text-[#2C2C2C]">
-                          Rupture de stock
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="p-4">
-                    <h3 className="font-serif text-base font-semibold text-[#2C2C2C] transition-colors group-hover:text-[#C4704B]">
-                      {product.name}
-                    </h3>
-                    <p className="mt-1 text-xs text-[#999]">
-                      par {product.artisan.name} &mdash; {product.artisan.country}
-                    </p>
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="font-serif text-lg font-bold text-[#C4704B]">
-                        {formatPrice(product.price)}
-                      </span>
-                      <span className="rounded-full bg-[#F5F0EB] px-2.5 py-0.5 text-xs font-medium text-[#6B6B6B]">
-                        {product.category}
-                      </span>
-                    </div>
-                    {product.stock <= 3 && product.stock > 0 && (
-                      <p className="mt-2 text-xs text-[#C4704B]">
-                        Plus que {product.stock} en stock
-                      </p>
-                    )}
-                  </div>
-                </Link>
-              </React.Fragment>);
-            })}
-          </div>
-
-          </>
-        )}
       </section>
 
-      <DiscoverMore exclude="marketplace" />
+      {/* Catégories */}
+      <section className="bg-dta-bg px-4 py-16">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-center font-serif text-2xl font-bold text-dta-dark mb-10">
+            Ce qui arrive
+          </h2>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {CATEGORIES.map((cat) => (
+              <div
+                key={cat.label}
+                className="rounded-2xl border border-dta-sand bg-white p-5 text-center transition-all hover:-translate-y-1 hover:shadow-md"
+              >
+                <span className="block text-3xl mb-2">{cat.emoji}</span>
+                <p className="text-xs font-semibold text-dta-dark">
+                  {cat.label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Inscription */}
+      <section className="bg-white px-4 py-16">
+        <div className="mx-auto max-w-lg text-center">
+          <h2 className="font-serif text-2xl font-bold text-dta-dark mb-3">
+            Soyez les premiers inform&eacute;s
+          </h2>
+          <p className="text-sm text-dta-char/70 mb-8">
+            Inscrivez-vous &agrave; notre newsletter pour &ecirc;tre
+            pr&eacute;venu du lancement de Made In Africa.
+          </p>
+          <NewsletterSection />
+        </div>
+      </section>
+
+      {/* CTA Artisans */}
+      <section className="bg-[#0A0A0A] px-4 py-16">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="font-serif text-2xl font-bold text-white mb-3">
+            Vous &ecirc;tes artisan ou producteur ?
+          </h2>
+          <p className="text-sm text-white/60 mb-8">
+            Vendez vos cr&eacute;ations sur Made In Africa.
+            Rejoignez notre r&eacute;seau d&apos;artisans et touchez
+            des milliers de clients en France et en Europe.
+          </p>
+          <a
+            href="mailto:hello@dreamteamafrica.com?subject=Candidature%20artisan%20Made%20In%20Africa"
+            className="inline-flex items-center gap-2 rounded-full bg-[#16A34A] px-8 py-4 text-sm font-semibold text-white transition-all hover:bg-[#15803d]"
+          >
+            Proposer mes produits
+            <ArrowRight size={16} />
+          </a>
+        </div>
+      </section>
+
+      {/* Lien vers exposants */}
+      <section className="bg-dta-beige px-4 py-12">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-sm text-dta-char/70 mb-4">
+            En attendant, d&eacute;couvrez nos exposants &agrave; la Foire
+            d&apos;Afrique Paris &mdash; 1er &amp; 2 mai 2026
+          </p>
+          <Link
+            href="/saison-culturelle-africaine/foire-dafrique-paris"
+            className="inline-flex items-center gap-2 rounded-full border border-dta-accent px-6 py-3 text-sm font-semibold text-dta-accent transition-all hover:bg-dta-accent hover:text-white"
+          >
+            Voir les &eacute;v&eacute;nements
+            <ArrowRight size={14} />
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

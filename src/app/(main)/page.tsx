@@ -577,9 +577,92 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* L'Afropéen dissocié — section masquée, SEO intact via lafropeen.com */}
+      {/* ══ L'ÉCOSYSTÈME DREAM TEAM AFRICA ══ */}
+      <section className="bg-[#0A0A0A] px-4 py-20 sm:py-28">
+        <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <p className="text-xs font-medium uppercase tracking-[0.3em] text-dta-accent mb-4">
+              L&apos;&eacute;cosyst&egrave;me
+            </p>
+            <h2 className="font-serif text-4xl font-bold text-white sm:text-5xl">
+              Dream Team Africa
+            </h2>
+            <p className="mt-4 font-serif text-lg italic text-white/50 max-w-xl mx-auto">
+              4 piliers pour faire rayonner la culture africaine &agrave; Paris
+            </p>
+          </div>
 
-      {/* L'Officiel d'Afrique dissocié — SEO intact via lofficieldafrique.fr */}
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Saison Culturelle */}
+            <Link
+              href="/saison-culturelle-africaine"
+              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 transition-all duration-300 hover:border-dta-accent/50 hover:bg-white/10 hover:-translate-y-1"
+            >
+              <span className="mb-4 block text-3xl">🎪</span>
+              <h3 className="font-serif text-xl font-bold text-white mb-2">
+                Saison Culturelle
+              </h3>
+              <p className="text-sm text-white/50 leading-relaxed">
+                7 &eacute;v&eacute;nements, billetterie, 60 exposants. Le rendez-vous de la diaspora.
+              </p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-dta-accent">
+                D&eacute;couvrir <ArrowRight size={14} />
+              </span>
+            </Link>
+
+            {/* L'Afropéen */}
+            <Link
+              href="/lafropeen"
+              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 transition-all duration-300 hover:border-[#D4AF37]/50 hover:bg-white/10 hover:-translate-y-1"
+            >
+              <span className="mb-4 block text-3xl">📰</span>
+              <h3 className="font-serif text-xl font-bold text-[#D4AF37] mb-2">
+                L&apos;Afrop&eacute;en
+              </h3>
+              <p className="text-sm text-white/50 leading-relaxed">
+                Le journal de la diaspora africaine. Actualit&eacute;s, culture, lifestyle.
+              </p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#D4AF37]">
+                Lire <ArrowRight size={14} />
+              </span>
+            </Link>
+
+            {/* L'Officiel d'Afrique */}
+            <Link
+              href="/lofficiel-dafrique"
+              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 transition-all duration-300 hover:border-[#7C3AED]/50 hover:bg-white/10 hover:-translate-y-1"
+            >
+              <span className="mb-4 block text-3xl">📋</span>
+              <h3 className="font-serif text-xl font-bold text-[#7C3AED] mb-2">
+                L&apos;Officiel d&apos;Afrique
+              </h3>
+              <p className="text-sm text-white/50 leading-relaxed">
+                L&apos;annuaire professionnel de la diaspora africaine &agrave; Paris.
+              </p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#7C3AED]">
+                D&eacute;couvrir <ArrowRight size={14} />
+              </span>
+            </Link>
+
+            {/* Made In Africa */}
+            <Link
+              href="/made-in-africa"
+              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 transition-all duration-300 hover:border-[#16A34A]/50 hover:bg-white/10 hover:-translate-y-1"
+            >
+              <span className="mb-4 block text-3xl">🛍️</span>
+              <h3 className="font-serif text-xl font-bold text-[#16A34A] mb-2">
+                Made In Africa
+              </h3>
+              <p className="text-sm text-white/50 leading-relaxed">
+                Produits naturels &amp; artisanat africain. Marketplace bient&ocirc;t disponible.
+              </p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[#16A34A]">
+                Bient&ocirc;t <ArrowRight size={14} />
+              </span>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* ══ 8. Newsletter ══ */}
       <Newsletter />

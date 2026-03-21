@@ -267,16 +267,11 @@ export default async function AnnuairePage({
                           </p>
                           <div className="mt-1 flex flex-wrap gap-1.5">
                             <span className="rounded bg-[#F5F0EB] px-2 py-0.5 text-[10px] font-semibold text-[#C4704B]">
-                              {entry.category}
+                              {entry.description?.slice(0, 40) || entry.category}
                             </span>
                             {entry.country && (
                               <span className="rounded bg-[#F5F0EB] px-2 py-0.5 text-[10px] font-semibold text-[#6B6B6B]">
                                 {entry.country}
-                              </span>
-                            )}
-                            {entry.event && (
-                              <span className="rounded bg-[#E8F5E9] px-2 py-0.5 text-[10px] font-semibold text-[#2E7D32]">
-                                {entry.event}
                               </span>
                             )}
                           </div>

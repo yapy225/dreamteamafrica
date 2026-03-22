@@ -102,6 +102,13 @@ export async function POST(request: NextRequest) {
       });
       if (!booking) throw new Error("Réservation introuvable");
 
+      // SECURITY: prevent changing stand once assigned (only admin can free)
+      if (booking.standNumber && booking.standNumber !== standNumber) {
+        throw new Error(
+          "Votre stand n°" + booking.standNumber + " est déjà attribué. Contactez l'organisateur pour tout changement."
+        );
+      }
+
       // Reserve
       await tx.exhibitorBooking.update({
         where: { id: bookingId },

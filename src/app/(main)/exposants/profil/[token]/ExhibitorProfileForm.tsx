@@ -11,6 +11,50 @@ import {
   AlertCircle,
 } from "lucide-react";
 
+/** Compress image client-side to max 1.5MB before upload */
+async function compressImage(file: File, maxSizeMB = 1.5): Promise<File> {
+  if (file.type === "video/mp4" || file.type.startsWith("video/")) return file;
+  if (file.size <= maxSizeMB * 1024 * 1024) return file;
+
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      let { width, height } = img;
+
+      // Max 1920px
+      const MAX = 1920;
+      if (width > MAX || height > MAX) {
+        if (width > height) {
+          height = Math.round((height * MAX) / width);
+          width = MAX;
+        } else {
+          width = Math.round((width * MAX) / height);
+          height = MAX;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" }));
+          } else {
+            resolve(file);
+          }
+        },
+        "image/jpeg",
+        0.8,
+      );
+    };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 interface ProfileData {
   id: string;
   token: string;
@@ -145,9 +189,12 @@ export default function ExhibitorProfileForm({ token }: { token: string }) {
     const formData = new FormData(e.currentTarget);
     formData.set("token", token);
 
-    // Add files
+    // Add files (compressed)
     for (const [key, file] of Object.entries(files)) {
-      if (file) formData.set(key, file);
+      if (file) {
+        const compressed = await compressImage(file);
+        formData.set(key, compressed);
+      }
     }
 
     // Ensure daysPresent is sent

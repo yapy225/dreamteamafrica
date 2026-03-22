@@ -171,20 +171,7 @@ export default function ExhibitorProfileForm({ token }: { token: string }) {
     setSubmitting(true);
     setError("");
 
-    // Validate required files (logo, image1, image2, image3)
-    const requiredFiles = ["logo", "image1", "image2", "image3"];
-    for (const key of requiredFiles) {
-      const hasExisting = key === "logo" ? data.logoUrl
-        : key === "image1" ? data.image1Url
-        : key === "image2" ? data.image2Url
-        : data.image3Url;
-      if (!files[key] && !hasExisting) {
-        const labels: Record<string, string> = { logo: "Logo", image1: "Image 1", image2: "Image 2", image3: "Image 3" };
-        setError(`Le champ "${labels[key]}" est obligatoire.`);
-        setSubmitting(false);
-        return;
-      }
-    }
+    // Images are now optional — exhibitors can upload via Tally form instead
 
     const formData = new FormData(e.currentTarget);
     formData.set("token", token);

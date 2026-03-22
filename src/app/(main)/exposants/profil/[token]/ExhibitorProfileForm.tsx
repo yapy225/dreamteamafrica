@@ -164,14 +164,24 @@ export default function ExhibitorProfileForm({ token }: { token: string }) {
         method: "POST",
         body: formData,
       });
-      const result = await res.json();
-      if (result.success) {
-        setSuccess(true);
+      if (!res.ok) {
+        const text = await res.text();
+        try {
+          const result = JSON.parse(text);
+          setError(result.error || "Erreur lors de l'envoi (" + res.status + ")");
+        } catch {
+          setError("Erreur serveur (" + res.status + "). Veuillez réessayer ou réduire la taille de vos images.");
+        }
       } else {
-        setError(result.error || "Erreur lors de l'envoi.");
+        const result = await res.json();
+        if (result.success) {
+          setSuccess(true);
+        } else {
+          setError(result.error || "Erreur lors de l'envoi.");
+        }
       }
-    } catch {
-      setError("Erreur de connexion.");
+    } catch (err) {
+      setError("Erreur de connexion. Vérifiez votre connexion internet et réessayez. Si le problème persiste, réduisez la taille de vos images.");
     }
     setSubmitting(false);
   };

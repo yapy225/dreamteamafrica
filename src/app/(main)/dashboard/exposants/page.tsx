@@ -45,6 +45,7 @@ export default async function ExposantsDashboardPage({
           publications: { select: { platform: true, status: true, postUrl: true } },
         },
       },
+      payments: { select: { amount: true, paidAt: true } },
     },
     orderBy: [
       { totalPrice: "desc" },
@@ -58,12 +59,8 @@ export default async function ExposantsDashboardPage({
     const sb = statusOrder[b.status] ?? 9;
     if (sa !== sb) return sa - sb;
     // Within same status, sort by paid amount descending
-    const paidA = a.installments === 1
-      ? (a.paidInstallments > 0 ? a.totalPrice : 0)
-      : (a.paidInstallments > 0 ? Math.min(DEPOSIT_AMOUNT, a.totalPrice) : 0) + Math.max(0, a.paidInstallments - 1) * a.installmentAmount;
-    const paidB = b.installments === 1
-      ? (b.paidInstallments > 0 ? b.totalPrice : 0)
-      : (b.paidInstallments > 0 ? Math.min(DEPOSIT_AMOUNT, b.totalPrice) : 0) + Math.max(0, b.paidInstallments - 1) * b.installmentAmount;
+    const paidA = a.payments.reduce((s: number, p: { amount: number }) => s + p.amount, 0);
+    const paidB = b.payments.reduce((s: number, p: { amount: number }) => s + p.amount, 0);
     return paidB - paidA;
   });
 
@@ -84,10 +81,7 @@ export default async function ExposantsDashboardPage({
     revenue: bookings
       .filter((b) => b.status !== "CANCELLED")
       .reduce((sum, b) => {
-        if (b.installments === 1) return sum + (b.paidInstallments > 0 ? b.totalPrice : 0);
-        const deposit = Math.min(50, b.totalPrice);
-        const paidMonths = Math.max(0, b.paidInstallments - 1);
-        return sum + (b.paidInstallments > 0 ? deposit : 0) + paidMonths * b.installmentAmount;
+        return sum + b.payments.reduce((s: number, p: { amount: number }) => s + p.amount, 0);
       }, 0),
     deposits: bookings
       .filter((b) => b.status !== "CANCELLED" && b.paidInstallments > 0)
@@ -183,11 +177,9 @@ export default async function ExposantsDashboardPage({
 
               // Payment breakdown
               const deposit = Math.min(DEPOSIT_AMOUNT, b.totalPrice);
-              const isFullPayment = b.installments === 1;
-              const paidAmount = isFullPayment
-                ? (b.paidInstallments > 0 ? b.totalPrice : 0)
-                : (b.paidInstallments > 0 ? deposit : 0) + Math.max(0, b.paidInstallments - 1) * b.installmentAmount;
-              const remaining = b.totalPrice - paidAmount;
+              // Use real payments instead of estimated calculation
+              const paidAmount = b.payments.reduce((sum: number, p: { amount: number }) => sum + p.amount, 0);
+              const remaining = Math.max(0, b.totalPrice - paidAmount);
               const progressPct = b.totalPrice > 0 ? Math.round((paidAmount / b.totalPrice) * 100) : 0;
 
               return (

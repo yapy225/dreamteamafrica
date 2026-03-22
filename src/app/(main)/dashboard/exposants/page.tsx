@@ -217,27 +217,8 @@ export default async function ExposantsDashboardPage({
                       </div>
 
                       {/* Détail par ligne */}
-                      {b.status === "CONFIRMED" && b.paidInstallments >= b.installments ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
-                          Soldé — {formatter.format(b.totalPrice)}
-                        </span>
-                      ) : (
-                        <div className="space-y-0.5 text-xs">
-                          {/* Avance / Acompte */}
-                          {isFullPayment ? (
-                            b.paidInstallments > 0 ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 font-medium text-green-700">
-                                Payé {formatter.format(b.totalPrice)}
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 font-medium text-red-600">
-                                Non payé
-                              </span>
-                            )
-                          ) : (
-                            <>
-                              {/* Acompte */}
-                              {/* Paiements réels */}
+                      <div className="space-y-0.5 text-xs">
+                          {/* Paiements réels */}
                               {b.payments.length > 0 ? (
                                 <>
                                   {b.payments.map((p: { amount: number; paidAt: Date | null }, i: number) => (
@@ -283,10 +264,7 @@ export default async function ExposantsDashboardPage({
                                   </span>
                                 </div>
                               )}
-                            </>
-                          )}
-                        </div>
-                      )}
+                      </div>
                     </div>
                   </td>
 

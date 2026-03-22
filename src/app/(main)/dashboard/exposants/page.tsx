@@ -237,27 +237,34 @@ export default async function ExposantsDashboardPage({
                           ) : (
                             <>
                               {/* Acompte */}
-                              <div className="flex items-center gap-1.5">
-                                <span className={`inline-block h-2 w-2 rounded-full ${b.paidInstallments > 0 ? "bg-blue-500" : "bg-gray-300"}`} />
-                                <span className={b.paidInstallments > 0 ? "text-blue-700" : "text-gray-400"}>
-                                  Acompte {formatter.format(deposit)}
-                                  {b.paidInstallments > 0 && " ✓"}
-                                </span>
-                              </div>
-
-                              {/* Mensualités */}
-                              {Array.from({ length: b.installments - 1 }, (_, i) => {
-                                const isPaid = b.paidInstallments > i + 1;
-                                return (
-                                  <div key={i} className="flex items-center gap-1.5">
-                                    <span className={`inline-block h-2 w-2 rounded-full ${isPaid ? "bg-amber-500" : "bg-gray-300"}`} />
-                                    <span className={isPaid ? "text-amber-700" : "text-gray-400"}>
-                                      Éch. {i + 1} — {formatter.format(b.installmentAmount)}
-                                      {isPaid && " ✓"}
+                              {/* Paiements réels */}
+                              {b.payments.length > 0 ? (
+                                <>
+                                  {b.payments.map((p: { amount: number; paidAt: Date | null }, i: number) => (
+                                    <div key={i} className="flex items-center gap-1.5">
+                                      <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
+                                      <span className="text-green-700">
+                                        {formatter.format(p.amount)}
+                                        {p.paidAt && (
+                                          <span className="ml-1 text-gray-400 text-[10px]">
+                                            {new Date(p.paidAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                                          </span>
+                                        )}
+                                      </span>
+                                    </div>
+                                  ))}
+                                  <div className="mt-1 flex items-center gap-1.5 border-t border-dta-sand/30 pt-1">
+                                    <span className="text-[11px] text-gray-500">
+                                      Total : {formatter.format(paidAmount)} / {formatter.format(b.totalPrice)}
                                     </span>
                                   </div>
-                                );
-                              })}
+                                </>
+                              ) : (
+                                <div className="flex items-center gap-1.5">
+                                  <span className="inline-block h-2 w-2 rounded-full bg-gray-300" />
+                                  <span className="text-gray-400">Aucun paiement</span>
+                                </div>
+                              )}
 
                               {/* Reste à payer */}
                               {remaining > 0 && (
@@ -265,6 +272,14 @@ export default async function ExposantsDashboardPage({
                                   <span className="inline-block h-2 w-2 rounded-full bg-red-400" />
                                   <span className="font-medium text-red-600">
                                     Reste {formatter.format(remaining)}
+                                  </span>
+                                </div>
+                              )}
+                              {remaining <= 0 && paidAmount > 0 && (
+                                <div className="mt-1 flex items-center gap-1.5">
+                                  <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
+                                  <span className="font-medium text-green-600">
+                                    Soldé ✓
                                   </span>
                                 </div>
                               )}

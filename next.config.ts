@@ -229,6 +229,14 @@ const nextConfig: NextConfig = {
       { source: "/2021/:path*", destination: "/lafropeen", permanent: true },
       { source: "/2020/:path*", destination: "/lafropeen", permanent: true },
 
+      // ── Variantes slugs événements courantes ──
+      { source: "/saison-culturelle-africaine/foire-afrique-paris", destination: "/saison-culturelle-africaine/foire-dafrique-paris", permanent: true },
+      { source: "/saison-culturelle-africaine/foire-d-afrique-paris", destination: "/saison-culturelle-africaine/foire-dafrique-paris", permanent: true },
+      { source: "/saison-culturelle-africaine/foire-afrique", destination: "/saison-culturelle-africaine/foire-dafrique-paris", permanent: true },
+      { source: "/saison-culturelle-africaine/foire-d-afrique", destination: "/saison-culturelle-africaine/foire-dafrique-paris", permanent: true },
+      { source: "/saison-culturelle-africaine/foire-dafrique", destination: "/saison-culturelle-africaine/foire-dafrique-paris", permanent: true },
+      { source: "/saison-culturelle-africaine/fap", destination: "/saison-culturelle-africaine/foire-dafrique-paris", permanent: true },
+
       // ── Catch-all WordPress patterns encore en 404 ──
       { source: "/wp-admin/:path*", destination: "/", permanent: true },
       { source: "/wp-login.php", destination: "/", permanent: true },

@@ -88,6 +88,7 @@ function extractMessageInfo(msg: Record<string, unknown>): { body: string; media
   const type = msg.type as string;
   const text = msg.text as { body?: string } | undefined;
   const button = msg.button as { text?: string } | undefined;
+  const interactive = msg.interactive as { type?: string; button_reply?: { id?: string; title?: string }; list_reply?: { id?: string; title?: string } } | undefined;
   const image = msg.image as { id?: string; caption?: string } | undefined;
   const video = msg.video as { id?: string; caption?: string } | undefined;
   const audio = msg.audio as { id?: string } | undefined;
@@ -98,6 +99,7 @@ function extractMessageInfo(msg: Record<string, unknown>): { body: string; media
   switch (type) {
     case "text": return { body: text?.body ?? "", mediaId: null };
     case "button": return { body: button?.text ?? "", mediaId: null };
+    case "interactive": return { body: interactive?.button_reply?.title || interactive?.list_reply?.title || "Quick Reply", mediaId: null };
     case "image": return { body: image?.caption ?? "[Image]", mediaId: image?.id ?? null };
     case "video": return { body: video?.caption ?? "[Video]", mediaId: video?.id ?? null };
     case "audio": return { body: "[Audio]", mediaId: audio?.id ?? null };

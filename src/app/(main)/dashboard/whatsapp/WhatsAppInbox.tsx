@@ -85,7 +85,10 @@ function MediaBubble({ url, type, body }: { url: string; type: string; body: str
   if (type === "audio") {
     return (
       <audio controls className="mb-1 w-full max-w-[250px]">
-        <source src={url} />
+        <source src={url} type="audio/ogg; codecs=opus" />
+        <source src={url} type="audio/mpeg" />
+        <source src={url} type="audio/mp4" />
+        <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600">Écouter l&apos;audio</a>
       </audio>
     );
   }

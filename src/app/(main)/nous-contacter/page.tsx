@@ -45,7 +45,7 @@ export default function NousContacterPage() {
     mainEntity: {
       "@type": "Organization",
       name: "Dream Team Africa",
-      telephone: "+33753444804",
+      telephone: "+33751443774",
       email: "hello@dreamteamafrica.com",
       address: {
         "@type": "PostalAddress",

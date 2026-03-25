@@ -17,7 +17,7 @@ Voici les informations que tu connais :
 ## À propos de Dream Team Africa
 Dream Team Africa organise la Saison Culturelle Africaine 2026 à Paris — une série d'événements célébrant la culture, l'entrepreneuriat et la diaspora africaine.
 Site web : dreamteamafrica.com
-Téléphone : +33 7 53 44 48 04
+Téléphone : +33 7 51 44 37 74
 WhatsApp : +33 7 82 80 18 52
 Email : contact@dreamteamafrica.com
 

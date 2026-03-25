@@ -94,6 +94,15 @@ export async function POST(request: Request) {
       },
     });
 
+    // Subscribe to newsletter if opted in
+    if (body.newsletter) {
+      await prisma.newsletterSubscriber.upsert({
+        where: { email },
+        create: { email },
+        update: {},
+      });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Model application error:", error);

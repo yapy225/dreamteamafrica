@@ -5,6 +5,7 @@ import Link from "next/link";
 
 export default function CastingPage() {
   const [honeypot, setHoneypot] = useState("");
+  const [newsletter, setNewsletter] = useState(true);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -38,6 +39,7 @@ export default function CastingPage() {
         body: JSON.stringify({
           ...form,
           website: honeypot,
+          newsletter,
           event: "Fashion Week Africa — Paris 2026",
         }),
       });
@@ -253,6 +255,20 @@ export default function CastingPage() {
             className="w-full rounded-lg border border-dta-sand bg-dta-bg px-4 py-2.5 text-sm text-dta-dark outline-none focus:border-dta-accent focus:ring-1 focus:ring-dta-accent resize-none"
           />
         </div>
+
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-dta-sand bg-dta-bg p-4 transition-colors hover:border-dta-accent/40">
+          <input
+            type="checkbox"
+            checked={newsletter}
+            onChange={(e) => setNewsletter(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 accent-dta-accent"
+          />
+          <span className="text-xs leading-relaxed text-dta-char/70">
+            Je souhaite &ecirc;tre inform&eacute;(e) en avant-premi&egrave;re des castings,
+            d&eacute;fil&eacute;s et &eacute;v&eacute;nements mode organis&eacute;s par Dream Team Africa.
+            Conform&eacute;ment au RGPD, je peux me d&eacute;sinscrire &agrave; tout moment.
+          </span>
+        </label>
 
         <button
           type="submit"

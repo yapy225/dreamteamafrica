@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
 import Providers from "@/components/layout/Providers";
+import CookieBanner from "@/components/layout/CookieBanner";
 import "./globals.css";
 
 const GTM_ID = "GTM-N5GGFDFK";
@@ -74,6 +75,31 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <head>
+        {/* Google Consent Mode v2 — default denied before user choice */}
+        <Script id="consent-default" strategy="beforeInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'analytics_storage': 'denied',
+            'functionality_storage': 'granted',
+            'security_storage': 'granted',
+            'wait_for_update': 500
+          });
+          gtag('set', 'ads_data_redaction', true);
+          gtag('set', 'url_passthrough', true);
+        `}</Script>
+        {/* GTM — loads after consent default is set */}
+        <Script id="gtm" strategy="afterInteractive">{`
+          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','${GTM_ID}');
+        `}</Script>
+        {/* Facebook Pixel — consent-aware */}
         <Script id="fb-pixel" strategy="afterInteractive">{`
           !function(f,b,e,v,n,t,s)
           {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -83,6 +109,7 @@ export default function RootLayout({
           t.src=v;s=b.getElementsByTagName(e)[0];
           s.parentNode.insertBefore(t,s)}(window, document,'script',
           'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('consent', 'revoke');
           fbq('init', '${FB_PIXEL_ID}');
           fbq('track', 'PageView');
           fbq('set', 'autoConfig', true, '${FB_PIXEL_ID}');
@@ -92,13 +119,6 @@ export default function RootLayout({
             src={`https://www.facebook.com/tr?id=${FB_PIXEL_ID}&ev=PageView&noscript=1`}
           />
         </noscript>
-        <Script id="gtm" strategy="afterInteractive">{`
-          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-          })(window,document,'script','dataLayer','${GTM_ID}');
-        `}</Script>
       </head>
       <body
         className={`${cormorant.variable} ${outfit.variable} antialiased`}
@@ -112,6 +132,7 @@ export default function RootLayout({
           />
         </noscript>
         <Providers>{children}</Providers>
+        <CookieBanner />
       </body>
     </html>
   );

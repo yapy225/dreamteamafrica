@@ -14,10 +14,10 @@ export default function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Nous contacter sur WhatsApp"
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-white shadow-lg transition-transform hover:scale-105 hover:shadow-xl"
+      className="fixed bottom-24 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2 rounded-full bg-[#25D366] p-3 sm:px-5 sm:py-3 text-white shadow-lg transition-transform hover:scale-105 hover:shadow-xl"
     >
       <MessageCircle className="h-6 w-6" />
-      <span className="text-sm font-semibold">Nous contacter</span>
+      <span className="hidden sm:inline text-sm font-semibold">Nous contacter</span>
     </a>
   );
 }

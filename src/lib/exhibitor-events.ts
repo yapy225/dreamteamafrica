@@ -86,6 +86,7 @@ export interface ExhibitorPackInfo {
   description: string;
   kit: string[];
   highlight?: boolean;
+  soldOut?: boolean;
 }
 
 export const EXHIBITOR_PACKS: ExhibitorPackInfo[] = [
@@ -95,6 +96,7 @@ export const EXHIBITOR_PACKS: ExhibitorPackInfo[] = [
     pricePerDay: 190,
     allEventsPricePerDay: 170,
     description: "Stand exposant 2 m² pour 1 journée — idéal pour tester",
+    soldOut: true,
     kit: [
       "1 table (1,50 m x 0,60 m)",
       "2 chaises",

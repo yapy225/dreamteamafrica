@@ -155,20 +155,27 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
             const days = p.id === "ENTREPRENEUR_1J" ? 1 : event.days;
             const price = days * p.pricePerDay;
             const selected = pack.id === p.id;
+            const isSoldOut = p.soldOut === true;
             return (
               <button
                 key={p.id}
                 type="button"
-                onClick={() => setPack(p)}
+                onClick={() => !isSoldOut && setPack(p)}
+                disabled={isSoldOut}
                 className={`rounded-[var(--radius-card)] border-2 p-5 text-left transition-all ${
-                  selected
-                    ? "border-dta-accent bg-dta-accent/5"
-                    : "border-dta-sand bg-white hover:border-dta-accent/40"
+                  isSoldOut
+                    ? "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
+                    : selected
+                      ? "border-dta-accent bg-dta-accent/5"
+                      : "border-dta-sand bg-white hover:border-dta-accent/40"
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-bold text-dta-dark">{p.name}</p>
+                    <p className="font-bold text-dta-dark">
+                      {p.name}
+                      {isSoldOut && <span className="ml-2 text-xs font-bold text-red-500">COMPLET</span>}
+                    </p>
                     <p className="mt-1 text-xs text-dta-char/70">
                       {p.description}
                     </p>

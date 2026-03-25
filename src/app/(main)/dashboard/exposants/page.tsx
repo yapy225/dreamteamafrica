@@ -338,6 +338,25 @@ export default async function ExposantsDashboardPage({
                       >
                         Modifier
                       </Link>
+                      {b.invoiceNumber ? (
+                        <a
+                          href={`/api/exposants/${b.id}/invoice`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded-[var(--radius-button)] border border-green-300 bg-green-50 px-3 py-1.5 text-center text-xs font-medium text-green-700 hover:bg-green-100 transition-colors"
+                        >
+                          Facture {b.invoiceNumber}
+                        </a>
+                      ) : b.status === "CONFIRMED" ? (
+                        <a
+                          href={`/api/exposants/${b.id}/invoice`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded-[var(--radius-button)] border border-dta-accent/30 bg-dta-accent/5 px-3 py-1.5 text-center text-xs font-medium text-dta-accent hover:bg-dta-accent/10 transition-colors"
+                        >
+                          Générer facture
+                        </a>
+                      ) : null}
                     </div>
                   </td>
                 </tr>

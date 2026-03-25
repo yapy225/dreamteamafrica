@@ -12,6 +12,7 @@ import {
   User,
   Music,
 } from "lucide-react";
+import InvitationGenerator from "./InvitationGenerator";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Contrats | Dashboard" };
@@ -64,13 +65,16 @@ export default async function ContratsPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="font-serif text-3xl font-bold text-dta-dark">
-          Contrats & Engagements
-        </h1>
-        <p className="mt-1 text-sm text-dta-char/70">
-          Suivi des exposants, mannequins et artistes engag&eacute;s
-        </p>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="font-serif text-3xl font-bold text-dta-dark">
+            Contrats & Engagements
+          </h1>
+          <p className="mt-1 text-sm text-dta-char/70">
+            Suivi des exposants, mannequins et artistes engag&eacute;s
+          </p>
+        </div>
+        <InvitationGenerator />
       </div>
 
       {/* Tabs */}

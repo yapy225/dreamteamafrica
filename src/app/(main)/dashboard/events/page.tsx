@@ -13,7 +13,7 @@ export const metadata = { title: "Gestion des événements" };
 export default async function DashboardEventsPage() {
   const session = await auth();
   if (!session) redirect("/auth/signin");
-  // Accessible à tous les utilisateurs connectés
+  if (session.user.role !== "ADMIN") redirect("/dashboard");
 
   const events = await prisma.event.findMany({
     orderBy: { date: "desc" },

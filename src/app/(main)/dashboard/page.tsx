@@ -74,15 +74,15 @@ export default async function DashboardPage() {
           },
         ]
       : []),
-    {
-      href: "/dashboard/events",
-      icon: CalendarDays,
-      label: "Gestion événements",
-      count: null,
-      color: "bg-teal-100 text-teal-600",
-    },
     ...(session.user.role === "ADMIN"
       ? [
+          {
+            href: "/dashboard/events",
+            icon: CalendarDays,
+            label: "Gestion événements",
+            count: null,
+            color: "bg-teal-100 text-teal-600",
+          },
           {
             href: "/dashboard/officiel-afrique",
             icon: BookOpen,

@@ -24,6 +24,7 @@ export default async function EditEventPage({
 }) {
   const session = await auth();
   if (!session) redirect("/auth/signin");
+  if (session.user.role !== "ADMIN") redirect("/dashboard");
   // Accessible à tous les utilisateurs connectés
 
   const { id } = await params;

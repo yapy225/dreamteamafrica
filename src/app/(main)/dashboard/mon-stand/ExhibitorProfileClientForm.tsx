@@ -6,8 +6,6 @@ import {
   Check,
   Loader2,
   Camera,
-  Video,
-  Image as ImageIcon,
   AlertCircle,
   Send,
 } from "lucide-react";
@@ -423,81 +421,44 @@ export default function ExhibitorProfileClientForm({
         </div>
       </fieldset>
 
-      {/* Description */}
+      {/* Description d'activité */}
       <fieldset className="rounded-2xl bg-white p-6 shadow-[var(--shadow-card)]">
         <legend className="text-sm font-semibold uppercase tracking-wider text-dta-accent px-2">
-          Votre description
+          Description d&apos;activit&eacute;
         </legend>
         <div className="mt-4">
           <label className="block text-sm font-medium text-dta-dark mb-1">
-            Description en 4 lignes (important !) *
+            D&eacute;crivez votre activit&eacute; *
           </label>
           <textarea
             name="description"
             defaultValue={data.description}
             required
-            rows={4}
+            rows={5}
             maxLength={600}
-            placeholder="Décrivez votre activité, votre marque, ce que vous proposez..."
+            placeholder="Décrivez votre activité, votre marque, les produits ou services que vous proposez sur votre stand..."
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-dta-accent focus:ring-1 focus:ring-dta-accent resize-none"
           />
           <p className="text-xs text-dta-taupe mt-1">
             Cette description sera utilis&eacute;e pour vous pr&eacute;senter sur nos
-            r&eacute;seaux sociaux.
+            r&eacute;seaux sociaux et supports de communication.
           </p>
         </div>
       </fieldset>
 
-      {/* Médias */}
+      {/* Logo */}
       <fieldset className="rounded-2xl bg-white p-6 shadow-[var(--shadow-card)]">
         <legend className="text-sm font-semibold uppercase tracking-wider text-dta-accent px-2">
-          Vos visuels
+          Votre logo
         </legend>
-        <p className="text-sm text-dta-taupe mt-2 mb-4">
-          Ces visuels seront utilis&eacute;s pour vos publications sur nos r&eacute;seaux.
-        </p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="mt-4 max-w-sm">
           <FileUploadField
-            label="Votre logo *"
+            label="Logo de votre entreprise *"
             name="logo"
             accept="image/*"
             icon={Upload}
             currentUrl={data.logoUrl}
             onChange={(f) => setFiles((p) => ({ ...p, logo: f }))}
-          />
-          <FileUploadField
-            label="Image produit 1 *"
-            name="image1"
-            accept="image/*"
-            icon={ImageIcon}
-            currentUrl={data.image1Url}
-            onChange={(f) => setFiles((p) => ({ ...p, image1: f }))}
-          />
-          <FileUploadField
-            label="Image produit 2"
-            name="image2"
-            accept="image/*"
-            icon={Camera}
-            currentUrl={data.image2Url}
-            onChange={(f) => setFiles((p) => ({ ...p, image2: f }))}
-          />
-          <FileUploadField
-            label="Image produit 3"
-            name="image3"
-            accept="image/*"
-            icon={Camera}
-            currentUrl={data.image3Url}
-            onChange={(f) => setFiles((p) => ({ ...p, image3: f }))}
-          />
-        </div>
-        <div className="mt-4">
-          <FileUploadField
-            label="Vidéo promo (optionnel)"
-            name="video"
-            accept="video/*"
-            icon={Video}
-            currentUrl={data.videoUrl}
-            onChange={(f) => setFiles((p) => ({ ...p, video: f }))}
           />
         </div>
       </fieldset>

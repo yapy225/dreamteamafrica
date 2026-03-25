@@ -406,6 +406,32 @@ model DirectoryEntry {
   @@index([published])
 }
 
+// ─── MODEL APPLICATIONS (CANDIDATURES MANNEQUINS) ─────────
+model ModelApplication {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String
+  phone       String
+  height      String?
+  measurements String?
+  experience  String?  @db.Text
+  instagram   String?
+  bookUrl     String?
+  photo1Url   String?
+  photo2Url   String?
+  photo3Url   String?
+  event       String?
+  status      String   @default("PENDING") // PENDING, SELECTED, REJECTED
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([email])
+  @@index([status])
+  @@index([event])
+}
+
 // ─── COMMENTS (AVIS PUBLICS) ──────────────────────────────
 
 model Comment {

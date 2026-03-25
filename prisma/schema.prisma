@@ -432,6 +432,32 @@ model ModelApplication {
   @@index([event])
 }
 
+// ─── ARTIST APPLICATIONS (CANDIDATURES ARTISTES) ──────────
+model ArtistApplication {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String
+  phone       String
+  discipline  String   // Danse, Musique, Conte, Performance, Chant, DJ, etc.
+  groupName   String?  // Nom du groupe/compagnie
+  country     String?
+  description String?  @db.Text
+  videoUrl    String?
+  instagram   String?
+  facebook    String?
+  website     String?
+  event       String?
+  status      String   @default("PENDING") // PENDING, SELECTED, REJECTED
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([email])
+  @@index([status])
+  @@index([discipline])
+}
+
 // ─── COMMENTS (AVIS PUBLICS) ──────────────────────────────
 
 model Comment {

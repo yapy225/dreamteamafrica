@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import PDFDocument from "pdfkit";
+import { uploadBuffer } from "@/lib/bunny";
 
 export const dynamic = "force-dynamic";
 
@@ -191,6 +192,16 @@ export async function POST(request: NextRequest) {
   const pdfBuffer = await pdfPromise;
 
   const safeName = recipientName.replace(/[^a-zA-Z0-9]/g, "_");
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const archivePath = `invitations/${dateStr}-${safeName}.pdf`;
+
+  // Archive on Bunny CDN
+  try {
+    await uploadBuffer(pdfBuffer, archivePath, "application/pdf");
+  } catch (err) {
+    console.error("Invitation archive upload error:", err);
+  }
+
   return new NextResponse(pdfBuffer, {
     headers: {
       "Content-Type": "application/pdf",

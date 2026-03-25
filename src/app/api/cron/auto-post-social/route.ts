@@ -5,20 +5,20 @@ const IMAGE_URL = "https://dreamteamafrica.com/foire-afrique.jpg";
 const CRON_SECRET = process.env.CRON_SECRET;
 
 const FB_MESSAGES = [
-  `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Billets Early Bird à 5€ — Dépêchez-vous, il n'en reste presque plus !\n\nMode • Artisanat • Gastronomie • Bijoux\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS — Paris 13e\n\n👉 Toutes les infos sur notre page officielle`,
+  `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Billets Last Chance à 7€ — Plus que 50 places !\n\nMode • Artisanat • Gastronomie • Bijoux\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS — Paris 13e\n\n👉 Toutes les infos sur notre page officielle`,
   `✨ Le Grand Marché Africain revient à Paris !\n\n+60 exposants vous attendent pour célébrer la culture africaine.\n\nTextiles wax, bogolan, bijoux en or, gastronomie...\n\n🗓 1er & 2 Mai 2026\n📍 Espace MAS — Paris 13e\n🎟 Billetterie : saisonculturelleafricaine.fr`,
-  `🎉 Bientôt la Foire d'Afrique Paris 2026 !\n\nVenez vivre une expérience unique : défilés, dégustations, artisanat africain...\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS — 10 rue des Terres au Curé, 75013 Paris\n\n🎟 Derniers Early Bird à 5€ !`,
+  `🎉 Bientôt la Foire d'Afrique Paris 2026 !\n\nVenez vivre une expérience unique : défilés, dégustations, artisanat africain...\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS — 10 rue des Terres au Curé, 75013 Paris\n\n🎟 Billets Last Chance à 7€ — Places limitées !`,
   `🌍 La diaspora africaine se retrouve à Paris !\n\nFoire d'Afrique 2026 — 6ème édition\nMode, artisanat, gastronomie, bijoux, spectacles\n\n+60 exposants\n\n🗓 1er & 2 Mai 2026 · Espace MAS Paris\n👉 saisonculturelleafricaine.fr`,
-  `💎 Bijoux, textiles, saveurs d'Afrique...\n\nTout ça à la Foire d'Afrique Paris — 6ème Édition !\n\n🗓 1er & 2 Mai 2026\n🕐 12h — 22h\n📍 Espace MAS — Paris 13e\n\n🎟 Billets à partir de 5€\n👉 saisonculturelleafricaine.fr`,
+  `💎 Bijoux, textiles, saveurs d'Afrique...\n\nTout ça à la Foire d'Afrique Paris — 6ème Édition !\n\n🗓 1er & 2 Mai 2026\n🕐 12h — 22h\n📍 Espace MAS — Paris 13e\n\n🎟 Billets à partir de 7€\n👉 saisonculturelleafricaine.fr`,
   `🔥 L'événement incontournable de la diaspora africaine à Paris !\n\nFoire d'Afrique 2026 : le Grand Marché Africain\n\n+60 exposants · Mode · Artisanat · Gastronomie · Bijoux\n\n🗓 1er & 2 Mai 2026\n📍 Espace MAS, Paris 13e\n🎟 saisonculturelleafricaine.fr`,
 ];
 
 const IG_CAPTIONS = [
-  `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Billets Early Bird à 5€ — Dépêchez-vous !\n\nRetrouvez toutes les infos sur @foiredafriqueparis\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #Afrique #DiasporaAfricaine #Wax #Artisanat`,
+  `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Billets Last Chance à 7€ — Plus que 50 places !\n\nRetrouvez toutes les infos sur @foiredafriqueparis\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #Afrique #DiasporaAfricaine #Wax #Artisanat`,
   `✨ Le Grand Marché Africain revient !\n\n+60 exposants • Mode • Artisanat • Gastronomie • Bijoux\n\n@foiredafriqueparis\n\n🗓 1er & 2 Mai 2026\n📍 Espace MAS Paris\n\n#FoiredAfrique #Paris2026 #MadeInAfrica #Bogolan #BijouxAfricains #GastronomieAfricaine`,
   `🎉 Rendez-vous les 1er & 2 mai !\n\nFoire d'Afrique Paris — 6ème Édition\nL'Afrique en plein Paris 🌍\n\n@foiredafriqueparis\n📍 Espace MAS — Paris 13e\n🎟 saisonculturelleafricaine.fr\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #Afrique #Culture #EspaceMAS`,
   `💎 Bijoux, textiles wax, gastronomie africaine...\n\nTout ça à la Foire d'Afrique Paris 2026 !\n\n@foiredafriqueparis\n🗓 1er & 2 Mai · 12h-22h\n📍 Paris 13e\n\n#FoiredAfrique #Paris2026 #Wax #BijouxAfricains #Artisanat #DiasporaAfricaine`,
-  `🌍 La diaspora se retrouve à Paris !\n\nFoire d'Afrique 2026 — +60 exposants\n\n@foiredafriqueparis\n🗓 1er & 2 Mai 2026\n🎟 Billets à partir de 5€\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #GrandMarcheAfricain #Afrique #MadeInAfrica`,
+  `🌍 La diaspora se retrouve à Paris !\n\nFoire d'Afrique 2026 — +60 exposants\n\n@foiredafriqueparis\n🗓 1er & 2 Mai 2026\n🎟 Billets à partir de 7€\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #GrandMarcheAfricain #Afrique #MadeInAfrica`,
   `🔥 L'événement incontournable !\n\nFoire d'Afrique Paris — 6ème Édition\nMode • Artisanat • Gastronomie • Bijoux\n\n@foiredafriqueparis\n📍 Espace MAS Paris 13e\n👉 saisonculturelleafricaine.fr\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #EarlyBird #Afrique`,
 ];
 

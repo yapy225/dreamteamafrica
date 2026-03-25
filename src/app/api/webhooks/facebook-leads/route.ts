@@ -101,7 +101,7 @@ export async function POST(request: Request) {
                     { type: "text", text: "Foire d'Afrique Paris — 6ème Édition" },
                     { type: "text", text: "1er & 2 mai 2026" },
                     { type: "text", text: "Espace MAS, Paris 13e" },
-                    { type: "text", text: "5,00 €" },
+                    { type: "text", text: "7,00 €" },
                   ],
                 },
               ],

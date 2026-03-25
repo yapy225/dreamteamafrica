@@ -33,7 +33,8 @@ Email : contact@dreamteamafrica.com
    - Lieu : Espace MAS, 10 rue des terres au curé, Paris
    - Horaires : 12h – 22h (2 jours)
    - Le plus grand salon de la culture africaine à Paris
-   - Tarifs visiteurs : Early Bird 5 €, Standard 10 €, VIP 15 €
+   - Tarifs visiteurs : Last Chance 7 € (50 places), Prévente 10 €, Sur place 15 €
+   - Early Bird ÉPUISÉ (200 billets vendus)
    - Billetterie : dreamteamafrica.com/saison-culturelle-africaine/foire-dafrique-paris
 
 3. **Évasion Paris** — 13 juin 2026

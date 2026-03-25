@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_LEN = 500;
+
+function sanitize(val: unknown, maxLen = 200): string | null {
+  if (typeof val !== "string") return null;
+  const trimmed = val.trim().slice(0, maxLen);
+  return trimmed || null;
+}
 
 // GET — list all applications (admin only)
 export async function GET() {
@@ -19,9 +29,27 @@ export async function GET() {
 // POST — public submission (no auth required)
 export async function POST(request: Request) {
   try {
+    // Rate limit: 5 submissions per 15 minutes per IP
+    const ip = getClientIp(request);
+    const rl = rateLimit(`model-apply:${ip}`, { limit: 5, windowSec: 15 * 60 });
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: "Trop de tentatives. Réessayez dans quelques minutes." },
+        { status: 429 },
+      );
+    }
+
     const body = await request.json();
 
-    const { firstName, lastName, email, phone, height, measurements, experience, instagram, bookUrl, photo1Url, photo2Url, photo3Url, event } = body;
+    // Honeypot — if filled, silently reject
+    if (body.website) {
+      return NextResponse.json({ success: true });
+    }
+
+    const firstName = sanitize(body.firstName);
+    const lastName = sanitize(body.lastName);
+    const email = sanitize(body.email)?.toLowerCase();
+    const phone = sanitize(body.phone, 30);
 
     if (!firstName || !lastName || !email || !phone) {
       return NextResponse.json(
@@ -30,25 +58,43 @@ export async function POST(request: Request) {
       );
     }
 
-    const application = await prisma.modelApplication.create({
+    if (!EMAIL_RE.test(email)) {
+      return NextResponse.json(
+        { error: "Adresse email invalide." },
+        { status: 400 },
+      );
+    }
+
+    // Check duplicate
+    const existing = await prisma.modelApplication.findFirst({
+      where: { email },
+    });
+    if (existing) {
+      return NextResponse.json(
+        { error: "Une candidature avec cet email existe déjà." },
+        { status: 409 },
+      );
+    }
+
+    await prisma.modelApplication.create({
       data: {
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: email.trim().toLowerCase(),
-        phone: phone.trim(),
-        height: height?.trim() || null,
-        measurements: measurements?.trim() || null,
-        experience: experience?.trim() || null,
-        instagram: instagram?.trim() || null,
-        bookUrl: bookUrl?.trim() || null,
-        photo1Url: photo1Url?.trim() || null,
-        photo2Url: photo2Url?.trim() || null,
-        photo3Url: photo3Url?.trim() || null,
-        event: event || "Fashion Week Africa — Paris 2026",
+        firstName,
+        lastName,
+        email,
+        phone,
+        height: sanitize(body.height, 20),
+        measurements: sanitize(body.measurements, 50),
+        experience: sanitize(body.experience, MAX_LEN),
+        instagram: sanitize(body.instagram, 100),
+        bookUrl: sanitize(body.bookUrl, 500),
+        photo1Url: null,
+        photo2Url: null,
+        photo3Url: null,
+        event: "Fashion Week Africa — Paris 2026",
       },
     });
 
-    return NextResponse.json({ success: true, id: application.id });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Model application error:", error);
     return NextResponse.json(

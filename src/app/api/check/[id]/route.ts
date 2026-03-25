@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const ip = getClientIp(_request);
+  const rl = rateLimit(`check-ticket:${ip}`, { limit: 30, windowSec: 60 });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Trop de tentatives." }, { status: 429 });
+  }
+
   const { id } = await params;
 
   // Try paid ticket

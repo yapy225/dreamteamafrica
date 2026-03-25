@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 export default function CastingPage() {
+  const [honeypot, setHoneypot] = useState("");
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -36,6 +37,7 @@ export default function CastingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          website: honeypot,
           event: "Fashion Week Africa — Paris 2026",
         }),
       });
@@ -111,6 +113,18 @@ export default function CastingPage() {
         onSubmit={handleSubmit}
         className="mt-10 space-y-6 rounded-2xl bg-white p-8 shadow-[var(--shadow-card)]"
       >
+        {/* Honeypot — hidden from real users, filled by bots */}
+        <div aria-hidden="true" className="absolute -left-[9999px]">
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+          />
+        </div>
+
         {error && (
           <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
             {error}

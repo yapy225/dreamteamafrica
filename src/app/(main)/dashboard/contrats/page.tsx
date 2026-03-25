@@ -13,6 +13,7 @@ import {
   Music,
 } from "lucide-react";
 import InvitationGenerator from "./InvitationGenerator";
+import DocumentArchive from "./DocumentArchive";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Contrats | Dashboard" };
@@ -275,6 +276,11 @@ export default async function ContratsPage({
           )}
         </div>
       )}
+
+      {/* Archive documents */}
+      <div className="mt-8">
+        <DocumentArchive />
+      </div>
     </div>
   );
 }

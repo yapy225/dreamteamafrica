@@ -420,6 +420,25 @@ export default function ExhibitorProfileClientForm({
           </div>
         </div>
       </fieldset>
+      {/* Logo */}
+      <fieldset className="rounded-2xl bg-white p-6 shadow-[var(--shadow-card)]">
+        <legend className="text-sm font-semibold uppercase tracking-wider text-dta-accent px-2">
+          Votre logo
+        </legend>
+        <div className="mt-4 max-w-sm">
+          <FileUploadField
+            label="Logo de votre entreprise *"
+            name="logo"
+            accept="image/*"
+            icon={Upload}
+            currentUrl={data.logoUrl}
+            onChange={(f) => setFiles((p) => ({ ...p, logo: f }))}
+          />
+          <p className="text-xs text-dta-taupe mt-2">
+            Votre logo sera utilis&eacute; comme avatar dans l&apos;Officiel d&apos;Afrique et nos publications.
+          </p>
+        </div>
+      </fieldset>
 
       {/* Description d'activité */}
       <fieldset className="rounded-2xl bg-white p-6 shadow-[var(--shadow-card)]">
@@ -446,22 +465,6 @@ export default function ExhibitorProfileClientForm({
         </div>
       </fieldset>
 
-      {/* Logo */}
-      <fieldset className="rounded-2xl bg-white p-6 shadow-[var(--shadow-card)]">
-        <legend className="text-sm font-semibold uppercase tracking-wider text-dta-accent px-2">
-          Votre logo
-        </legend>
-        <div className="mt-4 max-w-sm">
-          <FileUploadField
-            label="Logo de votre entreprise *"
-            name="logo"
-            accept="image/*"
-            icon={Upload}
-            currentUrl={data.logoUrl}
-            onChange={(f) => setFiles((p) => ({ ...p, logo: f }))}
-          />
-        </div>
-      </fieldset>
 
       {/* Options */}
       <fieldset className="rounded-2xl bg-white p-6 shadow-[var(--shadow-card)]">

@@ -395,6 +395,7 @@ model DirectoryEntry {
   linkedin      String?
   youtube       String?
   description   String   @db.Text
+  logoUrl       String?
   event         String?  // Événement intéressé
   published     Boolean  @default(true)
   createdAt     DateTime @default(now())

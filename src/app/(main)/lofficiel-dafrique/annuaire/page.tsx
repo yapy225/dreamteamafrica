@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronRight, Phone, Mail, MapPin } from "lucide-react";
 import { prisma } from "@/lib/db";
 import type { Metadata } from "next";
@@ -253,9 +254,19 @@ export default async function AnnuairePage({
                     >
                       {/* Header */}
                       <div className="flex items-start gap-3">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#C4704B] text-sm font-bold text-white">
-                          {initials}
-                        </div>
+                        {entry.logoUrl ? (
+                          <Image
+                            src={entry.logoUrl}
+                            alt={entry.companyName || entry.contactName}
+                            width={44}
+                            height={44}
+                            className="h-11 w-11 shrink-0 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#C4704B] text-sm font-bold text-white">
+                            {initials}
+                          </div>
+                        )}
                         <div className="min-w-0">
                           {entry.companyName && (
                             <p className="truncate text-sm font-bold text-[#2C2C2C]">

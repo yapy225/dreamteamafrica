@@ -542,6 +542,21 @@ model NewsletterSubscriber {
   subscribedAt DateTime @default(now())
 }
 
+model NewsletterCampaign {
+  id           String   @id @default(cuid())
+  subject      String
+  htmlContent  String   @db.Text
+  status       String   @default("PENDING") // PENDING, SENDING, COMPLETED
+  totalEmails  Int      @default(0)
+  sentEmails   Int      @default(0)
+  lastSentAt   DateTime?
+  scheduledAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status])
+}
+
 // ─── RÉSERVATIONS GRATUITES ─────────────────────────────
 
 model EventReservation {

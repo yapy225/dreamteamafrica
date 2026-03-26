@@ -12,6 +12,7 @@ import {
 import ArticleCard from "@/components/journal/ArticleCard";
 import Newsletter from "@/components/journal/Newsletter";
 import styles from "./home.module.css";
+import CountdownTimer from "@/components/CountdownTimer";
 
 export const revalidate = 60;
 
@@ -277,6 +278,9 @@ export default async function Home() {
                     <p className="mt-2 line-clamp-2 max-w-lg text-sm text-white/80">
                       {featuredEvent.description}
                     </p>
+                    <div className="mt-4">
+                      <CountdownTimer targetDate={featuredEvent.date.toISOString()} />
+                    </div>
                     <div className="mt-4 flex items-center justify-between">
                       <span className="text-sm font-semibold text-white">
                         À partir de {formatPrice(featuredEvent.priceEarly)}

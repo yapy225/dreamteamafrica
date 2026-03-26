@@ -3,7 +3,7 @@ import { Heart, Users, Globe, Music, Palette, GraduationCap, HandHeart, ArrowRig
 import DonationForm from "./DonationForm";
 
 export const metadata = {
-  title: "Nous Soutenir",
+  title: "Nous Soutenir — Dream Team Africa",
   description:
     "Soutenez Dream Team Africa dans sa mission de promotion de la culture africaine à Paris. Don, bénévolat, partenariat.",
   alternates: { canonical: "https://dreamteamafrica.com/faire-un-don" },

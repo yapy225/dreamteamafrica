@@ -36,47 +36,47 @@ const PATH_REDIRECTS: Record<string, string> = {
   "/saison-culturelle-africaine/foire-afrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
 
   // ── Fashion Week Africa (994 clicks) → Festival de l'Autre Culture ──
-  "/fashion-week-africa-paris": "/saison-culturelle-africaine/festival-de-lautre-culture",
-  "/fashion-week-africa-paris/": "/saison-culturelle-africaine/festival-de-lautre-culture",
+  "/fashion-week-africa-paris": "/saison-culturelle-africaine/fashion-week-africa",
+  "/fashion-week-africa-paris/": "/saison-culturelle-africaine/fashion-week-africa",
 
   // ── Festival du Conte (528+ clicks) ──
-  "/festival-du-conte-africain": "/saison-culturelle-africaine",
-  "/festival-du-conte-africain/": "/saison-culturelle-africaine",
-  "/festival-du-conte-africain-paris-2025": "/saison-culturelle-africaine",
-  "/festival-du-conte-africain-paris-2025/": "/saison-culturelle-africaine",
-  "/festival-du-conte-africain-paris": "/saison-culturelle-africaine",
-  "/festival-du-conte-africain-paris/": "/saison-culturelle-africaine",
+  "/festival-du-conte-africain": "/saison-culturelle-africaine/festival-du-conte-africain",
+  "/festival-du-conte-africain/": "/saison-culturelle-africaine/festival-du-conte-africain",
+  "/festival-du-conte-africain-paris-2025": "/saison-culturelle-africaine/festival-du-conte-africain",
+  "/festival-du-conte-africain-paris-2025/": "/saison-culturelle-africaine/festival-du-conte-africain",
+  "/festival-du-conte-africain-paris": "/saison-culturelle-africaine/festival-du-conte-africain",
+  "/festival-du-conte-africain-paris/": "/saison-culturelle-africaine/festival-du-conte-africain",
 
   // ── Salon Made in Africa (300 clicks) ──
-  "/salon-made-in-africa": "/saison-culturelle-africaine",
-  "/salon-made-in-africa/": "/saison-culturelle-africaine",
-  "/salon-made-in-africa-paris": "/saison-culturelle-africaine",
-  "/salon-made-in-africa-paris/": "/saison-culturelle-africaine",
+  "/salon-made-in-africa": "/saison-culturelle-africaine/salon-made-in-africa",
+  "/salon-made-in-africa/": "/saison-culturelle-africaine/salon-made-in-africa",
+  "/salon-made-in-africa-paris": "/saison-culturelle-africaine/salon-made-in-africa",
+  "/salon-made-in-africa-paris/": "/saison-culturelle-africaine/salon-made-in-africa",
 
   // ── Juste Une Danse ──
-  "/juste-une-danse": "/saison-culturelle-africaine",
-  "/juste-une-danse/": "/saison-culturelle-africaine",
+  "/juste-une-danse": "/saison-culturelle-africaine/juste-une-danse",
+  "/juste-une-danse/": "/saison-culturelle-africaine/juste-une-danse",
 
   // ── FICA ──
-  "/festival-international-du-cin%C3%A9ma-africain": "/saison-culturelle-africaine",
+  "/festival-international-du-cin%C3%A9ma-africain": "/saison-culturelle-africaine/festival-international-du-cinema-africain",
   "/festival-international-du-cinema-africain-fontenay-sous-bois-2026": "/saison-culturelle-africaine/festival-international-du-cinema-africain",
   "/festival-international-du-cinema-africain-fontenay-sous-bois-2026/": "/saison-culturelle-africaine/festival-international-du-cinema-africain",
 
   // ── Old /event/* pages (304+ clicks) ──
-  "/event/festival-du-conte-africain": "/saison-culturelle-africaine",
-  "/event/festival-du-conte-africain/": "/saison-culturelle-africaine",
-  "/event/fashion-week-africa-paris": "/saison-culturelle-africaine",
-  "/event/fashion-week-africa-paris/": "/saison-culturelle-africaine",
+  "/event/festival-du-conte-africain": "/saison-culturelle-africaine/festival-du-conte-africain",
+  "/event/festival-du-conte-africain/": "/saison-culturelle-africaine/festival-du-conte-africain",
+  "/event/fashion-week-africa-paris": "/saison-culturelle-africaine/fashion-week-africa",
+  "/event/fashion-week-africa-paris/": "/saison-culturelle-africaine/fashion-week-africa",
   "/event/foire-dafrique-paris": "/saison-culturelle-africaine/foire-dafrique-paris",
   "/event/foire-dafrique-paris/": "/saison-culturelle-africaine/foire-dafrique-paris",
-  "/event/billets-salon-made-in-africa": "/saison-culturelle-africaine",
-  "/event/billets-salon-made-in-africa/": "/saison-culturelle-africaine",
-  "/event/billets-le-grand-defile-zulu": "/saison-culturelle-africaine",
-  "/event/billets-le-grand-defile-zulu/": "/saison-culturelle-africaine",
-  "/event/salon-made-in-africa-paris-2025": "/saison-culturelle-africaine",
-  "/event/salon-made-in-africa-paris-2025/": "/saison-culturelle-africaine",
-  "/event/marche-de-noel-salon-paris-2025-2%E1%B5%89-edition": "/saison-culturelle-africaine",
-  "/event/marche-de-noel-salon-paris-2025-2%E1%B5%89-edition/": "/saison-culturelle-africaine",
+  "/event/billets-salon-made-in-africa": "/saison-culturelle-africaine/salon-made-in-africa",
+  "/event/billets-salon-made-in-africa/": "/saison-culturelle-africaine/salon-made-in-africa",
+  "/event/billets-le-grand-defile-zulu": "/saison-culturelle-africaine/fashion-week-africa",
+  "/event/billets-le-grand-defile-zulu/": "/saison-culturelle-africaine/fashion-week-africa",
+  "/event/salon-made-in-africa-paris-2025": "/saison-culturelle-africaine/salon-made-in-africa",
+  "/event/salon-made-in-africa-paris-2025/": "/saison-culturelle-africaine/salon-made-in-africa",
+  "/event/marche-de-noel-salon-paris-2025-2%E1%B5%89-edition": "/saison-culturelle-africaine/salon-made-in-africa",
+  "/event/marche-de-noel-salon-paris-2025-2%E1%B5%89-edition/": "/saison-culturelle-africaine/salon-made-in-africa",
 
   // ── Old /page/* (377 clicks) ──
   "/page/saison-culturelle-africaine-paris-2025": "/saison-culturelle-africaine",

@@ -26,6 +26,7 @@ export default function ContactPageForm({
     company: "",
     message: "",
   });
+  const [newsletter, setNewsletter] = useState(true);
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
@@ -43,7 +44,7 @@ export default function ContactPageForm({
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ category, ...form }),
+        body: JSON.stringify({ category, ...form, newsletter }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -205,6 +206,20 @@ export default function ContactPageForm({
               placeholder="Décrivez votre demande..."
             />
           </div>
+
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-dta-sand bg-dta-bg p-4 transition-colors hover:border-dta-accent/40">
+            <input
+              type="checkbox"
+              checked={newsletter}
+              onChange={(e) => setNewsletter(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 accent-dta-accent"
+            />
+            <span className="text-xs leading-relaxed text-dta-char/70">
+              Je souhaite recevoir les actualit&eacute;s, &eacute;v&eacute;nements et offres
+              de Dream Team Africa par email. Conform&eacute;ment au RGPD, je peux me
+              d&eacute;sinscrire &agrave; tout moment.
+            </span>
+          </label>
 
           <button
             type="submit"

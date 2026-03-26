@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { category, firstName, lastName, email, phone, company, message } =
+    const { category, firstName, lastName, email, phone, company, message, newsletter } =
       await request.json();
 
     if (
@@ -69,6 +69,15 @@ export async function POST(request: NextRequest) {
         message: trimmedMessage,
       },
     });
+
+    // Newsletter opt-in
+    if (newsletter && trimmedEmail) {
+      await prisma.newsletterSubscriber.upsert({
+        where: { email: trimmedEmail },
+        create: { email: trimmedEmail },
+        update: {},
+      });
+    }
 
     // Generate AI draft reply (non-blocking)
     try {

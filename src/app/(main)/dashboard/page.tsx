@@ -112,13 +112,6 @@ export default async function DashboardPage() {
             color: "bg-orange-100 text-orange-600",
           },
           {
-            href: "/dashboard/talents",
-            icon: Sparkles,
-            label: "Talents (Mannequins & Artistes)",
-            count: null,
-            color: "bg-pink-100 text-pink-600",
-          },
-          {
             href: "/dashboard/contrats",
             icon: FileText,
             label: "Contrats & Engagements",

@@ -10,24 +10,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       : "https://dreamteamafrica.com";
 
   // ── Static pages ──────────────────────────────────────────
-  const staticLastModified = new Date('2026-03-14');
+  const now = new Date();
   const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: staticLastModified, changeFrequency: "daily", priority: 1.0 },
-    { url: `${baseUrl}/saison-culturelle-africaine`, lastModified: staticLastModified, changeFrequency: "weekly", priority: 0.9 },
-    { url: `${baseUrl}/made-in-africa`, lastModified: staticLastModified, changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/lafropeen`, lastModified: staticLastModified, changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/lafropeen/archives`, lastModified: staticLastModified, changeFrequency: "weekly", priority: 0.6 },
-    { url: `${baseUrl}/exposants`, lastModified: staticLastModified, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/nous-contacter`, lastModified: staticLastModified, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${baseUrl}/faire-un-don`, lastModified: staticLastModified, changeFrequency: "monthly", priority: 0.4 },
-    { url: `${baseUrl}/lofficiel-dafrique`, lastModified: staticLastModified, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/lofficiel-dafrique/annuaire`, lastModified: staticLastModified, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/mentions-legales`, lastModified: staticLastModified, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${baseUrl}/conditions-generales`, lastModified: staticLastModified, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${baseUrl}/politique-de-confidentialite`, lastModified: staticLastModified, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${baseUrl}/politique-cookies`, lastModified: staticLastModified, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${baseUrl}/conditions-utilisation`, lastModified: staticLastModified, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${baseUrl}/politique-annulation`, lastModified: staticLastModified, changeFrequency: "yearly", priority: 0.3 },
+    { url: baseUrl, lastModified: now, changeFrequency: "daily", priority: 1.0 },
+    { url: `${baseUrl}/saison-culturelle-africaine`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${baseUrl}/lafropeen`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${baseUrl}/lafropeen/archives`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${baseUrl}/exposants`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${baseUrl}/nous-contacter`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/faire-un-don`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${baseUrl}/lofficiel-dafrique`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/lofficiel-dafrique/annuaire`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${baseUrl}/artistes`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/mentions-legales`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${baseUrl}/conditions-generales`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${baseUrl}/politique-de-confidentialite`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${baseUrl}/politique-cookies`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${baseUrl}/conditions-utilisation`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/politique-annulation`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
 
   // ── Journal category pages ────────────────────────────────
@@ -92,26 +92,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  // ── Exhibitor reservation pages ───────────────────────────
-  const exhibitorPages: MetadataRoute.Sitemap = events
-    .filter((e) =>
-      ["foire-dafrique-paris", "salon-made-in-africa"].some((s) =>
-        e.slug.includes(s)
-      )
-    )
-    .map((e) => ({
-      url: `${baseUrl}/resa-exposants/${e.slug}`,
-      lastModified: e.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
-    }));
-
   return [
     ...staticPages,
     ...categoryPages,
     ...eventPages,
     ...productPages,
     ...articlePages,
-    ...exhibitorPages,
   ];
 }

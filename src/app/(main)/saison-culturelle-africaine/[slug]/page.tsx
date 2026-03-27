@@ -621,18 +621,27 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                      {tiers.map((tier) => (
+                      {tiers.map((tier) => {
+                        const tierSoldOut = tier.quota != null && tier.quota > 0 && tier.sold >= tier.quota;
+                        return (
                         <div
                           key={tier.id}
                           className={`rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-200 ${
-                            tier.highlight
+                            tierSoldOut || tier.onSiteOnly ? "opacity-60" : ""
+                          } ${
+                            tier.highlight && !tierSoldOut
                               ? "ring-2 ring-dta-accent md:scale-105"
                               : ""
                           }`}
                         >
-                          {tier.highlight && (
+                          {tier.highlight && !tierSoldOut && (
                             <span className="mb-3 inline-block rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
                               Populaire
+                            </span>
+                          )}
+                          {tierSoldOut && (
+                            <span className="mb-3 inline-block rounded-[var(--radius-full)] bg-dta-char/40 px-3 py-1 text-xs font-semibold text-white">
+                              Complet
                             </span>
                           )}
                           <div className="flex items-baseline justify-between">
@@ -650,6 +659,15 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                               </li>
                             ))}
                           </ul>
+                          {tierSoldOut ? (
+                            <p className="mt-4 w-full rounded-[var(--radius-button)] bg-dta-char/20 px-4 py-3 text-center text-sm font-semibold text-dta-char/60">
+                              Complet
+                            </p>
+                          ) : tier.onSiteOnly ? (
+                            <p className="mt-4 w-full rounded-[var(--radius-button)] bg-dta-char/20 px-4 py-3 text-center text-sm font-semibold text-dta-char/60">
+                              Sur place uniquement
+                            </p>
+                          ) : (
                           <TicketSelector
                             eventId={event.id}
                             eventSlug={event.slug}
@@ -661,8 +679,10 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                             eventDate={event.date.toISOString()}
                             eventEndDate={event.endDate?.toISOString()}
                           />
+                          )}
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>

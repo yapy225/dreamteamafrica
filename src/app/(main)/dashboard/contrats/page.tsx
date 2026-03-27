@@ -11,7 +11,9 @@ import {
   Store,
   User,
   Music,
+  Mail,
 } from "lucide-react";
+import { listFiles, getCdnUrl } from "@/lib/bunny";
 import InvitationGenerator from "./InvitationGenerator";
 import DocumentArchive from "./DocumentArchive";
 
@@ -58,10 +60,36 @@ export default async function ContratsPage({
     orderBy: { createdAt: "desc" },
   });
 
+  // Invitations
+  let invitationFiles: { name: string; url: string; date: string; size: string }[] = [];
+  try {
+    const raw = await listFiles("invitations");
+    invitationFiles = raw
+      .filter((f) => !f.IsDirectory && f.ObjectName.endsWith(".pdf"))
+      .map((f) => ({
+        name: f.ObjectName.replace(/\.pdf$/, "").replace(/[-_]/g, " "),
+        fileName: f.ObjectName,
+        url: getCdnUrl(`invitations/${f.ObjectName}`),
+        date: new Date(f.LastChanged).toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }),
+        size:
+          f.Length > 1024 * 1024
+            ? `${(f.Length / (1024 * 1024)).toFixed(1)} Mo`
+            : `${Math.round(f.Length / 1024)} Ko`,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  } catch {
+    // silent
+  }
+
   const tabs = [
     { id: "exposants", label: "Exposants", icon: Store, count: activeBookings.length },
     { id: "mannequins", label: "Mannequins", icon: User, count: models.length },
     { id: "artistes", label: "Artistes", icon: Music, count: artists.length },
+    { id: "invitations", label: "Invitations", icon: Mail, count: invitationFiles.length },
   ];
 
   return (
@@ -274,6 +302,44 @@ export default async function ContratsPage({
           {artists.length === 0 && (
             <p className="p-8 text-center text-sm text-dta-char/50">Aucune candidature artiste.</p>
           )}
+        </div>
+      )}
+
+      {/* ── INVITATIONS ── */}
+      {tab === "invitations" && (
+        <div className="rounded-2xl border border-dta-sand bg-white shadow-sm overflow-hidden">
+          <div className="p-6">
+            <h3 className="font-serif text-lg font-bold text-dta-dark mb-4">
+              Lettres d&apos;invitation — D&eacute;l&eacute;gation PAK &amp; Invit&eacute;s
+            </h3>
+            {invitationFiles.length === 0 ? (
+              <p className="py-8 text-center text-sm text-dta-char/50">Aucune invitation archiv&eacute;e.</p>
+            ) : (
+              <div className="space-y-2">
+                {invitationFiles.map((f) => (
+                  <div
+                    key={f.url}
+                    className="flex items-center gap-3 rounded-xl border border-dta-sand/50 bg-dta-bg px-4 py-3 transition-colors hover:bg-white"
+                  >
+                    <FileText size={18} className="shrink-0 text-red-500" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-dta-dark">{f.name}</p>
+                      <p className="text-[10px] text-dta-char/50">{f.date} &middot; {f.size}</p>
+                    </div>
+                    <a
+                      href={f.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-dta-accent px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-dta-accent-dark"
+                    >
+                      <Download size={12} />
+                      T&eacute;l&eacute;charger
+                    </a>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

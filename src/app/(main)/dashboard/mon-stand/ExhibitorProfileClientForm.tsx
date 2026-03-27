@@ -588,7 +588,7 @@ export default function ExhibitorProfileClientForm({
 
       <p className="text-center text-xs text-dta-taupe">
         En soumettant ce formulaire, vous autorisez Dream Team Africa &agrave;
-        utiliser vos visuels et votre description &agrave; des fins promotionnelles
+        utiliser votre description &agrave; des fins promotionnelles
         sur ses r&eacute;seaux sociaux et m&eacute;dias partenaires.
       </p>
     </form>

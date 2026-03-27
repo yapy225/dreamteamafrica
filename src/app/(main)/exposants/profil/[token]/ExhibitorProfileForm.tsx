@@ -421,60 +421,6 @@ export default function ExhibitorProfileForm({ token }: { token: string }) {
           </div>
         </fieldset>
 
-        {/* Médias */}
-        <fieldset className="rounded-2xl bg-white p-6 shadow-[var(--shadow-card)]">
-          <legend className="text-sm font-semibold uppercase tracking-wider text-dta-accent px-2">
-            Vos visuels
-          </legend>
-          <p className="text-sm text-dta-taupe mt-2 mb-4">
-            Ces visuels seront utilisés pour vos publications sur nos réseaux.
-          </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <FileUploadField
-              label="Votre logo *"
-              name="logo"
-              accept="image/*"
-              icon={Upload}
-              currentUrl={data.logoUrl}
-              onChange={(f) => setFiles((p) => ({ ...p, logo: f }))}
-            />
-            <FileUploadField
-              label="Image 1 *"
-              name="image1"
-              accept="image/*"
-              icon={ImageIcon}
-              currentUrl={data.image1Url}
-              onChange={(f) => setFiles((p) => ({ ...p, image1: f }))}
-            />
-            <FileUploadField
-              label="Image 2 *"
-              name="image2"
-              accept="image/*"
-              icon={Camera}
-              currentUrl={data.image2Url}
-              onChange={(f) => setFiles((p) => ({ ...p, image2: f }))}
-            />
-            <FileUploadField
-              label="Image 3 *"
-              name="image3"
-              accept="image/*"
-              icon={Camera}
-              currentUrl={data.image3Url}
-              onChange={(f) => setFiles((p) => ({ ...p, image3: f }))}
-            />
-          </div>
-          <div className="mt-4">
-            <FileUploadField
-              label="Vidéo promo (optionnel)"
-              name="video"
-              accept="video/*"
-              icon={Video}
-              currentUrl={data.videoUrl}
-              onChange={(f) => setFiles((p) => ({ ...p, video: f }))}
-            />
-          </div>
-        </fieldset>
-
         {/* Options */}
         <fieldset className="rounded-2xl bg-white p-6 shadow-[var(--shadow-card)]">
           <legend className="text-sm font-semibold uppercase tracking-wider text-dta-accent px-2">
@@ -559,7 +505,7 @@ export default function ExhibitorProfileForm({ token }: { token: string }) {
 
         <p className="text-center text-xs text-dta-taupe">
           En soumettant ce formulaire, vous autorisez Dream Team Africa à
-          utiliser vos visuels et votre description à des fins promotionnelles
+          utiliser votre description à des fins promotionnelles
           sur ses réseaux sociaux et médias partenaires.
         </p>
       </form>

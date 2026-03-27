@@ -626,22 +626,24 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                         return (
                         <div
                           key={tier.id}
-                          className={`rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-200 ${
-                            tierSoldOut || tier.onSiteOnly ? "opacity-60" : ""
+                          className={`relative overflow-hidden rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-200 ${
+                            tierSoldOut || tier.onSiteOnly ? "opacity-60 grayscale-[30%]" : ""
                           } ${
                             tier.highlight && !tierSoldOut
                               ? "ring-2 ring-dta-accent md:scale-105"
                               : ""
                           }`}
                         >
+                          {tierSoldOut && (
+                            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+                              <div className="rotate-[-30deg] rounded bg-red-600/90 px-10 py-2 text-lg font-black uppercase tracking-widest text-white shadow-lg">
+                                Sold Out
+                              </div>
+                            </div>
+                          )}
                           {tier.highlight && !tierSoldOut && (
                             <span className="mb-3 inline-block rounded-[var(--radius-full)] bg-dta-accent px-3 py-1 text-xs font-semibold text-white">
                               Populaire
-                            </span>
-                          )}
-                          {tierSoldOut && (
-                            <span className="mb-3 inline-block rounded-[var(--radius-full)] bg-dta-char/40 px-3 py-1 text-xs font-semibold text-white">
-                              Complet
                             </span>
                           )}
                           <div className="flex items-baseline justify-between">

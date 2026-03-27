@@ -44,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
   const categoryPages: MetadataRoute.Sitemap = categories.map((cat) => ({
     url: `${baseUrl}/lafropeen/categorie/${cat}`,
-    lastModified: staticLastModified,
+    lastModified: now,
     changeFrequency: "daily",
     priority: 0.7,
   }));

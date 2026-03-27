@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
     console.error("Invitation archive upload error:", err);
   }
 
-  return new NextResponse(pdfBuffer, {
+  return new NextResponse(new Uint8Array(pdfBuffer), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="Invitation-${safeName}.pdf"`,

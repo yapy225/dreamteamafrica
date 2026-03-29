@@ -21,8 +21,8 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Contrats | Dashboard" };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof CheckCircle }> = {
-  CONFIRMED: { label: "Confirmé", color: "bg-green-100 text-green-700", icon: CheckCircle },
-  PARTIAL: { label: "En cours", color: "bg-amber-100 text-amber-700", icon: Clock },
+  CONFIRMED: { label: "Soldé", color: "bg-green-100 text-green-700", icon: CheckCircle },
+  PARTIAL: { label: "Réservation", color: "bg-amber-100 text-amber-700", icon: Clock },
   PENDING: { label: "En attente", color: "bg-gray-100 text-gray-500", icon: Clock },
   CANCELLED: { label: "Annulé", color: "bg-red-100 text-red-600", icon: XCircle },
   SELECTED: { label: "Sélectionné(e)", color: "bg-green-100 text-green-700", icon: CheckCircle },
@@ -48,7 +48,25 @@ export default async function ContratsPage({
     include: { payments: true },
     orderBy: { createdAt: "desc" },
   });
-  const activeBookings = bookings.filter((b) => b.status !== "PENDING" || b.totalPrice === 0);
+  // Recalculate status based on actual payments
+  const activeBookings = bookings
+    .map((b) => {
+      const paid = b.payments.reduce((s, p) => s + p.amount, 0);
+      let computedStatus = b.status;
+      if (paid <= 0 && b.totalPrice > 0) {
+        computedStatus = "PENDING"; // nothing paid
+      } else if (paid > 0 && paid < b.totalPrice) {
+        computedStatus = "PARTIAL"; // reservation — partially paid
+      } else if (paid >= b.totalPrice && b.totalPrice > 0) {
+        computedStatus = "CONFIRMED"; // fully paid
+      }
+      return { ...b, status: computedStatus };
+    })
+    .filter((b) => {
+      const paid = b.payments.reduce((s, p) => s + p.amount, 0);
+      // Only show bookings that have paid something
+      return paid > 0 || b.totalPrice === 0;
+    });
 
   // Mannequins
   const models = await prisma.modelApplication.findMany({

@@ -89,6 +89,10 @@ export default async function ExposantsDashboardPage({
     expected: bookings
       .filter((b) => b.status !== "CANCELLED")
       .reduce((sum, b) => sum + b.totalPrice, 0),
+    paidAtLeast50: bookings.filter((b) => {
+      const paid = b.payments.reduce((s: number, p: { amount: number }) => s + p.amount, 0);
+      return paid >= 50 && b.status !== "CANCELLED";
+    }).length,
   };
 
   const formatter = new Intl.NumberFormat("fr-FR", {
@@ -112,7 +116,7 @@ export default async function ExposantsDashboardPage({
       </div>
 
       {/* Stats */}
-      <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-5">
+      <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-6">
         <div className="rounded-[var(--radius-card)] bg-white p-5 shadow-[var(--shadow-card)]">
           <p className="text-xs font-medium text-dta-taupe">R&eacute;servations</p>
           <p className="mt-1 font-serif text-2xl font-bold text-dta-dark">{stats.total}</p>
@@ -120,6 +124,10 @@ export default async function ExposantsDashboardPage({
         <div className="rounded-[var(--radius-card)] bg-white p-5 shadow-[var(--shadow-card)]">
           <p className="text-xs font-medium text-dta-taupe">Confirm&eacute;es</p>
           <p className="mt-1 font-serif text-2xl font-bold text-green-600">{stats.confirmed}</p>
+        </div>
+        <div className="rounded-[var(--radius-card)] bg-white p-5 shadow-[var(--shadow-card)]">
+          <p className="text-xs font-medium text-purple-600">Acompte vers&eacute; (&ge;50&nbsp;&euro;)</p>
+          <p className="mt-1 font-serif text-2xl font-bold text-purple-600">{stats.paidAtLeast50}</p>
         </div>
         <div className="rounded-[var(--radius-card)] bg-white p-5 shadow-[var(--shadow-card)]">
           <p className="text-xs font-medium text-blue-600">Avances</p>

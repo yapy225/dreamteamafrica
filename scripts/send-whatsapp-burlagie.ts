@@ -1,0 +1,50 @@
+import "dotenv/config";
+import { sendWhatsAppText } from "../src/lib/whatsapp";
+
+const message = `Bonjour Burlagie,
+
+Merci pour votre interet pour la Foire d'Afrique Paris - 6eme Edition !
+
+Voici le detail complet de nos offres exposant :
+
+*Foire d'Afrique Paris - 6eme Edition*
+Dates : 1er & 2 mai 2026
+Horaires : 12h - 22h
+Lieu : Espace MAS, 10 rue des Terres au Cure, 75013 Paris
+
+---
+
+*Pack Entrepreneur 1 jour - 190 EUR (prix total)*
+- Stand de 2 m2
+- 1 table (1,50 m x 0,60 m)
+- 2 chaises
+- 2 badges exposants
+
+*Pack Entrepreneur 2 jours - 320 EUR (prix total)* (160 EUR/jour)
+- Stand de 2 m2
+- 1 table (1,50 m x 0,60 m)
+- 2 chaises
+- 2 badges exposants
+
+*Modalites de paiement :*
+- Acompte de 50 EUR pour confirmer votre place
+- Solde payable en mensualites (jusqu'a 10 fois)
+
+Le montant affiche sur le lien correspond a l'acompte de 50 EUR. Le reste est payable en plusieurs fois selon votre convenance.
+
+Reservez en ligne : https://dreamteamafrica.com/resa-exposants/foire-dafrique-paris
+
+N'hesitez pas si vous avez des questions !
+
+L'equipe Dream Team Africa`;
+
+async function main() {
+  try {
+    await sendWhatsAppText("+33760886304", message);
+    console.log("OK - WhatsApp envoye a +33760886304");
+  } catch (err) {
+    console.error("ERREUR:", err);
+  }
+}
+
+main();

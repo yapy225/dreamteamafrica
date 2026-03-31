@@ -608,7 +608,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                     (t) => t.quota != null && t.quota > 0 && t.quota - t.sold > 0 && !t.onSiteOnly,
                   );
                   return available ? (
-                    <SocialProofBanner sold={available.sold} quota={available.quota!} tierName={available.name} />
+                    <SocialProofBanner sold={available.sold} quota={available.quota!} tierName={available.name} tierPrice={available.price} />
                   ) : null;
                 })()}
                 <div className="mt-10">

@@ -9,50 +9,43 @@ interface Purchase {
   total: number;
 }
 
-const PURCHASES: Purchase[] = [
-  { name: "Stéphanie M.", qty: 5, total: 25 },
-  { name: "Mamadou D.", qty: 2, total: 10 },
-  { name: "Christelle V.", qty: 3, total: 15 },
-  { name: "Fatou S.", qty: 2, total: 10 },
-  { name: "Abdoulaye K.", qty: 4, total: 20 },
-  { name: "Assa C.", qty: 2, total: 10 },
-  { name: "Jean-Pierre L.", qty: 1, total: 5 },
-  { name: "Aminata T.", qty: 3, total: 15 },
-  { name: "Honorine G.", qty: 2, total: 10 },
-  { name: "Patrick N.", qty: 2, total: 10 },
-  { name: "Marie-Claire B.", qty: 4, total: 20 },
-  { name: "Ousmane F.", qty: 1, total: 5 },
-  { name: "Sandrine A.", qty: 3, total: 15 },
-  { name: "Ibrahim H.", qty: 2, total: 10 },
-  { name: "Cécile R.", qty: 2, total: 10 },
-  { name: "Abdulrahman B.", qty: 2, total: 10 },
-  { name: "Nadia O.", qty: 3, total: 15 },
-  { name: "David M.", qty: 1, total: 5 },
-  { name: "Aïssatou D.", qty: 2, total: 10 },
-  { name: "Franck T.", qty: 4, total: 20 },
+const NAMES = [
+  "Stéphanie M.", "Mamadou D.", "Christelle V.", "Fatou S.", "Abdoulaye K.",
+  "Assa C.", "Jean-Pierre L.", "Aminata T.", "Honorine G.", "Patrick N.",
+  "Marie-Claire B.", "Ousmane F.", "Sandrine A.", "Ibrahim H.", "Cécile R.",
+  "Abdulrahman B.", "Nadia O.", "David M.", "Aïssatou D.", "Franck T.",
 ];
+
+function generatePurchases(price: number): Purchase[] {
+  return NAMES.map((name) => {
+    const qty = Math.random() < 0.6 ? 1 : 2;
+    return { name, qty, total: qty * price };
+  });
+}
 
 interface SocialProofBannerProps {
   sold: number;
   quota: number;
   tierName?: string;
+  tierPrice?: number;
 }
 
-export default function SocialProofBanner({ sold, quota, tierName = "Early Bird" }: SocialProofBannerProps) {
+export default function SocialProofBanner({ sold, quota, tierName = "Early Bird", tierPrice = 10 }: SocialProofBannerProps) {
+  const [purchases] = useState(() => generatePurchases(tierPrice));
   const [currentIdx, setCurrentIdx] = useState(0);
   const remaining = quota - sold;
   const percent = Math.round((sold / quota) * 100);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIdx((prev) => (prev + 1) % PURCHASES.length);
+      setCurrentIdx((prev) => (prev + 1) % purchases.length);
     }, 3000);
     return () => clearInterval(interval);
   }, []);
 
   if (remaining <= 0) return null;
 
-  const current = PURCHASES[currentIdx];
+  const current = purchases[currentIdx];
 
   return (
     <div className="mx-auto mt-6 max-w-3xl">

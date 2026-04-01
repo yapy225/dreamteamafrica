@@ -66,6 +66,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // Anti-spam: reject gibberish names (no vowels or too many consecutive consonants)
+    const hasVowel = /[aeiouyàâéèêëïîôùûüæœ]/i;
+    const tooManyConsonants = /[^aeiouyàâéèêëïîôùûüæœ\s\-'&.]{6,}/i;
+    if (!hasVowel.test(companyName) || !hasVowel.test(contactName) ||
+        tooManyConsonants.test(companyName) || tooManyConsonants.test(contactName)) {
+      return NextResponse.json(
+        { error: "Nom invalide." },
+        { status: 400 }
+      );
+    }
+
     // Calculate price (per stand), then multiply by number of stands
     const { totalDays, totalPrice: unitPrice } = calculatePrice(effectivePackId, eventIds);
     const totalPrice = unitPrice * stands;
@@ -108,14 +119,38 @@ export async function POST(request: Request) {
       },
     });
 
-    // Lier le lead au booking (pour ne pas double-compter l'acompte lead)
+    // Vérifier si le lead a déjà versé un acompte de 50 €
+    let leadDepositCredit = 0;
     try {
-      await prisma.exposantLead.updateMany({
+      const paidLead = await prisma.exposantLead.findFirst({
         where: { email: email.trim(), status: "DEPOSIT_PAID", bookingId: null },
-        data: { bookingId: booking.id },
       });
+      if (paidLead) {
+        leadDepositCredit = DEPOSIT_AMOUNT;
+        // Lier le lead au booking
+        await prisma.exposantLead.update({
+          where: { id: paidLead.id },
+          data: { bookingId: booking.id },
+        });
+        // Enregistrer l'acompte lead comme paiement sur le booking
+        await prisma.exhibitorPayment.create({
+          data: {
+            bookingId: booking.id,
+            amount: DEPOSIT_AMOUNT,
+            type: "deposit",
+            label: "Acompte pré-inscription (50 €)",
+            stripeId: paidLead.stripeSessionId,
+          },
+        });
+        // Mettre à jour le booking
+        await prisma.exhibitorBooking.update({
+          where: { id: booking.id },
+          data: { paidInstallments: 1, status: "PARTIAL" },
+        });
+      }
     } catch (_) {
-      // non bloquant
+      // non bloquant — on continue sans crédit
+      leadDepositCredit = 0;
     }
 
     // Newsletter subscription
@@ -166,8 +201,22 @@ export async function POST(request: Request) {
 
     const stripe = getStripe();
 
+    // Montant restant après crédit de l'acompte lead
+    const amountDue = totalPrice - leadDepositCredit;
+
+    // Si le lead a déjà payé la totalité (cas rare: prix = 50€)
+    if (amountDue <= 0) {
+      await prisma.exhibitorBooking.update({
+        where: { id: booking.id },
+        data: { status: "CONFIRMED", paidInstallments: 1 },
+      });
+      return NextResponse.json({
+        url: `${process.env.NEXT_PUBLIC_APP_URL}/exposants/confirmation/${booking.id}`,
+      });
+    }
+
     if (nbInstallments === 1) {
-      // ── Single full payment ──
+      // ── Single full payment (minus lead credit) ──
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card", "paypal"],
@@ -176,10 +225,12 @@ export async function POST(request: Request) {
           {
             price_data: {
               currency: "eur",
-              unit_amount: Math.round(totalPrice * 100),
+              unit_amount: Math.round(amountDue * 100),
               product_data: {
                 name: `Stand Exposant${standsLabel} — ${selectedPack.name}`,
-                description,
+                description: leadDepositCredit > 0
+                  ? `${description} (${leadDepositCredit} € d'acompte déduit)`
+                  : description,
               },
             },
             quantity: 1,
@@ -191,6 +242,7 @@ export async function POST(request: Request) {
           userId: session.user.id,
           stands: String(stands),
           installments: "1",
+          leadDepositCredit: String(leadDepositCredit),
         },
         success_url: `${process.env.NEXT_PUBLIC_APP_URL}/exposants/confirmation/${booking.id}`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/exposants/reservation?pack=${pack}`,
@@ -203,9 +255,67 @@ export async function POST(request: Request) {
 
       return NextResponse.json({ url: checkoutSession.url });
     } else {
-      // ── Deposit (50€) + remaining balance in (N-1) monthly installments ──
+      // ── Installments: le lead a déjà payé l'acompte, on passe au solde ──
+      if (leadDepositCredit >= deposit) {
+        // L'acompte lead couvre le dépôt → on crée directement l'abonnement mensuel
+        // Le webhook exhibitor_early_payment ou le checkout normal prendra le relais
+        // Pour l'instant, redirigeons vers la page de confirmation avec statut PARTIAL
+        // Le solde sera géré par les mensualités automatiques configurées par le webhook
+        const adjustedRemainingBalance = totalPrice - leadDepositCredit;
+        const adjustedInstallmentAmount = nbInstallments > 1 && adjustedRemainingBalance > 0
+          ? Math.ceil((adjustedRemainingBalance / (nbInstallments - 1)) * 100) / 100
+          : 0;
 
-      // Step 1: Create Stripe checkout for the deposit only
+        // Mettre à jour le montant des mensualités
+        await prisma.exhibitorBooking.update({
+          where: { id: booking.id },
+          data: {
+            installmentAmount: adjustedInstallmentAmount,
+          },
+        });
+
+        // Créer un checkout pour la première mensualité (pas le dépôt, déjà payé)
+        const checkoutSession = await stripe.checkout.sessions.create({
+          mode: "payment",
+          payment_method_types: ["card", "paypal"],
+          customer_email: email.trim(),
+          line_items: [
+            {
+              price_data: {
+                currency: "eur",
+                unit_amount: Math.round(adjustedInstallmentAmount * 100),
+                product_data: {
+                  name: `1ère mensualité${standsLabel} — ${selectedPack.name}`,
+                  description: `Acompte de 50 € déjà versé. Solde restant (${adjustedRemainingBalance} €) en ${nbInstallments - 1} mensualité${nbInstallments - 1 > 1 ? "s" : ""}.`,
+                },
+              },
+              quantity: 1,
+            },
+          ],
+          metadata: {
+            type: "exhibitor",
+            bookingId: booking.id,
+            userId: session.user.id,
+            stands: String(stands),
+            installments: String(nbInstallments),
+            deposit: String(leadDepositCredit),
+            remainingBalance: String(adjustedRemainingBalance),
+            installmentAmount: String(adjustedInstallmentAmount),
+            leadDepositCredit: String(leadDepositCredit),
+          },
+          success_url: `${process.env.NEXT_PUBLIC_APP_URL}/exposants/confirmation/${booking.id}`,
+          cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/exposants/reservation?pack=${pack}`,
+        });
+
+        await prisma.exhibitorBooking.update({
+          where: { id: booking.id },
+          data: { stripeSessionId: checkoutSession.id },
+        });
+
+        return NextResponse.json({ url: checkoutSession.url });
+      }
+
+      // Pas de crédit lead, checkout normal pour l'acompte
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card", "paypal"],

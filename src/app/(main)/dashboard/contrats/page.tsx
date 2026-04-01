@@ -68,6 +68,12 @@ export default async function ContratsPage({
       return paid > 0 || b.totalPrice === 0;
     });
 
+  // Leads exposants avec acompte versé mais pas encore de booking
+  const paidLeadsWithoutBooking = await prisma.exposantLead.findMany({
+    where: { status: "DEPOSIT_PAID", bookingId: null },
+    orderBy: { depositPaidAt: "desc" },
+  });
+
   // Mannequins
   const models = await prisma.modelApplication.findMany({
     orderBy: { createdAt: "desc" },
@@ -216,6 +222,50 @@ export default async function ContratsPage({
           {activeBookings.length === 0 && (
             <p className="p-8 text-center text-sm text-dta-char/50">Aucun contrat exposant.</p>
           )}
+        </div>
+      )}
+
+      {/* Leads avec acompte en attente de booking */}
+      {tab === "exposants" && paidLeadsWithoutBooking.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-amber-200">
+            <h3 className="text-sm font-semibold text-amber-800">
+              <AlertCircle size={14} className="inline mr-1.5 -mt-0.5" />
+              Acomptes re&ccedil;us — en attente de r&eacute;servation ({paidLeadsWithoutBooking.length})
+            </h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs font-medium uppercase tracking-wider text-amber-600">
+                  <th className="px-4 py-2">Nom</th>
+                  <th className="px-4 py-2">Contact</th>
+                  <th className="px-4 py-2">&Eacute;v&eacute;nement</th>
+                  <th className="px-4 py-2 text-right">Acompte</th>
+                  <th className="px-4 py-2">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-amber-100">
+                {paidLeadsWithoutBooking.map((l) => (
+                  <tr key={l.id} className="hover:bg-amber-100/50">
+                    <td className="px-4 py-2 font-medium text-dta-dark">
+                      {l.firstName} {l.lastName}
+                      <p className="text-[11px] text-dta-char/50">{l.brand}</p>
+                    </td>
+                    <td className="px-4 py-2">
+                      <p className="text-dta-char/70">{l.email}</p>
+                      <p className="text-[11px] text-dta-char/50">{l.phone}</p>
+                    </td>
+                    <td className="px-4 py-2 text-dta-char/70">{l.eventName}</td>
+                    <td className="px-4 py-2 text-right text-green-600">{fmt.format(50)}</td>
+                    <td className="px-4 py-2 text-[11px] text-dta-char/50">
+                      {l.depositPaidAt ? new Date(l.depositPaidAt).toLocaleDateString("fr-FR") : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

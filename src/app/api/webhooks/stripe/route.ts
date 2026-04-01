@@ -411,68 +411,84 @@ async function handleOrderPurchase(session: Stripe.Checkout.Session) {
 }
 
 async function handleExhibitorBooking(session: Stripe.Checkout.Session) {
-  const { bookingId, installments, remainingBalance, installmentAmount } = session.metadata!;
+  const { bookingId, installments, remainingBalance, installmentAmount, leadDepositCredit } = session.metadata!;
   if (!bookingId) return;
 
   const nbInstallments = parseInt(installments || "1");
   const isOneTime = nbInstallments === 1;
+  const leadCredit = parseFloat(leadDepositCredit || "0");
 
   // Get booking to calculate amounts
   const bookingData = await prisma.exhibitorBooking.findUnique({
     where: { id: bookingId },
-    select: { totalPrice: true, stands: true },
+    select: { totalPrice: true, stands: true, paidInstallments: true },
   });
   const stands = bookingData?.stands ?? 1;
   const deposit = Math.min(DEPOSIT_AMOUNT * stands, bookingData?.totalPrice ?? 0);
+  // Si le lead avait déjà payé un acompte, paidInstallments est déjà à 1
+  const currentPaid = bookingData?.paidInstallments ?? 0;
 
   if (isOneTime) {
     // Full payment — confirm immediately
+    // Le montant Stripe est totalPrice - leadCredit
+    const stripeAmount = (bookingData?.totalPrice ?? 0) - leadCredit;
+
     await prisma.exhibitorBooking.update({
       where: { id: bookingId },
       data: {
         stripeSessionId: session.id,
-        paidInstallments: 1,
+        paidInstallments: currentPaid + 1,
         status: "CONFIRMED",
       },
     });
 
-    // Record payment
+    // Record payment (montant réellement payé via Stripe)
     await prisma.exhibitorPayment.create({
       data: {
         bookingId,
-        amount: bookingData?.totalPrice ?? 0,
+        amount: stripeAmount,
         type: "full_payment",
-        label: "Paiement intégral",
+        label: leadCredit > 0
+          ? `Paiement intégral (${leadCredit} € d'acompte déduit)`
+          : "Paiement intégral",
         stripeId: session.id,
       },
     });
 
     // Generate invoice
     await generateInvoiceOnCompletion(bookingId);
-    console.log(`Exhibitor booking ${bookingId}: CONFIRMED (full payment)`);
+    console.log(`Exhibitor booking ${bookingId}: CONFIRMED (full payment, lead credit: ${leadCredit}€)`);
   } else {
-    // Deposit paid — create subscription for remaining balance
+    // Deposit or installment paid — update booking
+    const newPaid = currentPaid + 1;
     await prisma.exhibitorBooking.update({
       where: { id: bookingId },
       data: {
         stripeSessionId: session.id,
-        paidInstallments: 1,
+        paidInstallments: newPaid,
         status: "PARTIAL",
       },
     });
 
-    // Record deposit payment
+    // Record payment (montant réellement débité via Stripe)
+    const stripeDeposit = leadCredit >= deposit
+      ? parseFloat(installmentAmount || "0")  // 1ère mensualité, pas le dépôt
+      : deposit;
+    const paymentLabel = leadCredit >= deposit
+      ? "1ère mensualité"
+      : "Acompte de réservation";
+
     await prisma.exhibitorPayment.create({
       data: {
         bookingId,
-        amount: deposit,
-        type: "deposit",
-        label: "Acompte de réservation",
+        amount: stripeDeposit,
+        type: leadCredit >= deposit ? "installment" : "deposit",
+        label: paymentLabel,
         stripeId: session.id,
       },
     });
 
-    console.log(`Exhibitor booking ${bookingId}: PARTIAL (deposit paid, 1/${nbInstallments})`);
+    console.log(`Exhibitor booking ${bookingId}: PARTIAL (${newPaid}/${nbInstallments}, lead credit: ${leadCredit}€)`);
 
     // Create subscription for remaining installments
     const balance = parseFloat(remainingBalance || "0");

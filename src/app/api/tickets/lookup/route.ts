@@ -5,8 +5,8 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 /**
  * POST /api/tickets/lookup
- * Returns tickets for the authenticated user only.
- * Falls back to email lookup with strict rate limiting for unauthenticated /mes-billets.
+ * Authenticated: returns full ticket details for own email only.
+ * Unauthenticated: returns minimal info (no QR, no payments, no names).
  */
 export async function POST(request: Request) {
   try {
@@ -20,13 +20,13 @@ export async function POST(request: Request) {
 
     const trimmedEmail = email.trim().toLowerCase();
 
-    // If authenticated, only allow looking up own tickets
     if (session?.user?.id) {
+      // Authenticated: only own tickets
       if (session.user.email?.toLowerCase() !== trimmedEmail) {
         return NextResponse.json({ error: "Accès interdit." }, { status: 403 });
       }
     } else {
-      // Unauthenticated: strict rate limiting (3 per 15 min per IP)
+      // Unauthenticated: strict rate limiting
       const rl = rateLimit(`lookup-tickets:${ip}`, { limit: 3, windowSec: 15 * 60 });
       if (!rl.success) {
         return NextResponse.json(
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       where: { email: trimmedEmail },
       include: {
         event: { select: { title: true, venue: true, address: true, date: true, coverImage: true } },
-        payments: { orderBy: { paidAt: "desc" } },
+        ...(session?.user?.id ? { payments: { orderBy: { paidAt: "desc" as const } } } : {}),
       },
       orderBy: { purchasedAt: "desc" },
     });
@@ -49,31 +49,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ tickets: [] });
     }
 
+    const isAuthenticated = !!session?.user?.id;
+
     return NextResponse.json({
       tickets: tickets.map((t) => ({
-        id: t.id,
+        id: isAuthenticated ? t.id : undefined,
         eventTitle: t.event.title,
         venue: t.event.venue,
-        address: t.event.address,
         date: t.event.date,
-        coverImage: t.event.coverImage,
-        visitDate: t.visitDate,
         tier: t.tier,
         price: t.price,
         totalPaid: t.totalPaid,
-        installments: t.installments,
-        firstName: t.firstName,
-        lastName: t.lastName,
-        // Only expose QR codes to authenticated users
-        qrCode: session?.user?.id ? t.qrCode : null,
-        purchasedAt: t.purchasedAt,
-        payments: session?.user?.id ? t.payments.map((p) => ({
-          id: p.id,
-          amount: p.amount,
-          type: p.type,
-          label: p.label,
-          paidAt: p.paidAt,
-        })) : [],
+        // Sensitive data only for authenticated users
+        ...(isAuthenticated ? {
+          address: t.event.address,
+          coverImage: t.event.coverImage,
+          visitDate: t.visitDate,
+          installments: t.installments,
+          firstName: t.firstName,
+          lastName: t.lastName,
+          qrCode: t.qrCode,
+          purchasedAt: t.purchasedAt,
+          payments: (t as any).payments?.map((p: any) => ({
+            id: p.id,
+            amount: p.amount,
+            type: p.type,
+            label: p.label,
+            paidAt: p.paidAt,
+          })) || [],
+        } : {
+          // Minimal info for unauthenticated
+          status: t.totalPaid >= t.price ? "PAID" : "PARTIAL",
+        }),
       })),
     });
   } catch (error) {

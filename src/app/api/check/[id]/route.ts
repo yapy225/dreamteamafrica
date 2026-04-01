@@ -29,7 +29,7 @@ export async function GET(
 
     return NextResponse.json({
       type: "TICKET",
-      valid: true,
+      valid: isPaid && !ticket.checkedInAt,
       id: ticket.id,
       eventTitle: ticket.event.title,
       eventVenue: ticket.event.venue,
@@ -41,6 +41,7 @@ export async function GET(
       totalPaid: ticket.totalPaid,
       paymentPercent,
       paymentStatus: isPaid ? "PAID" : "PARTIAL",
+      admissionAllowed: isPaid && !ticket.checkedInAt,
       checkedIn: ticket.checkedInAt !== null,
       checkedInAt: ticket.checkedInAt,
     });

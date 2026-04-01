@@ -171,7 +171,6 @@ async function handleTicketInstallment(session: Stripe.Checkout.Session) {
   } = session.metadata!;
 
   const qty = parseInt(quantity);
-  const unitPriceNum = parseFloat(unitPrice);
   const nbInstallments = parseInt(installments);
 
   const event = await prisma.event.findUnique({
@@ -179,11 +178,19 @@ async function handleTicketInstallment(session: Stripe.Checkout.Session) {
     select: { title: true, date: true, venue: true, address: true, coverImage: true, tiers: true },
   });
 
-  // Resolve tier name
-  const customTiers = event?.tiers as Array<{ id: string; name: string }> | null;
+  if (!event) {
+    console.error(`Ticket installment: event ${eventId} not found`);
+    return;
+  }
+
+  // Re-validate price from database (never trust metadata)
+  const customTiers = event.tiers as Array<{ id: string; name: string; price: number }> | null;
   const matchedTier = Array.isArray(customTiers) ? customTiers.find((t) => t.id === tier) : null;
   const legacyLabelMap: Record<string, string> = { EARLY_BIRD: "Early Bird", STANDARD: "Standard", VIP: "VIP" };
   const tierName = matchedTier?.name || legacyLabelMap[tier] || tier;
+
+  // Use DB price, not metadata price
+  const unitPriceNum = matchedTier?.price ?? parseFloat(unitPrice);
 
   // Create tickets (with deposit paid, rest pending via subscription)
   const createdTickets: Array<{ id: string; qrCode: string }> = [];

@@ -26,7 +26,11 @@ export default function SignInPage() {
     setLoading(false);
 
     if (result?.error) {
-      setError("Email ou mot de passe incorrect.");
+      if (result.error.includes("ACCOUNT_LOCKED")) {
+        setError("Compte temporairement verrouillé. Réessayez dans 15 minutes.");
+      } else {
+        setError("Email ou mot de passe incorrect.");
+      }
     } else {
       router.push("/dashboard");
       router.refresh();

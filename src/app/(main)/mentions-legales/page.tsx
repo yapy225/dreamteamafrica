@@ -140,6 +140,48 @@ export default function MentionsLegalesPage() {
           </ul>
         </section>
 
+        {/* Médiation */}
+        <section>
+          <h2 className="mb-4 font-serif text-xl font-bold text-dta-dark">
+            M&eacute;diation de la consommation
+          </h2>
+          <p className="text-sm leading-relaxed text-dta-char">
+            Conform&eacute;ment aux articles L.616-1 et R.616-1 du Code de la consommation,
+            Dream Team Africa propose un dispositif de m&eacute;diation de la consommation.
+            En cas de litige non r&eacute;solu par notre service client, vous pouvez saisir
+            gratuitement le m&eacute;diateur de la consommation :
+          </p>
+          <div className="mt-3 rounded-lg bg-dta-bg p-4 text-sm">
+            <p className="font-medium text-dta-dark">M&eacute;diation de la Consommation &amp; Patrimoine (MCP)</p>
+            <p className="text-dta-char">12 Square Desnouettes, 75015 Paris</p>
+            <p className="text-dta-char">
+              Site :{" "}
+              <a href="https://mcpmediation.org" target="_blank" rel="noopener noreferrer" className="text-dta-accent underline">
+                mcpmediation.org
+              </a>
+            </p>
+          </div>
+          <p className="mt-3 text-xs text-dta-char/60">
+            Avant de saisir le m&eacute;diateur, le consommateur doit avoir pr&eacute;alablement
+            contact&eacute; notre service client &agrave; hello@dreamteamafrica.com pour tenter de
+            r&eacute;soudre le litige &agrave; l&apos;amiable.
+          </p>
+        </section>
+
+        {/* Données personnelles */}
+        <section>
+          <h2 className="mb-4 font-serif text-xl font-bold text-dta-dark">
+            Vos droits (RGPD)
+          </h2>
+          <p className="text-sm leading-relaxed text-dta-char">
+            Conform&eacute;ment au R&egrave;glement G&eacute;n&eacute;ral sur la Protection des Donn&eacute;es (RGPD),
+            vous disposez d&apos;un droit d&apos;acc&egrave;s, de rectification, de suppression et de portabilit&eacute;
+            de vos donn&eacute;es personnelles. Vous pouvez exercer ces droits depuis votre{" "}
+            <a href="/mon-espace" className="text-dta-accent underline">espace personnel</a>{" "}
+            ou en nous contactant &agrave; hello@dreamteamafrica.com.
+          </p>
+        </section>
+
         {/* Esprit */}
         <section className="rounded-xl border border-dta-sand/50 bg-dta-sand/10 p-6">
           <p className="font-serif text-base italic text-dta-dark">

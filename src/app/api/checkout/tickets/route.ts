@@ -199,6 +199,22 @@ export async function POST(request: Request) {
       });
     }
 
+    /* ── Duplicate payment detection ──────────────────────── */
+    const recentSession = await prisma.ticket.findFirst({
+      where: {
+        email: trimmedEmail,
+        eventId: event.id,
+        tier,
+        purchasedAt: { gte: new Date(Date.now() - 5 * 60 * 1000) }, // 5 min window
+      },
+    });
+    if (recentSession) {
+      return NextResponse.json(
+        { error: "Un paiement récent a déjà été détecté pour ce billet. Vérifiez votre email." },
+        { status: 409 },
+      );
+    }
+
     /* ── PAID TICKETS: Stripe checkout ──────────────────────── */
     const productName = `${event.title} — ${tierName}`;
     const nbInstallments = Math.min(Math.max(Number(installments) || 1, 1), 3);

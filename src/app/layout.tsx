@@ -65,6 +65,10 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true },
   },
+  other: {
+    "copyright": "Dream Team Africa — Association loi 1901",
+    "author": "Dream Team Africa",
+  },
 };
 
 export default function RootLayout({

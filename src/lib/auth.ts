@@ -86,8 +86,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
+        const emailKey = (credentials.email as string).toLowerCase();
+
+        // Account lockout: max 5 failed attempts per 15 min
+        const lockoutKey = `login_fail:${emailKey}`;
+        const now = Date.now();
+        const g = globalThis as unknown as { _loginAttempts?: Map<string, { count: number; firstAt: number }> };
+        if (!g._loginAttempts) g._loginAttempts = new Map();
+        const attempts = g._loginAttempts;
+        const entry = attempts.get(lockoutKey);
+        if (entry && now - entry.firstAt < 15 * 60 * 1000 && entry.count >= 5) {
+          throw new Error("ACCOUNT_LOCKED");
+        }
+
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
+          where: { email: emailKey },
         });
 
         if (!user || !user.password) return null;
@@ -97,7 +110,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user.password
         );
 
-        if (!isValid) return null;
+        if (!isValid) {
+          // Track failed attempt
+          if (entry && now - entry.firstAt < 15 * 60 * 1000) {
+            entry.count++;
+          } else {
+            attempts.set(lockoutKey, { count: 1, firstAt: now });
+          }
+          return null;
+        }
+
+        // Reset on success
+        attempts.delete(lockoutKey);
 
         return {
           id: user.id,

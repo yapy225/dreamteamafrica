@@ -17,6 +17,7 @@ export default function robots(): MetadataRoute.Robots {
           "/auth",
           "/cart",
           "/mes-billets",
+          "/mon-espace",
           "/check",
           "/resa-exposants",
           "/exposants/reservation",
@@ -25,6 +26,14 @@ export default function robots(): MetadataRoute.Robots {
           "/billetterie-exposants",
           "/casting",
         ],
+      },
+      {
+        userAgent: ["GPTBot", "ChatGPT-User", "CCBot", "anthropic-ai", "Google-Extended"],
+        disallow: ["/"],
+      },
+      {
+        userAgent: ["AhrefsBot", "SemrushBot", "MJ12bot", "DotBot", "BLEXBot"],
+        disallow: ["/"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

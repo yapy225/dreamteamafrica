@@ -380,12 +380,51 @@ export default function MonEspaceClient({
             <p className="font-medium text-dta-dark">{tickets.length}</p>
           </div>
         </div>
-        <button
-          onClick={() => signOut({ callbackUrl: "/" })}
-          className="mt-6 text-sm font-medium text-red-500 hover:text-red-700"
-        >
-          Se d&eacute;connecter
-        </button>
+        <div className="mt-6 flex items-center gap-4">
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="text-sm font-medium text-red-500 hover:text-red-700"
+          >
+            Se d&eacute;connecter
+          </button>
+        </div>
+      </div>
+
+      {/* RGPD */}
+      <div className="mt-6 rounded-xl border border-dta-sand bg-white p-6">
+        <h2 className="mb-3 text-sm font-bold text-dta-dark">Mes donn&eacute;es personnelles (RGPD)</h2>
+        <div className="flex flex-wrap gap-3">
+          <a
+            href="/api/account/export"
+            className="rounded-lg border border-dta-sand px-4 py-2 text-xs font-medium text-dta-char hover:bg-dta-bg"
+          >
+            &#x1F4E5; Exporter mes donn&eacute;es
+          </a>
+          <button
+            onClick={async () => {
+              const confirmation = prompt("Pour supprimer votre compte, tapez : SUPPRIMER MON COMPTE");
+              if (!confirmation) return;
+              const res = await fetch("/api/account/delete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ confirmation }),
+              });
+              const data = await res.json();
+              if (data.success) {
+                alert("Votre compte a \u00e9t\u00e9 supprim\u00e9.");
+                signOut({ callbackUrl: "/" });
+              } else {
+                alert(data.error || "Erreur");
+              }
+            }}
+            className="rounded-lg border border-red-200 px-4 py-2 text-xs font-medium text-red-500 hover:bg-red-50"
+          >
+            &#x1F5D1; Supprimer mon compte
+          </button>
+        </div>
+        <p className="mt-2 text-[10px] text-dta-char/40">
+          Conform&eacute;ment au RGPD, vous pouvez exporter ou supprimer vos donn&eacute;es &agrave; tout moment.
+        </p>
       </div>
 
       {/* Footer baseline */}

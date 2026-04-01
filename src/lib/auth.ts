@@ -3,7 +3,6 @@ import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
-import * as OTPAuth from "otpauth";
 import { prisma } from "./db";
 
 /**
@@ -83,7 +82,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Mot de passe", type: "password" },
-        totpCode: { label: "Code 2FA", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
@@ -100,28 +98,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
 
         if (!isValid) return null;
-
-        // 2FA check if enabled
-        if (user.totpEnabled && user.totpSecret) {
-          const totpCode = credentials.totpCode as string;
-          if (!totpCode) {
-            throw new Error("TOTP_REQUIRED");
-          }
-
-          const totp = new OTPAuth.TOTP({
-            issuer: "Dream Team Africa",
-            label: user.email,
-            algorithm: "SHA1",
-            digits: 6,
-            period: 30,
-            secret: OTPAuth.Secret.fromBase32(user.totpSecret),
-          });
-
-          const delta = totp.validate({ token: totpCode, window: 1 });
-          if (delta === null) {
-            throw new Error("TOTP_INVALID");
-          }
-        }
 
         return {
           id: user.id,

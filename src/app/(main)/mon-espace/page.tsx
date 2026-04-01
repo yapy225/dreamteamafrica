@@ -12,7 +12,7 @@ export default async function MonEspacePage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { name: true, email: true, createdAt: true, totpEnabled: true },
+    select: { name: true, email: true, createdAt: true },
   });
 
   const tickets = await prisma.ticket.findMany({
@@ -56,7 +56,6 @@ export default async function MonEspacePage() {
       userEmail={user?.email || ""}
       memberSince={user?.createdAt ? new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(user.createdAt) : ""}
       tickets={serialized}
-      totpEnabled={user?.totpEnabled || false}
     />
   );
 }

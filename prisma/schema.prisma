@@ -96,8 +96,6 @@ model User {
   bio            String?
   country        String?
   phone          String?
-  totpSecret     String?
-  totpEnabled    Boolean   @default(false)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

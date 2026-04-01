@@ -10,6 +10,10 @@ export const BEHAVIOR_WEIGHTS: Record<string, number> = {
   rapid_nav: 2,        // Navigation anormalement rapide (<1s entre pages)
   source_inspect: 4,   // Clic droit + "Afficher le code source"
   multi_tier_switch: 2,// Change de tier plusieurs fois sans acheter
+  copy_text: 2,        // Copie de texte (Ctrl+C / Cmd+C)
+  paste_text: 1,       // Colle du texte
+  select_text: 1,      // Sélection de texte (par bloc, pas clic simple)
+  print_attempt: 5,    // Tentative d'impression (Ctrl+P)
 };
 
 // Seuils de friction

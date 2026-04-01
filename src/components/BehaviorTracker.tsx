@@ -82,6 +82,58 @@ export default function BehaviorTracker() {
     return () => document.removeEventListener("contextmenu", handler);
   }, []);
 
+  // Detect copy (Ctrl+C / Cmd+C)
+  useEffect(() => {
+    const handler = () => sendSignal("copy_text");
+    document.addEventListener("copy", handler);
+    return () => document.removeEventListener("copy", handler);
+  }, []);
+
+  // Detect paste (Ctrl+V / Cmd+V)
+  useEffect(() => {
+    const handler = () => sendSignal("paste_text");
+    document.addEventListener("paste", handler);
+    return () => document.removeEventListener("paste", handler);
+  }, []);
+
+  // Detect text selection (only meaningful selections, not accidental clicks)
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    const handler = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        const sel = window.getSelection();
+        if (sel && sel.toString().trim().length > 10) {
+          sendSignal("select_text");
+        }
+      }, 500);
+    };
+    document.addEventListener("selectionchange", handler);
+    return () => {
+      document.removeEventListener("selectionchange", handler);
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  // Detect print attempt (Ctrl+P / Cmd+P)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "p") {
+        sendSignal("print_attempt");
+      }
+    };
+    document.addEventListener("keydown", handler);
+
+    // Also detect window.print() via beforeprint event
+    const printHandler = () => sendSignal("print_attempt");
+    window.addEventListener("beforeprint", printHandler);
+
+    return () => {
+      document.removeEventListener("keydown", handler);
+      window.removeEventListener("beforeprint", printHandler);
+    };
+  }, []);
+
   // Inject fingerprint into fetch headers for checkout friction
   useEffect(() => {
     const fp = getFingerprint();

@@ -21,6 +21,7 @@
     "@anthropic-ai/sdk": "^0.80.0",
     "@auth/prisma-adapter": "^2.11.1",
     "@prisma/client": "^6.19.2",
+    "@sentry/nextjs": "^10.47.0",
     "@stripe/stripe-js": "^8.8.0",
     "@tailwindcss/typography": "^0.5.19",
     "@types/nodemailer": "^7.0.11",

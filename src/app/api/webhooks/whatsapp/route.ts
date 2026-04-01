@@ -121,16 +121,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 
-  // Verify signature from Meta (skip if no signature header, e.g. test mode)
+  // Verify signature from Meta (REQUIRED in production)
   const signature = request.headers.get("x-hub-signature-256");
-  if (signature && APP_SECRET) {
-    const expectedSig =
-      "sha256=" +
-      crypto.createHmac("sha256", APP_SECRET).update(rawBody).digest("hex");
-    if (signature !== expectedSig) {
-      console.error("WhatsApp webhook: invalid signature");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
-    }
+  if (!signature || !APP_SECRET) {
+    console.error("WhatsApp webhook: missing signature or app secret");
+    return NextResponse.json({ error: "Missing signature" }, { status: 403 });
+  }
+  const expectedSig =
+    "sha256=" +
+    crypto.createHmac("sha256", APP_SECRET).update(rawBody).digest("hex");
+  if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
+    console.error("WhatsApp webhook: invalid signature");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
   }
 
   let payload: Record<string, unknown>;

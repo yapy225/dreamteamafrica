@@ -17,7 +17,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Aucun fichier fourni." }, { status: 400 });
     }
 
-    const result = await uploadFile(file, folder);
+    // File size limit: 10MB
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: "Fichier trop volumineux (max 10 Mo)." }, { status: 400 });
+    }
+
+    // Allowed MIME types
+    const allowedTypes = [
+      "image/jpeg", "image/png", "image/webp", "image/gif",
+      "video/mp4", "video/quicktime",
+      "application/pdf",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json({ error: "Type de fichier non autorisé." }, { status: 400 });
+    }
+
+    // Sanitize folder path (prevent directory traversal)
+    const safeFolder = folder.replace(/\.\./g, "").replace(/[^a-zA-Z0-9\-_\/]/g, "");
+
+    const result = await uploadFile(file, safeFolder);
 
     return NextResponse.json({ url: result.url, path: result.path }, { status: 201 });
   } catch (error) {

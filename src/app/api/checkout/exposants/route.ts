@@ -108,6 +108,16 @@ export async function POST(request: Request) {
       },
     });
 
+    // Lier le lead au booking (pour ne pas double-compter l'acompte lead)
+    try {
+      await prisma.exposantLead.updateMany({
+        where: { email: email.trim(), status: "DEPOSIT_PAID", bookingId: null },
+        data: { bookingId: booking.id },
+      });
+    } catch (_) {
+      // non bloquant
+    }
+
     // Newsletter subscription
     if (newsletter) {
       try {

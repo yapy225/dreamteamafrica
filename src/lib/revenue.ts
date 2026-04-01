@@ -46,7 +46,7 @@ export async function getRevenueData(): Promise<RevenueSummary> {
     d.setMonth(d.getMonth() + 1);
   }
 
-  const [tickets, exhibitorPayments] = await Promise.all([
+  const [tickets, exhibitorPayments, leadDeposits] = await Promise.all([
     // Revenus billetterie
     prisma.ticket.findMany({
       where: { purchasedAt: { gte: startDate } },
@@ -57,14 +57,30 @@ export async function getRevenueData(): Promise<RevenueSummary> {
       where: { paidAt: { gte: startDate } },
       select: { amount: true, paidAt: true },
     }),
+    // Acomptes leads exposants (50 € non rattachés à un booking)
+    prisma.exposantLead.findMany({
+      where: {
+        status: "DEPOSIT_PAID",
+        depositPaidAt: { gte: startDate },
+        bookingId: null, // pas encore converti en booking
+      },
+      select: { depositPaidAt: true },
+    }),
   ]);
+
+  // Fusionner les paiements exposants + acomptes leads
+  const LEAD_DEPOSIT = 50;
+  const allExposantPayments = [
+    ...exhibitorPayments,
+    ...leadDeposits.map((l) => ({ amount: LEAD_DEPOSIT, paidAt: l.depositPaidAt! })),
+  ];
 
   const monthly: MonthlyRevenue[] = buckets.map((bucket) => {
     const ticketRev = tickets
       .filter((t) => t.purchasedAt >= bucket.start && t.purchasedAt < bucket.end)
       .reduce((sum, t) => sum + t.price, 0);
 
-    const exposantRev = exhibitorPayments
+    const exposantRev = allExposantPayments
       .filter((p) => p.paidAt >= bucket.start && p.paidAt < bucket.end)
       .reduce((sum, p) => sum + p.amount, 0);
 
@@ -88,7 +104,7 @@ export async function getRevenueData(): Promise<RevenueSummary> {
   // Stats du jour
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const todayTickets = tickets.filter((t) => t.purchasedAt >= todayStart);
-  const todayExhibitor = exhibitorPayments.filter((p) => p.paidAt >= todayStart);
+  const todayExhibitor = allExposantPayments.filter((p) => p.paidAt >= todayStart);
 
   const todayTicketRev = todayTickets.reduce((s, t) => s + t.price, 0);
   const todayExposantRev = todayExhibitor.reduce((s, p) => s + p.amount, 0);

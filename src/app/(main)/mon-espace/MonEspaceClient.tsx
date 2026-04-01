@@ -50,17 +50,24 @@ export default function MonEspaceClient({
   userEmail,
   memberSince,
   tickets,
+  totpEnabled: initialTotpEnabled,
 }: {
   userName: string;
   userEmail: string;
   memberSince: string;
   tickets: TicketInfo[];
+  totpEnabled: boolean;
 }) {
   const [rechargeTicketId, setRechargeTicketId] = useState<string | null>(null);
   const [rechargeAmount, setRechargeAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState("");
   const [rechargeLoading, setRechargeLoading] = useState(false);
   const [expandedTicket, setExpandedTicket] = useState<string | null>(null);
+  const [totpEnabled, setTotpEnabled] = useState(initialTotpEnabled);
+  const [totpSetup, setTotpSetup] = useState<{ qrCode: string; secret: string } | null>(null);
+  const [totpCode, setTotpCode] = useState("");
+  const [totpLoading, setTotpLoading] = useState(false);
+  const [totpError, setTotpError] = useState("");
 
   const totalPaid = tickets.reduce((sum, t) => sum + t.totalPaid, 0);
   const totalPrice = tickets.reduce((sum, t) => sum + t.price, 0);
@@ -350,6 +357,140 @@ export default function MonEspaceClient({
           </div>
         </div>
       )}
+
+      {/* Security - 2FA */}
+      <div className="mt-10 rounded-xl border border-dta-sand bg-white p-6">
+        <h2 className="mb-4 font-serif text-lg font-bold text-dta-dark">S&eacute;curit&eacute;</h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-dta-dark">Authentification &agrave; deux facteurs (2FA)</p>
+            <p className="text-xs text-dta-char/50">
+              {totpEnabled
+                ? "Votre compte est prot\u00e9g\u00e9 par la v\u00e9rification en deux \u00e9tapes."
+                : "Ajoutez une couche de s\u00e9curit\u00e9 suppl\u00e9mentaire \u00e0 votre compte."}
+            </p>
+          </div>
+          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+            totpEnabled ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+          }`}>
+            {totpEnabled ? "Activ\u00e9" : "D\u00e9sactiv\u00e9"}
+          </span>
+        </div>
+
+        {totpError && (
+          <div className="mt-3 rounded-lg bg-red-50 px-4 py-2 text-xs text-red-600">{totpError}</div>
+        )}
+
+        {!totpEnabled && !totpSetup && (
+          <button
+            onClick={async () => {
+              setTotpLoading(true);
+              setTotpError("");
+              try {
+                const res = await fetch("/api/auth/totp/setup", { method: "POST" });
+                const data = await res.json();
+                if (data.qrCode) {
+                  setTotpSetup(data);
+                } else {
+                  setTotpError(data.error || "Erreur");
+                }
+              } catch { setTotpError("Erreur réseau."); }
+              setTotpLoading(false);
+            }}
+            disabled={totpLoading}
+            className="mt-4 rounded-lg bg-dta-accent px-4 py-2 text-sm font-semibold text-white hover:bg-dta-accent-dark disabled:opacity-50"
+          >
+            {totpLoading ? "Chargement..." : "Activer le 2FA"}
+          </button>
+        )}
+
+        {totpSetup && !totpEnabled && (
+          <div className="mt-4 rounded-xl border border-dta-sand bg-dta-bg p-5">
+            <p className="mb-3 text-sm font-medium text-dta-dark">1. Scannez ce QR code avec votre application (Google Authenticator, Authy, etc.)</p>
+            <div className="text-center">
+              <img src={totpSetup.qrCode} alt="QR Code 2FA" className="mx-auto h-48 w-48 rounded-lg" />
+            </div>
+            <p className="mt-3 text-xs text-dta-char/50 text-center">
+              Cl&eacute; manuelle : <code className="rounded bg-white px-2 py-0.5 font-mono text-xs">{totpSetup.secret}</code>
+            </p>
+            <p className="mt-4 mb-2 text-sm font-medium text-dta-dark">2. Entrez le code &agrave; 6 chiffres</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]{6}"
+                maxLength={6}
+                value={totpCode}
+                onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, ""))}
+                className="flex-1 rounded-lg border border-dta-sand bg-white px-4 py-2.5 text-center font-mono text-lg tracking-[0.3em] focus:border-dta-accent focus:outline-none"
+                placeholder="000000"
+              />
+              <button
+                onClick={async () => {
+                  setTotpLoading(true);
+                  setTotpError("");
+                  try {
+                    const res = await fetch("/api/auth/totp/verify", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ code: totpCode }),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      setTotpEnabled(true);
+                      setTotpSetup(null);
+                      setTotpCode("");
+                    } else {
+                      setTotpError(data.error || "Code incorrect.");
+                    }
+                  } catch { setTotpError("Erreur réseau."); }
+                  setTotpLoading(false);
+                }}
+                disabled={totpCode.length !== 6 || totpLoading}
+                className="rounded-lg bg-dta-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-dta-accent-dark disabled:opacity-50"
+              >
+                {totpLoading ? "..." : "Valider"}
+              </button>
+            </div>
+            <button
+              onClick={() => { setTotpSetup(null); setTotpCode(""); setTotpError(""); }}
+              className="mt-3 text-xs text-dta-char/50 hover:text-dta-dark"
+            >
+              Annuler
+            </button>
+          </div>
+        )}
+
+        {totpEnabled && (
+          <div className="mt-4">
+            <button
+              onClick={async () => {
+                const code = prompt("Entrez votre code 2FA pour d\u00e9sactiver :");
+                if (!code) return;
+                setTotpLoading(true);
+                setTotpError("");
+                try {
+                  const res = await fetch("/api/auth/totp/disable", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code }),
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    setTotpEnabled(false);
+                  } else {
+                    setTotpError(data.error || "Code incorrect.");
+                  }
+                } catch { setTotpError("Erreur réseau."); }
+                setTotpLoading(false);
+              }}
+              className="text-sm text-red-500 hover:text-red-700"
+            >
+              D&eacute;sactiver le 2FA
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Profile */}
       <div className="mt-10 rounded-xl border border-dta-sand bg-white p-6">

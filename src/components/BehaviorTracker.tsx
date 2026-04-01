@@ -82,9 +82,13 @@ export default function BehaviorTracker() {
     return () => document.removeEventListener("contextmenu", handler);
   }, []);
 
-  // Detect copy (Ctrl+C / Cmd+C)
+  // Detect copy (Ctrl+C / Cmd+C) — signal uniquement à partir de la 2ème copie
   useEffect(() => {
-    const handler = () => sendSignal("copy_text");
+    let count = 0;
+    const handler = () => {
+      count++;
+      if (count >= 2) sendSignal("copy_text");
+    };
     document.addEventListener("copy", handler);
     return () => document.removeEventListener("copy", handler);
   }, []);

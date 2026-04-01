@@ -292,13 +292,21 @@ export default function MonEspaceClient({
                   </div>
                 )}
 
-                {/* Details toggle */}
-                <button
-                  onClick={() => setExpandedTicket(isExpanded ? null : ticket.id)}
-                  className="mt-3 text-xs font-medium text-dta-accent hover:text-dta-accent-dark"
-                >
-                  {isExpanded ? "Masquer" : "D\u00e9tails"}
-                </button>
+                {/* Actions */}
+                <div className="mt-3 flex items-center gap-4">
+                  <button
+                    onClick={() => setExpandedTicket(isExpanded ? null : ticket.id)}
+                    className="text-xs font-medium text-dta-accent hover:text-dta-accent-dark"
+                  >
+                    {isExpanded ? "Masquer" : "D\u00e9tails"}
+                  </button>
+                  <a
+                    href={`/api/tickets/pdf?id=${ticket.id}`}
+                    className="text-xs font-medium text-dta-accent hover:text-dta-accent-dark"
+                  >
+                    &#x1F4E5; T&eacute;l&eacute;charger PDF
+                  </a>
+                </div>
               </div>
 
               {/* Expanded */}

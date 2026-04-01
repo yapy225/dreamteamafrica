@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { eventId, tier, quantity, sessionLabel, firstName, lastName, email, phone, visitDate } =
+    const { eventId, tier, quantity, sessionLabel, firstName, lastName, email, phone, visitDate, installments } =
       await request.json();
 
     // Validate required nominative fields
@@ -201,45 +201,99 @@ export async function POST(request: Request) {
 
     /* ── PAID TICKETS: Stripe checkout ──────────────────────── */
     const productName = `${event.title} — ${tierName}`;
+    const nbInstallments = Math.min(Math.max(Number(installments) || 1, 1), 3);
+    const totalAmount = unitPrice * quantity;
+    const stripe = getStripe();
 
-    const checkoutSession = await getStripe().checkout.sessions.create({
-      mode: "payment",
-      payment_method_types: ["card", "paypal"],
-      customer_email: trimmedEmail,
-      line_items: [
-        {
-          price_data: {
-            currency: "eur",
-            unit_amount: Math.round(unitPrice * 100),
-            product_data: {
-              name: productName,
-              description: sessionLabel
-                ? sessionLabel
-                : `${event.venue} — ${new Date(event.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`,
+    if (nbInstallments === 1) {
+      // ── Single full payment ──
+      const checkoutSession = await stripe.checkout.sessions.create({
+        mode: "payment",
+        payment_method_types: ["card", "paypal"],
+        customer_email: trimmedEmail,
+        line_items: [
+          {
+            price_data: {
+              currency: "eur",
+              unit_amount: Math.round(unitPrice * 100),
+              product_data: {
+                name: productName,
+                description: sessionLabel
+                  ? sessionLabel
+                  : `${event.venue} — ${new Date(event.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`,
+              },
             },
+            quantity,
           },
-          quantity,
+        ],
+        metadata: {
+          type: "ticket",
+          eventId: event.id,
+          userId: user.id,
+          tier,
+          quantity: String(quantity),
+          unitPrice: String(unitPrice),
+          firstName: trimmedFirstName,
+          lastName: trimmedLastName,
+          email: trimmedEmail,
+          phone: trimmedPhone,
+          installments: "1",
+          ...(visitDate && { visitDate: String(visitDate) }),
+          ...(sessionLabel && { sessionLabel }),
         },
-      ],
-      metadata: {
-        type: "ticket",
-        eventId: event.id,
-        userId: user.id,
-        tier,
-        quantity: String(quantity),
-        unitPrice: String(unitPrice),
-        firstName: trimmedFirstName,
-        lastName: trimmedLastName,
-        email: trimmedEmail,
-        phone: trimmedPhone,
-        ...(visitDate && { visitDate: String(visitDate) }),
-        ...(sessionLabel && { sessionLabel }),
-      },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/saison-culturelle-africaine/confirmation/{CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/saison-culturelle-africaine/${event.slug}`,
-    });
+        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/saison-culturelle-africaine/confirmation/{CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/saison-culturelle-africaine/${event.slug}`,
+      });
 
-    return NextResponse.json({ url: checkoutSession.url });
+      return NextResponse.json({ url: checkoutSession.url });
+    } else {
+      // ── Deposit (5€/billet) + remaining in (N-1) monthly installments ──
+      const depositPerTicket = 5;
+      const deposit = depositPerTicket * quantity;
+      const remainingBalance = totalAmount - deposit;
+      const installmentAmount = Math.ceil((remainingBalance / (nbInstallments - 1)) * 100) / 100;
+
+      const checkoutSession = await stripe.checkout.sessions.create({
+        mode: "payment",
+        payment_method_types: ["card", "paypal"],
+        customer_email: trimmedEmail,
+        line_items: [
+          {
+            price_data: {
+              currency: "eur",
+              unit_amount: Math.round(deposit * 100),
+              product_data: {
+                name: `Acompte — ${productName}`,
+                description: `Acompte de ${deposit} € sur ${totalAmount} € total. Solde (${remainingBalance} €) en ${nbInstallments - 1} mensualité${nbInstallments - 1 > 1 ? "s" : ""}.`,
+              },
+            },
+            quantity: 1,
+          },
+        ],
+        metadata: {
+          type: "ticket_installment",
+          eventId: event.id,
+          userId: user.id,
+          tier,
+          quantity: String(quantity),
+          unitPrice: String(unitPrice),
+          firstName: trimmedFirstName,
+          lastName: trimmedLastName,
+          email: trimmedEmail,
+          phone: trimmedPhone,
+          installments: String(nbInstallments),
+          deposit: String(deposit),
+          remainingBalance: String(remainingBalance),
+          installmentAmount: String(installmentAmount),
+          ...(visitDate && { visitDate: String(visitDate) }),
+          ...(sessionLabel && { sessionLabel }),
+        },
+        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/saison-culturelle-africaine/confirmation/{CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/saison-culturelle-africaine/${event.slug}`,
+      });
+
+      return NextResponse.json({ url: checkoutSession.url });
+    }
   } catch (error) {
     console.error("Checkout error:", error);
     return NextResponse.json(

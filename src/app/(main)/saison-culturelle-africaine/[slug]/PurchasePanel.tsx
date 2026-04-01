@@ -74,6 +74,7 @@ export default function PurchasePanel({
     phone: "",
   });
   const [selectedDate, setSelectedDate] = useState<string>(fixedVisitDate || eventDate);
+  const [installments, setInstallments] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -117,6 +118,9 @@ export default function PurchasePanel({
 
   /* ── derived ─────────────────────────────────────────── */
   const total = tier.price * quantity;
+  const deposit = installments > 1 ? 5 * quantity : total;
+  const remainingBalance = total - deposit;
+  const monthlyAmount = installments > 1 ? Math.ceil((remainingBalance / (installments - 1)) * 100) / 100 : 0;
   const canSubmit =
     form.firstName.trim() &&
     form.lastName.trim() &&
@@ -167,6 +171,7 @@ export default function PurchasePanel({
           email: form.email,
           phone: form.phone,
           visitDate: selectedDate,
+          installments,
         }),
       });
 
@@ -367,6 +372,43 @@ export default function PurchasePanel({
             />
           </div>
 
+          {/* installments selector */}
+          {tier.price > 0 && total > 10 && (
+            <div>
+              <label className="mb-2 block text-sm font-medium text-dta-char">
+                Mode de paiement
+              </label>
+              <p className="mb-3 text-xs text-dta-accent font-medium">
+                La culture africaine pour tous. R&eacute;serve ta place d&egrave;s 5&nbsp;&euro; et paye &agrave; ton rythme.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {[1, 2, 3].map((n) => {
+                  const isActive = installments === n;
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setInstallments(n)}
+                      className={`rounded-[var(--radius-button)] border px-4 py-2 text-sm font-medium transition-colors ${
+                        isActive
+                          ? "border-dta-accent bg-dta-accent text-white"
+                          : "border-dta-sand bg-white text-dta-char hover:border-dta-accent/50"
+                      }`}
+                    >
+                      {n === 1 ? "Paiement unique" : `${n}x sans frais`}
+                    </button>
+                  );
+                })}
+              </div>
+              {installments > 1 && (
+                <div className="mt-2 rounded-lg bg-dta-bg p-3 text-xs text-dta-char">
+                  <p>Aujourd&apos;hui : <strong>{formatCurrency(deposit)}</strong> (acompte)</p>
+                  <p>Puis {installments - 1}x <strong>{formatCurrency(monthlyAmount)}</strong>/mois</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* total + submit */}
           <div className="border-t border-dta-sand pt-4">
             <div className="mb-3 flex items-center justify-between text-sm">
@@ -392,7 +434,9 @@ export default function PurchasePanel({
               ) : tier.price === 0 ? (
                 "Réserver gratuitement"
               ) : (
-                `Passer au paiement — ${formatCurrency(total)}`
+                installments > 1
+                  ? `Payer l'acompte — ${formatCurrency(deposit)}`
+                  : `Passer au paiement — ${formatCurrency(total)}`
               )}
             </button>
           </div>

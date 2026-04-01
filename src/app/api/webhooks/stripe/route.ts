@@ -39,6 +39,8 @@ export async function POST(request: Request) {
 
     if (metadata?.type === "ticket") {
       await handleTicketPurchase(session);
+    } else if (metadata?.type === "ticket_installment") {
+      await handleTicketInstallment(session);
     } else if (metadata?.type === "order") {
       await handleOrderPurchase(session);
     } else if (metadata?.type === "exhibitor") {
@@ -156,6 +158,172 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
     }
   } catch (waErr) {
     console.error("WhatsApp ticket confirmation failed:", waErr);
+  }
+}
+
+async function handleTicketInstallment(session: Stripe.Checkout.Session) {
+  const {
+    eventId, userId, tier, quantity, unitPrice,
+    firstName, lastName, email, phone, visitDate,
+    installments, deposit, remainingBalance, installmentAmount,
+  } = session.metadata!;
+
+  const qty = parseInt(quantity);
+  const unitPriceNum = parseFloat(unitPrice);
+  const nbInstallments = parseInt(installments);
+
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    select: { title: true, date: true, venue: true, address: true, coverImage: true, tiers: true },
+  });
+
+  // Resolve tier name
+  const customTiers = event?.tiers as Array<{ id: string; name: string }> | null;
+  const matchedTier = Array.isArray(customTiers) ? customTiers.find((t) => t.id === tier) : null;
+  const legacyLabelMap: Record<string, string> = { EARLY_BIRD: "Early Bird", STANDARD: "Standard", VIP: "VIP" };
+  const tierName = matchedTier?.name || legacyLabelMap[tier] || tier;
+
+  // Create tickets (with deposit paid, rest pending via subscription)
+  const createdTickets: Array<{ id: string; qrCode: string }> = [];
+
+  const ticketPromises = Array.from({ length: qty }, async () => {
+    const ticketId = crypto.randomUUID();
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://dreamteamafrica.com";
+    const qrUrl = `${baseUrl}/check/${ticketId}`;
+    const qrBuffer = await QRCode.toBuffer(qrUrl, { width: 600, margin: 2 });
+    const { url: qrCdnUrl } = await uploadBuffer(
+      Buffer.from(qrBuffer),
+      `qrcodes/tickets/${ticketId}.png`,
+    );
+
+    const ticket = await prisma.ticket.create({
+      data: {
+        id: ticketId,
+        eventId,
+        userId,
+        tier,
+        price: unitPriceNum,
+        qrCode: qrCdnUrl,
+        stripeSessionId: session.id,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        email: email || null,
+        phone: phone || null,
+        visitDate: visitDate ? new Date(visitDate) : null,
+      },
+    });
+
+    createdTickets.push({ id: ticket.id, qrCode: qrCdnUrl });
+    return ticket;
+  });
+
+  await Promise.all(ticketPromises);
+  console.log(`Created ${qty} installment ticket(s) for event ${eventId} (${nbInstallments}x)`);
+
+  // Create Stripe subscription for remaining balance
+  if (nbInstallments > 1) {
+    try {
+      const stripe = getStripe();
+      const customerEmail = email || "";
+
+      // Find or create Stripe customer
+      const customers = await stripe.customers.list({ email: customerEmail, limit: 1 });
+      let customer: Stripe.Customer;
+      if (customers.data.length > 0) {
+        customer = customers.data[0];
+      } else {
+        customer = await stripe.customers.create({
+          email: customerEmail,
+          name: `${firstName || ""} ${lastName || ""}`.trim(),
+          metadata: { userId },
+        });
+      }
+
+      // Attach payment method from checkout session
+      if (session.payment_intent) {
+        const pi = await stripe.paymentIntents.retrieve(session.payment_intent as string);
+        if (pi.payment_method) {
+          await stripe.paymentMethods.attach(pi.payment_method as string, { customer: customer.id });
+          await stripe.customers.update(customer.id, {
+            invoice_settings: { default_payment_method: pi.payment_method as string },
+          });
+        }
+      }
+
+      const monthlyAmountNum = parseFloat(installmentAmount);
+      const remainingMonths = nbInstallments - 1;
+
+      // Create product + price for monthly installments
+      const product = await stripe.products.create({
+        name: `Mensualité billet — ${event?.title || "Événement"}`,
+        metadata: { eventId, userId },
+      });
+
+      const price = await stripe.prices.create({
+        product: product.id,
+        unit_amount: Math.round(monthlyAmountNum * 100),
+        currency: "eur",
+        recurring: { interval: "month" },
+      });
+
+      // Create subscription that auto-cancels after remaining months
+      const cancelAt = new Date();
+      cancelAt.setMonth(cancelAt.getMonth() + remainingMonths + 1);
+
+      await stripe.subscriptions.create({
+        customer: customer.id,
+        items: [{ price: price.id }],
+        cancel_at: Math.floor(cancelAt.getTime() / 1000),
+        metadata: {
+          type: "ticket_installment",
+          eventId,
+          userId,
+          ticketIds: createdTickets.map((t) => t.id).join(","),
+        },
+      });
+
+      console.log(`Created subscription for ${remainingMonths} monthly payments of ${monthlyAmountNum}€`);
+    } catch (subErr) {
+      console.error("Failed to create ticket installment subscription:", subErr);
+    }
+  }
+
+  // Send confirmation email
+  try {
+    if (event) {
+      const depositNum = parseFloat(deposit);
+      await sendTicketConfirmationEmail({
+        to: email || "",
+        guestName: `${firstName || ""} ${lastName || ""}`.trim(),
+        eventTitle: event.title,
+        eventVenue: event.venue,
+        eventAddress: event.address,
+        eventDate: visitDate ? new Date(visitDate) : event.date,
+        eventCoverImage: event.coverImage,
+        tier: tierName,
+        price: unitPriceNum,
+        quantity: qty,
+        tickets: createdTickets,
+      });
+    }
+  } catch (emailErr) {
+    console.error("Ticket installment confirmation email failed:", emailErr);
+  }
+
+  // Send WhatsApp confirmation
+  try {
+    const whatsappPhone = phone;
+    const customerName = `${firstName || ""} ${lastName || ""}`.trim();
+    if (whatsappPhone && event) {
+      const depositNum = parseFloat(deposit);
+      const monthlyNum = parseFloat(installmentAmount);
+      const remainingMonths = nbInstallments - 1;
+      await sendWhatsAppText(whatsappPhone,
+        `Bonjour ${customerName},\n\nMerci pour votre reservation !\n\nVotre acompte de ${depositNum} EUR a ete recu. Vos ${qty} billet(s) pour ${event.title} sont confirmes.\n\nSolde restant : ${remainingMonths}x ${monthlyNum} EUR/mois (prelevement automatique).\n\nA tres bientot !\n\nL'equipe Dream Team Africa`
+      );
+    }
+  } catch (waErr) {
+    console.error("WhatsApp ticket installment confirmation failed:", waErr);
   }
 }
 

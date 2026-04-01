@@ -41,6 +41,8 @@ export async function POST(request: Request) {
       await handleTicketPurchase(session);
     } else if (metadata?.type === "ticket_installment") {
       await handleTicketInstallment(session);
+    } else if (metadata?.type === "ticket_recharge") {
+      await handleTicketRecharge(session);
     } else if (metadata?.type === "order") {
       await handleOrderPurchase(session);
     } else if (metadata?.type === "exhibitor") {
@@ -325,6 +327,28 @@ async function handleTicketInstallment(session: Stripe.Checkout.Session) {
   } catch (waErr) {
     console.error("WhatsApp ticket installment confirmation failed:", waErr);
   }
+}
+
+async function handleTicketRecharge(session: Stripe.Checkout.Session) {
+  const { ticketId, amount } = session.metadata!;
+  const rechargeAmount = parseFloat(amount);
+
+  await prisma.ticketPayment.create({
+    data: {
+      ticketId,
+      amount: rechargeAmount,
+      type: "recharge",
+      label: `Recharge +${rechargeAmount} €`,
+      stripeId: session.id,
+    },
+  });
+
+  await prisma.ticket.update({
+    where: { id: ticketId },
+    data: { totalPaid: { increment: rechargeAmount } },
+  });
+
+  console.log(`Ticket ${ticketId} recharged +${rechargeAmount}€`);
 }
 
 async function handleOrderPurchase(session: Stripe.Checkout.Session) {

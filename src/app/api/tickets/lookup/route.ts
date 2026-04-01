@@ -27,7 +27,10 @@ export async function POST(request: Request) {
 
     const tickets = await prisma.ticket.findMany({
       where: { email: trimmedEmail },
-      include: { event: { select: { title: true, venue: true, address: true, date: true } } },
+      include: {
+        event: { select: { title: true, venue: true, address: true, date: true, coverImage: true } },
+        payments: { orderBy: { paidAt: "desc" } },
+      },
       orderBy: { purchasedAt: "desc" },
     });
 
@@ -42,12 +45,23 @@ export async function POST(request: Request) {
         venue: t.event.venue,
         address: t.event.address,
         date: t.event.date,
+        coverImage: t.event.coverImage,
         visitDate: t.visitDate,
         tier: t.tier,
         price: t.price,
+        totalPaid: t.totalPaid,
+        installments: t.installments,
         firstName: t.firstName,
         lastName: t.lastName,
         qrCode: t.qrCode,
+        purchasedAt: t.purchasedAt,
+        payments: t.payments.map((p) => ({
+          id: p.id,
+          amount: p.amount,
+          type: p.type,
+          label: p.label,
+          paidAt: p.paidAt,
+        })),
       })),
     });
   } catch (error) {

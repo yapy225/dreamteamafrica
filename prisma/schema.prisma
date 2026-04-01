@@ -251,11 +251,29 @@ model Ticket {
   phone           String?
   visitDate       DateTime?
 
-  event Event @relation(fields: [eventId], references: [id])
-  user  User  @relation(fields: [userId], references: [id])
+  // Installment tracking
+  totalPaid       Float      @default(0)
+  installments    Int        @default(1)
+
+  event    Event           @relation(fields: [eventId], references: [id])
+  user     User            @relation(fields: [userId], references: [id])
+  payments TicketPayment[]
 
   @@index([eventId])
   @@index([userId])
+}
+
+model TicketPayment {
+  id       String   @id @default(cuid())
+  ticketId String
+  ticket   Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  amount   Float
+  type     String   // "deposit" | "installment" | "recharge" | "full_payment"
+  label    String   // e.g. "Acompte", "Recharge", "Paiement complet"
+  stripeId String?
+  paidAt   DateTime @default(now())
+
+  @@index([ticketId])
 }
 
 // ─── MARKETPLACE ────────────────────────────────────────

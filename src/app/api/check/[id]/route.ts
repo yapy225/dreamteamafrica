@@ -24,6 +24,9 @@ export async function GET(
   });
 
   if (ticket) {
+    const isPaid = ticket.totalPaid >= ticket.price;
+    const paymentPercent = ticket.price > 0 ? Math.round((ticket.totalPaid / ticket.price) * 100) : 100;
+
     return NextResponse.json({
       type: "TICKET",
       valid: true,
@@ -32,9 +35,12 @@ export async function GET(
       eventVenue: ticket.event.venue,
       eventAddress: ticket.event.address,
       eventDate: ticket.event.date,
-      holder: ticket.user.name || ticket.user.email,
+      holder: `${ticket.firstName || ""} ${ticket.lastName || ""}`.trim() || ticket.user.name || ticket.user.email,
       tier: ticket.tier,
       price: ticket.price,
+      totalPaid: ticket.totalPaid,
+      paymentPercent,
+      paymentStatus: isPaid ? "PAID" : "PARTIAL",
       checkedIn: ticket.checkedInAt !== null,
       checkedInAt: ticket.checkedInAt,
     });
@@ -59,6 +65,7 @@ export async function GET(
       eventDate: reservation.event.date,
       holder: `${reservation.firstName} ${reservation.lastName}`,
       guests: reservation.guests,
+      paymentStatus: "FREE",
       checkedIn: reservation.checkedInAt !== null,
       checkedInAt: reservation.checkedInAt,
     });
@@ -85,6 +92,19 @@ export async function POST(
   // Try check-in paid ticket
   const ticket = await prisma.ticket.findUnique({ where: { id } });
   if (ticket) {
+    // FRAUD CHECK: verify payment is complete
+    if (ticket.price > 0 && ticket.totalPaid < ticket.price) {
+      const remaining = ticket.price - ticket.totalPaid;
+      return NextResponse.json({
+        success: false,
+        error: `Paiement incomplet. Il reste ${remaining.toFixed(2)} € à payer.`,
+        paymentStatus: "PARTIAL",
+        totalPaid: ticket.totalPaid,
+        price: ticket.price,
+        remaining,
+      }, { status: 402 });
+    }
+
     if (ticket.checkedInAt) {
       return NextResponse.json({
         success: false,
@@ -92,11 +112,17 @@ export async function POST(
         checkedInAt: ticket.checkedInAt,
       }, { status: 409 });
     }
+
     await prisma.ticket.update({
       where: { id },
       data: { checkedInAt: new Date() },
     });
-    return NextResponse.json({ success: true, message: "Check-in validé" });
+    return NextResponse.json({
+      success: true,
+      message: "Check-in validé",
+      holder: `${ticket.firstName || ""} ${ticket.lastName || ""}`.trim(),
+      tier: ticket.tier,
+    });
   }
 
   // Try check-in free reservation
@@ -113,7 +139,11 @@ export async function POST(
       where: { id },
       data: { checkedInAt: new Date() },
     });
-    return NextResponse.json({ success: true, message: "Check-in validé" });
+    return NextResponse.json({
+      success: true,
+      message: "Check-in validé",
+      holder: `${reservation.firstName} ${reservation.lastName}`,
+    });
   }
 
   return NextResponse.json({ success: false, error: "Billet introuvable" }, { status: 404 });

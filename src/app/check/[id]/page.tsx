@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { CheckCircle, Calendar, MapPin, Clock, Users } from "lucide-react";
+import { CheckCircle, AlertTriangle, XCircle, Calendar, MapPin, Clock, Users } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate, formatDateTime } from "@/lib/utils";
 
@@ -23,15 +23,54 @@ export default async function CheckPage({
   });
 
   if (ticket) {
+    const isPaid = ticket.price === 0 || ticket.totalPaid >= ticket.price;
+    const isCheckedIn = ticket.checkedInAt !== null;
+    const remaining = ticket.price - ticket.totalPaid;
+    const paymentPercent = ticket.price > 0 ? Math.round((ticket.totalPaid / ticket.price) * 100) : 100;
+
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
         <div className="rounded-2xl bg-white p-8 shadow-lg">
-          <div className="mx-auto mb-4 inline-flex rounded-full bg-green-100 p-3">
-            <CheckCircle size={32} className="text-green-600" />
-          </div>
-          <h1 className="font-serif text-2xl font-bold text-dta-dark">
-            Billet valide
-          </h1>
+          {isCheckedIn ? (
+            <>
+              <div className="mx-auto mb-4 inline-flex rounded-full bg-red-100 p-3">
+                <XCircle size={32} className="text-red-600" />
+              </div>
+              <h1 className="font-serif text-2xl font-bold text-red-600">
+                D&eacute;j&agrave; scann&eacute;
+              </h1>
+              <p className="mt-2 text-sm text-dta-char/70">
+                Ce billet a &eacute;t&eacute; utilis&eacute; le {new Date(ticket.checkedInAt!).toLocaleString("fr-FR")}
+              </p>
+            </>
+          ) : !isPaid ? (
+            <>
+              <div className="mx-auto mb-4 inline-flex rounded-full bg-amber-100 p-3">
+                <AlertTriangle size={32} className="text-amber-600" />
+              </div>
+              <h1 className="font-serif text-2xl font-bold text-amber-600">
+                Paiement incomplet
+              </h1>
+              <p className="mt-2 text-sm text-dta-char/70">
+                {ticket.totalPaid.toFixed(2)} &euro; pay&eacute;s sur {ticket.price.toFixed(2)} &euro; &mdash; Il reste {remaining.toFixed(2)} &euro;
+              </p>
+              <div className="mt-3 h-3 overflow-hidden rounded-full bg-amber-100">
+                <div className="h-full rounded-full bg-amber-500" style={{ width: `${paymentPercent}%` }} />
+              </div>
+              <p className="mt-3 text-xs font-semibold text-red-600">
+                &#x26D4; Entr&eacute;e refus&eacute;e &mdash; Le billet doit &ecirc;tre enti&egrave;rement pay&eacute;
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="mx-auto mb-4 inline-flex rounded-full bg-green-100 p-3">
+                <CheckCircle size={32} className="text-green-600" />
+              </div>
+              <h1 className="font-serif text-2xl font-bold text-dta-dark">
+                Billet valide
+              </h1>
+            </>
+          )}
           <h2 className="mt-4 font-serif text-lg font-bold text-dta-dark">
             {ticket.event.title}
           </h2>

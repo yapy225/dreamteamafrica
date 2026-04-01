@@ -330,25 +330,40 @@ async function handleTicketInstallment(session: Stripe.Checkout.Session) {
 }
 
 async function handleTicketRecharge(session: Stripe.Checkout.Session) {
-  const { ticketId, amount } = session.metadata!;
+  const { ticketId, userId, amount } = session.metadata!;
   const rechargeAmount = parseFloat(amount);
+
+  // Verify ticket exists and belongs to user
+  const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
+  if (!ticket || (userId && ticket.userId !== userId)) {
+    console.error(`Recharge rejected: ticket ${ticketId} ownership mismatch`);
+    return;
+  }
+
+  // Prevent overpayment
+  const remaining = ticket.price - ticket.totalPaid;
+  const safeAmount = Math.min(rechargeAmount, remaining);
+  if (safeAmount <= 0) {
+    console.log(`Ticket ${ticketId} already fully paid, skipping recharge`);
+    return;
+  }
 
   await prisma.ticketPayment.create({
     data: {
       ticketId,
-      amount: rechargeAmount,
+      amount: safeAmount,
       type: "recharge",
-      label: `Recharge +${rechargeAmount} €`,
+      label: `Recharge +${safeAmount} €`,
       stripeId: session.id,
     },
   });
 
   await prisma.ticket.update({
     where: { id: ticketId },
-    data: { totalPaid: { increment: rechargeAmount } },
+    data: { totalPaid: { increment: safeAmount } },
   });
 
-  console.log(`Ticket ${ticketId} recharged +${rechargeAmount}€`);
+  console.log(`Ticket ${ticketId} recharged +${safeAmount}€ (user: ${userId})`);
 }
 
 async function handleOrderPurchase(session: Stripe.Checkout.Session) {

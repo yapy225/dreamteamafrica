@@ -71,6 +71,15 @@ export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const ip = getClientIp(_request);
+  const rl = rateLimit(`check-in:${ip}`, { limit: 10, windowSec: 60 });
+  if (!rl.success) {
+    return NextResponse.json(
+      { success: false, error: "Trop de tentatives." },
+      { status: 429 },
+    );
+  }
+
   const { id } = await params;
 
   // Try check-in paid ticket

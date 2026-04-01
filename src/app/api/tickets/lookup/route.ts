@@ -1,22 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 /**
  * POST /api/tickets/lookup
- * Returns tickets directly (QR codes) without sending email.
- * Fallback when Resend is unavailable.
+ * Returns tickets for the authenticated user only.
+ * Falls back to email lookup with strict rate limiting for unauthenticated /mes-billets.
  */
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request);
-    const rl = rateLimit(`lookup-tickets:${ip}`, { limit: 10, windowSec: 15 * 60 });
-    if (!rl.success) {
-      return NextResponse.json(
-        { error: "Trop de tentatives. Réessayez dans quelques minutes." },
-        { status: 429 },
-      );
-    }
+    const session = await auth();
 
     const { email } = await request.json();
     if (!email || typeof email !== "string") {
@@ -24,6 +19,22 @@ export async function POST(request: Request) {
     }
 
     const trimmedEmail = email.trim().toLowerCase();
+
+    // If authenticated, only allow looking up own tickets
+    if (session?.user?.id) {
+      if (session.user.email?.toLowerCase() !== trimmedEmail) {
+        return NextResponse.json({ error: "Accès interdit." }, { status: 403 });
+      }
+    } else {
+      // Unauthenticated: strict rate limiting (3 per 15 min per IP)
+      const rl = rateLimit(`lookup-tickets:${ip}`, { limit: 3, windowSec: 15 * 60 });
+      if (!rl.success) {
+        return NextResponse.json(
+          { error: "Trop de tentatives. Réessayez dans quelques minutes." },
+          { status: 429 },
+        );
+      }
+    }
 
     const tickets = await prisma.ticket.findMany({
       where: { email: trimmedEmail },
@@ -53,15 +64,16 @@ export async function POST(request: Request) {
         installments: t.installments,
         firstName: t.firstName,
         lastName: t.lastName,
-        qrCode: t.qrCode,
+        // Only expose QR codes to authenticated users
+        qrCode: session?.user?.id ? t.qrCode : null,
         purchasedAt: t.purchasedAt,
-        payments: t.payments.map((p) => ({
+        payments: session?.user?.id ? t.payments.map((p) => ({
           id: p.id,
           amount: p.amount,
           type: p.type,
           label: p.label,
           paidAt: p.paidAt,
-        })),
+        })) : [],
       })),
     });
   } catch (error) {

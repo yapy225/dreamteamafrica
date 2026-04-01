@@ -12,6 +12,7 @@ import {
 import { sendQuoteEmail } from "@/lib/email";
 import { randomUUID } from "crypto";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { getFrictionLevel } from "@/lib/behavior";
 
 export async function POST(request: Request) {
   try {
@@ -208,6 +209,17 @@ export async function POST(request: Request) {
 
     const stripe = getStripe();
 
+    // Behavioral friction
+    const clientFp = request.headers.get("x-behavior-fp") || "";
+    const bFingerprint = `${clientFp}:${ip}`;
+    const bRecord = await prisma.behaviorScore.findUnique({ where: { fingerprint: bFingerprint } });
+    const friction = getFrictionLevel(bRecord?.score ?? 0);
+    if (friction === "block") {
+      return NextResponse.json({ error: "Service temporairement indisponible." }, { status: 403 });
+    }
+    const paymentMethods: ("card" | "paypal")[] =
+      friction === "card_only" ? ["card"] : ["card", "paypal"];
+
     // Montant restant après crédit de l'acompte lead
     const amountDue = totalPrice - leadDepositCredit;
 
@@ -226,7 +238,7 @@ export async function POST(request: Request) {
       // ── Single full payment (minus lead credit) ──
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
-        payment_method_types: ["card", "paypal"],
+        payment_method_types: paymentMethods,
         customer_email: email.trim(),
         line_items: [
           {
@@ -284,7 +296,7 @@ export async function POST(request: Request) {
         // Créer un checkout pour la première mensualité (pas le dépôt, déjà payé)
         const checkoutSession = await stripe.checkout.sessions.create({
           mode: "payment",
-          payment_method_types: ["card", "paypal"],
+          payment_method_types: paymentMethods,
           customer_email: email.trim(),
           line_items: [
             {
@@ -325,7 +337,7 @@ export async function POST(request: Request) {
       // Pas de crédit lead, checkout normal pour l'acompte
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
-        payment_method_types: ["card", "paypal"],
+        payment_method_types: paymentMethods,
         customer_email: email.trim(),
         line_items: [
           {

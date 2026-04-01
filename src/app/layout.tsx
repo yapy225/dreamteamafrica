@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
 import Providers from "@/components/layout/Providers";
 import CookieBanner from "@/components/layout/CookieBanner";
+import BehaviorTracker from "@/components/BehaviorTracker";
 import "./globals.css";
 
 const GTM_ID = "GTM-N5GGFDFK";
@@ -137,6 +138,7 @@ export default function RootLayout({
         </noscript>
         <Providers>{children}</Providers>
         <CookieBanner />
+        <BehaviorTracker />
       </body>
     </html>
   );

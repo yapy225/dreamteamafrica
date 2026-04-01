@@ -7,6 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── BEHAVIORAL SCORING ─────────────────────────────────
+
+model BehaviorScore {
+  id            String   @id @default(cuid())
+  fingerprint   String   @unique // hash of IP + user-agent
+  score         Int      @default(0)
+  signals       Json     @default("{}") // { "cgv_views": 5, "devtools": true, ... }
+  flagged       Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([fingerprint])
+  @@index([flagged])
+}
+
 // ─── STRIPE WEBHOOK IDEMPOTENCY ─────────────────────────
 
 model StripeEvent {

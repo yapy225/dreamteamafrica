@@ -6,6 +6,7 @@ import { uploadBuffer } from "@/lib/bunny";
 import { sendTicketConfirmationEmail } from "@/lib/email";
 import { sendTicketConfirmationWhatsApp } from "@/lib/whatsapp";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { getFrictionLevel } from "@/lib/behavior";
 
 export async function POST(request: Request) {
   try {
@@ -215,17 +216,36 @@ export async function POST(request: Request) {
       );
     }
 
+    /* ── BEHAVIORAL FRICTION CHECK ──────────────────────────── */
+    const clientFp = request.headers.get("x-behavior-fp") || "";
+    const fingerprint = `${clientFp}:${ip}`;
+    const behaviorRecord = await prisma.behaviorScore.findUnique({
+      where: { fingerprint },
+    });
+    const friction = getFrictionLevel(behaviorRecord?.score ?? 0);
+
+    if (friction === "block") {
+      return NextResponse.json(
+        { error: "Service temporairement indisponible. Réessayez plus tard." },
+        { status: 403 },
+      );
+    }
+
     /* ── PAID TICKETS: Stripe checkout ──────────────────────── */
     const productName = `${event.title} — ${tierName}`;
     const nbInstallments = Math.min(Math.max(Number(installments) || 1, 1), 3);
     const totalAmount = unitPrice * quantity;
     const stripe = getStripe();
 
+    // Restrict payment methods based on friction level
+    const paymentMethods: ("card" | "paypal")[] =
+      friction === "card_only" ? ["card"] : ["card", "paypal"];
+
     if (nbInstallments === 1) {
       // ── Single full payment ──
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
-        payment_method_types: ["card", "paypal"],
+        payment_method_types: paymentMethods,
         customer_email: trimmedEmail,
         line_items: [
           {
@@ -271,7 +291,7 @@ export async function POST(request: Request) {
 
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
-        payment_method_types: ["card", "paypal"],
+        payment_method_types: paymentMethods,
         customer_email: trimmedEmail,
         line_items: [
           {

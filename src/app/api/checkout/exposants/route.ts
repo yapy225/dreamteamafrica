@@ -11,9 +11,16 @@ import {
 } from "@/lib/exhibitor-events";
 import { sendQuoteEmail } from "@/lib/email";
 import { randomUUID } from "crypto";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rl = rateLimit(`checkout-exposant:${ip}`, { limit: 5, windowSec: 60 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Trop de tentatives, réessayez dans une minute." }, { status: 429 });
+    }
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });

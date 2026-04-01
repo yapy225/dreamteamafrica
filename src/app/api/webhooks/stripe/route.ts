@@ -33,6 +33,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
+  // ── Idempotency: skip already-processed events ──
+  const existing = await prisma.stripeEvent.findUnique({ where: { id: event.id } });
+  if (existing) {
+    console.log(`[webhook] Event ${event.id} already processed, skipping`);
+    return NextResponse.json({ received: true });
+  }
+  await prisma.stripeEvent.create({
+    data: { id: event.id, type: event.type },
+  });
+
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const metadata = session.metadata;
@@ -51,10 +61,10 @@ export async function POST(request: Request) {
       await handleExhibitorEarlyPayment(session);
     } else if (metadata?.type === "exposant_deposit") {
       await handleExposantDeposit(session);
+    } else {
+      console.warn(`[webhook] Unknown metadata.type: "${metadata?.type}" for session ${session.id}`);
     }
-  }
-
-  if (event.type === "invoice.paid") {
+  } else if (event.type === "invoice.paid") {
     const invoice = event.data.object as Stripe.Invoice;
     await handleExhibitorInstallment(invoice);
   }
@@ -65,24 +75,30 @@ export async function POST(request: Request) {
 async function handleTicketPurchase(session: Stripe.Checkout.Session) {
   const { eventId, userId, tier, quantity, unitPrice, firstName, lastName, email, phone, visitDate } = session.metadata!;
   const qty = parseInt(quantity);
-  const unitPriceNum = parseFloat(unitPrice);
 
   const event = await prisma.event.findUnique({
     where: { id: eventId },
-    select: { title: true, date: true, venue: true, address: true, coverImage: true },
+    select: { title: true, date: true, venue: true, address: true, coverImage: true, tiers: true },
   });
+
+  if (!event) {
+    console.error(`Ticket purchase: event ${eventId} not found`);
+    return;
+  }
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { name: true, email: true, phone: true },
   });
 
-  // Resolve tier name for email
-  const eventFull = await prisma.event.findUnique({ where: { id: eventId }, select: { tiers: true } });
-  const customTiers = eventFull?.tiers as Array<{ id: string; name: string }> | null;
+  // Re-validate price from database (never trust metadata)
+  const customTiers = event.tiers as Array<{ id: string; name: string; price: number }> | null;
   const matchedTier = Array.isArray(customTiers) ? customTiers.find((t) => t.id === tier) : null;
   const legacyLabelMap: Record<string, string> = { EARLY_BIRD: "Early Bird", STANDARD: "Standard", VIP: "VIP" };
   const tierName = matchedTier?.name || legacyLabelMap[tier] || tier;
+
+  // Use DB price, fallback to metadata only if tier not found in DB
+  const unitPriceNum = matchedTier?.price ?? parseFloat(unitPrice);
 
   const createdTickets: Array<{ id: string; qrCode: string }> = [];
 
@@ -344,6 +360,15 @@ async function handleTicketRecharge(session: Stripe.Checkout.Session) {
   const ticket = await prisma.ticket.findUnique({ where: { id: ticketId } });
   if (!ticket || (userId && ticket.userId !== userId)) {
     console.error(`Recharge rejected: ticket ${ticketId} ownership mismatch`);
+    return;
+  }
+
+  // Prevent duplicate payment (defense in depth — idempotency also checked globally)
+  const existingPayment = await prisma.ticketPayment.findFirst({
+    where: { ticketId, stripeId: session.id },
+  });
+  if (existingPayment) {
+    console.log(`Recharge already processed for ticket ${ticketId}, session ${session.id}`);
     return;
   }
 

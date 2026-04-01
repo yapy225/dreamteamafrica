@@ -3,9 +3,16 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
 import { DEPOSIT_AMOUNT } from "@/lib/exhibitor-events";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rl = rateLimit(`early-payment:${ip}`, { limit: 5, windowSec: 60 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Trop de tentatives." }, { status: 429 });
+    }
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });

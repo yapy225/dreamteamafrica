@@ -7,6 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── STRIPE WEBHOOK IDEMPOTENCY ─────────────────────────
+
+model StripeEvent {
+  id          String   @id // Stripe event ID (evt_...)
+  type        String   // e.g. "checkout.session.completed"
+  processedAt DateTime @default(now())
+
+  @@index([processedAt])
+}
+
 // ─── ENUMS ───────────────────────────────────────────────
 
 enum Role {

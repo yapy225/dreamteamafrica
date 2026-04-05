@@ -17,7 +17,7 @@ const SITES = [
   },
   {
     name: "Sneakers Love",
-    url: "https://sneakerslove.fr/",
+    url: "sc-domain:sneakerslove.fr",
     keyPages: [
       "https://sneakerslove.fr/",
       "https://sneakerslove.fr/jordan",

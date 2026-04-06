@@ -18,6 +18,9 @@ import JournalFooter from "@/components/journal/JournalFooter";
 import EventPromoCard from "@/components/journal/EventPromoCard";
 import OfficielPromoCard from "@/components/journal/OfficielPromoCard";
 import Comments from "@/components/sections/Comments";
+import PrepareVisit from "@/components/affiliate/PrepareVisit";
+import { GetYourGuideWidget } from "@/components/affiliate";
+import type { GYGTheme } from "@/components/affiliate";
 
 export const revalidate = 60;
 
@@ -157,6 +160,20 @@ export default async function ArticleDetailPage({
     LIFESTYLE: "lifestyle",
     OPINION: "opinion",
   };
+
+  // ── GYG theme mapping by article category ──
+  const categoryGYGTheme: Record<string, GYGTheme> = {
+    ACTUALITE: "culture",
+    CULTURE: "culture",
+    CINEMA: "shows",
+    MUSIQUE: "music",
+    SPORT: "culture",
+    DIASPORA: "culture",
+    BUSINESS: "culture",
+    LIFESTYLE: "food",
+    OPINION: "culture",
+  };
+  const gygTheme = categoryGYGTheme[article.category] || "culture";
 
   // ── Match article to its linked event (explicit) or by keywords (fallback) ──
   const eventSelect = {
@@ -489,6 +506,75 @@ export default async function ArticleDetailPage({
           </div>
         </div>
       )}
+
+      {/* Encarts affiliés — Préparer sa venue */}
+      <div className="bg-white px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl">
+          <PrepareVisit
+            eventName={article.title}
+            hotels={[
+              {
+                label: "Hôtels à Paris — Booking.com",
+                url: "https://www.booking.com/searchresults.html?ss=Paris+France&aid=dreamteamafrica",
+                description: "Réservez votre hébergement au meilleur prix",
+              },
+              {
+                label: "Logements Airbnb à Paris",
+                url: "https://www.airbnb.fr/s/Paris--France/homes",
+                description: "Appartements et chambres chez l'habitant",
+              },
+            ]}
+            transport={[
+              {
+                label: "Drivigo — VTC premium Mercedes",
+                url: "https://www.drivigo.fr/?ref=dreamteamafrica",
+                description: "Transferts aéroport, tarif fixe garanti, WiFi à bord",
+              },
+              {
+                label: "Trainline — Billets de train",
+                url: "https://www.thetrainline.com/fr/destinations/trains-pour-paris",
+                description: "TGV, Ouigo, TER vers Paris",
+              },
+              {
+                label: "Rentalcars — Location de voiture",
+                url: "https://www.rentalcars.com/fr/city/fr/paris/",
+                description: "Comparez les loueurs, annulation gratuite",
+              },
+            ]}
+            restaurants={[
+              {
+                label: "Restaurants africains — TheFork",
+                url: "https://www.thefork.fr/recherche?cityId=415144&what=restaurant+africain",
+                description: "Réservez avec jusqu'à -50% sur la carte",
+              },
+            ]}
+            activities={[
+              {
+                label: "Activités à Paris — GetYourGuide",
+                url: "https://www.getyourguide.fr/paris-l16/",
+                description: "Visites, croisières, musées — annulation gratuite",
+              },
+              {
+                label: "Expériences uniques — Viator",
+                url: "https://www.viator.com/fr-FR/Paris/d479-ttd",
+                description: "Food tours, ateliers, spectacles",
+              },
+            ]}
+          />
+        </div>
+      </div>
+
+      {/* Activités GetYourGuide */}
+      <div className="bg-dta-bg">
+        <GetYourGuideWidget
+          city="Paris"
+          theme={gygTheme}
+          title="Découvrir Paris autrement"
+          subtitle="Nos sélections d'activités pour enrichir votre séjour."
+          utmSource="article"
+          utmMedium="widget"
+        />
+      </div>
 
       {/* Maillage interne L'Afropéen — Catégories populaires */}
       <section className="bg-dta-accent/5 px-4 py-10">

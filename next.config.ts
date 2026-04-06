@@ -21,7 +21,7 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob: https://dreamteamafricamedia.b-cdn.net https://images.unsplash.com https://*.stripe.com https://lh3.googleusercontent.com https://cdn.getyourguide.com",
+      "img-src 'self' data: blob: https://dreamteamafricamedia.b-cdn.net https://images.unsplash.com https://*.stripe.com https://lh3.googleusercontent.com https://cdn.getyourguide.com https://images.pexels.com",
       "font-src 'self' https://fonts.gstatic.com",
       "connect-src 'self' https://api.stripe.com https://api.resend.com https://www.google-analytics.com https://vitals.vercel-insights.com https://dreamteamafricamedia.b-cdn.net",
       "frame-src https://js.stripe.com https://hooks.stripe.com",
@@ -51,6 +51,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "dreamteamafricamedia.b-cdn.net" },
+      { protocol: "https", hostname: "images.pexels.com" },
     ],
   },
   async headers() {

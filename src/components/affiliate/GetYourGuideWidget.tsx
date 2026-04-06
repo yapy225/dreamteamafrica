@@ -71,7 +71,7 @@ const THEME_CONFIG: Record<
         rating: 4.7,
         reviews: "45K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5cb405ea24072.jpeg/98.jpg",
+          "https://images.pexels.com/photos/33613242/pexels-photo-33613242.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/louvre-museum-skip-the-line-ticket-t395828/",
         badge: "Populaire",
       },
@@ -83,7 +83,7 @@ const THEME_CONFIG: Record<
         rating: 4.6,
         reviews: "3K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/63e83b27a0c5a.jpeg/98.jpg",
+          "https://images.pexels.com/photos/36465063/pexels-photo-36465063.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/musee-du-quai-branly-ticket-t418774/",
       },
       {
@@ -94,7 +94,7 @@ const THEME_CONFIG: Record<
         rating: 4.8,
         reviews: "2K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5db8110a3f22c.jpeg/98.jpg",
+          "https://images.pexels.com/photos/2570060/pexels-photo-2570060.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/marais-walking-tour-t67890/",
       },
       {
@@ -105,7 +105,7 @@ const THEME_CONFIG: Record<
         rating: 4.5,
         reviews: "28K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5cb401ae58e88.jpeg/98.jpg",
+          "https://images.pexels.com/photos/6479517/pexels-photo-6479517.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/eiffel-tower-summit-access-guided-tour-t395839/",
         badge: "Best-seller",
       },
@@ -123,7 +123,7 @@ const THEME_CONFIG: Record<
         rating: 4.6,
         reviews: "3K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/63e83b27a0c5a.jpeg/98.jpg",
+          "https://images.pexels.com/photos/36465063/pexels-photo-36465063.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/musee-du-quai-branly-ticket-t418774/",
         badge: "Art africain",
       },
@@ -135,7 +135,7 @@ const THEME_CONFIG: Record<
         rating: 4.7,
         reviews: "18K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5cb40617ddd74.jpeg/98.jpg",
+          "https://images.pexels.com/photos/28377090/pexels-photo-28377090.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/musee-dorsay-skip-the-line-ticket-t395830/",
         badge: "Populaire",
       },
@@ -147,7 +147,7 @@ const THEME_CONFIG: Record<
         rating: 4.7,
         reviews: "45K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5cb405ea24072.jpeg/98.jpg",
+          "https://images.pexels.com/photos/33613242/pexels-photo-33613242.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/louvre-museum-skip-the-line-ticket-t395828/",
       },
       {
@@ -158,7 +158,7 @@ const THEME_CONFIG: Record<
         rating: 4.5,
         reviews: "1K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5f3e8c0f8e4f2.jpeg/98.jpg",
+          "https://images.pexels.com/photos/30278208/pexels-photo-30278208.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/institut-monde-arabe-t320561/",
       },
     ],
@@ -175,7 +175,7 @@ const THEME_CONFIG: Record<
         rating: 4.4,
         reviews: "52K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5cb3f88e3db41.jpeg/98.jpg",
+          "https://images.pexels.com/photos/35464060/pexels-photo-35464060.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/seine-river-cruise-t395820/",
         badge: "Best-seller",
       },
@@ -187,7 +187,7 @@ const THEME_CONFIG: Record<
         rating: 4.3,
         reviews: "8K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5e4a8d3f2b8c1.jpeg/98.jpg",
+          "https://images.pexels.com/photos/16909140/pexels-photo-16909140.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/dinner-cruise-seine-t395835/",
         badge: "Romantique",
       },
@@ -199,7 +199,7 @@ const THEME_CONFIG: Record<
         rating: 4.6,
         reviews: "5K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/6a2b3c4d5e6f7.jpeg/98.jpg",
+          "https://images.pexels.com/photos/16823626/pexels-photo-16823626.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/sunset-cruise-champagne-t456789/",
       },
     ],
@@ -216,7 +216,7 @@ const THEME_CONFIG: Record<
         rating: 4.8,
         reviews: "4K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5db8110a3f22c.jpeg/98.jpg",
+          "https://images.pexels.com/photos/20413466/pexels-photo-20413466.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/marais-food-tour-t395842/",
         badge: "Top noté",
       },
@@ -228,7 +228,7 @@ const THEME_CONFIG: Record<
         rating: 4.9,
         reviews: "2K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5e3c8a2d1b4f5.jpeg/98.jpg",
+          "https://images.pexels.com/photos/35893693/pexels-photo-35893693.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/macaron-cooking-class-t395850/",
       },
       {
@@ -239,7 +239,7 @@ const THEME_CONFIG: Record<
         rating: 4.7,
         reviews: "3K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5f1a2b3c4d5e6.jpeg/98.jpg",
+          "https://images.pexels.com/photos/8472735/pexels-photo-8472735.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/wine-cheese-tasting-t395855/",
       },
     ],
@@ -256,7 +256,7 @@ const THEME_CONFIG: Record<
         rating: 4.7,
         reviews: "1K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5db8110a3f22c.jpeg/98.jpg",
+          "https://images.pexels.com/photos/19789287/pexels-photo-19789287.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/marais-shopping-tour-t395860/",
       },
       {
@@ -267,7 +267,7 @@ const THEME_CONFIG: Record<
         rating: 4.5,
         reviews: "2K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5f2a3b4c5d6e7.jpeg/98.jpg",
+          "https://images.pexels.com/photos/32392928/pexels-photo-32392928.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/galeries-lafayette-tour-t395865/",
         badge: "Mode",
       },
@@ -285,7 +285,7 @@ const THEME_CONFIG: Record<
         rating: 4.5,
         reviews: "30K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5cb3f23e12345.jpeg/98.jpg",
+          "https://images.pexels.com/photos/30560377/pexels-photo-30560377.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/disneyland-paris-ticket-t395870/",
         badge: "Famille",
       },
@@ -297,7 +297,7 @@ const THEME_CONFIG: Record<
         rating: 4.4,
         reviews: "5K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5e4b5c6d7e8f9.jpeg/98.jpg",
+          "https://images.pexels.com/photos/36503051/pexels-photo-36503051.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/jardin-acclimatation-t395875/",
       },
       {
@@ -308,7 +308,7 @@ const THEME_CONFIG: Record<
         rating: 4.6,
         reviews: "1K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5f3a4b5c6d7e8.jpeg/98.jpg",
+          "https://images.pexels.com/photos/13174519/pexels-photo-13174519.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/cirque-hiver-show-t395880/",
       },
     ],
@@ -325,7 +325,7 @@ const THEME_CONFIG: Record<
         rating: 4.5,
         reviews: "12K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5cb404d7e4321.jpeg/98.jpg",
+          "https://images.pexels.com/photos/36266492/pexels-photo-36266492.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/moulin-rouge-show-t395885/",
         badge: "Iconique",
       },
@@ -337,7 +337,7 @@ const THEME_CONFIG: Record<
         rating: 4.4,
         reviews: "6K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5e5c6d7e8f9a0.jpeg/98.jpg",
+          "https://images.pexels.com/photos/36716226/pexels-photo-36716226.png?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/lido-paris-show-t395890/",
       },
       {
@@ -348,7 +348,7 @@ const THEME_CONFIG: Record<
         rating: 4.8,
         reviews: "2K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5f4b5c6d7e8f9.jpeg/98.jpg",
+          "https://images.pexels.com/photos/9419405/pexels-photo-9419405.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/jazz-concert-cave-t395895/",
       },
     ],
@@ -365,7 +365,7 @@ const THEME_CONFIG: Record<
         rating: 4.8,
         reviews: "2K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5f4b5c6d7e8f9.jpeg/98.jpg",
+          "https://images.pexels.com/photos/9419405/pexels-photo-9419405.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/jazz-concert-cave-t395895/",
         badge: "Ambiance",
       },
@@ -377,7 +377,7 @@ const THEME_CONFIG: Record<
         rating: 4.5,
         reviews: "12K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5cb404d7e4321.jpeg/98.jpg",
+          "https://images.pexels.com/photos/36266492/pexels-photo-36266492.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/moulin-rouge-show-t395885/",
         badge: "Iconique",
       },
@@ -389,7 +389,7 @@ const THEME_CONFIG: Record<
         rating: 4.7,
         reviews: "8K+",
         image:
-          "https://cdn.getyourguide.com/img/tour/5e6d7e8f9a0b1.jpeg/98.jpg",
+          "https://images.pexels.com/photos/32603589/pexels-photo-32603589.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
         path: "/paris-l16/opera-garnier-guided-tour-t395900/",
       },
     ],

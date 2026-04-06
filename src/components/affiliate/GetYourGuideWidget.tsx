@@ -406,7 +406,7 @@ export default function GetYourGuideWidget({
   title,
   subtitle,
   maxItems = 3,
-  partnerId = "DREAMTEAMAFRICA",
+  partnerId = "K7ALFQK",
   eventName,
   eventSlug,
   utmSource = "evenement",

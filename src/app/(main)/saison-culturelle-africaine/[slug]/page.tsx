@@ -12,6 +12,7 @@ import ExposantButton from "@/components/ExposantButton";
 import SocialProofBanner from "./SocialProofBanner";
 import ShareButton from "./ShareButton";
 import PrepareVisit from "@/components/affiliate/PrepareVisit";
+import { GetYourGuideWidget } from "@/components/affiliate";
 
 const FREE_EVENT_IDS = [
   "cmm767c1m0008ti7933a7kqoq", // Festival de l'Autre Culture
@@ -760,6 +761,31 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
             ]}
           />
         </div>
+      </div>
+
+      {/* E ter — Activités GetYourGuide */}
+      <div className="bg-dta-bg">
+        <GetYourGuideWidget
+          city="Paris"
+          theme={
+            slug.includes("evasion") ? "cruises"
+            : slug.includes("foire") ? "museums"
+            : slug.includes("fashion") ? "fashion"
+            : slug.includes("conte") ? "family"
+            : slug.includes("danse") ? "music"
+            : slug.includes("cinema") ? "culture"
+            : slug.includes("made-in") ? "culture"
+            : slug.includes("autre-culture") ? "shows"
+            : "culture"
+          }
+          title={`Profitez de votre weekend à Paris`}
+          subtitle={`Vous venez pour ${event.title} ? Découvrez le meilleur de Paris.`}
+          maxItems={3}
+          utmSource="evenement"
+          utmMedium="widget"
+          eventName={event.title}
+          eventSlug={slug}
+        />
       </div>
 
       {/* F — Autres événements (maillage interne) */}

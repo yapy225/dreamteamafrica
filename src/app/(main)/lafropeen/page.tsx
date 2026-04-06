@@ -66,17 +66,20 @@ export const metadata = {
 };
 
 export default async function JournalPage() {
-  const [publishedArticles, archivedArticles] = await Promise.all([
+  const [publishedArticles, archivedArticles, totalArchived] = await Promise.all([
     prisma.article.findMany({
       where: { status: "PUBLISHED" },
       include: { author: { select: { name: true } } },
       orderBy: { publishedAt: "desc" },
+      take: 50, // Limit to recent articles for zone display
     }),
     prisma.article.findMany({
       where: { status: "ARCHIVED" },
       include: { author: { select: { name: true } } },
       orderBy: { publishedAt: "desc" },
+      take: 8, // Only first page of archives
     }),
+    prisma.article.count({ where: { status: "ARCHIVED" } }),
   ]);
 
   const zones = groupArticlesByZone(publishedArticles);
@@ -98,9 +101,9 @@ export default async function JournalPage() {
       ] as JournalZone[]
     ).find((z) => zones[z].length > 0) ?? "UNE";
 
-  // Archives preview (first 8)
+  // Archives preview (first 8) — archived articles already limited by query
   const archivePreview = zones.ARCHIVES.slice(0, 8);
-  const archiveTotalPages = Math.ceil(zones.ARCHIVES.length / 8);
+  const archiveTotalPages = Math.ceil((zones.ARCHIVES.length + totalArchived) / 8);
 
   const collectionJsonLd = {
     "@context": "https://schema.org",

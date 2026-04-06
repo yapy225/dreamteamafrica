@@ -11,8 +11,6 @@ import FreeReservationForm from "@/components/events/FreeReservationForm";
 import ExposantButton from "@/components/ExposantButton";
 import SocialProofBanner from "./SocialProofBanner";
 import ShareButton from "./ShareButton";
-import PrepareVisit from "@/components/affiliate/PrepareVisit";
-import { GetYourGuideWidget } from "@/components/affiliate";
 
 const FREE_EVENT_IDS = [
   "cmm767c1m0008ti7933a7kqoq", // Festival de l'Autre Culture
@@ -709,88 +707,6 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
             </div>
           </div>
         </div>
-      </div>
-
-      {/* E bis — Préparer sa venue (liens affiliés) */}
-      <div className="bg-white px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <PrepareVisit
-            eventName={event.title}
-            hotels={[
-              {
-                label: "Hôtels proches du lieu",
-                url: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(event.venue + " Paris")}`,
-                description: `À proximité de ${event.venue}`,
-              },
-              {
-                label: "Logements Airbnb",
-                url: "https://www.airbnb.fr/s/Paris--France/homes",
-                description: "Appartements et chambres chez l'habitant",
-              },
-            ]}
-            transport={[
-              {
-                label: "Drivigo — VTC premium Mercedes",
-                url: "https://www.drivigo.fr/?ref=dreamteamafrica",
-                description: "Transferts aéroport, tarif fixe garanti, WiFi à bord",
-              },
-              {
-                label: "Trainline — Billets de train",
-                url: "https://www.thetrainline.com/fr/destinations/trains-pour-paris",
-                description: "TGV, Ouigo, TER vers Paris",
-              },
-              {
-                label: "Rentalcars — Location de voiture",
-                url: "https://www.rentalcars.com/fr/city/fr/paris/",
-                description: "Comparez les loueurs, annulation gratuite",
-              },
-            ]}
-            restaurants={[
-              {
-                label: "Restaurants africains — TheFork",
-                url: "https://www.thefork.fr/recherche?cityId=415144&what=restaurant+africain",
-                description: "Réservez avec jusqu'à -50% sur la carte",
-              },
-            ]}
-            activities={[
-              {
-                label: "Activités à Paris — GetYourGuide",
-                url: "https://www.getyourguide.fr/paris-l16/",
-                description: "Visites, croisières, musées — annulation gratuite",
-              },
-              {
-                label: "Expériences uniques — Viator",
-                url: "https://www.viator.com/fr-FR/Paris/d479-ttd",
-                description: "Food tours, ateliers, spectacles",
-              },
-            ]}
-          />
-        </div>
-      </div>
-
-      {/* E ter — Activités GetYourGuide */}
-      <div className="bg-dta-bg">
-        <GetYourGuideWidget
-          city="Paris"
-          theme={
-            slug.includes("evasion") ? "cruises"
-            : slug.includes("foire") ? "museums"
-            : slug.includes("fashion") ? "fashion"
-            : slug.includes("conte") ? "family"
-            : slug.includes("danse") ? "music"
-            : slug.includes("cinema") ? "culture"
-            : slug.includes("made-in") ? "culture"
-            : slug.includes("autre-culture") ? "shows"
-            : "culture"
-          }
-          title={`Profitez de votre weekend à Paris`}
-          subtitle={`Vous venez pour ${event.title} ? Découvrez le meilleur de Paris.`}
-          maxItems={3}
-          utmSource="evenement"
-          utmMedium="widget"
-          eventName={event.title}
-          eventSlug={slug}
-        />
       </div>
 
       {/* F — Autres événements (maillage interne) */}

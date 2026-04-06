@@ -406,7 +406,7 @@ export default function GetYourGuideWidget({
   title,
   subtitle,
   maxItems = 3,
-  partnerId = "K7ALFQK",
+  partnerId = process.env.NEXT_PUBLIC_GYG_PARTNER_ID || "K7ALFQK",
   eventName,
   eventSlug,
   utmSource = "evenement",

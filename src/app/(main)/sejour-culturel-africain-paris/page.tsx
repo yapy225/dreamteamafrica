@@ -148,6 +148,15 @@ export default function SejourCulturelPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <AffiliateCard
               type="transport"
+              name="Drivigo — VTC premium"
+              description="Mercedes avec chauffeur, transferts aéroport CDG/Orly, tarif fixe garanti. WiFi, eau offerte."
+              price="À partir de 130€"
+              affiliateUrl="https://www.drivigo.fr/?ref=dreamteamafrica"
+              badge="Premium"
+              cta="Réserver"
+            />
+            <AffiliateCard
+              type="transport"
               name="Trainline"
               description="Comparez les billets TGV, Ouigo et TER vers Paris. Meilleur prix garanti."
               price="À partir de 19€"

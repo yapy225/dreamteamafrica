@@ -730,6 +730,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
             ]}
             transport={[
               {
+                label: "Drivigo — VTC premium Mercedes",
+                url: "https://www.drivigo.fr/?ref=dreamteamafrica",
+                description: "Transferts aéroport, tarif fixe garanti, WiFi à bord",
+              },
+              {
                 label: "Trainline — Billets de train",
                 url: "https://www.thetrainline.com/fr/destinations/trains-pour-paris",
                 description: "TGV, Ouigo, TER vers Paris",

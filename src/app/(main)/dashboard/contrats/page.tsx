@@ -12,6 +12,7 @@ import {
   User,
   Music,
   Mail,
+  Camera,
 } from "lucide-react";
 import { listFiles, getCdnUrl } from "@/lib/bunny";
 import InvitationGenerator from "./InvitationGenerator";
@@ -84,6 +85,11 @@ export default async function ContratsPage({
     orderBy: { createdAt: "desc" },
   });
 
+  // Médias
+  const medias = await prisma.mediaAccreditation.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+
   // Invitations
   let invitationFiles: { name: string; url: string; date: string; size: string }[] = [];
   try {
@@ -113,6 +119,7 @@ export default async function ContratsPage({
     { id: "exposants", label: "Exposants", icon: Store, count: activeBookings.length },
     { id: "mannequins", label: "Mannequins", icon: User, count: models.length },
     { id: "artistes", label: "Artistes", icon: Music, count: artists.length },
+    { id: "medias", label: "Médias", icon: Camera, count: medias.length },
     { id: "invitations", label: "Invitations", icon: Mail, count: invitationFiles.length },
   ];
 
@@ -369,6 +376,56 @@ export default async function ContratsPage({
           </div>
           {artists.length === 0 && (
             <p className="p-8 text-center text-sm text-dta-char/50">Aucune candidature artiste.</p>
+          )}
+        </div>
+      )}
+
+      {/* ── MÉDIAS ── */}
+      {tab === "medias" && (
+        <div className="rounded-2xl border border-dta-sand bg-white shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-dta-bg text-left text-xs font-medium uppercase tracking-wider text-dta-taupe">
+                  <th className="px-4 py-3">Nom</th>
+                  <th className="px-4 py-3">Contact</th>
+                  <th className="px-4 py-3">M&eacute;dia</th>
+                  <th className="px-4 py-3">Type</th>
+                  <th className="px-4 py-3">&Eacute;v&eacute;nement</th>
+                  <th className="px-4 py-3">Date</th>
+                  <th className="px-4 py-3 text-center">Statut</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-dta-sand/50">
+                {medias.map((m) => {
+                  const cfg = STATUS_CONFIG[m.status] || STATUS_CONFIG.PENDING;
+                  return (
+                    <tr key={m.id} className="hover:bg-dta-bg/50">
+                      <td className="px-4 py-3 font-medium text-dta-dark">{m.name}</td>
+                      <td className="px-4 py-3">
+                        <p className="text-dta-char/70">{m.email}</p>
+                        <p className="text-[11px] text-dta-char/50">{m.phone || "—"}</p>
+                      </td>
+                      <td className="px-4 py-3 text-dta-accent font-medium">{m.outlet}</td>
+                      <td className="px-4 py-3 text-dta-char/70">{m.type}</td>
+                      <td className="px-4 py-3 text-[11px] text-dta-char/50">{m.event || "—"}</td>
+                      <td className="px-4 py-3 text-[11px] text-dta-char/50">
+                        {new Date(m.createdAt).toLocaleDateString("fr-FR")}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${cfg.color}`}>
+                          <cfg.icon size={10} />
+                          {cfg.label}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          {medias.length === 0 && (
+            <p className="p-8 text-center text-sm text-dta-char/50">Aucune accr&eacute;ditation m&eacute;dia.</p>
           )}
         </div>
       )}

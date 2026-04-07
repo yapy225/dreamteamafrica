@@ -844,6 +844,25 @@ model ContactReply {
   @@index([messageId])
 }
 
+// ─── ACCRÉDITATIONS MÉDIA ────────────────────────────────
+
+model MediaAccreditation {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  outlet      String   // nom du média (Le Média Citoyen, etc.)
+  type        String   @default("PRESSE") // PRESSE, TV, RADIO, WEB, PHOTO, BLOG
+  event       String?
+  status      String   @default("PENDING") // PENDING, SELECTED, REJECTED
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
 // ─── LEADS (Facebook Ads) ────────────────────────────────
 
 model Lead {

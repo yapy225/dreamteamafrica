@@ -6,6 +6,8 @@ import { formatPrice } from "@/lib/utils";
 type KpiCardsProps = {
   totals: {
     tickets: number;
+    ticketsStripe: number;
+    ticketsHorsStripe: number;
     exposants: number;
     total: number;
   };
@@ -13,7 +15,9 @@ type KpiCardsProps = {
 
 const SOURCES = [
   { key: "total" as const, label: "Revenu total", color: "bg-dta-accent/10 text-dta-accent", ring: "ring-dta-accent" },
-  { key: "tickets" as const, label: "Billetterie", color: "bg-[#8B6F4E]/10 text-[#8B6F4E]", ring: "ring-[#8B6F4E]" },
+  { key: "tickets" as const, label: "Billetterie (total)", color: "bg-[#8B6F4E]/10 text-[#8B6F4E]", ring: "ring-[#8B6F4E]" },
+  { key: "ticketsStripe" as const, label: "Billetterie Stripe", color: "bg-[#635BFF]/10 text-[#635BFF]", ring: "ring-[#635BFF]" },
+  { key: "ticketsHorsStripe" as const, label: "Billetterie hors Stripe", color: "bg-[#f59e0b]/10 text-[#f59e0b]", ring: "ring-[#f59e0b]" },
   { key: "exposants" as const, label: "Stands exposants", color: "bg-[#7c3aed]/10 text-[#7c3aed]", ring: "ring-[#7c3aed]" },
 ] as const;
 
@@ -66,7 +70,7 @@ export function KpiCards({ totals }: KpiCardsProps) {
   }, [totals]);
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
       {SOURCES.map((s) => (
         <div
           key={s.key}

@@ -233,7 +233,7 @@ export async function generateDevisExposant(input: DevisExposantInput): Promise<
     doc.fontSize(8).font("Helvetica-Bold").fillColor(GOLD).text(dateLabel, 350, y, { width: 175, align: "right" });
     y += 11;
     doc.fontSize(7).font("Helvetica").fillColor(GREY).text(desc, L + 8, y, { width: 485 });
-    y += doc.heightOfString(desc, { width: 485, fontSize: 7 }) + 5;
+    y += doc.heightOfString(desc, { width: 485 }) + 5;
     drawLine(doc, y);
     y += 5;
   }

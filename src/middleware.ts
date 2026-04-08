@@ -130,6 +130,14 @@ const PATH_REDIRECTS: Record<string, string> = {
   "/hello-world": "/",
   "/hello-world/": "/",
 
+  // ── URLs 404 Google Search Console (avril 2026) ──
+  "/festival-international-du-cinema-africa": "/saison-culturelle-africaine",
+  "/festival-international-du-cinema-africa/": "/saison-culturelle-africaine",
+  "/merci-fap": "/",
+  "/merci-fap/": "/",
+  "/politiques-de-cookies": "/politique-cookies",
+  "/politiques-de-cookies/": "/politique-cookies",
+
   // ── Variantes sans tiret ──
   "/lofficieldafrique": "/lofficiel-dafrique",
   "/lofficieldafrique/": "/lofficiel-dafrique",
@@ -294,6 +302,13 @@ const PREFIX_REDIRECTS: Array<[string, string]> = [
   ["/tf_header_footer/", "/"],
   ["/wp-content/", "/"],
   ["/category/", "/lafropeen"],
+  // Date archives (WordPress)
+  ["/2024/", "/lafropeen"],
+  ["/2025/", "/lafropeen"],
+  ["/2026/", "/lafropeen"],
+  // Old event paths
+  ["/event/", "/saison-culturelle-africaine"],
+  ["/festival-international-du-cinema-africa", "/saison-culturelle-africaine"],
 ];
 
 export function middleware(request: NextRequest) {

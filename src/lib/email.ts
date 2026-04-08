@@ -4,6 +4,17 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY);
 }
 
+/** Escape HTML special characters to prevent injection in email templates */
+function esc(str: string | null | undefined): string {
+  if (!str) return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const FROM_EMAIL = process.env.EMAIL_FROM ?? "Dream Team Africa <onboarding@resend.dev>";
 
 export async function sendQuoteEmail(opts: {
@@ -34,22 +45,22 @@ export async function sendQuoteEmail(opts: {
     <p style="margin: 4px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #999;">Devis Exposant</p>
   </div>
 
-  <p>Bonjour <strong>${opts.contactName}</strong>,</p>
+  <p>Bonjour <strong>${esc(opts.contactName)}</strong>,</p>
 
   <p>Merci pour votre demande de stand exposant. Voici votre devis :</p>
 
   <table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
     <tr style="border-bottom: 1px solid #e5e5e5;">
       <td style="padding: 10px 0; color: #666;">Entreprise</td>
-      <td style="padding: 10px 0; font-weight: bold; text-align: right;">${opts.companyName}</td>
+      <td style="padding: 10px 0; font-weight: bold; text-align: right;">${esc(opts.companyName)}</td>
     </tr>
     <tr style="border-bottom: 1px solid #e5e5e5;">
       <td style="padding: 10px 0; color: #666;">Événement</td>
-      <td style="padding: 10px 0; font-weight: bold; text-align: right;">${opts.eventTitle}</td>
+      <td style="padding: 10px 0; font-weight: bold; text-align: right;">${esc(opts.eventTitle)}</td>
     </tr>
     <tr style="border-bottom: 1px solid #e5e5e5;">
       <td style="padding: 10px 0; color: #666;">Formule</td>
-      <td style="padding: 10px 0; font-weight: bold; text-align: right;">${opts.packName}</td>
+      <td style="padding: 10px 0; font-weight: bold; text-align: right;">${esc(opts.packName)}</td>
     </tr>
     <tr style="border-bottom: 1px solid #e5e5e5;">
       <td style="padding: 10px 0; color: #666;">Durée</td>
@@ -92,7 +103,7 @@ export async function sendQuoteEmail(opts: {
   const { error } = await getResend().emails.send({
     from: FROM_EMAIL,
     to: opts.to,
-    subject: `Devis Exposant — ${opts.packName} — ${opts.eventTitle}`,
+    subject: `Devis Exposant — ${esc(opts.packName)} — ${esc(opts.eventTitle)}`,
     html,
   });
 
@@ -126,7 +137,7 @@ export async function sendThankYouEmail(opts: {
     <p style="margin: 4px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #999;">Confirmation de paiement</p>
   </div>
 
-  <p>Bonjour <strong>${opts.contactName}</strong>,</p>
+  <p>Bonjour <strong>${esc(opts.contactName)}</strong>,</p>
 
   <p>Merci pour votre paiement ! Votre r${opts.isFullyPaid ? "éservation de stand pour <strong>" + opts.companyName + "</strong> est confirmée" : "éservation de stand pour <strong>" + opts.companyName + "</strong> est bien enregistrée. Votre premier versement a été reçu"}.</p>
 
@@ -171,8 +182,8 @@ export async function sendThankYouEmail(opts: {
     from: FROM_EMAIL,
     to: opts.to,
     subject: opts.isFullyPaid
-      ? `Merci ! Votre stand est confirmé — ${opts.companyName}`
-      : `Merci pour votre paiement — ${opts.companyName}`,
+      ? `Merci ! Votre stand est confirmé — ${esc(opts.companyName)}`
+      : `Merci pour votre paiement — ${esc(opts.companyName)}`,
     html,
   });
 
@@ -205,16 +216,16 @@ export async function sendFreeTicketEmail(opts: {
 
   const coverSection = opts.eventCoverImage
     ? `<div style="position:relative;border-radius:12px 12px 0 0;overflow:hidden;height:200px;background:#1A1A1A;">
-        <img src="${opts.eventCoverImage}" alt="${opts.eventTitle}" style="width:100%;height:100%;object-fit:cover;display:block;opacity:0.8;" />
+        <img src="${opts.eventCoverImage}" alt="${esc(opts.eventTitle)}" style="width:100%;height:100%;object-fit:cover;display:block;opacity:0.8;" />
         <div style="position:absolute;inset:0;background:linear-gradient(to top,#1A1A1A 0%,rgba(26,26,26,0.3) 50%,transparent 100%);"></div>
         <div style="position:absolute;bottom:16px;left:20px;right:20px;">
           <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#d4af37;font-family:Arial,sans-serif;">Entrée gratuite</p>
-          <h2 style="margin:6px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${opts.eventTitle}</h2>
+          <h2 style="margin:6px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${esc(opts.eventTitle)}</h2>
         </div>
       </div>`
     : `<div style="border-radius:12px 12px 0 0;background:linear-gradient(135deg,#8B6F4E,#6F5A3E);padding:30px 20px;">
         <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.7);font-family:Arial,sans-serif;">Entrée gratuite</p>
-        <h2 style="margin:8px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${opts.eventTitle}</h2>
+        <h2 style="margin:8px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${esc(opts.eventTitle)}</h2>
       </div>`;
 
   const html = `
@@ -232,7 +243,7 @@ export async function sendFreeTicketEmail(opts: {
 
     <!-- Greeting -->
     <p style="font-size:15px;margin-bottom:20px;">
-      Bonjour <strong>${opts.guestName}</strong>,<br>
+      Bonjour <strong>${esc(opts.guestName)}</strong>,<br>
       Votre réservation est confirmée ! Voici votre billet d'entrée :
     </p>
 
@@ -258,7 +269,7 @@ export async function sendFreeTicketEmail(opts: {
             <td style="vertical-align:top;padding-right:16px;">
               <!-- Guest name -->
               <p style="margin:0;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.35);font-family:Arial,sans-serif;">Invité(e)</p>
-              <p style="margin:4px 0 0;font-size:18px;font-weight:bold;color:#fff;">${opts.guestName}</p>
+              <p style="margin:4px 0 0;font-size:18px;font-weight:bold;color:#fff;">${esc(opts.guestName)}</p>
 
               <!-- Badge -->
               <div style="margin-top:10px;">
@@ -275,11 +286,11 @@ export async function sendFreeTicketEmail(opts: {
                 </tr>
                 <tr>
                   <td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Lieu</td>
-                  <td style="padding:3px 0;font-size:12px;font-weight:600;color:#fff;">${opts.eventVenue}</td>
+                  <td style="padding:3px 0;font-size:12px;font-weight:600;color:#fff;">${esc(opts.eventVenue)}</td>
                 </tr>
                 <tr>
                   <td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Adresse</td>
-                  <td style="padding:3px 0;font-size:12px;color:rgba(255,255,255,0.6);">${opts.eventAddress}</td>
+                  <td style="padding:3px 0;font-size:12px;color:rgba(255,255,255,0.6);">${esc(opts.eventAddress)}</td>
                 </tr>
                 <tr>
                   <td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Places</td>
@@ -319,7 +330,7 @@ export async function sendFreeTicketEmail(opts: {
       <ul style="margin:0;padding-left:18px;font-size:13px;color:#666;line-height:1.8;">
         <li>Présentez ce QR code (imprimé ou sur mobile) à l'entrée</li>
         <li>${opts.guests > 1 ? `Ce billet est valable pour <strong>${opts.guests} personnes</strong>` : "Ce billet est valable pour <strong>1 personne</strong>"}</li>
-        <li>Adresse : <strong>${opts.eventVenue}</strong>, ${opts.eventAddress}</li>
+        <li>Adresse : <strong>${esc(opts.eventVenue)}</strong>, ${esc(opts.eventAddress)}</li>
         <li>Conservez cet email, il fait office de billet</li>
       </ul>
     </div>
@@ -337,7 +348,7 @@ export async function sendFreeTicketEmail(opts: {
   const { error } = await getResend().emails.send({
     from: FROM_EMAIL,
     to: opts.to,
-    subject: `Votre billet — ${opts.eventTitle}`,
+    subject: `Votre billet — ${esc(opts.eventTitle)}`,
     html,
   });
 
@@ -377,20 +388,20 @@ export async function sendTicketConfirmationEmail(opts: {
   const ticketCards = opts.tickets
     .map((ticket, i) => {
       const refCode = ticket.id.slice(0, 8).toUpperCase();
-      const ticketLabel = `Billet ${i + 1}/${opts.quantity} — ${opts.tier} ${priceStr}`;
+      const ticketLabel = `Billet ${i + 1}/${opts.quantity} — ${esc(opts.tier)} ${priceStr}`;
 
       const coverSection = opts.eventCoverImage
         ? `<div style="position:relative;border-radius:12px 12px 0 0;overflow:hidden;height:200px;background:#1A1A1A;">
-            <img src="${opts.eventCoverImage}" alt="${opts.eventTitle}" style="width:100%;height:100%;object-fit:cover;display:block;opacity:0.8;" />
+            <img src="${opts.eventCoverImage}" alt="${esc(opts.eventTitle)}" style="width:100%;height:100%;object-fit:cover;display:block;opacity:0.8;" />
             <div style="position:absolute;inset:0;background:linear-gradient(to top,#1A1A1A 0%,rgba(26,26,26,0.3) 50%,transparent 100%);"></div>
             <div style="position:absolute;bottom:16px;left:20px;right:20px;">
               <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#d4af37;font-family:Arial,sans-serif;">${ticketLabel}</p>
-              <h2 style="margin:6px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${opts.eventTitle}</h2>
+              <h2 style="margin:6px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${esc(opts.eventTitle)}</h2>
             </div>
           </div>`
         : `<div style="border-radius:12px 12px 0 0;background:linear-gradient(135deg,#8B6F4E,#6F5A3E);padding:30px 20px;">
             <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.7);font-family:Arial,sans-serif;">${ticketLabel}</p>
-            <h2 style="margin:8px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${opts.eventTitle}</h2>
+            <h2 style="margin:8px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${esc(opts.eventTitle)}</h2>
           </div>`;
 
       const qrSection = ticket.qrCode
@@ -425,12 +436,12 @@ export async function sendTicketConfirmationEmail(opts: {
             <td style="vertical-align:top;padding-right:16px;">
               <!-- Guest name -->
               <p style="margin:0;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.35);font-family:Arial,sans-serif;">Acheteur</p>
-              <p style="margin:4px 0 0;font-size:18px;font-weight:bold;color:#fff;">${opts.guestName}</p>
+              <p style="margin:4px 0 0;font-size:18px;font-weight:bold;color:#fff;">${esc(opts.guestName)}</p>
 
               <!-- Badge -->
               <div style="margin-top:10px;">
                 <span style="display:inline-block;background:#d4af37;color:#fff;padding:4px 12px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">
-                  ${opts.tier} — ${priceStr}
+                  ${esc(opts.tier)} — ${priceStr}
                 </span>
               </div>
 
@@ -442,11 +453,11 @@ export async function sendTicketConfirmationEmail(opts: {
                 </tr>
                 <tr>
                   <td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Lieu</td>
-                  <td style="padding:3px 0;font-size:12px;font-weight:600;color:#fff;">${opts.eventVenue}</td>
+                  <td style="padding:3px 0;font-size:12px;font-weight:600;color:#fff;">${esc(opts.eventVenue)}</td>
                 </tr>
                 <tr>
                   <td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Adresse</td>
-                  <td style="padding:3px 0;font-size:12px;color:rgba(255,255,255,0.6);">${opts.eventAddress}</td>
+                  <td style="padding:3px 0;font-size:12px;color:rgba(255,255,255,0.6);">${esc(opts.eventAddress)}</td>
                 </tr>
                 <tr>
                   <td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Billet</td>
@@ -492,7 +503,7 @@ export async function sendTicketConfirmationEmail(opts: {
 
     <!-- Greeting -->
     <p style="font-size:15px;margin-bottom:20px;">
-      Bonjour <strong>${opts.guestName}</strong>,<br>
+      Bonjour <strong>${esc(opts.guestName)}</strong>,<br>
       Votre achat est confirmé ! Voici ${opts.quantity > 1 ? "vos billets" : "votre billet"} :
     </p>
 
@@ -504,7 +515,7 @@ export async function sendTicketConfirmationEmail(opts: {
       <ul style="margin:0;padding-left:18px;font-size:13px;color:#666;line-height:1.8;">
         <li>Présentez ce QR code (imprimé ou sur mobile) à l'entrée</li>
         <li>${opts.quantity > 1 ? `Vous avez <strong>${opts.quantity} billets</strong> — chaque billet a son propre QR code` : "Ce billet est valable pour <strong>1 personne</strong>"}</li>
-        <li>Adresse : <strong>${opts.eventVenue}</strong>, ${opts.eventAddress}</li>
+        <li>Adresse : <strong>${esc(opts.eventVenue)}</strong>, ${esc(opts.eventAddress)}</li>
         <li>Conservez cet email, il fait office de billet</li>
       </ul>
     </div>
@@ -522,7 +533,7 @@ export async function sendTicketConfirmationEmail(opts: {
   const { error } = await getResend().emails.send({
     from: FROM_EMAIL,
     to: opts.to,
-    subject: `Vos billets — ${opts.eventTitle}`,
+    subject: `Vos billets — ${esc(opts.eventTitle)}`,
     html,
   });
 
@@ -553,8 +564,8 @@ export async function sendExhibitorProfileNotification(opts: {
   <p>Nouvelle fiche exposant soumise !</p>
 
   <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin: 24px 0;">
-    <p style="margin: 0; font-size: 18px; font-weight: bold; color: #166534;">${opts.companyName}</p>
-    <p style="margin: 8px 0 0; font-size: 14px; color: #166534;">Soumise par ${opts.contactName}</p>
+    <p style="margin: 0; font-size: 18px; font-weight: bold; color: #166534;">${esc(opts.companyName)}</p>
+    <p style="margin: 8px 0 0; font-size: 14px; color: #166534;">Soumise par ${esc(opts.contactName)}</p>
   </div>
 
   <p>Connectez-vous au dashboard pour consulter, modifier et valider la fiche :</p>
@@ -574,7 +585,7 @@ export async function sendExhibitorProfileNotification(opts: {
     await getResend().emails.send({
       from: FROM_EMAIL,
       to: adminEmail,
-      subject: `Fiche exposant soumise — ${opts.companyName}`,
+      subject: `Fiche exposant soumise — ${esc(opts.companyName)}`,
       html,
     });
   } catch (err) {
@@ -684,13 +695,13 @@ export async function sendContactReplyEmail(opts: {
         </td></tr>
         <tr><td style="padding:32px;">
           <p style="margin:0 0 16px;color:#1a1a1a;font-size:15px;">
-            Bonjour ${opts.firstName},
+            Bonjour ${esc(opts.firstName)},
           </p>
           <p style="margin:0 0 16px;color:#1a1a1a;font-size:15px;">
             Merci pour votre message. Voici notre réponse :
           </p>
           <div style="background:#f5f0eb;border-left:4px solid #8B6F4E;padding:16px 20px;margin:16px 0;border-radius:0 8px 8px 0;">
-            <p style="margin:0;color:#1a1a1a;font-size:14px;line-height:1.6;white-space:pre-line;">${opts.replyBody}</p>
+            <p style="margin:0;color:#1a1a1a;font-size:14px;line-height:1.6;white-space:pre-line;">${esc(opts.replyBody)}</p>
           </div>
           <p style="margin:24px 0 0;color:#666;font-size:13px;">
             N'hésitez pas à nous répondre directement à cet email si vous avez d'autres questions.
@@ -743,21 +754,21 @@ export async function sendContactNotificationEmail(opts: {
       <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;">
         <tr><td style="background:#8B6F4E;padding:24px 32px;">
           <h1 style="margin:0;color:#ffffff;font-size:20px;">Nouveau message de contact</h1>
-          <p style="margin:4px 0 0;color:#ffffff99;font-size:13px;">${opts.category}</p>
+          <p style="margin:4px 0 0;color:#ffffff99;font-size:13px;">${esc(opts.category)}</p>
         </td></tr>
         <tr><td style="padding:32px;">
           <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;color:#1a1a1a;">
             <tr>
               <td style="padding:8px 0;color:#666;width:120px;vertical-align:top;">Nom</td>
-              <td style="padding:8px 0;font-weight:bold;">${opts.firstName} ${opts.lastName}</td>
+              <td style="padding:8px 0;font-weight:bold;">${esc(opts.firstName)} ${esc(opts.lastName)}</td>
             </tr>
             <tr>
               <td style="padding:8px 0;color:#666;vertical-align:top;">Email</td>
-              <td style="padding:8px 0;"><a href="mailto:${opts.email}" style="color:#8B6F4E;">${opts.email}</a></td>
+              <td style="padding:8px 0;"><a href="mailto:${esc(opts.email)}" style="color:#8B6F4E;">${esc(opts.email)}</a></td>
             </tr>
             ${opts.phone ? `<tr>
               <td style="padding:8px 0;color:#666;vertical-align:top;">Téléphone</td>
-              <td style="padding:8px 0;"><a href="tel:${opts.phone}" style="color:#8B6F4E;">${opts.phone}</a></td>
+              <td style="padding:8px 0;"><a href="tel:${esc(opts.phone)}" style="color:#8B6F4E;">${esc(opts.phone)}</a></td>
             </tr>` : ""}
             ${opts.company ? `<tr>
               <td style="padding:8px 0;color:#666;vertical-align:top;">Structure</td>
@@ -769,7 +780,7 @@ export async function sendContactNotificationEmail(opts: {
             <p style="margin:0;color:#1a1a1a;font-size:14px;line-height:1.6;white-space:pre-line;">${opts.message}</p>
           </div>
           <p style="margin:24px 0 0;font-size:13px;color:#666;">
-            Répondez directement à cet email pour contacter ${opts.firstName}.
+            Répondez directement à cet email pour contacter ${esc(opts.firstName)}.
           </p>
         </td></tr>
       </table>
@@ -783,7 +794,7 @@ export async function sendContactNotificationEmail(opts: {
     from: FROM_EMAIL,
     to: adminEmail,
     replyTo: opts.email,
-    subject: `[${opts.category}] ${opts.firstName} ${opts.lastName} — Nouveau message`,
+    subject: `[${esc(opts.category)}] ${esc(opts.firstName)} ${esc(opts.lastName)} — Nouveau message`,
     html,
   });
 
@@ -838,7 +849,7 @@ export async function sendProspectEmail(opts: {
 
 <tr><td style="padding:16px 28px 0;">
   <p style="margin:0;font-size:14px;line-height:1.6;color:#4A4540;">
-    Bonjour <strong>${opts.firstName}</strong>,
+    Bonjour <strong>${esc(opts.firstName)}</strong>,
   </p>
   <p style="margin:10px 0 0;font-size:14px;line-height:1.6;color:#4A4540;">
     Le plus grand marché africain de Paris revient pour sa <strong>6ème édition</strong> les <strong>${eventDate}</strong> !
@@ -869,7 +880,7 @@ export async function sendProspectEmail(opts: {
   const { error } = await resend.emails.send({
     from: FROM_EMAIL,
     to: opts.to,
-    subject: `🎪 ${opts.firstName}, exposez à la Foire d'Afrique Paris — Réservez avec 50 €`,
+    subject: `🎪 ${esc(opts.firstName)}, exposez à la Foire d'Afrique Paris — Réservez avec 50 €`,
     html,
   });
 
@@ -913,7 +924,7 @@ export async function sendExhibitorProfileInviteEmail(opts: {
   </p>
 
   <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#444;">
-    Merci pour votre réservation de stand pour <strong>${opts.companyName}</strong> !
+    Merci pour votre réservation de stand pour <strong>${esc(opts.companyName)}</strong> !
   </p>
 
   <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#444;">

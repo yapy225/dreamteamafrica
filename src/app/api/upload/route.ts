@@ -33,7 +33,14 @@ export async function POST(request: Request) {
     }
 
     // Sanitize folder path (prevent directory traversal)
-    const safeFolder = folder.replace(/\.\./g, "").replace(/[^a-zA-Z0-9\-_\/]/g, "");
+    const safeFolder = folder
+      .replace(/\.\./g, "")
+      .replace(/^\/+/, "")
+      .replace(/\/{2,}/g, "/")
+      .replace(/[^a-zA-Z0-9\-_\/]/g, "")
+      .split("/")
+      .filter(s => s && s !== ".")
+      .join("/");
 
     const result = await uploadFile(file, safeFolder);
 

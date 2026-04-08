@@ -56,6 +56,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Fichier trop volumineux (max 10 Mo)." }, { status: 400 });
   }
 
+  // Validate PDF magic bytes (%PDF)
+  const header = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+  if (header[0] !== 0x25 || header[1] !== 0x50 || header[2] !== 0x44 || header[3] !== 0x46) {
+    return NextResponse.json({ error: "Le fichier n'est pas un PDF valide." }, { status: 400 });
+  }
+
   try {
     const result = await uploadFile(file, FOLDER);
     return NextResponse.json({ success: true, url: result.url });

@@ -8,8 +8,19 @@ import { uploadFile } from "@/lib/bunny";
  * Downloads uploaded files and stores them on Bunny CDN.
  * Updates the exhibitor profile in the database.
  */
+const TALLY_SIGNING_SECRET = process.env.TALLY_SIGNING_SECRET;
+
 export async function POST(request: Request) {
   try {
+    // Verify webhook authenticity
+    if (TALLY_SIGNING_SECRET) {
+      const signature = request.headers.get("tally-signature");
+      if (!signature || signature !== TALLY_SIGNING_SECRET) {
+        console.error("[Tally Webhook] Invalid signature");
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+    }
+
     const payload = await request.json();
 
     console.log("[Tally Webhook] Received submission:", payload.eventId);
@@ -129,8 +140,18 @@ export async function POST(request: Request) {
     ): Promise<string | null> {
       if (!url) return null;
       try {
-        const response = await fetch(url);
+        // Validate URL: only allow HTTPS from trusted hosts
+        const parsed = new URL(url);
+        if (parsed.protocol !== "https:") return null;
+        const blockedHosts = ["localhost", "127.0.0.1", "0.0.0.0", "169.254.169.254"];
+        if (blockedHosts.some(h => parsed.hostname.includes(h)) || parsed.hostname.startsWith("10.") || parsed.hostname.startsWith("192.168.")) return null;
+
+        const response = await fetch(url, { signal: AbortSignal.timeout(10_000) });
         if (!response.ok) return null;
+
+        // Limit download size to 50MB
+        const contentLength = parseInt(response.headers.get("content-length") || "0");
+        if (contentLength > 50 * 1024 * 1024) return null;
 
         const buffer = Buffer.from(await response.arrayBuffer());
         const contentType =

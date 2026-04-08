@@ -102,25 +102,7 @@ const CATEGORY_MAP: Record<string, string> = {
 };
 
 // --- Sanitisation HTML ---
-function sanitizeHtml(dirty: string): string {
-  return dirty
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
-    .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, "")
-    .replace(/\son\w+\s*=\s*[^\s>]*/gi, "")
-    .replace(/javascript\s*:/gi, "")
-    .replace(/data\s*:/gi, "")
-    .replace(/<img\s([^>]*?)>/gi, (_, attrs) => {
-      if (!attrs.includes("loading=")) attrs += ' loading="lazy"';
-      return `<img ${attrs}>`;
-    })
-    .replace(/<a\s([^>]*?)>/gi, (_, attrs) => {
-      if (!attrs.includes("target=")) attrs += ' target="_blank"';
-      if (!attrs.includes("rel=")) attrs += ' rel="noopener noreferrer"';
-      return `<a ${attrs}>`;
-    })
-    .trim();
-}
+import { sanitizeHtml } from "@/lib/sanitize";
 
 // --- Generation de slug ---
 function generateSlug(title: string): string {

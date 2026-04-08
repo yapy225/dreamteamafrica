@@ -153,16 +153,7 @@ export function generateSlug(title: string): string {
 
 // ── HTML utilities ──
 
-export function sanitizeHtml(dirty: string): string {
-  return dirty
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
-    .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, "")
-    .replace(/\son\w+\s*=\s*[^\s>]*/gi, "")
-    .replace(/javascript\s*:/gi, "")
-    .replace(/data\s*:/gi, "")
-    .trim();
-}
+export { sanitizeHtml } from "@/lib/sanitize";
 
 export function computeReadingTime(html: string): number {
   const text = html.replace(/<[^>]*>/g, "");

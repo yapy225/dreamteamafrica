@@ -8,8 +8,8 @@ export async function PUT(
 ) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
+    if (!session?.user?.id || session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
     }
 
     const { id } = await params;
@@ -94,8 +94,8 @@ export async function DELETE(
 ) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
+    if (!session?.user?.id || session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
     }
 
     const { id } = await params;

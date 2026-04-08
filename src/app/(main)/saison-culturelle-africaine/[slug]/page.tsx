@@ -195,10 +195,10 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
     <>
       <Script id="fb-viewcontent" strategy="afterInteractive">{`
         if(typeof fbq==='function'){
-          fbq('track','ViewContent',{content_name:'${event.title.replace(/'/g, "\\'")}',content_type:'product',content_ids:['${event.id}'],value:${event.priceEarly},currency:'EUR'});
+          fbq('track','ViewContent',{content_name:${JSON.stringify(event.title)},content_type:'product',content_ids:[${JSON.stringify(event.id)}],value:${Number(event.priceEarly) || 0},currency:'EUR'});
         }
         window.dataLayer=window.dataLayer||[];
-        window.dataLayer.push({event:'view_item',ecommerce:{items:[{item_name:'${event.title.replace(/'/g, "\\'")}',item_category:'Evenement',price:${event.priceEarly}}]}});
+        window.dataLayer.push({event:'view_item',ecommerce:{items:[{item_name:${JSON.stringify(event.title)},item_category:'Evenement',price:${Number(event.priceEarly) || 0}}]}});
       `}</Script>
     <div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />

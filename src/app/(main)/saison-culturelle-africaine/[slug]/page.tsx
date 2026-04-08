@@ -19,7 +19,13 @@ const FREE_EVENT_IDS = [
 
 export const revalidate = 60;
 
-
+export async function generateStaticParams() {
+  const events = await prisma.event.findMany({
+    where: { published: true },
+    select: { slug: true },
+  });
+  return events.map((e) => ({ slug: e.slug }));
+}
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
 
@@ -49,7 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     openGraph: {
       title: event.title,
       description: description.slice(0, 160),
-      type: "article",
+      type: "website",
       url: `${siteUrl}/saison-culturelle-africaine/${slug}`,
       ...(event.coverImage && { images: [{ url: event.coverImage, width: 1200, height: 630, alt: altText }] }),
     },
@@ -171,13 +177,38 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
         }
       : {
           "@type": "AggregateOffer",
-          lowPrice: Math.min(event.priceEarly, event.priceStd, event.priceVip),
+          lowPrice: 5,
           highPrice: Math.max(event.priceEarly, event.priceStd, event.priceVip),
-          offerCount: 3,
+          offerCount: (customTiers?.length || 0) + 1,
           priceCurrency: "EUR",
           url: eventUrl,
           validFrom: event.createdAt ? event.createdAt.toISOString() : "2026-01-01T00:00:00Z",
           availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+          offers: [
+            {
+              "@type": "Offer",
+              name: "Culture pour Tous",
+              description: "Réservez dès 5€ et payez à votre rythme",
+              price: 5,
+              priceCurrency: "EUR",
+              url: eventUrl,
+              availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+            },
+            ...((customTiers?.length ?? 0) > 0
+              ? (customTiers ?? []).map((t: { id: string; name: string; price: number }) => ({
+                  "@type": "Offer" as const,
+                  name: t.name,
+                  price: t.price,
+                  priceCurrency: "EUR",
+                  url: eventUrl,
+                  availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+                }))
+              : [
+                  { "@type": "Offer", name: "Early Bird", price: event.priceEarly, priceCurrency: "EUR", url: eventUrl },
+                  { "@type": "Offer", name: "Standard", price: event.priceStd, priceCurrency: "EUR", url: eventUrl },
+                  { "@type": "Offer", name: "VIP", price: event.priceVip, priceCurrency: "EUR", url: eventUrl },
+                ]),
+          ],
         },
     organizer: {
       "@type": "Organization",
@@ -262,8 +293,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
         {event.coverImage ? (
           <Image
             src={event.coverImage}
-            alt={`${event.title} — ${event.venue}`}
+            alt={`${event.title} — ${event.venue}, Paris`}
             fill
+            sizes="100vw"
             className="object-cover opacity-60"
             priority
           />

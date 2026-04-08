@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, MapPin, Users, Ticket, ArrowRight, Newspaper, ShoppingBag, Store } from "lucide-react";
+import { Calendar, MapPin, Users, Ticket, ArrowRight, Newspaper, ShoppingBag, Store, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
 import ExposantButton from "@/components/ExposantButton";
@@ -123,13 +123,24 @@ export default async function EvenementsPage() {
   });
 
   function remaining(e: (typeof events)[number]) {
-    if (!e.capacity) return e.capacity;
+    if (!e.capacity) return 0;
     return Math.max(0, e.capacity - e._count.tickets);
   }
 
   return (
     <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
+    {/* Culture pour Tous banner */}
+    <div className="bg-green-600 text-white">
+      <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-2.5 text-center text-xs font-medium sm:text-sm">
+        <span>✨</span>
+        <span><strong>Culture pour Tous</strong> — Tous nos événements accessibles dès 5&nbsp;&euro;</span>
+        <Link href="/culture-pour-tous" className="ml-1 underline underline-offset-2 hover:text-green-100">
+          En savoir plus
+        </Link>
+      </div>
+    </div>
 
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       {/* Breadcrumb */}
@@ -297,7 +308,7 @@ export default async function EvenementsPage() {
                     {event.coverImage && (
                       <Image
                         src={event.coverImage}
-                        alt={event.title}
+                        alt={`${event.title} — ${event.venue}, Paris`}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -425,6 +436,23 @@ export default async function EvenementsPage() {
       {/* ── E. Cross-links — Maillage interne ────────── */}
       <div className="mt-16 border-t border-dta-sand pt-12">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+          {/* Link to Culture pour Tous */}
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <Sparkles size={18} className="text-green-600" />
+              <h3 className="font-serif text-lg font-bold text-dta-dark">Culture pour Tous</h3>
+            </div>
+            <p className="mb-3 text-sm text-dta-char/70">
+              Réservez dès 5&nbsp;&euro; et payez à votre rythme. La culture africaine accessible à tous.
+            </p>
+            <Link
+              href="/culture-pour-tous"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-green-600 hover:text-green-800"
+            >
+              Comment ça marche ? <ArrowRight size={14} />
+            </Link>
+          </div>
+
           {/* Link to exposants */}
           <div>
             <div className="mb-3 flex items-center gap-2">
@@ -432,7 +460,7 @@ export default async function EvenementsPage() {
               <h3 className="font-serif text-lg font-bold text-dta-dark">Devenir exposant</h3>
             </div>
             <p className="mb-3 text-sm text-dta-char/70">
-              R&eacute;servez votre stand pour la saison 2026. &Agrave; partir de 50&euro; d&apos;acompte.
+              Réservez votre stand pour la saison 2026. À partir de 50&nbsp;&euro; d&apos;acompte.
             </p>
             <Link
               href="/billetterie-exposants"
@@ -449,30 +477,13 @@ export default async function EvenementsPage() {
               <h3 className="font-serif text-lg font-bold text-dta-dark">Made in Africa</h3>
             </div>
             <p className="mb-3 text-sm text-dta-char/70">
-              D&eacute;couvrez notre s&eacute;lection d&apos;artisanat africain authentique.
+              Découvrez notre sélection d&apos;artisanat africain authentique.
             </p>
             <Link
               href="/made-in-africa"
               className="inline-flex items-center gap-1 text-sm font-medium text-dta-accent hover:text-dta-accent-dark"
             >
               Explorer la marketplace <ArrowRight size={14} />
-            </Link>
-          </div>
-
-          {/* Link to exposants */}
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <Store size={18} className="text-dta-accent" />
-              <h3 className="font-serif text-lg font-bold text-dta-dark">Devenir exposant</h3>
-            </div>
-            <p className="mb-3 text-sm text-dta-char/70">
-              R&eacute;servez votre stand pour la Foire d&apos;Afrique Paris et les salons de la saison.
-            </p>
-            <Link
-              href="/exposants"
-              className="inline-flex items-center gap-1 text-sm font-medium text-dta-accent hover:text-dta-accent-dark"
-            >
-              En savoir plus <ArrowRight size={14} />
             </Link>
           </div>
         </div>

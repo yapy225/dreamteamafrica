@@ -14,6 +14,7 @@ import {
   GraduationCap,
   Heart,
   CheckCircle2,
+  MessageCircle,
 } from "lucide-react";
 import DevisForm from "./DevisForm";
 
@@ -53,20 +54,15 @@ export const metadata: Metadata = {
   alternates: { canonical: `${siteUrl}/danse-zaouli-paris` },
 };
 
-const TARIFS_COURS = [
+const FORMULES_COURS = [
   {
     title: "Cours decouverte",
-    price: "20",
-    unit: "/ personne",
     duration: "1h30",
     desc: "Initiation aux pas de base du Zaouli. Ouvert a tous, aucune experience requise.",
     features: ["Echauffement rythme aux percussions", "Apprentissage des pas fondamentaux", "Initiation aux mouvements de bras", "Moment de partage culturel"],
-    highlight: false,
   },
   {
     title: "Stage intensif",
-    price: "75",
-    unit: "/ personne",
     duration: "Demi-journee (3h)",
     desc: "Approfondissement technique et immersion dans l'univers du Zaouli avec un maitre danseur.",
     features: ["Technique avancee du Zaouli", "Histoire et signification des mouvements", "Accompagnement live aux percussions", "Video souvenir du stage", "Certificat de participation"],
@@ -74,23 +70,19 @@ const TARIFS_COURS = [
   },
   {
     title: "Cours collectif hebdo",
-    price: "150",
-    unit: "/ mois",
     duration: "1h30 / semaine",
     desc: "Abonnement mensuel pour progresser regulierement. Cours chaque semaine avec suivi personnalise.",
     features: ["4 cours de 1h30 par mois", "Progression adaptee a votre niveau", "Percussions live", "Acces au groupe prive WhatsApp", "Spectacle de fin d'annee"],
-    highlight: false,
   },
   {
     title: "Cours prive / entreprise",
-    price: "Sur devis",
-    unit: "",
     duration: "Selon vos besoins",
     desc: "Prestation sur mesure pour votre groupe, association, CE ou evenement prive.",
     features: ["A partir de 8 participants", "Lieu de votre choix ou dans nos locaux", "Danseurs et percussionnistes dedies", "Team building & cohesion d'equipe", "Formule adaptable (1h a journee)"],
-    highlight: false,
   },
 ];
+
+const WHATSAPP_COURS_URL = "https://wa.me/33751443774?text=Bonjour%20Dream%20Team%20Africa%20%21%20Je%20suis%20int%C3%A9ress%C3%A9(e)%20par%20vos%20cours%20de%20danse%20Zaouli.%20Pouvez-vous%20me%20donner%20plus%20d%27informations%20sur%20les%20tarifs%20et%20disponibilit%C3%A9s%20%3F";
 
 const SPECTACLES = [
   {
@@ -144,21 +136,9 @@ export default function DanseZaouliParis() {
     makesOffer: [
       {
         "@type": "Offer",
-        name: "Cours decouverte Zaouli",
-        price: "20",
-        priceCurrency: "EUR",
-      },
-      {
-        "@type": "Offer",
-        name: "Stage intensif Zaouli",
-        price: "75",
-        priceCurrency: "EUR",
-      },
-      {
-        "@type": "Offer",
-        name: "Abonnement mensuel Zaouli",
-        price: "150",
-        priceCurrency: "EUR",
+        name: "Cours de danse Zaouli",
+        availability: "https://schema.org/InStock",
+        description: "Cours de danse Zaouli a Paris — decouverte, stage intensif, cours hebdo, cours prive",
       },
     ],
   };
@@ -203,7 +183,7 @@ export default function DanseZaouliParis() {
               href="#tarifs"
               className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-dta-accent-dark"
             >
-              Voir les tarifs des cours
+              Decouvrir nos cours
               <ArrowRight size={16} />
             </a>
             <a
@@ -275,7 +255,7 @@ export default function DanseZaouliParis() {
           </div>
 
           <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {TARIFS_COURS.map((t) => (
+            {FORMULES_COURS.map((t) => (
               <div
                 key={t.title}
                 className={`relative flex flex-col rounded-[var(--radius-card)] border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card-hover)] ${
@@ -290,16 +270,6 @@ export default function DanseZaouliParis() {
                   </span>
                 )}
                 <h3 className="font-serif text-lg font-bold text-dta-dark">{t.title}</h3>
-                <div className="mt-3 flex items-baseline gap-1">
-                  <span className="font-serif text-3xl font-bold text-dta-accent">
-                    {t.price === "Sur devis" ? "" : `${t.price}\u00A0\u20AC`}
-                  </span>
-                  {t.price === "Sur devis" ? (
-                    <span className="font-serif text-xl font-bold text-dta-accent">Sur devis</span>
-                  ) : (
-                    <span className="text-sm text-dta-taupe">{t.unit}</span>
-                  )}
-                </div>
                 <div className="mt-2 flex items-center gap-2 text-xs text-dta-taupe">
                   <Clock size={12} />
                   {t.duration}
@@ -313,23 +283,24 @@ export default function DanseZaouliParis() {
                     </li>
                   ))}
                 </ul>
-                <a
-                  href={t.price === "Sur devis" ? "#devis" : "/nous-contacter"}
-                  className={`mt-6 block rounded-[var(--radius-button)] px-4 py-2.5 text-center text-sm font-semibold transition-colors ${
-                    t.highlight
-                      ? "bg-dta-accent text-white hover:bg-dta-accent-dark"
-                      : "border border-dta-accent text-dta-accent hover:bg-dta-accent hover:text-white"
-                  }`}
-                >
-                  {t.price === "Sur devis" ? "Demander un devis" : "Reserver"}
-                </a>
               </div>
             ))}
           </div>
 
-          <p className="mt-8 text-center text-xs text-dta-taupe">
-            Tarifs TTC. Les cours ont lieu a Paris et en Ile-de-France. Deplacement possible en province (frais en sus).
-          </p>
+          <div className="mt-10 text-center">
+            <a
+              href={WHATSAPP_COURS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 rounded-[var(--radius-button)] bg-[#25D366] px-8 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:bg-[#1fb855] hover:shadow-xl"
+            >
+              <MessageCircle size={20} />
+              Contactez-nous sur WhatsApp pour les tarifs
+            </a>
+            <p className="mt-3 text-xs text-dta-taupe">
+              Reponse rapide — tarifs et disponibilites sur demande
+            </p>
+          </div>
         </div>
       </section>
 

@@ -432,7 +432,7 @@ export default function PurchasePanel({
               {installments > 1 && (
                 <div className="mt-2 rounded-lg border border-green-200 bg-green-50 p-3 text-xs text-green-800">
                   <p>Aujourd&apos;hui : <strong>{formatCurrency(deposit)}</strong> (acompte)</p>
-                  <p>Puis rechargez à votre rythme — {installments - 1}x <strong>{formatCurrency(monthlyAmount)}</strong> suggéré/mois</p>
+                  <p>Puis rechargez à votre rythme — reste <strong>{formatCurrency(remainingBalance)}</strong> à régler</p>
                   <p className="mt-1 text-green-600">Minimum 1&nbsp;&euro; par recharge · Solde avant l&apos;événement</p>
                 </div>
               )}

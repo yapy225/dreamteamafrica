@@ -13,6 +13,7 @@ const VALID_CATEGORIES = [
   "MEDIA",
   "ARTISTE",
   "ZAOULI_DEVIS",
+  "ZAOULI_INTERET",
 ];
 
 const categoryLabels: Record<string, string> = {
@@ -24,6 +25,7 @@ const categoryLabels: Record<string, string> = {
   MEDIA: "Média",
   ARTISTE: "Artiste",
   ZAOULI_DEVIS: "Devis Zaouli (cours / spectacle)",
+  ZAOULI_INTERET: "Sondage Zaouli — intéressé(e) cours sept. 2026",
 };
 
 export async function POST(request: NextRequest) {

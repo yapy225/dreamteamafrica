@@ -24,6 +24,7 @@ function WhatsAppIcon({ size = 20 }: { size?: number }) {
   );
 }
 import DevisForm from "./DevisForm";
+import InterestForm from "./InterestForm";
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
 
@@ -390,19 +391,23 @@ export default function DanseZaouliParis() {
             ))}
           </div>
 
-          <div className="mt-10 text-center">
-            <a
-              href={WHATSAPP_COURS_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 rounded-[var(--radius-button)] bg-[#25D366] px-8 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:bg-[#1fb855] hover:shadow-xl"
-            >
-              <WhatsAppIcon size={20} />
-              Contactez-nous sur WhatsApp pour les tarifs
-            </a>
-            <p className="mt-3 text-xs text-dta-taupe">
-              Réponse rapide — tarifs et disponibilités sur demande
-            </p>
+          {/* ── Encart lancement septembre ── */}
+          <div className="mx-auto mt-12 max-w-2xl rounded-[var(--radius-card)] border-2 border-dta-accent/20 bg-gradient-to-br from-white to-dta-beige/30 p-6 shadow-[var(--shadow-card)] sm:p-8">
+            <div className="text-center">
+              <span className="inline-block rounded-full bg-dta-accent/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-dta-accent">
+                Lancement mi-septembre 2026
+              </span>
+              <h3 className="mt-4 font-serif text-xl font-bold text-dta-dark sm:text-2xl">
+                Ça vous intéresse ? Dites-le nous !
+              </h3>
+              <p className="mx-auto mt-2 max-w-lg text-sm text-dta-char/70">
+                Les cours de danse Zaouli démarrent à la rentrée de septembre 2026 à Paris.
+                Laissez vos coordonnées pour être prévenu(e) en priorité dès l&apos;ouverture des inscriptions.
+              </p>
+            </div>
+            <div className="mt-6">
+              <InterestForm />
+            </div>
           </div>
         </div>
       </section>

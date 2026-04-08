@@ -6,12 +6,22 @@ const EVENT_URL = "https://dreamteamafrica.com/saison-culturelle-africaine/foire
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // ── Mentions exposants (cachées en bas des posts) ──
-const IG_EXPOSANTS = [
-  "@by_kemi", "@cbk_planner", "@edeniquecoffee", "@jabcollectionwax",
-  "@rentavoyage", "@sanaacreation_", "@lunivers_mesu",
-].join(" ");
+// Rotation de 3 groupes pour ne pas surcharger chaque post
+const IG_EXPOSANT_GROUPS = [
+  // Groupe 1 — Mode & Accessoires
+  "@sanaacreation_ @famashop78 @jabcollectionwax @by_kemi @cbk_planner @olgstyle @makakreation @beghabyrina @evra_hodna @mossane_pagne_tisse @dieynissa_fashion @anna_kate_pro @admundo_concept",
+  // Groupe 2 — Cosmétiques & Bien-être
+  "@maisonnimba @edeniquecoffee @lesfondantsdeGrace @mila_2585 @el.glorious.7 @asili_le_soin @samhatchad @queenyemuna @okosmetik18 @darna_senteurs @retour_aux_sources_by_ad @bijoo_bijoo",
+  // Groupe 3 — Art, Food & Culture
+  "@conficulture_afro_quiz @rentavoyage @le_comptoir_d_acraa @orange_zulucrown @izikaofficiel @nanse3d @yohel.france @kelima_ @abidjanis.art @cnergysolar @maison.dalla @lessecretsdobama @artaidani",
+];
 
-const IG_MENTIONS = `\n\n.\n.\n.\nNos exposants :\n${IG_EXPOSANTS}`;
+function getExposantMentions(): string {
+  const idx = Math.floor(Date.now() / 86400000) % IG_EXPOSANT_GROUPS.length;
+  return IG_EXPOSANT_GROUPS[idx];
+}
+
+const IG_MENTIONS = `\n\n.\n.\n.\nNos exposants :\n${getExposantMentions()}`;
 
 // ── Messages mis à jour : 10€ prévente, passage à 15€ ──
 

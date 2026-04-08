@@ -245,9 +245,9 @@ model Event {
   showCapacity Boolean  @default(true)
   program      Json?
   tiers        Json?
-  priceEarly   Float
-  priceStd     Float
-  priceVip     Float
+  priceEarly   Decimal @db.Decimal(10, 2)
+  priceStd     Decimal @db.Decimal(10, 2)
+  priceVip     Decimal @db.Decimal(10, 2)
   published   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -264,7 +264,7 @@ model Ticket {
   eventId         String
   userId          String
   tier            String
-  price           Float
+  price           Decimal @db.Decimal(10, 2)
   qrCode          String?
   stripeSessionId String?
   purchasedAt     DateTime   @default(now())
@@ -277,7 +277,7 @@ model Ticket {
   visitDate       DateTime?
 
   // Installment tracking
-  totalPaid       Float      @default(0)
+  totalPaid       Decimal @db.Decimal(10, 2) @default(0)
   installments    Int        @default(1)
 
   event    Event           @relation(fields: [eventId], references: [id])
@@ -292,7 +292,7 @@ model TicketPayment {
   id       String   @id @default(cuid())
   ticketId String
   ticket   Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  amount   Float
+  amount   Decimal @db.Decimal(10, 2)
   type     String   // "deposit" | "installment" | "recharge" | "full_payment"
   label    String   // e.g. "Acompte", "Recharge", "Paiement complet"
   stripeId String?
@@ -308,7 +308,7 @@ model Product {
   name        String
   slug        String   @unique
   description String   @db.Text
-  price       Float
+  price       Decimal @db.Decimal(10, 2)
   images      String[] // array of URLs
   category    String
   country     String
@@ -331,7 +331,7 @@ model Order {
   id              String      @id @default(cuid())
   userId          String
   status          OrderStatus @default(PENDING)
-  total           Float
+  total           Decimal @db.Decimal(10, 2)
   stripeSessionId String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
@@ -345,7 +345,7 @@ model OrderItem {
   orderId   String
   productId String
   quantity  Int
-  price     Float
+  price     Decimal @db.Decimal(10, 2)
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
@@ -663,11 +663,11 @@ model ExhibitorBooking {
   events               String[]       // ["foire-afrique", "juste-une-danse", ...]
   totalDays            Int
   stands               Int            @default(1)
-  totalPrice           Float
+  totalPrice           Decimal @db.Decimal(10, 2)
 
   // Paiement fractionné
   installments         Int            @default(1)  // 1 à 5
-  installmentAmount    Float
+  installmentAmount    Decimal @db.Decimal(10, 2)
   paidInstallments     Int            @default(0)
 
   // Stripe
@@ -699,7 +699,7 @@ model Coupon {
   id          String    @id @default(cuid())
   code        String    @unique
   type        String    @default("FREE_STAND") // FREE_STAND, PERCENTAGE, FIXED
-  value       Float      @default(0)            // 0 = gratuit, ou % ou montant fixe
+  value       Decimal @db.Decimal(10, 2) @default(0)            // 0 = gratuit, ou % ou montant fixe
   label       String                           // "Stand gratuit — Association"
   maxUses     Int       @default(1)
   usedCount   Int       @default(0)
@@ -730,7 +730,7 @@ model ExhibitorPayment {
   id        String   @id @default(cuid())
   bookingId String
   booking   ExhibitorBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  amount    Float
+  amount    Decimal @db.Decimal(10, 2)
   type      String   // "deposit" | "installment" | "early_payment" | "full_payment"
   label     String   // e.g. "Acompte", "Mensualité 3/9", "Paiement anticipé (2 mois)"
   stripeId  String?  // Stripe session or invoice ID

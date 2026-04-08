@@ -713,11 +713,17 @@ async function postLinkedInComment(
   let accessToken: string | undefined;
   let memberId: string | undefined;
 
-  if (cred?.accessToken && cred?.memberId) {
+  if (cred?.memberId && (cred.encryptedAccessToken || cred.accessToken)) {
     if (cred.expiresAt && cred.expiresAt < new Date()) {
       return { success: false, error: "LinkedIn token expiré" };
     }
-    accessToken = cred.accessToken;
+    // Prefer encrypted token, fallback to legacy plaintext
+    if (cred.encryptedAccessToken) {
+      const { decrypt } = await import("@/lib/crypto");
+      accessToken = decrypt(cred.encryptedAccessToken);
+    } else {
+      accessToken = cred.accessToken;
+    }
     memberId = cred.memberId;
   } else {
     accessToken = process.env.LINKEDIN_ACCESS_TOKEN;

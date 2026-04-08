@@ -65,19 +65,23 @@ export async function GET(request: NextRequest) {
     // 3. Save to database (upsert)
     const expiresAt = new Date(Date.now() + (tokenData.expires_in || 5184000) * 1000);
 
+    const { encrypt } = await import("@/lib/crypto");
     await prisma.socialCredential.upsert({
       where: { platform: "LINKEDIN" },
       update: {
-        accessToken: tokenData.access_token,
-        refreshToken: tokenData.refresh_token || null,
+        accessToken: "", // Deprecated — kept for backward compat
+        refreshToken: null,
+        encryptedAccessToken: encrypt(tokenData.access_token),
+        encryptedRefreshToken: tokenData.refresh_token ? encrypt(tokenData.refresh_token) : null,
         expiresAt,
         memberId,
         metadata: { name: profile.name, scope: tokenData.scope },
       },
       create: {
         platform: "LINKEDIN",
-        accessToken: tokenData.access_token,
-        refreshToken: tokenData.refresh_token || null,
+        accessToken: "",
+        encryptedAccessToken: encrypt(tokenData.access_token),
+        encryptedRefreshToken: tokenData.refresh_token ? encrypt(tokenData.refresh_token) : null,
         expiresAt,
         memberId,
         metadata: { name: profile.name, scope: tokenData.scope },

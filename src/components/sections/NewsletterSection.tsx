@@ -117,7 +117,10 @@ export default function NewsletterSection() {
               <span className="text-xs leading-relaxed text-white/40">
                 En cochant cette case, j&apos;accepte de recevoir les
                 newsletters de Dream Team Africa et je confirme avoir pris
-                connaissance de la politique de confidentialité. Conformément au
+                connaissance de la{" "}
+                <a href="/politique-de-confidentialite" target="_blank" className="underline hover:text-white/60">
+                  politique de confidentialité
+                </a>. Conformément au
                 RGPD, je peux me désinscrire à tout moment.
               </span>
             </label>

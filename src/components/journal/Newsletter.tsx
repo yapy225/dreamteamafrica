@@ -76,6 +76,13 @@ export default function Newsletter() {
           </button>
         </form>
 
+        <p className="mt-3 text-[11px] leading-relaxed text-white/30">
+          En vous abonnant, vous acceptez notre{" "}
+          <a href="/politique-de-confidentialite" target="_blank" className="underline hover:text-white/50">
+            politique de confidentialit&eacute;
+          </a>. D&eacute;sabonnement &agrave; tout moment. Conforme RGPD.
+        </p>
+
         {/* Status messages */}
         {status === "success" && (
           <p className="mt-4 text-sm text-green-400">{message}</p>

@@ -126,6 +126,12 @@ export default function DonationForm() {
       <p className="mt-3 text-center text-xs text-dta-sand/50">
         Paiement s&eacute;curis&eacute; par Stripe
       </p>
+      <p className="mt-2 text-center text-[11px] leading-relaxed text-dta-sand/40">
+        En effectuant ce don, j&apos;accepte que mes donn&eacute;es soient trait&eacute;es conform&eacute;ment &agrave; la{" "}
+        <a href="/politique-de-confidentialite" target="_blank" className="underline hover:text-dta-sand/60">
+          politique de confidentialit&eacute;
+        </a>.
+      </p>
     </form>
   );
 }

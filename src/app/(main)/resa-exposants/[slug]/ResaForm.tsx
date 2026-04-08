@@ -513,6 +513,19 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
         </span>
       </label>
 
+      <p className="text-[11px] leading-relaxed text-dta-char/50">
+        En validant ma r&eacute;servation, j&apos;accepte les{" "}
+        <a href="/conditions-generales" target="_blank" className="underline text-dta-accent">CGV</a>,{" "}
+        la{" "}
+        <a href="/politique-de-confidentialite" target="_blank" className="underline text-dta-accent">
+          politique de confidentialit&eacute;
+        </a>{" "}
+        et la{" "}
+        <a href="/politique-annulation" target="_blank" className="underline text-dta-accent">
+          politique d&apos;annulation
+        </a>. Conforme RGPD.
+      </p>
+
       {/* Submit */}
       <button
         type="submit"

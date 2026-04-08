@@ -147,9 +147,16 @@ export default function InterestForm() {
           className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 accent-dta-accent"
         />
         <span className="text-xs leading-relaxed text-dta-char/70">
-          Me prévenir à l&apos;ouverture des inscriptions et recevoir les actualités Dream Team Africa (RGPD, désabonnement à tout moment).
+          Me prévenir à l&apos;ouverture des inscriptions et recevoir les actualités Dream Team Africa. Désabonnement à tout moment.
         </span>
       </label>
+
+      <p className="text-[11px] leading-relaxed text-dta-char/50">
+        En soumettant ce formulaire, j&apos;accepte que mes données soient traitées conformément à la{" "}
+        <a href="/politique-de-confidentialite" target="_blank" className="underline text-dta-accent">
+          politique de confidentialité
+        </a>. Conformément au RGPD, je peux exercer mes droits d&apos;accès, de rectification et de suppression à tout moment.
+      </p>
 
       <button
         type="submit"

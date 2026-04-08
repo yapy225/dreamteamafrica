@@ -127,10 +127,23 @@ export default function CartPage() {
           </span>
         </div>
 
+        <p className="mt-4 text-[11px] leading-relaxed text-dta-char/50">
+          En passant au paiement, j&apos;accepte les{" "}
+          <a href="/conditions-generales" target="_blank" className="underline text-dta-accent">CGV</a>,{" "}
+          la{" "}
+          <a href="/politique-de-confidentialite" target="_blank" className="underline text-dta-accent">
+            politique de confidentialité
+          </a>{" "}
+          et la{" "}
+          <a href="/politique-annulation" target="_blank" className="underline text-dta-accent">
+            politique d&apos;annulation
+          </a>.
+        </p>
+
         <button
           onClick={handleCheckout}
           disabled={loading}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3.5 text-sm font-semibold text-white hover:bg-dta-accent-dark disabled:opacity-50"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3.5 text-sm font-semibold text-white hover:bg-dta-accent-dark disabled:opacity-50"
         >
           {loading ? (
             <>

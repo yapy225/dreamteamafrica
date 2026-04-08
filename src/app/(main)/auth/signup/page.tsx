@@ -152,6 +152,17 @@ function SignUpForm() {
               </div>
             </div>
 
+            <p className="text-[11px] leading-relaxed text-dta-char/50">
+              En créant un compte, j&apos;accepte les{" "}
+              <a href="/conditions-utilisation" target="_blank" className="underline text-dta-accent">
+                conditions d&apos;utilisation
+              </a>{" "}
+              et la{" "}
+              <a href="/politique-de-confidentialite" target="_blank" className="underline text-dta-accent">
+                politique de confidentialité
+              </a>. Conformément au RGPD, je peux exercer mes droits d&apos;accès, de rectification et de suppression à tout moment.
+            </p>
+
             <button
               type="submit"
               disabled={loading}

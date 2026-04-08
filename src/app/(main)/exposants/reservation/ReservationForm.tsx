@@ -483,6 +483,19 @@ export default function ReservationForm() {
         </fieldset>
       )}
 
+      <p className="text-[11px] leading-relaxed text-dta-char/50">
+        En validant ma réservation, j&apos;accepte les{" "}
+        <a href="/conditions-generales" target="_blank" className="underline text-dta-accent">CGV</a>,{" "}
+        la{" "}
+        <a href="/politique-de-confidentialite" target="_blank" className="underline text-dta-accent">
+          politique de confidentialité
+        </a>{" "}
+        et la{" "}
+        <a href="/politique-annulation" target="_blank" className="underline text-dta-accent">
+          politique d&apos;annulation
+        </a>. Conforme RGPD.
+      </p>
+
       {/* Submit */}
       <div className="flex gap-3 border-t border-dta-sand pt-6">
         <button

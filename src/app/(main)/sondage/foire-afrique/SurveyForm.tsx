@@ -179,6 +179,15 @@ export default function SurveyForm() {
         </fieldset>
       )}
 
+      {answer !== null && (
+        <p className="text-[11px] leading-relaxed text-dta-char/50">
+          En soumettant ce sondage, j&apos;accepte que mes donn&eacute;es soient trait&eacute;es conform&eacute;ment &agrave; la{" "}
+          <a href="/politique-de-confidentialite" target="_blank" className="underline text-dta-accent">
+            politique de confidentialit&eacute;
+          </a>. Conforme RGPD.
+        </p>
+      )}
+
       {/* Submit */}
       {answer !== null && (
         <button

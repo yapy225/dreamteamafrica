@@ -5,6 +5,7 @@ import { Calendar, MapPin, Ticket } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
+import RechargeButton from "./RechargeButton";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +44,7 @@ export default async function TicketsPage() {
 
   const tickets = await prisma.ticket.findMany({
     where: { userId: session.user.id },
-    include: { event: true },
+    include: { event: true, payments: { orderBy: { paidAt: "asc" } } },
     orderBy: { purchasedAt: "desc" },
   });
 
@@ -93,7 +94,7 @@ export default async function TicketsPage() {
               </h2>
               <div className="space-y-6">
                 {upcoming.map((ticket) => (
-                  <VisualTicketCard key={ticket.id} ticket={ticket} />
+                  <VisualTicketCard key={ticket.id} ticket={ticket} userEmail={session.user.email!} />
                 ))}
               </div>
             </section>
@@ -107,7 +108,7 @@ export default async function TicketsPage() {
               </h2>
               <div className="space-y-6 opacity-60">
                 {past.map((ticket) => (
-                  <VisualTicketCard key={ticket.id} ticket={ticket} />
+                  <VisualTicketCard key={ticket.id} ticket={ticket} userEmail={session.user.email!} />
                 ))}
               </div>
             </section>
@@ -120,13 +121,17 @@ export default async function TicketsPage() {
 
 function VisualTicketCard({
   ticket,
+  userEmail,
 }: {
+  userEmail: string;
   ticket: {
     id: string;
     tier: string;
     price: number;
+    totalPaid: number;
     qrCode: string | null;
     purchasedAt: Date;
+    payments: Array<{ id: string; amount: number; type: string; label: string; paidAt: Date }>;
     event: {
       title: string;
       slug: string;
@@ -137,6 +142,9 @@ function VisualTicketCard({
     };
   };
 }) {
+  const remaining = Math.max(0, ticket.price - ticket.totalPaid);
+  const isPaid = ticket.totalPaid >= ticket.price;
+  const paymentPercent = ticket.price > 0 ? Math.min(100, Math.round((ticket.totalPaid / ticket.price) * 100)) : 100;
   const eventDate = new Date(ticket.event.date);
 
   return (
@@ -234,19 +242,43 @@ function VisualTicketCard({
           </div>
         )}
 
-        <div className="flex flex-1 items-center justify-between gap-2">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-white/40">Prix</span>
-              <span className="text-sm font-semibold text-white">{formatPrice(ticket.price)}</span>
+        <div className="flex flex-1 flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-white/40">Prix</span>
+                <span className="text-sm font-semibold text-white">{formatPrice(ticket.price)}</span>
+              </div>
+              <p className="font-mono text-[10px] text-white/30">
+                Réf : {ticket.id.slice(0, 8).toUpperCase()}
+              </p>
             </div>
-            <p className="font-mono text-[10px] text-white/30">
-              Réf : {ticket.id.slice(0, 8).toUpperCase()}
-            </p>
+            <div className="flex items-center gap-2">
+              <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase ${isPaid ? "bg-green-500/20 text-green-400" : "bg-amber-500/20 text-amber-400"}`}>
+                {isPaid ? "Soldé" : `${paymentPercent}% payé`}
+              </span>
+              <span className="text-[10px] uppercase tracking-widest text-white/20">
+                DTA 2026
+              </span>
+            </div>
           </div>
-          <span className="text-[10px] uppercase tracking-widest text-white/20">
-            DTA 2026
-          </span>
+
+          {/* Payment progress bar */}
+          {!isPaid && ticket.price > 0 && (
+            <div className="space-y-2">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-amber-500 to-dta-accent transition-all"
+                  style={{ width: `${paymentPercent}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-white/50">
+                <span>Payé : {formatPrice(ticket.totalPaid)}</span>
+                <span>Reste : {formatPrice(remaining)}</span>
+              </div>
+              <RechargeButton ticketId={ticket.id} email={userEmail} remaining={remaining} />
+            </div>
+          )}
         </div>
       </div>
     </Link>

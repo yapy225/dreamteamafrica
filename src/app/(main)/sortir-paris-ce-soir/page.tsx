@@ -152,9 +152,9 @@ export default function SortirParisCeSoir() {
           <h2 className="font-serif text-2xl font-bold text-dta-dark">A decouvrir aussi</h2>
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
+              { title: "Danse Zaouli — cours & spectacles", href: "/danse-zaouli-paris", emoji: "\uD83D\uDC83" },
               { title: "Concerts afro a Paris", href: "/concert-afro-paris", emoji: "\uD83C\uDFB5" },
               { title: "Croisieres sur la Seine", href: "/croisiere-seine-paris", emoji: "\uD83D\uDEA2" },
-              { title: "Weekend a Paris pas cher", href: "/weekend-paris-pas-cher", emoji: "\uD83D\uDCB0" },
               { title: "Les meilleurs restaurants africains a Paris", href: "/lafropeen/meilleurs-restaurants-africains-paris-2026", emoji: "\uD83C\uDF7D\uFE0F" },
               { title: "Evasion Paris — soiree africaine 2026", href: "/lafropeen/evasion-paris-soiree-africaine-2026", emoji: "\uD83D\uDEA2" },
               { title: "Sejour culturel africain a Paris", href: "/sejour-culturel-africain-paris", emoji: "\u2708\uFE0F" },

@@ -274,6 +274,28 @@ export default function SejourCulturelPage() {
         </div>
       </section>
 
+      {/* Expérience Zaouli */}
+      <section className="px-4 py-14 sm:py-16">
+        <div className="mx-auto max-w-5xl">
+          <Link
+            href="/danse-zaouli-paris"
+            className="group flex flex-col items-center gap-6 rounded-[var(--radius-card)] border border-dta-accent/20 bg-gradient-to-r from-dta-beige/50 to-dta-accent/5 p-8 text-center transition-all hover:shadow-[var(--shadow-card-hover)] sm:flex-row sm:text-left"
+          >
+            <span className="text-5xl">💃</span>
+            <div className="flex-1">
+              <h3 className="font-serif text-xl font-bold text-dta-dark transition-colors group-hover:text-dta-accent">
+                Vivez l&apos;expérience Zaouli
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-dta-char/70">
+                Découvrez le Zaouli, danse traditionnelle de Côte d&apos;Ivoire inscrite au patrimoine de l&apos;UNESCO.
+                Cours de danse à Paris et spectacles sur mesure pour vos événements. Une expérience culturelle unique à intégrer dans votre séjour.
+              </p>
+            </div>
+            <ArrowRight size={24} className="shrink-0 text-dta-taupe transition-colors group-hover:text-dta-accent" />
+          </Link>
+        </div>
+      </section>
+
       {/* CTA Billetterie */}
       <section className="bg-dta-dark px-4 py-16 sm:py-20">
         <div className="mx-auto max-w-3xl text-center">

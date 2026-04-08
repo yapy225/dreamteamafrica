@@ -151,6 +151,7 @@ export default function ConcertAfroParis() {
           <h2 className="font-serif text-2xl font-bold text-dta-dark">A decouvrir aussi</h2>
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
+              { title: "Danse Zaouli — cours & spectacles", href: "/danse-zaouli-paris", emoji: "\uD83D\uDC83" },
               { title: "Sortir a Paris ce soir", href: "/sortir-paris-ce-soir", emoji: "\uD83C\uDF19" },
               { title: "Spectacles africains a Paris", href: "/spectacle-africain-paris", emoji: "\uD83C\uDFAD" },
               { title: "Croisieres sur la Seine", href: "/croisiere-seine-paris", emoji: "\uD83D\uDEA2" },

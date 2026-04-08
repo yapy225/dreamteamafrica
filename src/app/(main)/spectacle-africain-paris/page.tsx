@@ -126,6 +126,11 @@ export default function SpectacleAfricainParis() {
               Paris est l&apos;une des capitales mondiales des arts africains. La ville abrite une scene dynamique ou se croisent{" "}
               <strong>danseurs contemporains</strong>, <strong>griots traditionnels</strong> et <strong>musiciens afrobeats</strong>.
               Des salles comme le Cabaret Sauvage, La Cigale ou le New Morning programment regulierement des artistes africains.
+              Parmi les danses les plus spectaculaires, le{" "}
+              <Link href="/danse-zaouli-paris" className="font-semibold text-dta-accent hover:underline">
+                Zaouli de Cote d&apos;Ivoire
+              </Link>
+              , inscrit au patrimoine de l&apos;UNESCO, attire un public toujours plus large.
             </p>
             <p>
               La{" "}

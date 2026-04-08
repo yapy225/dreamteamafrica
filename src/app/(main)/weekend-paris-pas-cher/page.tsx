@@ -174,8 +174,8 @@ export default function WeekendParisPasCher() {
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
               { title: "Que faire a Paris ce weekend ?", href: "/que-faire-paris-ce-weekend", emoji: "\uD83D\uDDFC" },
+              { title: "Danse Zaouli — cours & spectacles", href: "/danse-zaouli-paris", emoji: "\uD83D\uDC83" },
               { title: "Sortir a Paris ce soir", href: "/sortir-paris-ce-soir", emoji: "\uD83C\uDF19" },
-              { title: "Musees d'art africain a Paris", href: "/musee-art-africain-paris", emoji: "\uD83C\uDFDB\uFE0F" },
               { title: "Activites culturelles a Paris en mai 2026", href: "/lafropeen/activites-culturelles-paris-mai-2026", emoji: "\uD83C\uDFA8" },
               { title: "Sorties famille & culture africaine", href: "/lafropeen/sorties-famille-culture-africaine-paris-enfants-2026", emoji: "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC66" },
               { title: "Sejour culturel africain a Paris", href: "/sejour-culturel-africain-paris", emoji: "\u2708\uFE0F" },

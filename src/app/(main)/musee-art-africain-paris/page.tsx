@@ -143,8 +143,8 @@ export default function MuseeArtAfricainParis() {
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
               { title: "Que faire à Paris ce weekend ?", href: "/que-faire-paris-ce-weekend", emoji: "🗼" },
+              { title: "Danse Zaouli — cours & spectacles", href: "/danse-zaouli-paris", emoji: "💃" },
               { title: "Spectacles africains à Paris", href: "/spectacle-africain-paris", emoji: "🎭" },
-              { title: "Croisières sur la Seine", href: "/croisiere-seine-paris", emoji: "🚢" },
               { title: "Marchés africains à Paris", href: "/marche-africain-paris", emoji: "🏪" },
               { title: "Concerts afro à Paris", href: "/concert-afro-paris", emoji: "🎵" },
               { title: "Art contemporain africain", href: "/lafropeen/art-contemporain-africain-marche-mondial", emoji: "🎨" },

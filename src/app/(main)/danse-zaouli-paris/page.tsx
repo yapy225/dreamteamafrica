@@ -305,6 +305,26 @@ export default function DanseZaouliParis() {
                   <strong>patrimoine culturel immatériel de l&apos;humanité par l&apos;UNESCO</strong>,
                   reconnaissant son importance culturelle et sa contribution au patrimoine mondial.
                 </p>
+                <p>
+                  À Paris, le Zaouli s&apos;inscrit dans une scène culturelle africaine en plein essor.
+                  La{" "}
+                  <Link href="/saison-culturelle-africaine" className="font-semibold text-dta-accent hover:underline">
+                    Saison Culturelle Africaine 2026
+                  </Link>{" "}
+                  met à l&apos;honneur les arts vivants du continent, avec notamment{" "}
+                  <Link href="/saison-culturelle-africaine/juste-une-danse" className="font-semibold text-dta-accent hover:underline">
+                    Juste Une Danse
+                  </Link>
+                  , un événement dédié à la danse africaine sous toutes ses formes. Retrouvez également nos{" "}
+                  <Link href="/spectacle-africain-paris" className="font-semibold text-dta-accent hover:underline">
+                    spectacles africains à Paris
+                  </Link>{" "}
+                  et les{" "}
+                  <Link href="/activites-culturelles-paris" className="font-semibold text-dta-accent hover:underline">
+                    activités culturelles
+                  </Link>{" "}
+                  à découvrir dans la capitale.
+                </p>
               </div>
             </div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)]">

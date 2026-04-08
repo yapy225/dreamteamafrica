@@ -82,6 +82,10 @@ export default function QueFaireParisCeWeekend() {
             ,{" "}
             <Link href="/concert-afro-paris" className="font-semibold text-dta-accent underline decoration-dta-accent/30 underline-offset-2 hover:decoration-dta-accent">
               concerts afro
+            </Link>
+            ,{" "}
+            <Link href="/danse-zaouli-paris" className="font-semibold text-dta-accent underline decoration-dta-accent/30 underline-offset-2 hover:decoration-dta-accent">
+              cours de danse Zaouli
             </Link>{" "}
             et{" "}
             <Link href="/marche-africain-paris" className="font-semibold text-dta-accent underline decoration-dta-accent/30 underline-offset-2 hover:decoration-dta-accent">
@@ -162,6 +166,7 @@ export default function QueFaireParisCeWeekend() {
               { title: "Musées & art africain", href: "/musee-art-africain-paris", emoji: "🎨" },
               { title: "Marchés africains", href: "/marche-africain-paris", emoji: "🏪" },
               { title: "Spectacles africains", href: "/spectacle-africain-paris", emoji: "🎭" },
+              { title: "Danse Zaouli", href: "/danse-zaouli-paris", emoji: "💃" },
               { title: "Concerts afro", href: "/concert-afro-paris", emoji: "🎵" },
               { title: "Weekend pas cher", href: "/weekend-paris-pas-cher", emoji: "💰" },
               { title: "Boutiques africaines", href: "/boutique-africaine-paris", emoji: "🛍️" },

@@ -6,6 +6,7 @@ const footerSections = [
     title: "Découvrir",
     links: [
       { href: "/saison-culturelle-africaine", label: "Saison Culturelle" },
+      { href: "/danse-zaouli-paris", label: "Danse Zaouli" },
       { href: "/lafropeen", label: "L'Afropéen" },
       { href: "/lofficiel-dafrique", label: "L'Officiel d'Afrique" },
       { href: "/made-in-africa", label: "Made In Africa" },

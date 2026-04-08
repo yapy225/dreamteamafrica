@@ -55,6 +55,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Ce billet est déjà entièrement payé." }, { status: 400 });
     }
 
+    // 6b. Deadline check: no recharge after the event
+    if (new Date() > new Date(ticket.event.date)) {
+      return NextResponse.json({ error: "L'événement est passé, la recharge n'est plus possible." }, { status: 400 });
+    }
+
     const rechargeAmount = Math.min(Math.round(parsedAmount * 100) / 100, remaining);
 
     // 7. Stripe checkout

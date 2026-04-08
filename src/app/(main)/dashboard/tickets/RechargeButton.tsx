@@ -52,36 +52,42 @@ export default function RechargeButton({
           e.stopPropagation();
           setShowAmounts(true);
         }}
-        className="mt-1 inline-flex items-center rounded-full bg-dta-accent px-4 py-1.5 text-xs font-semibold text-white hover:bg-dta-accent-dark"
+        className="inline-flex items-center gap-1.5 rounded-xl border border-dta-accent bg-dta-accent/5 px-4 py-2 text-xs font-semibold text-dta-accent transition-colors hover:bg-dta-accent hover:text-white"
       >
-        Recharger mon billet
+        + Recharger
       </button>
     );
   }
 
   return (
     <div
-      className="mt-2 rounded-lg bg-white/5 p-3"
+      className="rounded-xl border border-slate-200 bg-slate-50 p-4"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
       }}
     >
-      <p className="mb-2 text-[11px] font-medium text-white/60">Choisis un montant</p>
+      <p className="mb-2.5 text-xs font-medium text-slate-600">Choisis un montant</p>
       <div className="flex flex-wrap gap-2">
         {amounts.map((amt) => (
           <button
             key={amt}
             disabled={loading}
             onClick={() => handleRecharge(amt)}
-            className="rounded-full bg-dta-accent/20 px-3 py-1 text-xs font-semibold text-dta-accent hover:bg-dta-accent hover:text-white disabled:opacity-50"
+            className="rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:border-dta-accent hover:bg-dta-accent hover:text-white disabled:opacity-50"
           >
             {amt === remaining ? `${formatCurrency(amt)} (solde)` : formatCurrency(amt)}
           </button>
         ))}
       </div>
-      {error && <p className="mt-1 text-[10px] text-red-400">{error}</p>}
-      {loading && <p className="mt-1 text-[10px] text-white/40">Redirection...</p>}
+      <button
+        onClick={() => setShowAmounts(false)}
+        className="mt-2 text-[10px] text-slate-400 hover:text-slate-600"
+      >
+        Annuler
+      </button>
+      {error && <p className="mt-1 text-[10px] text-red-500">{error}</p>}
+      {loading && <p className="mt-1 text-[10px] text-slate-400">Redirection vers le paiement...</p>}
     </div>
   );
 }

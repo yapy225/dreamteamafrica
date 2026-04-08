@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import crypto from "crypto";
+
+function verifyTicketSig(ticketId: string, sig: string | null): boolean {
+  if (!sig) return false;
+  const secret = process.env.NEXTAUTH_SECRET || "dta-secret";
+  const expected = crypto.createHmac("sha256", secret).update(ticketId).digest("hex").slice(0, 16);
+  try {
+    return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
+  } catch {
+    return false;
+  }
+}
 
 export async function GET(
   _request: NextRequest,
@@ -89,9 +101,21 @@ export async function POST(
 
   const { id } = await params;
 
+  // Verify HMAC signature from QR code
+  const url = new URL(_request.url);
+  const sig = url.searchParams.get("sig");
+
   // Try check-in paid ticket
   const ticket = await prisma.ticket.findUnique({ where: { id } });
   if (ticket) {
+    // SIGNATURE CHECK: verify the QR code is authentic (not guessed)
+    if (!verifyTicketSig(id, sig)) {
+      return NextResponse.json({
+        success: false,
+        error: "QR code invalide ou falsifié.",
+      }, { status: 403 });
+    }
+
     // FRAUD CHECK: verify payment is complete
     if (ticket.price > 0 && ticket.totalPaid < ticket.price) {
       const remaining = ticket.price - ticket.totalPaid;

@@ -123,6 +123,21 @@ export async function POST(request: Request) {
       );
     }
 
+    // Limit per email per event (max 5 tickets)
+    const MAX_TICKETS_PER_EMAIL = 5;
+    const existingTickets = await prisma.ticket.count({
+      where: { email: trimmedEmail, eventId: event.id },
+    });
+    if (existingTickets + quantity > MAX_TICKETS_PER_EMAIL) {
+      const left = MAX_TICKETS_PER_EMAIL - existingTickets;
+      return NextResponse.json(
+        { error: left <= 0
+          ? `Vous avez déjà atteint la limite de ${MAX_TICKETS_PER_EMAIL} billets pour cet événement.`
+          : `Vous pouvez encore acheter ${left} billet(s) pour cet événement.` },
+        { status: 400 },
+      );
+    }
+
     /* ── FREE TICKETS: create directly without Stripe ──────────── */
     if (unitPrice === 0) {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://dreamteamafrica.com";

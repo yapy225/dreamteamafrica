@@ -121,7 +121,9 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
   const ticketPromises = Array.from({ length: qty }, async () => {
     const ticketId = crypto.randomUUID();
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://dreamteamafrica.com";
-    const qrUrl = `${baseUrl}/check/${ticketId}`;
+    // HMAC signature to prevent QR URL guessing
+    const sig = crypto.createHmac("sha256", process.env.NEXTAUTH_SECRET || "dta-secret").update(ticketId).digest("hex").slice(0, 16);
+    const qrUrl = `${baseUrl}/check/${ticketId}?sig=${sig}`;
 
     const qrBuffer = await QRCode.toBuffer(qrUrl, { width: 600, margin: 2 });
     const { url: qrCdnUrl } = await uploadBuffer(
@@ -241,14 +243,8 @@ async function handleTicketInstallment(session: Stripe.Checkout.Session) {
 
   const ticketPromises = Array.from({ length: qty }, async () => {
     const ticketId = crypto.randomUUID();
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://dreamteamafrica.com";
-    const qrUrl = `${baseUrl}/check/${ticketId}`;
-    const qrBuffer = await QRCode.toBuffer(qrUrl, { width: 600, margin: 2 });
-    const { url: qrCdnUrl } = await uploadBuffer(
-      Buffer.from(qrBuffer),
-      `qrcodes/tickets/${ticketId}.png`,
-    );
 
+    // Installment: no QR code until fully paid — prevents usage before payment
     const ticket = await prisma.ticket.create({
       data: {
         id: ticketId,
@@ -256,7 +252,8 @@ async function handleTicketInstallment(session: Stripe.Checkout.Session) {
         userId,
         tier,
         price: unitPriceNum,
-        qrCode: qrCdnUrl,
+        totalPaid: 0,
+        qrCode: null,
         stripeSessionId: session.id,
         firstName: firstName || null,
         lastName: lastName || null,
@@ -266,7 +263,7 @@ async function handleTicketInstallment(session: Stripe.Checkout.Session) {
       },
     });
 
-    createdTickets.push({ id: ticket.id, qrCode: qrCdnUrl });
+    createdTickets.push({ id: ticket.id, qrCode: "" });
     return ticket;
   });
 
@@ -418,10 +415,28 @@ async function handleTicketRecharge(session: Stripe.Checkout.Session) {
     },
   });
 
-  await prisma.ticket.update({
+  const updatedTicket = await prisma.ticket.update({
     where: { id: ticketId },
     data: { totalPaid: { increment: safeAmount } },
   });
+
+  // If now fully paid → generate QR code
+  if (updatedTicket.totalPaid >= updatedTicket.price && !updatedTicket.qrCode) {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://dreamteamafrica.com";
+      const sig = crypto.createHmac("sha256", process.env.NEXTAUTH_SECRET || "dta-secret").update(ticketId).digest("hex").slice(0, 16);
+      const qrUrl = `${baseUrl}/check/${ticketId}?sig=${sig}`;
+      const qrBuffer = await QRCode.toBuffer(qrUrl, { width: 600, margin: 2 });
+      const { url: qrCdnUrl } = await uploadBuffer(Buffer.from(qrBuffer), `qrcodes/tickets/${ticketId}.png`);
+      await prisma.ticket.update({
+        where: { id: ticketId },
+        data: { qrCode: qrCdnUrl },
+      });
+      console.log(`Ticket ${ticketId} fully paid → QR generated: ${qrCdnUrl}`);
+    } catch (qrErr) {
+      console.error(`Failed to generate QR for ticket ${ticketId}:`, qrErr);
+    }
+  }
 
   console.log(`Ticket ${ticketId} recharged +${safeAmount}€ (user: ${userId})`);
 }

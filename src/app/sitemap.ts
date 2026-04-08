@@ -34,6 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/concert-afro-paris`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${baseUrl}/weekend-paris-pas-cher`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${baseUrl}/sejour-culturel-africain-paris`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${baseUrl}/danse-zaouli-paris`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${baseUrl}/mentions-legales`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
     { url: `${baseUrl}/conditions-generales`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
     { url: `${baseUrl}/politique-de-confidentialite`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },

@@ -170,12 +170,12 @@ export default function SpectacleAfricainParis() {
           <h2 className="font-serif text-2xl font-bold text-dta-dark">A decouvrir aussi</h2>
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
+              { title: "Danse Zaouli — cours & spectacles", href: "/danse-zaouli-paris", emoji: "\uD83D\uDC83" },
               { title: "Concerts afro a Paris", href: "/concert-afro-paris", emoji: "\uD83C\uDFB5" },
               { title: "Que faire a Paris ce weekend ?", href: "/que-faire-paris-ce-weekend", emoji: "\uD83D\uDDFC" },
               { title: "Foires & salons a Paris 2026", href: "/foire-paris-2026", emoji: "\uD83D\uDCC5" },
               { title: "Sorties famille & culture africaine", href: "/lafropeen/sorties-famille-culture-africaine-paris-enfants-2026", emoji: "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67\u200D\uD83D\uDC66" },
               { title: "Musees d'art africain a Paris", href: "/musee-art-africain-paris", emoji: "\uD83C\uDFDB\uFE0F" },
-              { title: "Sejour culturel africain a Paris", href: "/sejour-culturel-africain-paris", emoji: "\u2708\uFE0F" },
             ].map((item) => (
               <Link key={item.href} href={item.href} className="group flex items-center gap-3 rounded-[var(--radius-card)] border border-dta-sand/40 bg-white p-4 transition-all hover:bg-dta-accent/5 hover:shadow-sm">
                 <span className="text-2xl">{item.emoji}</span>

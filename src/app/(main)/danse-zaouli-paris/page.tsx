@@ -28,64 +28,71 @@ import DevisForm from "./DevisForm";
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
 
 export const metadata: Metadata = {
-  title: "Danse Zaouli a Paris — cours & spectacles | Dream Team Africa",
+  title: "Danse Zaouli à Paris — cours & spectacles | Dream Team Africa",
   description:
-    "Decouvrez le Zaouli, danse traditionnelle de Cote d'Ivoire. Cours de danse Zaouli a Paris, spectacles, animations comite d'entreprise. Dream Team Africa, specialiste de la culture africaine.",
+    "Découvrez le Zaouli, danse traditionnelle de Côte d'Ivoire. Cours de danse Zaouli à Paris, spectacles, animations comité d'entreprise. Dream Team Africa, spécialiste de la culture africaine.",
   keywords: [
     "danse zaouli paris",
     "cours danse zaouli",
     "spectacle zaouli",
     "danse traditionnelle africaine paris",
-    "danse cote d'ivoire",
-    "animation africaine comite entreprise",
+    "danse côte d'ivoire",
+    "animation africaine comité entreprise",
     "spectacle danse africaine",
     "cours danse africaine paris",
     "zaouli dance",
     "troupe danse africaine paris",
   ],
   openGraph: {
-    title: "Danse Zaouli a Paris — cours & spectacles | Dream Team Africa",
+    title: "Danse Zaouli à Paris — cours & spectacles | Dream Team Africa",
     description:
-      "Cours de danse Zaouli et production de spectacles traditionnels africains a Paris. Comite d'entreprise, theatres, festivals.",
+      "Cours de danse Zaouli et production de spectacles traditionnels africains à Paris. Comité d'entreprise, théâtres, festivals.",
     type: "website",
     url: `${siteUrl}/danse-zaouli-paris`,
     images: [
       {
-        url: "https://dreamteamafricamedia.b-cdn.net/dansezaouliparis/zaouli-1920x1080%20.png",
+        url: "https://dreamteamafricamedia.b-cdn.net/dansezaouliparis/zaouli-1920x1080.png",
         width: 1920,
         height: 1080,
         alt: "Danse Zaouli — Dream Team Africa",
       },
     ],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Danse Zaouli à Paris — cours & spectacles | Dream Team Africa",
+    description:
+      "Cours de danse Zaouli et spectacles traditionnels africains à Paris. Comité d'entreprise, théâtres, festivals.",
+    images: ["https://dreamteamafricamedia.b-cdn.net/dansezaouliparis/zaouli-1920x1080.png"],
+  },
   alternates: { canonical: `${siteUrl}/danse-zaouli-paris` },
 };
 
 const FORMULES_COURS = [
   {
-    title: "Cours decouverte",
+    title: "Cours découverte",
     duration: "1h30",
-    desc: "Initiation aux pas de base du Zaouli. Ouvert a tous, aucune experience requise.",
-    features: ["Echauffement rythme aux percussions", "Apprentissage des pas fondamentaux", "Initiation aux mouvements de bras", "Moment de partage culturel"],
+    desc: "Initiation aux pas de base du Zaouli. Ouvert à tous, aucune expérience requise.",
+    features: ["Échauffement rythmé aux percussions", "Apprentissage des pas fondamentaux", "Initiation aux mouvements de bras", "Moment de partage culturel"],
   },
   {
     title: "Stage intensif",
-    duration: "Demi-journee (3h)",
-    desc: "Approfondissement technique et immersion dans l'univers du Zaouli avec un maitre danseur.",
-    features: ["Technique avancee du Zaouli", "Histoire et signification des mouvements", "Accompagnement live aux percussions", "Video souvenir du stage", "Certificat de participation"],
+    duration: "Demi-journée (3h)",
+    desc: "Approfondissement technique et immersion dans l'univers du Zaouli avec un maître danseur.",
+    features: ["Technique avancée du Zaouli", "Histoire et signification des mouvements", "Accompagnement live aux percussions", "Vidéo souvenir du stage", "Certificat de participation"],
     highlight: true,
   },
   {
     title: "Cours collectif hebdo",
     duration: "1h30 / semaine",
-    desc: "Abonnement mensuel pour progresser regulierement. Cours chaque semaine avec suivi personnalise.",
-    features: ["4 cours de 1h30 par mois", "Progression adaptee a votre niveau", "Percussions live", "Acces au groupe prive WhatsApp", "Spectacle de fin d'annee"],
+    desc: "Abonnement mensuel pour progresser régulièrement. Cours chaque semaine avec suivi personnalisé.",
+    features: ["4 cours de 1h30 par mois", "Progression adaptée à votre niveau", "Percussions live", "Accès au groupe privé WhatsApp", "Spectacle de fin d'année"],
   },
   {
-    title: "Cours prive / entreprise",
+    title: "Cours privé / entreprise",
     duration: "Selon vos besoins",
-    desc: "Prestation sur mesure pour votre groupe, association, CE ou evenement prive.",
-    features: ["A partir de 8 participants", "Lieu de votre choix ou dans nos locaux", "Danseurs et percussionnistes dedies", "Team building & cohesion d'equipe", "Formule adaptable (1h a journee)"],
+    desc: "Prestation sur mesure pour votre groupe, association, CE ou événement privé.",
+    features: ["À partir de 8 participants", "Lieu de votre choix ou dans nos locaux", "Danseurs et percussionnistes dédiés", "Team building & cohésion d'équipe", "Formule adaptable (1h à journée)"],
   },
 ];
 
@@ -94,74 +101,143 @@ const WHATSAPP_COURS_URL = "https://wa.me/33751443774?text=Bonjour%20Dream%20Tea
 const SPECTACLES = [
   {
     icon: Theater,
-    title: "Spectacle en theatre",
-    desc: "Production complete avec danseurs, percussionnistes et costumes traditionnels. De 30 min a 1h30 de spectacle.",
+    title: "Spectacle en théâtre",
+    desc: "Production complète avec danseurs, percussionnistes et costumes traditionnels. De 30 min à 1h30 de spectacle.",
   },
   {
     icon: Building2,
-    title: "Comite d'entreprise",
-    desc: "Animation culturelle pour vos evenements d'entreprise : seminaire, soiree de gala, journee de cohesion.",
+    title: "Comité d'entreprise",
+    desc: "Animation culturelle pour vos événements d'entreprise : séminaire, soirée de gala, journée de cohésion.",
   },
   {
     icon: Music,
-    title: "Festival & evenement public",
-    desc: "Prestation pour festivals, fetes de la musique, carnavals, journees du patrimoine, inaugurations.",
+    title: "Festival & événement public",
+    desc: "Prestation pour festivals, fêtes de la musique, carnavals, journées du patrimoine, inaugurations.",
   },
   {
     icon: GraduationCap,
     title: "Milieu scolaire & MJC",
-    desc: "Ateliers pedagogiques et representations pour ecoles, colleges, centres culturels et MJC.",
+    desc: "Ateliers pédagogiques et représentations pour écoles, collèges, centres culturels et MJC.",
   },
   {
     icon: Heart,
-    title: "Mariages & evenements prives",
-    desc: "Entree des maries, animation de soiree, spectacle surprise. Un moment inoubliable pour vos invites.",
+    title: "Mariages & événements privés",
+    desc: "Entrée des mariés, animation de soirée, spectacle surprise. Un moment inoubliable pour vos invités.",
   },
   {
     icon: Users,
-    title: "Collectivites & mairies",
-    desc: "Spectacles pour journees interculturelles, fetes de quartier, celebrations officielles.",
+    title: "Collectivités & mairies",
+    desc: "Spectacles pour journées interculturelles, fêtes de quartier, célébrations officielles.",
   },
 ];
 
 export default function DanseZaouliParis() {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: "Dream Team Africa — Danse Zaouli",
-    description:
-      "Cours de danse Zaouli et production de spectacles de danse traditionnelle africaine a Paris.",
-    url: `${siteUrl}/danse-zaouli-paris`,
-    telephone: "+33751443774",
-    email: "hello@dreamteamafrica.com",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Paris",
-      addressCountry: "FR",
-    },
-    priceRange: "$$",
-    makesOffer: [
-      {
-        "@type": "Offer",
-        name: "Cours de danse Zaouli",
-        availability: "https://schema.org/InStock",
-        description: "Cours de danse Zaouli a Paris — decouverte, stage intensif, cours hebdo, cours prive",
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      name: "Dream Team Africa — Danse Zaouli",
+      description:
+        "Cours de danse Zaouli et production de spectacles de danse traditionnelle africaine à Paris.",
+      url: `${siteUrl}/danse-zaouli-paris`,
+      telephone: "+33751443774",
+      email: "hello@dreamteamafrica.com",
+      image: "https://dreamteamafricamedia.b-cdn.net/dansezaouliparis/zaouli-1920x1080.png",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Paris",
+        addressRegion: "Île-de-France",
+        addressCountry: "FR",
       },
-    ],
-  };
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: 48.8566,
+        longitude: 2.3522,
+      },
+      areaServed: [
+        { "@type": "City", name: "Paris" },
+        { "@type": "State", name: "Île-de-France" },
+        { "@type": "Country", name: "France" },
+      ],
+      priceRange: "$$",
+      makesOffer: [
+        {
+          "@type": "Offer",
+          name: "Cours de danse Zaouli",
+          availability: "https://schema.org/InStock",
+          description: "Cours de danse Zaouli à Paris — découverte, stage intensif, cours hebdo, cours privé",
+        },
+        {
+          "@type": "Offer",
+          name: "Spectacle de danse Zaouli",
+          availability: "https://schema.org/InStock",
+          description: "Production et distribution de spectacles Zaouli pour théâtres, festivals, comités d'entreprise, mariages",
+        },
+      ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: "Qu'est-ce que la danse Zaouli ?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Le Zaouli est une danse traditionnelle originaire du peuple Gouro de Côte d'Ivoire, née dans les années 1950. Inscrite au patrimoine immatériel de l'UNESCO en 2017, elle se caractérise par des mouvements de jambes d'une rapidité extraordinaire, un masque sculpté coloré et un accompagnement aux percussions.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Faut-il avoir de l'expérience pour suivre un cours de Zaouli ?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Non, nos cours découverte sont ouverts à tous, sans aucune expérience préalable. Nos danseurs professionnels adaptent leur enseignement à chaque niveau, du débutant complet au danseur confirmé.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Où se déroulent les cours de danse Zaouli à Paris ?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Les cours ont lieu à Paris et en Île-de-France. Pour les cours privés et prestations entreprise, nous nous déplaçons dans le lieu de votre choix, partout en France.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Comment réserver un spectacle Zaouli pour un événement ?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Remplissez notre formulaire de devis en ligne ou contactez-nous par WhatsApp au 07 51 44 37 74. Nous vous envoyons une proposition personnalisée sous 48h, adaptée à votre événement (théâtre, comité d'entreprise, mariage, festival, collectivité).",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Combien de danseurs pour un spectacle Zaouli ?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Nos prestations mobilisent de 2 à 10 artistes (danseurs et percussionnistes) selon la taille de votre événement et vos souhaits. Le spectacle dure de 20 minutes à 1h30, avec possibilité d'atelier participatif en complément.",
+          },
+        },
+      ],
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-white">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {jsonLd.map((schema, i) => (
+        <script
+          key={i}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        />
+      ))}
 
       {/* ───── Hero ───── */}
       <section className="relative overflow-hidden bg-dta-dark">
         <div className="absolute inset-0">
           <Image
-            src="https://dreamteamafricamedia.b-cdn.net/dansezaouliparis/zaouli-1920x1080%20.png"
+            src="https://dreamteamafricamedia.b-cdn.net/dansezaouliparis/zaouli-1920x1080.png"
             alt="Spectacle de danse Zaouli"
             fill
             className="object-cover opacity-40"
@@ -175,22 +251,22 @@ export default function DanseZaouliParis() {
             Danse traditionnelle africaine
           </div>
           <h1 className="mt-4 max-w-3xl font-serif text-4xl font-bold text-white sm:text-5xl lg:text-6xl">
-            Le Zaouli — cours de danse &amp; spectacles a Paris
+            Le Zaouli — cours de danse &amp; spectacles à Paris
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-dta-sand/80">
-            Originaire du peuple Gouro de <strong className="text-white">Cote d&apos;Ivoire</strong>,
+            Originaire du peuple Gouro de <strong className="text-white">Côte d&apos;Ivoire</strong>,
             le Zaouli est l&apos;une des danses les plus rapides et les plus spectaculaires d&apos;Afrique
-            de l&apos;Ouest. Inscrit au <strong className="text-white">patrimoine immateriel de
-            l&apos;UNESCO</strong>, le Zaouli fascine par sa virtuosite, ses masques colores et ses
-            rythmes envooutants. <strong className="text-white">Dream Team Africa</strong> vous propose
-            des cours de danse et la production de spectacles Zaouli a Paris et en Ile-de-France.
+            de l&apos;Ouest. Inscrit au <strong className="text-white">patrimoine immatériel de
+            l&apos;UNESCO</strong>, le Zaouli fascine par sa virtuosité, ses masques colorés et ses
+            rythmes envoûtants. <strong className="text-white">Dream Team Africa</strong> vous propose
+            des cours de danse et la production de spectacles Zaouli à Paris et en Île-de-France.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <a
               href="#tarifs"
               className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-dta-accent-dark"
             >
-              Decouvrir nos cours
+              Découvrir nos cours
               <ArrowRight size={16} />
             </a>
             <a
@@ -213,20 +289,20 @@ export default function DanseZaouliParis() {
               </h2>
               <div className="mt-4 space-y-4 text-sm leading-relaxed text-dta-char/80">
                 <p>
-                  Le <strong>Zaouli</strong> est une danse traditionnelle nee dans les annees 1950
-                  au sein du peuple Gouro, dans le centre-ouest de la Cote d&apos;Ivoire. Elle tire son
-                  nom de <strong>Djela Lou Zaouli</strong>, une jeune fille d&apos;une beaute
-                  legendaire dont le masque est inspire.
+                  Le <strong>Zaouli</strong> est une danse traditionnelle née dans les années 1950
+                  au sein du peuple Gouro, dans le centre-ouest de la Côte d&apos;Ivoire. Elle tire son
+                  nom de <strong>Djela Lou Zaouli</strong>, une jeune fille d&apos;une beauté
+                  légendaire dont le masque est inspiré.
                 </p>
                 <p>
-                  Le danseur, dissimule derriere un masque finement sculpte et pare de costumes
-                  multicolores, execute des mouvements de jambes d&apos;une rapidite stupefiant, tout
+                  Le danseur, dissimulé derrière un masque finement sculpté et paré de costumes
+                  multicolores, exécute des mouvements de jambes d&apos;une rapidité stupéfiante, tout
                   en maintenant le haut du corps parfaitement immobile. Cette prouesse technique,
-                  accompagnee par un ensemble de percussions, cree un spectacle hypnotique.
+                  accompagnée par un ensemble de percussions, crée un spectacle hypnotique.
                 </p>
                 <p>
-                  En 2017, le Zaouli a ete inscrit sur la liste representative du{" "}
-                  <strong>patrimoine culturel immateriel de l&apos;humanite par l&apos;UNESCO</strong>,
+                  En 2017, le Zaouli a été inscrit sur la liste représentative du{" "}
+                  <strong>patrimoine culturel immatériel de l&apos;humanité par l&apos;UNESCO</strong>,
                   reconnaissant son importance culturelle et sa contribution au patrimoine mondial.
                 </p>
               </div>
@@ -252,11 +328,11 @@ export default function DanseZaouliParis() {
               Cours de danse
             </div>
             <h2 className="mt-3 font-serif text-2xl font-bold text-dta-dark sm:text-3xl">
-              Nos formules de cours Zaouli
+              Nos formules de cours de Zaouli
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-sm text-dta-char/70">
-              Du cours decouverte au stage intensif, trouvez la formule qui vous convient.
-              Tous nos cours sont animes par des danseurs professionnels accompagnes de
+              Du cours découverte au stage intensif, trouvez la formule qui vous convient.
+              Tous nos cours sont animés par des danseurs professionnels accompagnés de
               percussionnistes live.
             </p>
           </div>
@@ -305,7 +381,7 @@ export default function DanseZaouliParis() {
               Contactez-nous sur WhatsApp pour les tarifs
             </a>
             <p className="mt-3 text-xs text-dta-taupe">
-              Reponse rapide — tarifs et disponibilites sur demande
+              Réponse rapide — tarifs et disponibilités sur demande
             </p>
           </div>
         </div>
@@ -319,7 +395,7 @@ export default function DanseZaouliParis() {
           </h2>
           <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
             {[
-              { src: "https://dreamteamafricamedia.b-cdn.net/dansezaouliparis/zaouli-1920x1080%20.png", alt: "Spectacle de danse Zaouli" },
+              { src: "https://dreamteamafricamedia.b-cdn.net/dansezaouliparis/zaouli-1920x1080.png", alt: "Spectacle de danse Zaouli" },
               { src: "https://dreamteamafricamedia.b-cdn.net/dansezaouliparis/zaouli-1080x1080.png", alt: "Masque Zaouli traditionnel" },
               { src: "https://dreamteamafricamedia.b-cdn.net/dansezaouliparis/zaouli-1080x1920.png", alt: "Danseur Zaouli en costume" },
             ].map((img) => (
@@ -345,12 +421,12 @@ export default function DanseZaouliParis() {
               Production &amp; distribution de spectacles
             </div>
             <h2 className="mt-3 font-serif text-2xl font-bold text-dta-dark sm:text-3xl">
-              Un spectacle Zaouli pour votre evenement
+              Un spectacle Zaouli pour votre événement
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-dta-char/70">
               Dream Team Africa produit et distribue des spectacles de danse Zaouli authentiques
-              pour tous types d&apos;evenements. Nos danseurs professionnels, accompagnes de
-              percussionnistes, offrent une experience immersive et inoubliable.
+              pour tous types d&apos;événements. Nos danseurs professionnels, accompagnés de
+              percussionnistes, offrent une expérience immersive et inoubliable.
             </p>
           </div>
 
@@ -394,22 +470,22 @@ export default function DanseZaouliParis() {
               {
                 icon: Users,
                 title: "Danseurs professionnels",
-                desc: "Nos artistes sont originaires de Cote d'Ivoire et pratiquent le Zaouli depuis l'enfance.",
+                desc: "Nos artistes sont originaires de Côte d'Ivoire et pratiquent le Zaouli depuis l'enfance.",
               },
               {
                 icon: Music,
                 title: "Percussions live",
-                desc: "Tous nos cours et spectacles sont accompagnes par un ensemble de percussionnistes en live.",
+                desc: "Tous nos cours et spectacles sont accompagnés par un ensemble de percussionnistes en live.",
               },
               {
                 icon: Sparkles,
                 title: "Costumes authentiques",
-                desc: "Masques sculptes et costumes traditionnels confectionnes par des artisans ivoiriens.",
+                desc: "Masques sculptés et costumes traditionnels confectionnés par des artisans ivoiriens.",
               },
               {
                 icon: MapPin,
                 title: "Partout en France",
-                desc: "Nous nous deplacons a Paris, en Ile-de-France et dans toute la France pour vos evenements.",
+                desc: "Nous nous déplaçons à Paris, en Île-de-France et dans toute la France pour vos événements.",
               },
             ].map((item) => (
               <div key={item.title} className="text-center">
@@ -433,17 +509,17 @@ export default function DanseZaouliParis() {
                 Votre spectacle Zaouli sur mesure
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-dta-char/80">
-                Que vous organisiez un evenement d&apos;entreprise, un festival, un mariage ou une
-                representation en theatre, nous concevons une prestation adaptee a vos besoins.
+                Que vous organisiez un événement d&apos;entreprise, un festival, un mariage ou une
+                représentation en théâtre, nous concevons une prestation adaptée à vos besoins.
               </p>
               <ul className="mt-6 space-y-3">
                 {[
                   "Devis gratuit sous 48h",
-                  "Prestation cle en main (danseurs, musiciens, costumes, son)",
-                  "De 2 a 10 artistes selon votre evenement",
-                  "Spectacle de 20 min a 1h30",
-                  "Atelier participatif possible en complement",
-                  "Deplacement dans toute la France",
+                  "Prestation clé en main (danseurs, musiciens, costumes, son)",
+                  "De 2 à 10 artistes selon votre événement",
+                  "Spectacle de 20 min à 1h30",
+                  "Atelier participatif possible en complément",
+                  "Déplacement dans toute la France",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3 text-sm text-dta-char/80">
                     <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-dta-accent" />
@@ -458,7 +534,7 @@ export default function DanseZaouliParis() {
                   <a href="tel:+33751443774" className="font-semibold text-dta-accent hover:underline">
                     07 51 44 37 74
                   </a>{" "}
-                  ou ecrivez a{" "}
+                  ou écrivez à{" "}
                   <a href="mailto:hello@dreamteamafrica.com" className="font-semibold text-dta-accent hover:underline">
                     hello@dreamteamafrica.com
                   </a>
@@ -470,17 +546,63 @@ export default function DanseZaouliParis() {
         </div>
       </section>
 
+      {/* ───── FAQ ───── */}
+      <section className="bg-white px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="text-center font-serif text-2xl font-bold text-dta-dark sm:text-3xl">
+            Questions fréquentes
+          </h2>
+          <div className="mt-8 space-y-4">
+            {[
+              {
+                q: "Qu'est-ce que la danse Zaouli ?",
+                a: "Le Zaouli est une danse traditionnelle originaire du peuple Gouro de Côte d'Ivoire, née dans les années 1950. Inscrite au patrimoine immatériel de l'UNESCO en 2017, elle se caractérise par des mouvements de jambes d'une rapidité extraordinaire, un masque sculpté coloré et un accompagnement aux percussions.",
+              },
+              {
+                q: "Faut-il avoir de l'expérience pour suivre un cours ?",
+                a: "Non, nos cours découverte sont ouverts à tous, sans aucune expérience préalable. Nos danseurs professionnels adaptent leur enseignement à chaque niveau, du débutant complet au danseur confirmé.",
+              },
+              {
+                q: "Où se déroulent les cours à Paris ?",
+                a: "Les cours ont lieu à Paris et en Île-de-France. Pour les cours privés et prestations entreprise, nous nous déplaçons dans le lieu de votre choix, partout en France.",
+              },
+              {
+                q: "Comment réserver un spectacle pour un événement ?",
+                a: "Remplissez notre formulaire de devis en ligne ou contactez-nous par WhatsApp au 07 51 44 37 74. Nous vous envoyons une proposition personnalisée sous 48h.",
+              },
+              {
+                q: "Combien de danseurs pour un spectacle ?",
+                a: "Nos prestations mobilisent de 2 à 10 artistes (danseurs et percussionnistes) selon la taille de votre événement. Le spectacle dure de 20 minutes à 1h30, avec possibilité d'atelier participatif.",
+              },
+            ].map((faq) => (
+              <details
+                key={faq.q}
+                className="group rounded-[var(--radius-card)] border border-dta-sand/40 bg-dta-bg transition-all open:shadow-[var(--shadow-card)]"
+              >
+                <summary className="flex cursor-pointer items-center justify-between p-5 text-sm font-semibold text-dta-dark">
+                  {faq.q}
+                  <ArrowRight size={16} className="shrink-0 text-dta-taupe transition-transform group-open:rotate-90" />
+                </summary>
+                <p className="px-5 pb-5 text-sm leading-relaxed text-dta-char/70">
+                  {faq.a}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ───── Maillage interne ───── */}
       <section className="bg-dta-bg px-4 py-14 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <h2 className="font-serif text-2xl font-bold text-dta-dark">A decouvrir aussi</h2>
+          <h2 className="font-serif text-2xl font-bold text-dta-dark">À découvrir aussi</h2>
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { title: "Spectacles africains a Paris", href: "/spectacle-africain-paris", emoji: "\uD83C\uDFAD" },
-              { title: "Concerts afro a Paris", href: "/concert-afro-paris", emoji: "\uD83C\uDFB5" },
+              { title: "Spectacles africains à Paris", href: "/spectacle-africain-paris", emoji: "\uD83C\uDFAD" },
+              { title: "Concerts afro à Paris", href: "/concert-afro-paris", emoji: "\uD83C\uDFB5" },
               { title: "Saison Culturelle Africaine 2026", href: "/saison-culturelle-africaine", emoji: "\uD83C\uDF1F" },
-              { title: "Activites culturelles a Paris", href: "/activites-culturelles-paris", emoji: "\uD83C\uDFA8" },
-              { title: "Que faire a Paris ce weekend ?", href: "/que-faire-paris-ce-weekend", emoji: "\uD83D\uDDFC" },
+              { title: "Activités culturelles à Paris", href: "/activites-culturelles-paris", emoji: "\uD83C\uDFA8" },
+              { title: "Que faire à Paris ce weekend ?", href: "/que-faire-paris-ce-weekend", emoji: "\uD83D\uDDFC" },
               { title: "Nous contacter", href: "/nous-contacter", emoji: "\uD83D\uDCE9" },
             ].map((item) => (
               <Link

@@ -4,12 +4,12 @@ import { useState } from "react";
 import { Send, Loader2, CheckCircle, ChevronDown } from "lucide-react";
 
 const PRESTATIONS = [
-  { id: "SPECTACLE_THEATRE", label: "Spectacle Zaouli en theatre" },
-  { id: "SPECTACLE_FESTIVAL", label: "Spectacle pour festival / evenement" },
-  { id: "COMITE_ENTREPRISE", label: "Comite d'entreprise / team building" },
-  { id: "MARIAGE_PRIVE", label: "Mariage / evenement prive" },
-  { id: "COLLECTIVITE", label: "Collectivite / mairie / association" },
-  { id: "SCOLAIRE", label: "Etablissement scolaire / MJC" },
+  { id: "SPECTACLE_THEATRE", label: "Spectacle Zaouli en théâtre" },
+  { id: "SPECTACLE_FESTIVAL", label: "Spectacle pour festival / événement" },
+  { id: "COMITE_ENTREPRISE", label: "Comité d'entreprise / team building" },
+  { id: "MARIAGE_PRIVE", label: "Mariage / événement privé" },
+  { id: "COLLECTIVITE", label: "Collectivité / mairie / association" },
+  { id: "SCOLAIRE", label: "Établissement scolaire / MJC" },
   { id: "AUTRE", label: "Autre demande" },
 ];
 
@@ -80,7 +80,7 @@ export default function DevisForm() {
       }
       setSent(true);
     } catch {
-      setError("Erreur reseau. Veuillez reessayer.");
+      setError("Erreur réseau. Veuillez réessayer.");
       setLoading(false);
     }
   };
@@ -90,11 +90,11 @@ export default function DevisForm() {
       <div className="rounded-[var(--radius-card)] border border-green-200 bg-green-50 p-8 text-center">
         <CheckCircle size={48} className="mx-auto text-green-500" />
         <h3 className="mt-4 font-serif text-xl font-bold text-dta-dark">
-          Demande envoyee !
+          Demande envoyée !
         </h3>
         <p className="mt-2 text-sm text-dta-char/70">
-          Merci pour votre demande de devis. Notre equipe vous recontactera sous 48h
-          avec une proposition personnalisee.
+          Merci pour votre demande de devis. Notre équipe vous recontactera sous 48h
+          avec une proposition personnalisée.
         </p>
       </div>
     );
@@ -109,7 +109,7 @@ export default function DevisForm() {
         Demander un devis
       </h3>
       <p className="mt-1 text-sm text-dta-char/70">
-        Decrivez votre projet et recevez une proposition sur mesure sous 48h.
+        Décrivez votre projet et recevez une proposition sur mesure sous 48h.
       </p>
 
       {error && (
@@ -131,7 +131,7 @@ export default function DevisForm() {
               onChange={(e) => setPrestation(e.target.value)}
               className={`${inputClass} appearance-none pr-10`}
             >
-              <option value="">Selectionnez une prestation</option>
+              <option value="">Sélectionnez une prestation</option>
               {PRESTATIONS.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.label}
@@ -149,14 +149,14 @@ export default function DevisForm() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1 block text-sm font-medium text-dta-char">
-              Prenom *
+              Prénom *
             </label>
             <input
               required
               value={form.firstName}
               onChange={(e) => setForm({ ...form, firstName: e.target.value })}
               className={inputClass}
-              placeholder="Votre prenom"
+              placeholder="Votre prénom"
             />
           </div>
           <div>
@@ -190,7 +190,7 @@ export default function DevisForm() {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-dta-char">
-              Telephone *
+              Téléphone *
             </label>
             <input
               required
@@ -216,11 +216,11 @@ export default function DevisForm() {
           />
         </div>
 
-        {/* Details evenement */}
+        {/* Détails événement */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
             <label className="mb-1 block text-sm font-medium text-dta-char">
-              Date souhaitee
+              Date souhaitée
             </label>
             <input
               type="date"
@@ -242,7 +242,7 @@ export default function DevisForm() {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-dta-char">
-              Nombre d&apos;invites
+              Nombre d&apos;invités
             </label>
             <input
               type="number"
@@ -257,7 +257,7 @@ export default function DevisForm() {
         {/* Message */}
         <div>
           <label className="mb-1 block text-sm font-medium text-dta-char">
-            Decrivez votre projet *
+            Décrivez votre projet *
           </label>
           <textarea
             required
@@ -265,7 +265,7 @@ export default function DevisForm() {
             value={form.message}
             onChange={(e) => setForm({ ...form, message: e.target.value })}
             className={inputClass}
-            placeholder="Contexte, nombre de danseurs souhaites, duree de la prestation, budget indicatif..."
+            placeholder="Contexte, nombre de danseurs souhaités, durée de la prestation, budget indicatif..."
           />
         </div>
 
@@ -278,8 +278,8 @@ export default function DevisForm() {
             className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 accent-dta-accent"
           />
           <span className="text-xs leading-relaxed text-dta-char/70">
-            Je souhaite recevoir les actualites et evenements de Dream Team Africa
-            par email. Conformement au RGPD, je peux me desinscrire a tout moment.
+            Je souhaite recevoir les actualités et événements de Dream Team Africa
+            par email. Conformément au RGPD, je peux me désinscrire à tout moment.
           </span>
         </label>
 

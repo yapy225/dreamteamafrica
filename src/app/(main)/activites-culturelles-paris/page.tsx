@@ -216,6 +216,27 @@ export default function ActivitesCulturellesParis() {
         </div>
       </section>
 
+      {/* Zaouli */}
+      <section className="bg-white px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <Link
+            href="/danse-zaouli-paris"
+            className="group flex items-center gap-6 rounded-[var(--radius-card)] border border-dta-sand/40 bg-dta-beige/30 p-6 transition-all hover:shadow-[var(--shadow-card-hover)]"
+          >
+            <span className="text-4xl">💃</span>
+            <div className="flex-1">
+              <h3 className="font-serif text-lg font-bold text-dta-dark transition-colors group-hover:text-dta-accent">
+                Cours de danse Zaouli &amp; spectacles
+              </h3>
+              <p className="mt-1 text-sm text-dta-char/70">
+                Découvrez le Zaouli, danse traditionnelle de Côte d&apos;Ivoire inscrite au patrimoine de l&apos;UNESCO. Cours à Paris et spectacles pour vos événements.
+              </p>
+            </div>
+            <ArrowRight size={20} className="flex-shrink-0 text-dta-taupe transition-colors group-hover:text-dta-accent" />
+          </Link>
+        </div>
+      </section>
+
       {/* Disclosure finale */}
       <div className="bg-dta-beige/30 px-4 py-6 sm:px-6 lg:px-8">
         <p className="mx-auto max-w-3xl text-center text-xs leading-relaxed text-dta-taupe">

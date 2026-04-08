@@ -417,17 +417,6 @@ export default function PurchasePanel({
                 >
                   Dès 5&euro; — Culture pour Tous
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setInstallments(3)}
-                  className={`rounded-[var(--radius-button)] border px-4 py-2 text-sm font-medium transition-colors ${
-                    installments === 3
-                      ? "border-green-600 bg-green-600 text-white"
-                      : "border-green-300 bg-green-50 text-green-700 hover:border-green-500"
-                  }`}
-                >
-                  3x — Culture pour Tous
-                </button>
               </div>
               {installments > 1 && (
                 <div className="mt-2 rounded-lg border border-green-200 bg-green-50 p-3 text-xs text-green-800">

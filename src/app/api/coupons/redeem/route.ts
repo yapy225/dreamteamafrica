@@ -23,27 +23,45 @@ export async function POST(request: Request) {
     );
   }
 
-  const coupon = await prisma.coupon.findUnique({
-    where: { code: code.trim().toUpperCase() },
-  });
-
-  if (
-    !coupon ||
-    !coupon.active ||
-    coupon.usedCount >= coupon.maxUses ||
-    (coupon.expiresAt && coupon.expiresAt < new Date())
-  ) {
-    return NextResponse.json(
-      { error: "Coupon invalide ou expiré." },
-      { status: 400 },
-    );
-  }
-
   try {
+    // Atomic coupon validation + increment to prevent race conditions
+    const trimmedCode = code.trim().toUpperCase();
+    const coupon = await prisma.coupon.findUnique({
+      where: { code: trimmedCode },
+    });
+
+    if (
+      !coupon ||
+      !coupon.active ||
+      coupon.usedCount >= coupon.maxUses ||
+      (coupon.expiresAt && coupon.expiresAt < new Date())
+    ) {
+      return NextResponse.json(
+        { error: "Coupon invalide ou expiré." },
+        { status: 400 },
+      );
+    }
+
+    // Atomic increment with condition — prevents double-use race condition
+    const { count: updated } = await prisma.coupon.updateMany({
+      where: {
+        id: coupon.id,
+        usedCount: { lt: coupon.maxUses },
+      },
+      data: { usedCount: { increment: 1 } },
+    });
+    if (updated === 0) {
+      return NextResponse.json(
+        { error: "Coupon déjà utilisé." },
+        { status: 400 },
+      );
+    }
+
     // Create or find user
     const trimmedEmail = email.trim().toLowerCase();
-    const rawPassword = Math.random().toString(36).slice(2, 10);
-    const hashedPassword = await bcrypt.hash(rawPassword, 10);
+    const { randomBytes } = await import("crypto");
+    const rawPassword = randomBytes(8).toString("hex"); // 16 chars, cryptographically secure
+    const hashedPassword = await bcrypt.hash(rawPassword, 12);
 
     const user = await prisma.user.upsert({
       where: { email: trimmedEmail },
@@ -87,11 +105,10 @@ export async function POST(request: Request) {
       },
     });
 
-    // Mark coupon as used
+    // Link coupon to booking (increment already done above atomically)
     await prisma.coupon.update({
       where: { id: coupon.id },
       data: {
-        usedCount: { increment: 1 },
         usedBy: trimmedEmail,
         bookingId: booking.id,
       },

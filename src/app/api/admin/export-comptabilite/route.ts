@@ -1,14 +1,24 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await auth();
-  if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  if (!session?.user?.id || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
+
+  // Rate limit: 2 exports per 5 minutes
+  const ip = getClientIp(request);
+  const rl = rateLimit(`export:${ip}`, { limit: 2, windowSec: 300 });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Trop de tentatives. Réessayez dans quelques minutes." }, { status: 429 });
+  }
+
+  console.log(`[ADMIN EXPORT] ${session.user.email} exported comptabilité at ${new Date().toISOString()}`);
 
   // Tickets
   const tickets = await prisma.ticket.findMany({

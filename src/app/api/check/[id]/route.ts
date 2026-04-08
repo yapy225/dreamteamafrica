@@ -27,23 +27,22 @@ export async function GET(
     const isPaid = ticket.totalPaid >= ticket.price;
     const paymentPercent = ticket.price > 0 ? Math.round((ticket.totalPaid / ticket.price) * 100) : 100;
 
+    // Mask holder name for privacy (show first letter + last name initial)
+    const fullName = `${ticket.firstName || ""} ${ticket.lastName || ""}`.trim() || ticket.user.name || "Visiteur";
+    const maskedName = fullName.length > 2
+      ? fullName[0] + "***" + (fullName.includes(" ") ? " " + fullName.split(" ").pop()?.[0] + "." : "")
+      : fullName;
+
     return NextResponse.json({
       type: "TICKET",
       valid: isPaid && !ticket.checkedInAt,
       id: ticket.id,
       eventTitle: ticket.event.title,
-      eventVenue: ticket.event.venue,
-      eventAddress: ticket.event.address,
-      eventDate: ticket.event.date,
-      holder: `${ticket.firstName || ""} ${ticket.lastName || ""}`.trim() || ticket.user.name || ticket.user.email,
+      holder: maskedName,
       tier: ticket.tier,
-      price: ticket.price,
-      totalPaid: ticket.totalPaid,
-      paymentPercent,
       paymentStatus: isPaid ? "PAID" : "PARTIAL",
       admissionAllowed: isPaid && !ticket.checkedInAt,
       checkedIn: ticket.checkedInAt !== null,
-      checkedInAt: ticket.checkedInAt,
     });
   }
 

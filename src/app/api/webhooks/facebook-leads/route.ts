@@ -42,8 +42,21 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    console.log("Facebook lead webhook:", JSON.stringify(body));
+    // Verify Facebook webhook signature (X-Hub-Signature-256)
+    const rawBody = await request.text();
+    const fbSignature = request.headers.get("x-hub-signature-256");
+    const appSecret = process.env.WHATSAPP_APP_SECRET || process.env.META_APP_SECRET;
+    if (appSecret && fbSignature) {
+      const { createHmac } = await import("crypto");
+      const expectedSig = "sha256=" + createHmac("sha256", appSecret).update(rawBody).digest("hex");
+      if (fbSignature !== expectedSig) {
+        console.error("[Facebook Leads] Invalid signature");
+        return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+      }
+    }
+
+    const body = JSON.parse(rawBody);
+    console.log("Facebook lead webhook received");
 
     const entries = body.entry ?? [];
 

@@ -32,9 +32,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (password.length < 8) {
+    if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
       return NextResponse.json(
-        { error: "Le mot de passe doit contenir au moins 8 caractères." },
+        { error: "Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre." },
         { status: 400 },
       );
     }

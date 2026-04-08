@@ -343,5 +343,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|api|letthemusicplay|favicon.ico|.*\\..*).*)"],
+  matcher: ["/((?!_next|letthemusicplay|favicon.ico|.*\\..*).*)"],
 };

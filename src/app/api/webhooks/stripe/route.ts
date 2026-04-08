@@ -177,7 +177,7 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
   // Send WhatsApp confirmation if user has a phone number
   try {
     const whatsappPhone = phone || user?.phone;
-    const customerName = `${firstName || ""} ${lastName || ""}`.trim() || user?.name || "Client";
+    const customerName = (`${firstName || ""} ${lastName || ""}`.trim() || user?.name || "Client").replace(/[\n\r]/g, " ");
     if (whatsappPhone && event) {
       await sendTicketConfirmationWhatsApp({
         phone: whatsappPhone,
@@ -202,8 +202,8 @@ async function handleTicketInstallment(session: Stripe.Checkout.Session) {
     installments, deposit, remainingBalance, installmentAmount,
   } = session.metadata!;
 
-  const qty = parseInt(quantity);
-  const nbInstallments = parseInt(installments);
+  const qty = Math.min(Math.max(parseInt(quantity) || 1, 1), 10);
+  const nbInstallments = Math.min(Math.max(parseInt(installments) || 1, 1), 3);
 
   const event = await prisma.event.findUnique({
     where: { id: eventId },
@@ -366,7 +366,7 @@ async function handleTicketInstallment(session: Stripe.Checkout.Session) {
   // Send WhatsApp confirmation
   try {
     const whatsappPhone = phone;
-    const customerName = `${firstName || ""} ${lastName || ""}`.trim();
+    const customerName = `${firstName || ""} ${lastName || ""}`.trim().replace(/[\n\r]/g, " ");
     if (whatsappPhone && event) {
       const depositNum = parseFloat(deposit);
       const monthlyNum = parseFloat(installmentAmount);
@@ -814,7 +814,7 @@ async function handleExposantDeposit(session: Stripe.Checkout.Session) {
   }
 
   // Generate a random password
-  const rawPassword = crypto.randomBytes(4).toString("hex"); // 8 chars
+  const rawPassword = crypto.randomBytes(8).toString("hex"); // 16 chars, 64 bits
   const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
   // Upsert user account

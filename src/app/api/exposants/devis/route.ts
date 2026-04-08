@@ -24,6 +24,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Réservation introuvable." }, { status: 404 });
     }
 
+    // Verify ownership: user must own the booking or be admin
+    if (booking.userId !== session.user.id && session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
+    }
+
     const pack = EXHIBITOR_PACKS.find((p) => p.id === booking.pack);
     const eventNames = EXHIBITOR_EVENTS.filter((e) =>
       booking.events.includes(e.id)

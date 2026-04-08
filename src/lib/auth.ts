@@ -123,6 +123,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Reset on success
         attempts.delete(lockoutKey);
 
+        // 2FA check: if enabled, verify TOTP code
+        if (user.totpEnabled && user.totpSecret) {
+          const totpCode = (credentials as Record<string, unknown>).totpCode as string | undefined;
+          if (!totpCode) {
+            throw new Error("TOTP_REQUIRED");
+          }
+          try {
+            const { verifyTotp } = await import("@/lib/totp");
+            const { decrypt } = await import("@/lib/crypto");
+            const secret = decrypt(user.totpSecret);
+            if (!verifyTotp(totpCode, secret)) {
+              throw new Error("TOTP_INVALID");
+            }
+          } catch (e: unknown) {
+            if (e instanceof Error && (e.message === "TOTP_REQUIRED" || e.message === "TOTP_INVALID")) throw e;
+            throw new Error("TOTP_INVALID");
+          }
+        }
+
         return {
           id: user.id,
           name: user.name,

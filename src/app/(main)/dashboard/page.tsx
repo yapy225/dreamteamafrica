@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail, ScanLine, MessageSquare, Inbox, MessageCircle, FileImage, Sparkles, FileText, Calculator } from "lucide-react";
+import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail, ScanLine, MessageSquare, Inbox, MessageCircle, FileImage, Sparkles, FileText, Calculator, ShieldCheck } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getRevenueData } from "@/lib/revenue";
@@ -173,6 +173,13 @@ export default async function DashboardPage() {
             label: "Hub SEO",
             count: null,
             color: "bg-cyan-100 text-cyan-600",
+          },
+          {
+            href: "/dashboard/security",
+            icon: ShieldCheck,
+            label: "Sécurité (2FA)",
+            count: null,
+            color: "bg-red-100 text-red-600",
           },
         ]
       : []),

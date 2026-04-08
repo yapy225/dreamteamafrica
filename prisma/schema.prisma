@@ -121,6 +121,8 @@ model User {
   bio            String?
   country        String?
   phone          String?
+  totpSecret     String?   // TOTP secret (encrypted), null = 2FA disabled
+  totpEnabled    Boolean   @default(false)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

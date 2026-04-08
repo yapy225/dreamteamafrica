@@ -246,8 +246,8 @@ model Event {
   program      Json?
   tiers        Json?
   priceEarly   Float
-  priceStd    Float
-  priceVip    Float
+  priceStd     Float
+  priceVip     Float
   published   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -699,7 +699,7 @@ model Coupon {
   id          String    @id @default(cuid())
   code        String    @unique
   type        String    @default("FREE_STAND") // FREE_STAND, PERCENTAGE, FIXED
-  value       Float     @default(0)            // 0 = gratuit, ou % ou montant fixe
+  value       Float      @default(0)            // 0 = gratuit, ou % ou montant fixe
   label       String                           // "Stand gratuit — Association"
   maxUses     Int       @default(1)
   usedCount   Int       @default(0)
@@ -1032,15 +1032,45 @@ model EmailSyncState {
 }
 
 model SocialCredential {
-  id           String         @id @default(cuid())
-  platform     SocialPlatform @unique
-  accessToken  String         @db.Text
-  refreshToken String?        @db.Text
-  expiresAt    DateTime?
-  memberId     String?        // LinkedIn member ID, etc.
-  metadata     Json?          // Extra platform-specific data
-  updatedAt    DateTime       @updatedAt
-  createdAt    DateTime       @default(now())
+  id                  String         @id @default(cuid())
+  platform            SocialPlatform @unique
+  accessToken         String         @db.Text // Deprecated: use encryptedAccessToken
+  refreshToken        String?        @db.Text // Deprecated: use encryptedRefreshToken
+  encryptedAccessToken  String?      @db.Text // AES-256-GCM encrypted
+  encryptedRefreshToken String?      @db.Text // AES-256-GCM encrypted
+  expiresAt           DateTime?
+  memberId            String?        // LinkedIn member ID, etc.
+  metadata            Json?          // Extra platform-specific data
+  updatedAt           DateTime       @updatedAt
+  createdAt           DateTime       @default(now())
+}
+
+// ─── AUDIT LOG ──────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  userEmail String?
+  action    String   // "ticket.create", "admin.export", "account.delete", etc.
+  target    String?  // ID of the affected resource
+  details   Json?    // Extra context
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ─── DB RATE LIMITING (serverless-safe) ─────────────────
+
+model RateLimitEntry {
+  id        String   @id // key: "checkout:192.168.1.1"
+  count     Int      @default(1)
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+
+  @@index([resetAt])
 }
 
 // ─── SONDAGE EXPOSANTS ──────────────────────────────────

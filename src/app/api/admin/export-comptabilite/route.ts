@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { audit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Trop de tentatives. Réessayez dans quelques minutes." }, { status: 429 });
   }
 
-  console.log(`[ADMIN EXPORT] ${session.user.email} exported comptabilité at ${new Date().toISOString()}`);
+  await audit({
+    userId: session.user.id,
+    userEmail: session.user.email,
+    action: "admin.export_comptabilite",
+    ip: getClientIp(request),
+  });
 
   // Tickets
   const tickets = await prisma.ticket.findMany({

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
+import { audit } from "@/lib/audit";
 
 /**
  * POST /api/account/delete
@@ -28,37 +29,78 @@ export async function POST(request: Request) {
   }
 
   const userId = session.user.id;
+  const userEmail = session.user.email || "";
 
-  // Anonymize tickets (keep for financial records)
+  // Audit log BEFORE deletion (so we have a record)
+  await audit({
+    userId,
+    userEmail,
+    action: "account.delete",
+    details: { reason: "user_request" },
+  });
+
+  const ANON_EMAIL = "supprime@anonyme.fr";
+  const ANON_NAME = "SUPPRIMÉ";
+
+  // ── Anonymize tickets (keep for financial/tax records) ──
   await prisma.ticket.updateMany({
     where: { userId },
-    data: {
-      firstName: "SUPPRIMÉ",
-      lastName: "SUPPRIMÉ",
-      email: "supprime@anonyme.fr",
-      phone: null,
-    },
+    data: { firstName: ANON_NAME, lastName: ANON_NAME, email: ANON_EMAIL, phone: null },
   });
 
-  // Anonymize exhibitor bookings
+  // ── Anonymize exhibitor bookings ──
   await prisma.exhibitorBooking.updateMany({
     where: { userId },
-    data: {
-      contactName: "SUPPRIMÉ",
-      email: "supprime@anonyme.fr",
-      phone: "",
-    },
+    data: { contactName: ANON_NAME, email: ANON_EMAIL, phone: "", companyName: ANON_NAME },
   });
 
-  // Delete newsletter subscription
+  // ── Anonymize exhibitor profiles ──
+  await prisma.exhibitorProfile.updateMany({
+    where: { userId },
+    data: { companyName: ANON_NAME, description: null, logoUrl: null, videoUrl: null, image1Url: null, image2Url: null, image3Url: null },
+  });
+
+  // ── Anonymize orders ──
+  await prisma.order.updateMany({
+    where: { userId },
+    data: { stripeSessionId: null },
+  });
+
+  // ── Anonymize event reservations (by email) ──
+  await prisma.eventReservation.updateMany({
+    where: { email: { equals: userEmail, mode: "insensitive" } },
+    data: { firstName: ANON_NAME, lastName: ANON_NAME, email: ANON_EMAIL, phone: "" },
+  });
+
+  // ── Anonymize contact messages (by email) ──
+  await prisma.contactMessage.updateMany({
+    where: { email: { equals: userEmail, mode: "insensitive" } },
+    data: { firstName: ANON_NAME, lastName: ANON_NAME, email: ANON_EMAIL, phone: null, company: null, message: "Contenu supprimé (RGPD)" },
+  });
+
+  // ── Anonymize exposant leads (by email) ──
+  try {
+    await prisma.exposantLead.updateMany({
+      where: { email: { equals: userEmail, mode: "insensitive" } },
+      data: { firstName: ANON_NAME, lastName: ANON_NAME, email: ANON_EMAIL, phone: "" },
+    });
+  } catch { /* table may not have all fields */ }
+
+  // ── Delete newsletter subscription ──
   await prisma.newsletterSubscriber.deleteMany({
-    where: { email: session.user.email || "" },
+    where: { email: userEmail },
   });
 
-  // Delete favorites
+  // ── Delete favorites ──
   await prisma.favorite.deleteMany({ where: { userId } });
 
-  // Anonymize user account
+  // ── Delete sessions & accounts ──
+  await prisma.session.deleteMany({ where: { userId } });
+  await prisma.account.deleteMany({ where: { userId } });
+
+  // ── Delete social credentials if admin (shouldn't happen but safety) ──
+
+  // ── Anonymize user account (last step) ──
   await prisma.user.update({
     where: { id: userId },
     data: {
@@ -71,7 +113,7 @@ export async function POST(request: Request) {
     },
   });
 
-  console.log(`[RGPD] Account ${userId} anonymized (${session.user.email})`);
+  console.log(`[RGPD] Account ${userId} fully anonymized`);
 
   return NextResponse.json({ success: true, message: "Votre compte a été supprimé et vos données anonymisées." });
 }

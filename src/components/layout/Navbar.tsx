@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { Menu, X, User, ShoppingBag, Heart, Mail, Phone } from "lucide-react";
+import { Menu, X, User, ShoppingBag, Heart, Mail, Phone, Sparkles } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { useCartStore } from "@/stores/cart";
 
@@ -46,6 +46,13 @@ export default function Navbar() {
             >
               <Mail size={14} />
               Nous contacter
+            </Link>
+            <Link
+              href="/culture-pour-tous"
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius-button)] border border-green-600 px-4 py-2 text-sm font-semibold text-green-700 transition-colors hover:bg-green-600 hover:text-white"
+            >
+              <Sparkles size={14} />
+              Dès 5€
             </Link>
             <Link
               href="/faire-un-don"
@@ -125,6 +132,14 @@ export default function Navbar() {
           >
             <Mail size={14} />
             Nous contacter
+          </Link>
+          <Link
+            href="/culture-pour-tous"
+            onClick={() => setMobileOpen(false)}
+            className="mt-2 flex items-center gap-2 rounded-[var(--radius-button)] border border-green-600 px-3 py-3 text-sm font-semibold text-green-700"
+          >
+            <Sparkles size={14} />
+            Culture pour Tous — Dès 5€
           </Link>
           <Link
             href="/faire-un-don"

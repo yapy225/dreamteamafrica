@@ -144,7 +144,7 @@ export async function GET(request: Request) {
           const container = await containerRes.json();
 
           if (container.id) {
-            await new Promise((r) => setTimeout(r, 5000));
+            await new Promise((r) => setTimeout(r, 2000));
             const pubRes = await fetch(
               `https://graph.facebook.com/v23.0/${page.igAccountId}/media_publish?creation_id=${container.id}`,
               { method: "POST", headers: { Authorization: `Bearer ${token}` } },

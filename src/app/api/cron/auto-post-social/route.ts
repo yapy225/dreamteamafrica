@@ -5,6 +5,14 @@ const IMAGE_URL = "https://dreamteamafricamedia.b-cdn.net/campaigns/foire-afriqu
 const EVENT_URL = "https://dreamteamafrica.com/saison-culturelle-africaine/foire-dafrique-paris";
 const CRON_SECRET = process.env.CRON_SECRET;
 
+// ── Mentions exposants (cachées en bas des posts) ──
+const IG_EXPOSANTS = [
+  "@by_kemi", "@cbk_planner", "@edeniquecoffee", "@jabcollectionwax",
+  "@rentavoyage", "@sanaacreation_", "@lunivers_mesu",
+].join(" ");
+
+const IG_MENTIONS = `\n\n.\n.\n.\nNos exposants :\n${IG_EXPOSANTS}`;
+
 // ── Messages mis à jour : 10€ prévente, passage à 15€ ──
 
 const FB_MESSAGES = [
@@ -17,12 +25,12 @@ const FB_MESSAGES = [
 ];
 
 const IG_CAPTIONS = [
-  `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Prévente en ligne à 10€ — Avant passage à 15€ sur place !\n\n+60 exposants · Mode · Artisanat · Gastronomie · Bijoux\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #Afrique #DiasporaAfricaine #Wax #Artisanat #MadeInAfrica`,
-  `✨ Le Grand Marché Africain revient !\n\n+60 exposants • Mode • Artisanat • Gastronomie • Bijoux\n\n🎟 Prévente 10€ (15€ sur place)\n🗓 1er & 2 Mai 2026\n📍 Espace MAS Paris\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #MadeInAfrica #Bogolan #BijouxAfricains #GastronomieAfricaine`,
-  `🎉 Compte à rebours lancé !\n\nFoire d'Afrique Paris — 6ème Édition\nDéjà 348 billets vendus 🔥\n\n🎟 10€ en prévente\n📍 Espace MAS — Paris 13e\n🗓 1er & 2 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #Afrique #Culture #EspaceMAS`,
-  `💎 Bijoux, textiles wax, gastronomie africaine...\n\nTout ça à la Foire d'Afrique Paris 2026 !\n\n🎟 10€ en prévente (15€ sur place)\n🗓 1er & 2 Mai · 12h-22h\n📍 Paris 13e\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #Wax #BijouxAfricains #Artisanat #DiasporaAfricaine`,
-  `🌍 La diaspora se retrouve à Paris !\n\nFoire d'Afrique 2026 — +60 exposants\nMusique live • DJ sets • Masterclass\n\n🎟 Billets 10€ en prévente\n🗓 1er & 2 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #GrandMarcheAfricain #Afrique #MadeInAfrica`,
-  `🔥 L'événement incontournable !\n\nFoire d'Afrique Paris — 6ème Édition\nMode • Artisanat • Gastronomie • Bijoux\n\n🎟 Prévente 10€ — Tarif plein 15€\n📍 Espace MAS Paris 13e\n🗓 1er & 2 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #Afrique`,
+  `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Prévente en ligne à 10€ — Avant passage à 15€ sur place !\n\n+60 exposants · Mode · Artisanat · Gastronomie · Bijoux\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #Afrique #DiasporaAfricaine #Wax #Artisanat #MadeInAfrica${IG_MENTIONS}`,
+  `✨ Le Grand Marché Africain revient !\n\n+60 exposants • Mode • Artisanat • Gastronomie • Bijoux\n\n🎟 Prévente 10€ (15€ sur place)\n🗓 1er & 2 Mai 2026\n📍 Espace MAS Paris\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #MadeInAfrica #Bogolan #BijouxAfricains #GastronomieAfricaine${IG_MENTIONS}`,
+  `🎉 Compte à rebours lancé !\n\nFoire d'Afrique Paris — 6ème Édition\nDéjà 348 billets vendus 🔥\n\n🎟 10€ en prévente\n📍 Espace MAS — Paris 13e\n🗓 1er & 2 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #Afrique #Culture #EspaceMAS${IG_MENTIONS}`,
+  `💎 Bijoux, textiles wax, gastronomie africaine...\n\nTout ça à la Foire d'Afrique Paris 2026 !\n\n🎟 10€ en prévente (15€ sur place)\n🗓 1er & 2 Mai · 12h-22h\n📍 Paris 13e\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #Wax #BijouxAfricains #Artisanat #DiasporaAfricaine${IG_MENTIONS}`,
+  `🌍 La diaspora se retrouve à Paris !\n\nFoire d'Afrique 2026 — +60 exposants\nMusique live • DJ sets • Masterclass\n\n🎟 Billets 10€ en prévente\n🗓 1er & 2 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #GrandMarcheAfricain #Afrique #MadeInAfrica${IG_MENTIONS}`,
+  `🔥 L'événement incontournable !\n\nFoire d'Afrique Paris — 6ème Édition\nMode • Artisanat • Gastronomie • Bijoux\n\n🎟 Prévente 10€ — Tarif plein 15€\n📍 Espace MAS Paris 13e\n🗓 1er & 2 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #Afrique${IG_MENTIONS}`,
 ];
 
 const LINKEDIN_MESSAGES = [

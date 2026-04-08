@@ -138,21 +138,9 @@ export default function BehaviorTracker() {
     };
   }, []);
 
-  // Inject fingerprint into fetch headers for checkout friction
+  // Store fingerprint in localStorage for checkout routes to read
   useEffect(() => {
-    const fp = getFingerprint();
-    const originalFetch = window.fetch;
-    window.fetch = function (input, init) {
-      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;
-      if (url.includes("/api/checkout")) {
-        init = init || {};
-        const headers = new Headers(init.headers);
-        headers.set("x-behavior-fp", fp);
-        init.headers = headers;
-      }
-      return originalFetch.call(this, input, init);
-    };
-    return () => { window.fetch = originalFetch; };
+    getFingerprint(); // ensures fp is stored in localStorage
   }, []);
 
   return null;

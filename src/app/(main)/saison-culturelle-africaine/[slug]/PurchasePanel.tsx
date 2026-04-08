@@ -159,9 +159,10 @@ export default function PurchasePanel({
     setLoading(true);
 
     try {
+      const bfp = typeof window !== "undefined" ? localStorage.getItem("dta_bfp") || "" : "";
       const res = await fetch("/api/checkout/tickets", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-behavior-fp": bfp },
         body: JSON.stringify({
           eventId,
           tier: tier.id,

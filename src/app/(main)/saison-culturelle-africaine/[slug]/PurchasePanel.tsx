@@ -121,6 +121,14 @@ export default function PurchasePanel({
   const deposit = installments > 1 ? 5 * quantity : total;
   const remainingBalance = total - deposit;
   const monthlyAmount = installments > 1 ? Math.ceil((remainingBalance / (installments - 1)) * 100) / 100 : 0;
+
+  // Frais de gestion 3% (min 0.50€)
+  const payableAmount = installments > 1 ? deposit : total;
+  const rawFee = payableAmount * 0.03;
+  const fees = tier.price > 0 ? Math.max(rawFee, 0.50) : 0;
+  const roundedFees = Math.round(fees * 100) / 100;
+  const totalWithFees = Math.round((payableAmount + roundedFees) * 100) / 100;
+
   const canSubmit =
     form.firstName.trim() &&
     form.lastName.trim() &&
@@ -410,16 +418,30 @@ export default function PurchasePanel({
             </div>
           )}
 
-          {/* total + submit */}
+          {/* total + fees + submit */}
           <div className="border-t border-dta-sand pt-4">
-            <div className="mb-3 flex items-center justify-between text-sm">
-              <span className="text-dta-char/70">
-                {quantity} billet{quantity > 1 ? "s" : ""}
-                {tier.price > 0 && <> &times; {formatCurrency(tier.price)}</>}
-              </span>
-              <span className="font-serif text-lg font-bold text-dta-dark">
-                {tier.price === 0 ? "Gratuit" : formatCurrency(total)}
-              </span>
+            <div className="space-y-1.5 mb-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-dta-char/70">
+                  {quantity} billet{quantity > 1 ? "s" : ""}
+                  {tier.price > 0 && <> &times; {formatCurrency(tier.price)}</>}
+                </span>
+                <span className="text-dta-dark">
+                  {tier.price === 0 ? "Gratuit" : formatCurrency(installments > 1 ? deposit : total)}
+                </span>
+              </div>
+              {tier.price > 0 && roundedFees > 0 && (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-dta-char/50">Frais de gestion (3%)</span>
+                  <span className="text-dta-char/50">{formatCurrency(roundedFees)}</span>
+                </div>
+              )}
+              {tier.price > 0 && (
+                <div className="flex items-center justify-between text-sm font-semibold border-t border-dta-sand/50 pt-1.5">
+                  <span className="text-dta-dark">Total</span>
+                  <span className="font-serif text-lg font-bold text-dta-dark">{formatCurrency(totalWithFees)}</span>
+                </div>
+              )}
             </div>
 
             <button
@@ -436,8 +458,8 @@ export default function PurchasePanel({
                 "Réserver gratuitement"
               ) : (
                 installments > 1
-                  ? `Payer l'acompte — ${formatCurrency(deposit)}`
-                  : `Passer au paiement — ${formatCurrency(total)}`
+                  ? `Payer l'acompte — ${formatCurrency(totalWithFees)}`
+                  : `Passer au paiement — ${formatCurrency(totalWithFees)}`
               )}
             </button>
           </div>

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
 import { auth } from "@/lib/auth";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { calculateFees } from "@/lib/fees";
 
 export async function POST(request: Request) {
   try {
@@ -61,26 +62,40 @@ export async function POST(request: Request) {
     }
 
     const rechargeAmount = Math.min(Math.round(parsedAmount * 100) / 100, remaining);
+    // Fees: absorbed on micro-recharges < 5€
+    const { fees } = calculateFees(rechargeAmount, true);
 
     // 7. Stripe checkout
     const stripe = getStripe();
+    const rechargeLineItems: Array<{ price_data: { currency: string; unit_amount: number; product_data: { name: string; description?: string } }; quantity: number }> = [
+      {
+        price_data: {
+          currency: "eur",
+          unit_amount: Math.round(rechargeAmount * 100),
+          product_data: {
+            name: `Recharge billet — ${ticket.event.title}`,
+            description: `Versement de ${rechargeAmount} € sur votre billet`,
+          },
+        },
+        quantity: 1,
+      },
+    ];
+    if (fees > 0) {
+      rechargeLineItems.push({
+        price_data: {
+          currency: "eur",
+          unit_amount: Math.round(fees * 100),
+          product_data: { name: "Frais de gestion (3%)" },
+        },
+        quantity: 1,
+      });
+    }
+
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card", "paypal"],
       customer_email: session.user.email || ticket.email || undefined,
-      line_items: [
-        {
-          price_data: {
-            currency: "eur",
-            unit_amount: Math.round(rechargeAmount * 100),
-            product_data: {
-              name: `Recharge billet — ${ticket.event.title}`,
-              description: `Versement de ${rechargeAmount} € sur votre billet`,
-            },
-          },
-          quantity: 1,
-        },
-      ],
+      line_items: rechargeLineItems,
       metadata: {
         type: "ticket_recharge",
         ticketId: ticket.id,

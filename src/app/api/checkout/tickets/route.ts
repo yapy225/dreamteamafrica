@@ -7,6 +7,7 @@ import { sendTicketConfirmationEmail } from "@/lib/email";
 import { sendTicketConfirmationWhatsApp } from "@/lib/whatsapp";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { getFrictionLevel, SCORE_TTL_MS } from "@/lib/behavior";
+import { calculateFees } from "@/lib/fees";
 
 export async function POST(request: Request) {
   try {
@@ -262,26 +263,38 @@ export async function POST(request: Request) {
 
     if (nbInstallments === 1) {
       // ── Single full payment ──
+      const { fees } = calculateFees(totalAmount);
+      const eventDescription = sessionLabel
+        ? sessionLabel
+        : `${event.venue} — ${new Date(event.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`;
+
+      const lineItems: Array<{ price_data: { currency: string; unit_amount: number; product_data: { name: string; description?: string } }; quantity: number }> = [
+        {
+          price_data: {
+            currency: "eur",
+            unit_amount: Math.round(unitPrice * 100),
+            product_data: { name: productName, description: eventDescription },
+          },
+          quantity,
+        },
+      ];
+      if (fees > 0) {
+        lineItems.push({
+          price_data: {
+            currency: "eur",
+            unit_amount: Math.round(fees * 100),
+            product_data: { name: "Frais de gestion (3%)" },
+          },
+          quantity: 1,
+        });
+      }
+
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: paymentMethods,
         allow_promotion_codes: true,
         customer_email: trimmedEmail,
-        line_items: [
-          {
-            price_data: {
-              currency: "eur",
-              unit_amount: Math.round(unitPrice * 100),
-              product_data: {
-                name: productName,
-                description: sessionLabel
-                  ? sessionLabel
-                  : `${event.venue} — ${new Date(event.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`,
-              },
-            },
-            quantity,
-          },
-        ],
+        line_items: lineItems,
         metadata: {
           type: "ticket",
           eventId: event.id,
@@ -308,24 +321,37 @@ export async function POST(request: Request) {
       const deposit = depositPerTicket * quantity;
       const remainingBalance = totalAmount - deposit;
       const installmentAmount = Math.ceil((remainingBalance / (nbInstallments - 1)) * 100) / 100;
+      const { fees: depositFees } = calculateFees(deposit);
+
+      const depositLineItems: Array<{ price_data: { currency: string; unit_amount: number; product_data: { name: string; description?: string } }; quantity: number }> = [
+        {
+          price_data: {
+            currency: "eur",
+            unit_amount: Math.round(deposit * 100),
+            product_data: {
+              name: `Acompte — ${productName}`,
+              description: `Acompte de ${deposit} € sur ${totalAmount} € total. Solde (${remainingBalance} €) en ${nbInstallments - 1} mensualité${nbInstallments - 1 > 1 ? "s" : ""}.`,
+            },
+          },
+          quantity: 1,
+        },
+      ];
+      if (depositFees > 0) {
+        depositLineItems.push({
+          price_data: {
+            currency: "eur",
+            unit_amount: Math.round(depositFees * 100),
+            product_data: { name: "Frais de gestion (3%)" },
+          },
+          quantity: 1,
+        });
+      }
 
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: paymentMethods,
         customer_email: trimmedEmail,
-        line_items: [
-          {
-            price_data: {
-              currency: "eur",
-              unit_amount: Math.round(deposit * 100),
-              product_data: {
-                name: `Acompte — ${productName}`,
-                description: `Acompte de ${deposit} € sur ${totalAmount} € total. Solde (${remainingBalance} €) en ${nbInstallments - 1} mensualité${nbInstallments - 1 > 1 ? "s" : ""}.`,
-              },
-            },
-            quantity: 1,
-          },
-        ],
+        line_items: depositLineItems,
         metadata: {
           type: "ticket_installment",
           eventId: event.id,

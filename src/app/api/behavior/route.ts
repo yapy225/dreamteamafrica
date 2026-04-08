@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { BEHAVIOR_WEIGHTS } from "@/lib/behavior";
+import { BEHAVIOR_WEIGHTS, SCORE_TTL_MS } from "@/lib/behavior";
 import { headers } from "next/headers";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
@@ -21,12 +21,10 @@ export async function POST(request: Request) {
 
     const weight = BEHAVIOR_WEIGHTS[signal];
     if (!weight) {
-      return NextResponse.json({ ok: true }); // unknown signal, ignore
+      return NextResponse.json({ ok: true }); // unknown signal or zero-weight, ignore
     }
 
     // Build fingerprint from client FP + IP for harder spoofing
-    const headersList = await headers();
-    const ua = headersList.get("user-agent") || "";
     const fingerprint = `${fp}:${ip}`;
 
     // Upsert behavior score
@@ -35,25 +33,39 @@ export async function POST(request: Request) {
     });
 
     if (existing) {
-      const signals = (existing.signals as Record<string, number>) || {};
-      signals[signal] = (signals[signal] || 0) + 1;
-      const newScore = existing.score + weight;
+      // Reset score if older than TTL (24h)
+      const isExpired = Date.now() - existing.updatedAt.getTime() > SCORE_TTL_MS;
 
-      await prisma.behaviorScore.update({
-        where: { fingerprint },
-        data: {
-          score: newScore,
-          signals,
-          flagged: newScore >= 15,
-        },
-      });
+      if (isExpired) {
+        await prisma.behaviorScore.update({
+          where: { fingerprint },
+          data: {
+            score: weight,
+            signals: { [signal]: 1 },
+            flagged: false,
+          },
+        });
+      } else {
+        const signals = (existing.signals as Record<string, number>) || {};
+        signals[signal] = (signals[signal] || 0) + 1;
+        const newScore = existing.score + weight;
+
+        await prisma.behaviorScore.update({
+          where: { fingerprint },
+          data: {
+            score: newScore,
+            signals,
+            flagged: newScore >= 30,
+          },
+        });
+      }
     } else {
       await prisma.behaviorScore.create({
         data: {
           fingerprint,
           score: weight,
           signals: { [signal]: 1 },
-          flagged: weight >= 15,
+          flagged: weight >= 30,
         },
       });
     }

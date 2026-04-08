@@ -12,7 +12,7 @@ import {
 import { sendQuoteEmail } from "@/lib/email";
 import { randomUUID } from "crypto";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { getFrictionLevel } from "@/lib/behavior";
+import { getFrictionLevel, SCORE_TTL_MS } from "@/lib/behavior";
 
 export async function POST(request: Request) {
   try {
@@ -209,13 +209,15 @@ export async function POST(request: Request) {
 
     const stripe = getStripe();
 
-    // Behavioral friction
+    // Behavioral friction (with TTL — expired scores are ignored)
     const clientFp = request.headers.get("x-behavior-fp") || "";
     const bFingerprint = `${clientFp}:${ip}`;
     const bRecord = await prisma.behaviorScore.findUnique({ where: { fingerprint: bFingerprint } });
-    const friction = getFrictionLevel(bRecord?.score ?? 0);
+    const bScoreAge = bRecord ? Date.now() - bRecord.updatedAt.getTime() : 0;
+    const bEffectiveScore = bRecord && bScoreAge < SCORE_TTL_MS ? bRecord.score : 0;
+    const friction = getFrictionLevel(bEffectiveScore);
     if (friction === "block") {
-      return NextResponse.json({ error: "Service temporairement indisponible." }, { status: 403 });
+      return NextResponse.json({ error: "Trop de tentatives inhabituelles détectées. Réessayez dans quelques heures." }, { status: 403 });
     }
     const paymentMethods: ("card" | "paypal")[] =
       friction === "card_only" ? ["card"] : ["card", "paypal"];

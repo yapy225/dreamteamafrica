@@ -6,7 +6,7 @@ import { uploadBuffer } from "@/lib/bunny";
 import { sendTicketConfirmationEmail } from "@/lib/email";
 import { sendTicketConfirmationWhatsApp } from "@/lib/whatsapp";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { getFrictionLevel } from "@/lib/behavior";
+import { getFrictionLevel, SCORE_TTL_MS } from "@/lib/behavior";
 
 export async function POST(request: Request) {
   try {
@@ -222,11 +222,15 @@ export async function POST(request: Request) {
     const behaviorRecord = await prisma.behaviorScore.findUnique({
       where: { fingerprint },
     });
-    const friction = getFrictionLevel(behaviorRecord?.score ?? 0);
+
+    // Ignore expired scores (older than 24h)
+    const scoreAge = behaviorRecord ? Date.now() - behaviorRecord.updatedAt.getTime() : 0;
+    const effectiveScore = behaviorRecord && scoreAge < SCORE_TTL_MS ? behaviorRecord.score : 0;
+    const friction = getFrictionLevel(effectiveScore);
 
     if (friction === "block") {
       return NextResponse.json(
-        { error: "Service temporairement indisponible. Réessayez plus tard." },
+        { error: "Trop de tentatives inhabituelles détectées. Veuillez réessayer dans quelques heures ou nous contacter." },
         { status: 403 },
       );
     }

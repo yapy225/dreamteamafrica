@@ -46,7 +46,6 @@ export async function POST(request: NextRequest) {
       !category ||
       !VALID_CATEGORIES.includes(category) ||
       !firstName?.trim() ||
-      !lastName?.trim() ||
       !email?.trim()
     ) {
       return NextResponse.json(

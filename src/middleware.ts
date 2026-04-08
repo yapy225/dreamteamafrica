@@ -330,6 +330,7 @@ export function middleware(request: NextRequest) {
       `https://${PRIMARY_DOMAIN}`,
       "https://www.dreamteamafrica.com",
       "http://localhost:3000",
+      "http://localhost:3001",
       "http://localhost:4000",
     ];
     // Webhooks from external services don't send Origin — skip for webhook paths

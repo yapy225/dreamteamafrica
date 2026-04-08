@@ -1,30 +1,33 @@
 import { NextResponse } from "next/server";
 
 const USER_TOKEN = process.env.META_LONG_LIVED_TOKEN!;
-const IMAGE_URL = "https://dreamteamafrica.com/foire-afrique.jpg";
+const IMAGE_URL = "https://dreamteamafricamedia.b-cdn.net/campaigns/foire-afrique-danseuse-j24.png";
+const EVENT_URL = "https://dreamteamafrica.com/saison-culturelle-africaine/foire-dafrique-paris";
 const CRON_SECRET = process.env.CRON_SECRET;
 
+// ── Messages mis à jour : 10€ prévente, passage à 15€ ──
+
 const FB_MESSAGES = [
-  `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Billets Last Chance à 7€ — Plus que 50 places !\n\nMode • Artisanat • Gastronomie • Bijoux\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS — Paris 13e\n\n👉 Toutes les infos sur notre page officielle`,
-  `✨ Le Grand Marché Africain revient à Paris !\n\n+60 exposants vous attendent pour célébrer la culture africaine.\n\nTextiles wax, bogolan, bijoux en or, gastronomie...\n\n🗓 1er & 2 Mai 2026\n📍 Espace MAS — Paris 13e\n🎟 Billetterie : saisonculturelleafricaine.fr`,
-  `🎉 Bientôt la Foire d'Afrique Paris 2026 !\n\nVenez vivre une expérience unique : défilés, dégustations, artisanat africain...\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS — 10 rue des Terres au Curé, 75013 Paris\n\n🎟 Billets Last Chance à 7€ — Places limitées !`,
-  `🌍 La diaspora africaine se retrouve à Paris !\n\nFoire d'Afrique 2026 — 6ème édition\nMode, artisanat, gastronomie, bijoux, spectacles\n\n+60 exposants\n\n🗓 1er & 2 Mai 2026 · Espace MAS Paris\n👉 saisonculturelleafricaine.fr`,
-  `💎 Bijoux, textiles, saveurs d'Afrique...\n\nTout ça à la Foire d'Afrique Paris — 6ème Édition !\n\n🗓 1er & 2 Mai 2026\n🕐 12h — 22h\n📍 Espace MAS — Paris 13e\n\n🎟 Billets à partir de 7€\n👉 saisonculturelleafricaine.fr`,
-  `🔥 L'événement incontournable de la diaspora africaine à Paris !\n\nFoire d'Afrique 2026 : le Grand Marché Africain\n\n+60 exposants · Mode · Artisanat · Gastronomie · Bijoux\n\n🗓 1er & 2 Mai 2026\n📍 Espace MAS, Paris 13e\n🎟 saisonculturelleafricaine.fr`,
+  `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Prévente en ligne à 10€ — Avant passage à 15€ sur place !\n\nMode • Artisanat • Gastronomie • Bijoux\n+60 exposants\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS — Paris 13e\n\n🎟 ${EVENT_URL}`,
+  `✨ Le Grand Marché Africain revient à Paris !\n\n+60 exposants vous attendent pour célébrer la culture africaine.\n\nTextiles wax, bogolan, bijoux, gastronomie...\n\n🎟 Billets à 10€ en prévente (15€ sur place)\n\n🗓 1er & 2 Mai 2026\n📍 Espace MAS — Paris 13e\n\n👉 ${EVENT_URL}`,
+  `🎉 Plus que quelques jours avant la Foire d'Afrique Paris 2026 !\n\nDéjà 348 billets vendus. Profitez du tarif prévente à 10€ avant le passage à 15€.\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS — 10 rue des Terres au Curé, 75013 Paris\n\n🎟 ${EVENT_URL}`,
+  `🌍 La diaspora africaine se retrouve à Paris !\n\nFoire d'Afrique 2026 — 6ème édition\nMode, artisanat, gastronomie, bijoux, musique live\n\n+60 exposants • DJ sets • Masterclass\n\n🎟 Prévente 10€ (tarif plein 15€)\n🗓 1er & 2 Mai 2026 · Espace MAS Paris\n\n👉 ${EVENT_URL}`,
+  `💎 Bijoux, textiles, saveurs d'Afrique...\n\nTout ça à la Foire d'Afrique Paris — 6ème Édition !\n\n🗓 1er & 2 Mai 2026\n🕐 12h — 22h\n📍 Espace MAS — Paris 13e\n\n🎟 Billets à 10€ en prévente\n👉 ${EVENT_URL}`,
+  `🔥 L'événement incontournable de la diaspora africaine à Paris !\n\nFoire d'Afrique 2026 : le Grand Marché Africain\n\n+60 exposants · Mode · Artisanat · Gastronomie · Bijoux\n\n🎟 10€ en prévente — 15€ sur place\n🗓 1er & 2 Mai 2026\n📍 Espace MAS, Paris 13e\n\n👉 ${EVENT_URL}`,
 ];
 
 const IG_CAPTIONS = [
-  `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Billets Last Chance à 7€ — Plus que 50 places !\n\nRetrouvez toutes les infos sur @foiredafriqueparis\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #Afrique #DiasporaAfricaine #Wax #Artisanat`,
-  `✨ Le Grand Marché Africain revient !\n\n+60 exposants • Mode • Artisanat • Gastronomie • Bijoux\n\n@foiredafriqueparis\n\n🗓 1er & 2 Mai 2026\n📍 Espace MAS Paris\n\n#FoiredAfrique #Paris2026 #MadeInAfrica #Bogolan #BijouxAfricains #GastronomieAfricaine`,
-  `🎉 Rendez-vous les 1er & 2 mai !\n\nFoire d'Afrique Paris — 6ème Édition\nL'Afrique en plein Paris 🌍\n\n@foiredafriqueparis\n📍 Espace MAS — Paris 13e\n🎟 saisonculturelleafricaine.fr\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #Afrique #Culture #EspaceMAS`,
-  `💎 Bijoux, textiles wax, gastronomie africaine...\n\nTout ça à la Foire d'Afrique Paris 2026 !\n\n@foiredafriqueparis\n🗓 1er & 2 Mai · 12h-22h\n📍 Paris 13e\n\n#FoiredAfrique #Paris2026 #Wax #BijouxAfricains #Artisanat #DiasporaAfricaine`,
-  `🌍 La diaspora se retrouve à Paris !\n\nFoire d'Afrique 2026 — +60 exposants\n\n@foiredafriqueparis\n🗓 1er & 2 Mai 2026\n🎟 Billets à partir de 7€\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #GrandMarcheAfricain #Afrique #MadeInAfrica`,
-  `🔥 L'événement incontournable !\n\nFoire d'Afrique Paris — 6ème Édition\nMode • Artisanat • Gastronomie • Bijoux\n\n@foiredafriqueparis\n📍 Espace MAS Paris 13e\n👉 saisonculturelleafricaine.fr\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #EarlyBird #Afrique`,
+  `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Prévente en ligne à 10€ — Avant passage à 15€ sur place !\n\n+60 exposants · Mode · Artisanat · Gastronomie · Bijoux\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #Afrique #DiasporaAfricaine #Wax #Artisanat #MadeInAfrica`,
+  `✨ Le Grand Marché Africain revient !\n\n+60 exposants • Mode • Artisanat • Gastronomie • Bijoux\n\n🎟 Prévente 10€ (15€ sur place)\n🗓 1er & 2 Mai 2026\n📍 Espace MAS Paris\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #MadeInAfrica #Bogolan #BijouxAfricains #GastronomieAfricaine`,
+  `🎉 Compte à rebours lancé !\n\nFoire d'Afrique Paris — 6ème Édition\nDéjà 348 billets vendus 🔥\n\n🎟 10€ en prévente\n📍 Espace MAS — Paris 13e\n🗓 1er & 2 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #Afrique #Culture #EspaceMAS`,
+  `💎 Bijoux, textiles wax, gastronomie africaine...\n\nTout ça à la Foire d'Afrique Paris 2026 !\n\n🎟 10€ en prévente (15€ sur place)\n🗓 1er & 2 Mai · 12h-22h\n📍 Paris 13e\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #Wax #BijouxAfricains #Artisanat #DiasporaAfricaine`,
+  `🌍 La diaspora se retrouve à Paris !\n\nFoire d'Afrique 2026 — +60 exposants\nMusique live • DJ sets • Masterclass\n\n🎟 Billets 10€ en prévente\n🗓 1er & 2 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #GrandMarcheAfricain #Afrique #MadeInAfrica`,
+  `🔥 L'événement incontournable !\n\nFoire d'Afrique Paris — 6ème Édition\nMode • Artisanat • Gastronomie • Bijoux\n\n🎟 Prévente 10€ — Tarif plein 15€\n📍 Espace MAS Paris 13e\n🗓 1er & 2 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #Afrique`,
 ];
 
 const LINKEDIN_MESSAGES = [
-  `Foire d'Afrique Paris 2026 — 6ème Édition\n\nLe Grand Marché Africain réunit plus de 60 entrepreneurs et artisans de la diaspora africaine.\n\nMode, artisanat, gastronomie, bijouterie.\n\nDates : 1er et 2 Mai 2026\nLieu : Espace MAS, Paris 13e\n\nsaisonculturelleafricaine.fr`,
-  `L'entrepreneuriat africain à l'honneur à Paris\n\nLa 6ème édition de la Foire d'Afrique rassemble +60 exposants de la diaspora africaine.\n\nUn événement qui valorise le savoir-faire et les talents africains en France.\n\n1er et 2 Mai 2026 — Espace MAS, Paris\n\nsaisonculturelleafricaine.fr`,
+  `Foire d'Afrique Paris 2026 — 6ème Édition\n\nLe Grand Marché Africain réunit plus de 60 entrepreneurs et artisans de la diaspora africaine.\n\nMode, artisanat, gastronomie, bijouterie, masterclass.\n\nDates : 1er et 2 Mai 2026\nLieu : Espace MAS, Paris 13e\nBillets : 10€ en prévente (15€ sur place)\n\n${EVENT_URL}`,
+  `L'entrepreneuriat africain à l'honneur à Paris\n\nLa 6ème édition de la Foire d'Afrique rassemble +60 exposants de la diaspora africaine.\n\nUn événement qui valorise le savoir-faire et les talents africains en France.\n\n1er et 2 Mai 2026 — Espace MAS, Paris\nPrévente : 10€\n\n${EVENT_URL}`,
 ];
 
 interface PageConfig {
@@ -57,6 +60,7 @@ function getRotationIndex(total: number): number {
   const dayOfYear = Math.floor(
     (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000,
   );
+  // Rotation toutes les 4h : 6 slots par jour
   return (dayOfYear * 6 + Math.floor(hour / 4)) % total;
 }
 
@@ -73,7 +77,6 @@ async function getPageTokens(): Promise<Map<string, string>> {
 }
 
 export async function GET(request: Request) {
-  // Verify cron secret
   const authHeader = request.headers.get("authorization");
   if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -94,17 +97,18 @@ export async function GET(request: Request) {
       const token = tokens.get(page.fbPageId);
       if (!token) continue;
 
-      // Facebook
+      // Facebook — page principale : message complet, autres : lien vers la page
       try {
         const params = new URLSearchParams();
         if (page.fbPageId === "100771645843324") {
           params.append("message", fbMessage);
+          params.append("link", EVENT_URL);
         } else {
           params.append(
             "message",
-            `🌍 La Foire d'Afrique Paris revient !\n\n👉 Retrouvez toutes les infos sur notre page officielle`,
+            `🌍 La Foire d'Afrique Paris revient les 1er & 2 Mai !\n\nBillets 10€ en prévente (15€ sur place)\n+60 exposants · Mode · Artisanat · Gastronomie\n\n👉 ${EVENT_URL}`,
           );
-          params.append("link", "https://www.facebook.com/100771645843324");
+          params.append("link", EVENT_URL);
         }
 
         const fbRes = await fetch(
@@ -120,13 +124,13 @@ export async function GET(request: Request) {
           fbOk++;
           results.push(`FB ${page.name}: OK`);
         } else {
-          results.push(`FB ${page.name}: ${JSON.stringify(fb).slice(0, 60)}`);
+          results.push(`FB ${page.name}: ${JSON.stringify(fb).slice(0, 80)}`);
         }
       } catch (e) {
         results.push(`FB ${page.name}: error`);
       }
 
-      // Instagram
+      // Instagram — image + caption
       if (page.igAccountId) {
         try {
           const containerParams = new URLSearchParams({
@@ -150,7 +154,7 @@ export async function GET(request: Request) {
               igOk++;
               results.push(`IG ${page.name}: OK`);
             } else {
-              results.push(`IG ${page.name}: ${JSON.stringify(pub).slice(0, 60)}`);
+              results.push(`IG ${page.name}: ${JSON.stringify(pub).slice(0, 80)}`);
             }
           }
         } catch {
@@ -181,8 +185,8 @@ export async function GET(request: Request) {
                 media: [
                   {
                     status: "READY",
-                    originalUrl: "https://saisonculturelleafricaine.fr",
-                    title: { text: "Foire d'Afrique Paris 2026" },
+                    originalUrl: EVENT_URL,
+                    title: { text: "Foire d'Afrique Paris 2026 — Billets à 10€" },
                   },
                 ],
               },
@@ -194,7 +198,7 @@ export async function GET(request: Request) {
         });
         const li = await liRes.json();
         liOk = !!li.id;
-        results.push(`LinkedIn: ${li.id ? "OK" : JSON.stringify(li).slice(0, 60)}`);
+        results.push(`LinkedIn: ${li.id ? "OK" : JSON.stringify(li).slice(0, 80)}`);
       }
     } catch {
       results.push("LinkedIn: error");

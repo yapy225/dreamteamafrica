@@ -381,38 +381,59 @@ export default function PurchasePanel({
             />
           </div>
 
-          {/* installments selector */}
+          {/* installments selector — Culture pour Tous */}
           {tier.price > 0 && total > 10 && (
             <div>
               <label className="mb-2 block text-sm font-medium text-dta-char">
                 Mode de paiement
               </label>
-              <p className="mb-3 text-xs text-dta-accent font-medium">
-                La culture africaine pour tous. R&eacute;serve ta place d&egrave;s 5&nbsp;&euro; et paye &agrave; ton rythme.
-              </p>
+              <div className="mb-3 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2">
+                <span className="text-base">✨</span>
+                <p className="text-xs font-medium text-green-700">
+                  <strong>Culture pour Tous</strong> — Réserve ta place dès 5&nbsp;&euro; et paie à ton rythme.{" "}
+                  <a href="/culture-pour-tous" target="_blank" className="underline hover:text-green-900">En savoir plus</a>
+                </p>
+              </div>
               <div className="flex flex-wrap gap-2">
-                {[1, 2, 3].map((n) => {
-                  const isActive = installments === n;
-                  return (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => setInstallments(n)}
-                      className={`rounded-[var(--radius-button)] border px-4 py-2 text-sm font-medium transition-colors ${
-                        isActive
-                          ? "border-dta-accent bg-dta-accent text-white"
-                          : "border-dta-sand bg-white text-dta-char hover:border-dta-accent/50"
-                      }`}
-                    >
-                      {n === 1 ? "Paiement unique" : `${n}x sans frais`}
-                    </button>
-                  );
-                })}
+                <button
+                  type="button"
+                  onClick={() => setInstallments(1)}
+                  className={`rounded-[var(--radius-button)] border px-4 py-2 text-sm font-medium transition-colors ${
+                    installments === 1
+                      ? "border-dta-accent bg-dta-accent text-white"
+                      : "border-dta-sand bg-white text-dta-char hover:border-dta-accent/50"
+                  }`}
+                >
+                  Paiement unique
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInstallments(2)}
+                  className={`rounded-[var(--radius-button)] border px-4 py-2 text-sm font-medium transition-colors ${
+                    installments === 2
+                      ? "border-green-600 bg-green-600 text-white"
+                      : "border-green-300 bg-green-50 text-green-700 hover:border-green-500"
+                  }`}
+                >
+                  Dès 5&euro; — Culture pour Tous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInstallments(3)}
+                  className={`rounded-[var(--radius-button)] border px-4 py-2 text-sm font-medium transition-colors ${
+                    installments === 3
+                      ? "border-green-600 bg-green-600 text-white"
+                      : "border-green-300 bg-green-50 text-green-700 hover:border-green-500"
+                  }`}
+                >
+                  3x — Culture pour Tous
+                </button>
               </div>
               {installments > 1 && (
-                <div className="mt-2 rounded-lg bg-dta-bg p-3 text-xs text-dta-char">
+                <div className="mt-2 rounded-lg border border-green-200 bg-green-50 p-3 text-xs text-green-800">
                   <p>Aujourd&apos;hui : <strong>{formatCurrency(deposit)}</strong> (acompte)</p>
-                  <p>Puis {installments - 1}x <strong>{formatCurrency(monthlyAmount)}</strong>/mois</p>
+                  <p>Puis rechargez à votre rythme — {installments - 1}x <strong>{formatCurrency(monthlyAmount)}</strong> suggéré/mois</p>
+                  <p className="mt-1 text-green-600">Minimum 1&nbsp;&euro; par recharge · Solde avant l&apos;événement</p>
                 </div>
               )}
             </div>

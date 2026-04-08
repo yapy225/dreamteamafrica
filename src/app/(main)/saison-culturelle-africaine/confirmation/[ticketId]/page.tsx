@@ -123,19 +123,19 @@ export default async function ConfirmationPage({
         window.dataLayer.push({
           event: 'purchase',
           ecommerce: {
-            transaction_id: '${ticketId}',
-            value: ${totalAmount},
+            transaction_id: ${JSON.stringify(ticketId)},
+            value: ${Number(totalAmount) || 0},
             currency: 'EUR',
             items: [{
-              item_name: '${event.title.replace(/'/g, "\\'")}',
+              item_name: ${JSON.stringify(event.title)},
               item_category: 'Billet',
-              price: ${finalTickets[0].price},
+              price: ${Number(finalTickets[0].price) || 0},
               quantity: ${finalTickets.length}
             }]
           }
         });
         if(typeof fbq==='function'){
-          fbq('track','Purchase',{value:${totalAmount},currency:'EUR',content_name:'${event.title.replace(/'/g, "\\'")}',content_type:'product'});
+          fbq('track','Purchase',{value:${Number(totalAmount) || 0},currency:'EUR',content_name:${JSON.stringify(event.title)},content_type:'product'});
         }
       `}</Script>
 
@@ -291,8 +291,41 @@ export default async function ConfirmationPage({
           ))}
         </div>
 
+        {/* Culture pour Tous — solde restant */}
+        {totalAmount > 0 && finalTickets.some(t => t.totalPaid < t.price) && (
+          <div className="mt-8 rounded-2xl border border-green-200 bg-green-50 p-6">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">✨</span>
+              <div>
+                <h2 className="font-serif text-lg font-bold text-green-800">
+                  Culture pour Tous — Rechargez à votre rythme
+                </h2>
+                <p className="mt-1 text-sm text-green-700">
+                  Votre billet est réservé ! Il vous reste{" "}
+                  <strong>{formatPrice(finalTickets.reduce((s, t) => s + (t.price - t.totalPaid), 0))}</strong>{" "}
+                  à régler avant l&apos;événement. Rechargez quand vous voulez, dès 1&nbsp;&euro;.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link
+                    href="/dashboard/tickets"
+                    className="inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-700"
+                  >
+                    Recharger mon billet
+                  </Link>
+                  <Link
+                    href="/culture-pour-tous"
+                    className="inline-flex items-center rounded-lg border border-green-300 px-4 py-2 text-xs font-semibold text-green-700 hover:bg-green-100"
+                  >
+                    Comment ça marche ?
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Actions */}
-        <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Link
             href="/dashboard/tickets"
             className="flex flex-1 items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white hover:bg-dta-accent-dark"

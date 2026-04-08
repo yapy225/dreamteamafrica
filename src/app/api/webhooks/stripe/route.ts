@@ -368,8 +368,9 @@ async function handleTicketInstallment(session: Stripe.Checkout.Session) {
       const depositNum = parseFloat(deposit);
       const monthlyNum = parseFloat(installmentAmount);
       const remainingMonths = nbInstallments - 1;
+      const totalRemaining = unitPriceNum * qty - depositNum;
       await sendWhatsAppText(whatsappPhone,
-        `Bonjour ${customerName},\n\nMerci pour votre reservation !\n\nVotre acompte de ${depositNum} EUR a ete recu. Vos ${qty} billet(s) pour ${event.title} sont confirmes.\n\nSolde restant : ${remainingMonths}x ${monthlyNum} EUR/mois (prelevement automatique).\n\nA tres bientot !\n\nL'equipe Dream Team Africa`
+        `Bonjour ${customerName},\n\nMerci pour votre reservation !\n\nVotre acompte de ${depositNum} EUR a ete recu. Vos ${qty} billet(s) pour ${event.title} sont confirmes.\n\nSolde restant : ${totalRemaining} EUR\n\nCulture pour Tous : rechargez a votre rythme des 1 EUR depuis votre espace billets :\nhttps://dreamteamafrica.com/dashboard/tickets\n\nA tres bientot !\n\nL'equipe Dream Team Africa`
       );
     }
   } catch (waErr) {

@@ -202,6 +202,21 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
       `}</Script>
     <div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {/* Culture pour Tous banner */}
+      {event.priceEarly > 0 && (
+        <div className="bg-green-600 text-white">
+          <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-2 text-center text-xs font-medium sm:text-sm">
+            <span>✨</span>
+            <span>
+              <strong>Culture pour Tous</strong> — Réservez dès 5&nbsp;&euro; et payez à votre rythme
+            </span>
+            <a href="/culture-pour-tous" className="ml-1 underline underline-offset-2 hover:text-green-100">
+              Comment ça marche ?
+            </a>
+          </div>
+        </div>
+      )}
+
       {/* A — Navigation Bar */}
       <div className="sticky top-0 z-30 border-b border-dta-sand/50 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">

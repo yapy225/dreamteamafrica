@@ -62,10 +62,15 @@ export default function MonEspaceClient({
   const [rechargeLoading, setRechargeLoading] = useState(false);
   const [expandedTicket, setExpandedTicket] = useState<string | null>(null);
 
+  const [showTickets, setShowTickets] = useState(false);
   const totalPaid = tickets.reduce((sum, t) => sum + t.totalPaid, 0);
   const totalPrice = tickets.reduce((sum, t) => sum + t.price, 0);
   const totalRemaining = totalPrice - totalPaid;
+  const globalPercent = totalPrice > 0 ? Math.round((totalPaid / totalPrice) * 100) : 100;
   const firstName = userName.split(" ")[0];
+  const ticketsPaid = tickets.filter((t) => t.totalPaid >= t.price).length;
+  const ticketsInProgress = tickets.filter((t) => t.totalPaid > 0 && t.totalPaid < t.price).length;
+  const ticketsNotStarted = tickets.filter((t) => t.totalPaid === 0).length;
 
   const allPayments = tickets
     .flatMap((t) => t.payments.map((p) => ({ ...p, eventTitle: t.eventTitle })))
@@ -136,25 +141,100 @@ export default function MonEspaceClient({
         </span>
       </div>
 
-      {/* Stats */}
-      <div className="mb-8 grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-dta-sand bg-white p-4 text-center">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-dta-char/50">Billets</p>
-          <p className="mt-1 font-serif text-2xl font-bold text-dta-dark">{tickets.length}</p>
+      {/* ── RÉSUMÉ FINANCIER ── */}
+      <div className="mb-8 overflow-hidden rounded-2xl border border-dta-sand bg-white">
+        <div className="bg-gradient-to-r from-dta-dark to-[#2a1a0a] p-6">
+          <p className="text-xs font-medium uppercase tracking-widest text-white/40">Mon solde global</p>
+          <div className="mt-3 flex items-end justify-between">
+            <div>
+              <p className="font-serif text-3xl font-bold text-white">{formatCurrency(totalPaid)}</p>
+              <p className="text-sm text-white/50">vers&eacute;s sur {formatCurrency(totalPrice)}</p>
+            </div>
+            <div className="text-right">
+              <p className="font-serif text-2xl font-bold text-dta-accent">{formatCurrency(totalRemaining)}</p>
+              <p className="text-xs text-white/40">restant</p>
+            </div>
+          </div>
+          {/* Barre globale */}
+          <div className="mt-4">
+            <div className="h-3 overflow-hidden rounded-full bg-white/10">
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ${globalPercent >= 100 ? "bg-green-400" : "bg-gradient-to-r from-dta-accent to-amber-400"}`}
+                style={{ width: `${Math.max(globalPercent, 2)}%` }}
+              />
+            </div>
+            <p className="mt-1.5 text-right text-xs text-white/40">{globalPercent}%</p>
+          </div>
         </div>
-        <div className="rounded-xl border border-dta-sand bg-white p-4 text-center">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-dta-char/50">Total vers&eacute;</p>
-          <p className="mt-1 font-serif text-xl font-bold text-green-600">{formatCurrency(totalPaid)}</p>
-        </div>
-        <div className="rounded-xl border border-dta-sand bg-white p-4 text-center">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-dta-char/50">Reste</p>
-          <p className="mt-1 font-serif text-xl font-bold text-dta-accent">{formatCurrency(totalRemaining)}</p>
+
+        {/* Stats détaillées */}
+        <div className="grid grid-cols-4 divide-x divide-dta-sand">
+          <div className="p-4 text-center">
+            <p className="font-serif text-xl font-bold text-dta-dark">{tickets.length}</p>
+            <p className="text-[10px] uppercase tracking-wider text-dta-char/40">Billets</p>
+          </div>
+          <div className="p-4 text-center">
+            <p className="font-serif text-xl font-bold text-green-600">{ticketsPaid}</p>
+            <p className="text-[10px] uppercase tracking-wider text-dta-char/40">Sold&eacute;s</p>
+          </div>
+          <div className="p-4 text-center">
+            <p className="font-serif text-xl font-bold text-amber-600">{ticketsInProgress}</p>
+            <p className="text-[10px] uppercase tracking-wider text-dta-char/40">En cours</p>
+          </div>
+          <div className="p-4 text-center">
+            <p className="font-serif text-xl font-bold text-gray-400">{ticketsNotStarted}</p>
+            <p className="text-[10px] uppercase tracking-wider text-dta-char/40">&Agrave; payer</p>
+          </div>
         </div>
       </div>
 
-      {/* Tickets */}
-      <h2 className="mb-4 font-serif text-lg font-bold text-dta-dark">Mes r&eacute;servations</h2>
-      <div className="space-y-4">
+      {/* ── ÉTAT PAR BILLET (résumé compact) ── */}
+      <div className="mb-8 space-y-3">
+        <h2 className="font-serif text-lg font-bold text-dta-dark">&Eacute;tat des versements</h2>
+        {tickets.map((ticket) => {
+          const remaining = ticket.price - ticket.totalPaid;
+          const percent = ticket.price > 0 ? Math.round((ticket.totalPaid / ticket.price) * 100) : 100;
+          const isPaid = remaining <= 0;
+          return (
+            <div key={ticket.id + "-summary"} className="rounded-xl border border-dta-sand bg-white p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-dta-dark">{ticket.eventTitle}</p>
+                  <p className="text-xs text-dta-char/50">{formatDate(ticket.date)}</p>
+                </div>
+                <div className="text-right">
+                  {isPaid ? (
+                    <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700">Sold&eacute;</span>
+                  ) : (
+                    <span className="text-sm font-bold text-dta-accent">{formatCurrency(remaining)} restant</span>
+                  )}
+                </div>
+              </div>
+              <div className="mt-2.5 flex items-center gap-3">
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-dta-bg">
+                  <div
+                    className={`h-full rounded-full ${isPaid ? "bg-green-500" : "bg-gradient-to-r from-dta-accent to-amber-500"}`}
+                    style={{ width: `${Math.max(percent, 2)}%` }}
+                  />
+                </div>
+                <span className="text-xs font-medium text-dta-char/50">{formatCurrency(ticket.totalPaid)}/{formatCurrency(ticket.price)}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── BOUTON VOIR BILLETS ── */}
+      <button
+        onClick={() => setShowTickets(!showTickets)}
+        className="mb-6 w-full rounded-xl border-2 border-dashed border-dta-accent/30 bg-dta-accent/5 px-4 py-3 text-sm font-semibold text-dta-accent transition-colors hover:border-dta-accent/50 hover:bg-dta-accent/10"
+      >
+        {showTickets ? "Masquer mes billets" : `Voir mes ${tickets.length} billets et recharger`}
+      </button>
+
+      {/* Tickets (caché par défaut) */}
+      {showTickets && <h2 className="mb-4 font-serif text-lg font-bold text-dta-dark">Mes r&eacute;servations</h2>}
+      {showTickets && <div className="space-y-4">
         {tickets.map((ticket) => {
           const remaining = ticket.price - ticket.totalPaid;
           const percent = ticket.price > 0 ? Math.round((ticket.totalPaid / ticket.price) * 100) : 100;
@@ -336,7 +416,7 @@ export default function MonEspaceClient({
             </div>
           );
         })}
-      </div>
+      </div>}
 
       {/* Payment history */}
       {allPayments.length > 0 && (

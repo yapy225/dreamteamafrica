@@ -27,12 +27,13 @@ export default function ContactPageForm({
     message: "",
   });
   const [newsletter, setNewsletter] = useState(true);
+  const [rgpd, setRgpd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
 
   const canSubmit =
-    category && form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.phone.trim() && form.message.trim();
+    category && form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.phone.trim() && form.message.trim() && rgpd;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -218,6 +219,22 @@ export default function ContactPageForm({
               Je souhaite recevoir les actualit&eacute;s, &eacute;v&eacute;nements et offres
               de Dream Team Africa par email. Conform&eacute;ment au RGPD, je peux me
               d&eacute;sinscrire &agrave; tout moment.
+            </span>
+          </label>
+
+          <label className="flex items-start gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={rgpd}
+              onChange={(e) => setRgpd(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-dta-sand text-dta-accent accent-dta-accent"
+              required
+            />
+            <span className="text-[11px] leading-relaxed text-dta-char/60">
+              J&apos;accepte que mes données soient traitées conformément à la{" "}
+              <a href="/politique-de-confidentialite" target="_blank" className="underline text-dta-accent">
+                politique de confidentialité
+              </a>. *
             </span>
           </label>
 

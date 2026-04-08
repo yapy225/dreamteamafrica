@@ -33,15 +33,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  // ── Idempotency: skip already-processed events ──
-  const existing = await prisma.stripeEvent.findUnique({ where: { id: event.id } });
-  if (existing) {
-    console.log(`[webhook] Event ${event.id} already processed, skipping`);
-    return NextResponse.json({ received: true });
+  // ── Idempotency: atomic upsert to prevent race conditions ──
+  try {
+    await prisma.stripeEvent.create({
+      data: { id: event.id, type: event.type },
+    });
+  } catch (e: any) {
+    // Unique constraint violation → already processed
+    if (e?.code === "P2002") {
+      console.log(`[webhook] Event ${event.id} already processed, skipping`);
+      return NextResponse.json({ received: true });
+    }
+    throw e;
   }
-  await prisma.stripeEvent.create({
-    data: { id: event.id, type: event.type },
-  });
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
@@ -78,7 +82,7 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
 
   const event = await prisma.event.findUnique({
     where: { id: eventId },
-    select: { title: true, date: true, venue: true, address: true, coverImage: true, tiers: true },
+    select: { title: true, date: true, venue: true, address: true, coverImage: true, tiers: true, priceEarly: true, priceStd: true, priceVip: true },
   });
 
   if (!event) {
@@ -91,14 +95,26 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
     select: { name: true, email: true, phone: true },
   });
 
-  // Re-validate price from database (never trust metadata)
+  // Re-validate price from database — NEVER trust metadata for pricing
   const customTiers = event.tiers as Array<{ id: string; name: string; price: number }> | null;
   const matchedTier = Array.isArray(customTiers) ? customTiers.find((t) => t.id === tier) : null;
   const legacyLabelMap: Record<string, string> = { EARLY_BIRD: "Early Bird", STANDARD: "Standard", VIP: "VIP" };
   const tierName = matchedTier?.name || legacyLabelMap[tier] || tier;
 
-  // Use DB price, fallback to metadata only if tier not found in DB
-  const unitPriceNum = matchedTier?.price ?? parseFloat(unitPrice);
+  // Resolve price from DB only — never trust client metadata
+  let unitPriceNum: number;
+  if (matchedTier) {
+    unitPriceNum = matchedTier.price;
+  } else if (tier === "EARLY_BIRD") {
+    unitPriceNum = event.priceEarly;
+  } else if (tier === "STANDARD") {
+    unitPriceNum = event.priceStd;
+  } else if (tier === "VIP") {
+    unitPriceNum = event.priceVip;
+  } else {
+    console.error(`[webhook] Ticket purchase rejected: tier "${tier}" not found in DB for event ${eventId}`);
+    return;
+  }
 
   const createdTickets: Array<{ id: string; qrCode: string }> = [];
 
@@ -191,7 +207,7 @@ async function handleTicketInstallment(session: Stripe.Checkout.Session) {
 
   const event = await prisma.event.findUnique({
     where: { id: eventId },
-    select: { title: true, date: true, venue: true, address: true, coverImage: true, tiers: true },
+    select: { title: true, date: true, venue: true, address: true, coverImage: true, tiers: true, priceEarly: true, priceStd: true, priceVip: true },
   });
 
   if (!event) {
@@ -199,14 +215,26 @@ async function handleTicketInstallment(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // Re-validate price from database (never trust metadata)
+  // Re-validate price from database — never trust metadata
   const customTiers = event.tiers as Array<{ id: string; name: string; price: number }> | null;
   const matchedTier = Array.isArray(customTiers) ? customTiers.find((t) => t.id === tier) : null;
   const legacyLabelMap: Record<string, string> = { EARLY_BIRD: "Early Bird", STANDARD: "Standard", VIP: "VIP" };
   const tierName = matchedTier?.name || legacyLabelMap[tier] || tier;
 
-  // Use DB price, not metadata price
-  const unitPriceNum = matchedTier?.price ?? parseFloat(unitPrice);
+  // Resolve price from DB only
+  let unitPriceNum: number;
+  if (matchedTier) {
+    unitPriceNum = matchedTier.price;
+  } else if (tier === "EARLY_BIRD") {
+    unitPriceNum = event.priceEarly;
+  } else if (tier === "STANDARD") {
+    unitPriceNum = event.priceStd;
+  } else if (tier === "VIP") {
+    unitPriceNum = event.priceVip;
+  } else {
+    console.error(`[webhook] Ticket installment rejected: tier "${tier}" not found in DB for event ${eventId}`);
+    return;
+  }
 
   // Create tickets (with deposit paid, rest pending via subscription)
   const createdTickets: Array<{ id: string; qrCode: string }> = [];
@@ -399,40 +427,61 @@ async function handleTicketRecharge(session: Stripe.Checkout.Session) {
 }
 
 async function handleOrderPurchase(session: Stripe.Checkout.Session) {
-  const { userId, items: itemsJson, total } = session.metadata!;
+  const { userId, items: itemsJson } = session.metadata!;
   const items = JSON.parse(itemsJson) as Array<{
     productId: string;
     quantity: number;
     price: number;
   }>;
 
-  const order = await prisma.order.create({
-    data: {
-      userId,
-      status: "PAID",
-      total: parseFloat(total),
-      stripeSessionId: session.id,
-      items: {
-        create: items.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-      },
-    },
-  });
+  // Atomic transaction: re-validate stock from DB, create order, decrement stock
+  await prisma.$transaction(async (tx) => {
+    // Re-validate prices and stock from database (never trust metadata)
+    const products = await tx.product.findMany({
+      where: { id: { in: items.map((i) => i.productId) } },
+    });
+    const productMap = new Map(products.map((p) => [p.id, p]));
 
-  // Decrement stock
-  await Promise.all(
-    items.map((item) =>
-      prisma.product.update({
+    let dbTotal = 0;
+    for (const item of items) {
+      const product = productMap.get(item.productId);
+      if (!product) {
+        console.error(`[webhook] Order rejected: product ${item.productId} not found`);
+        return;
+      }
+      if (product.stock < item.quantity) {
+        console.error(`[webhook] Order rejected: insufficient stock for ${product.name} (${product.stock} < ${item.quantity})`);
+        return;
+      }
+      dbTotal += product.price * item.quantity;
+    }
+
+    const order = await tx.order.create({
+      data: {
+        userId,
+        status: "PAID",
+        total: dbTotal,
+        stripeSessionId: session.id,
+        items: {
+          create: items.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            price: productMap.get(item.productId)!.price,
+          })),
+        },
+      },
+    });
+
+    // Decrement stock atomically within same transaction
+    for (const item of items) {
+      await tx.product.update({
         where: { id: item.productId },
         data: { stock: { decrement: item.quantity } },
-      })
-    )
-  );
+      });
+    }
 
-  console.log(`Created order ${order.id} for user ${userId}, total: ${total}€`);
+    console.log(`Created order ${order.id} for user ${userId}, total: ${dbTotal}€`);
+  });
 }
 
 async function handleExhibitorBooking(session: Stripe.Checkout.Session) {

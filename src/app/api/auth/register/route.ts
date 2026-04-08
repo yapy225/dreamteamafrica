@@ -47,13 +47,8 @@ export async function POST(request: Request) {
       select: { id: true },
     });
 
-    const finalRole = hasExhibitorBookings
-      ? "EXPOSANT"
-      : role === "ARTISAN"
-        ? "ARTISAN"
-        : role === "EXPOSANT"
-          ? "EXPOSANT"
-          : "USER";
+    // Role is determined server-side only — never trust client input
+    const finalRole = hasExhibitorBookings ? "EXPOSANT" : "USER";
 
     const user = await prisma.user.create({
       data: {

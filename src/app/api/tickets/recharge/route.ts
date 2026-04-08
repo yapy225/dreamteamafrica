@@ -30,8 +30,8 @@ export async function POST(request: Request) {
     }
 
     const parsedAmount = Number(amount);
-    if (!Number.isFinite(parsedAmount) || parsedAmount < 5 || parsedAmount > 10000) {
-      return NextResponse.json({ error: "Le montant minimum est de 5€." }, { status: 400 });
+    if (!Number.isFinite(parsedAmount) || parsedAmount < 1 || parsedAmount > 10000) {
+      return NextResponse.json({ error: "Le montant minimum de recharge est de 1€." }, { status: 400 });
     }
 
     // 4. Fetch ticket

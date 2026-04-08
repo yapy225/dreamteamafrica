@@ -97,10 +97,12 @@ export default function MonEspaceClient({
     setCustomAmount("");
   };
 
+  const MIN_RECHARGE = 5;
+
   const handleCustomAmount = (val: string) => {
     setCustomAmount(val);
     const num = parseFloat(val);
-    setRechargeAmount(num > 0 ? num : null);
+    setRechargeAmount(num >= MIN_RECHARGE ? num : null);
   };
 
   if (tickets.length === 0) {
@@ -224,6 +226,24 @@ export default function MonEspaceClient({
         })}
       </div>
 
+      {/* ── HISTORIQUE DES VERSEMENTS ── */}
+      {allPayments.length > 0 && (
+        <div className="mb-8">
+          <h2 className="mb-3 font-serif text-lg font-bold text-dta-dark">Historique des versements</h2>
+          <div className="space-y-2">
+            {allPayments.slice(0, 10).map((p) => (
+              <div key={p.id} className="flex items-center justify-between rounded-xl border border-dta-sand bg-white px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-dta-dark">{p.label}</p>
+                  <p className="text-xs text-dta-char/50">{p.eventTitle} &middot; {formatDate(p.paidAt)}</p>
+                </div>
+                <span className="text-sm font-bold text-green-600">+{formatCurrency(p.amount)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── BOUTON VOIR BILLETS ── */}
       <button
         onClick={() => setShowTickets(!showTickets)}
@@ -337,9 +357,9 @@ export default function MonEspaceClient({
                         </div>
                         <input
                           type="number"
-                          min="1"
+                          min={MIN_RECHARGE}
                           max={remaining}
-                          placeholder="Autre montant (&euro;)"
+                          placeholder="Autre montant (min. 5&euro;)"
                           value={customAmount}
                           onChange={(e) => handleCustomAmount(e.target.value)}
                           className="mt-3 w-full rounded-lg border border-dta-sand bg-white px-4 py-2 text-sm text-dta-dark placeholder:text-dta-taupe focus:border-dta-accent focus:outline-none"
@@ -418,26 +438,7 @@ export default function MonEspaceClient({
         })}
       </div>}
 
-      {/* Payment history */}
-      {allPayments.length > 0 && (
-        <div className="mt-10">
-          <h2 className="mb-4 font-serif text-lg font-bold text-dta-dark">Historique des versements</h2>
-          <div className="space-y-2">
-            {allPayments.map((p) => (
-              <div key={p.id} className="flex items-center justify-between rounded-xl border border-dta-sand bg-white px-5 py-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-lg">&#x1F4B3;</span>
-                  <div>
-                    <p className="text-sm font-medium text-dta-dark">{p.label}</p>
-                    <p className="text-xs text-dta-char/50">{p.eventTitle} &middot; {formatDate(p.paidAt)}</p>
-                  </div>
-                </div>
-                <span className="text-sm font-bold text-green-600">+{formatCurrency(p.amount)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Payment history moved above */}
 
       {/* Profile */}
       <div className="mt-10 rounded-xl border border-dta-sand bg-white p-6">

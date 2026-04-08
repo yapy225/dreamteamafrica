@@ -215,8 +215,8 @@ model Article {
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
-  author       User          @relation(fields: [authorId], references: [id])
-  event        Event?        @relation(fields: [eventId], references: [id])
+  author       User          @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  event        Event?        @relation(fields: [eventId], references: [id], onDelete: SetNull)
   socialPosts  SocialPost[]
   socialDrafts SocialDraft[]
 
@@ -280,8 +280,8 @@ model Ticket {
   totalPaid       Decimal @db.Decimal(10, 2) @default(0)
   installments    Int        @default(1)
 
-  event    Event           @relation(fields: [eventId], references: [id])
-  user     User            @relation(fields: [userId], references: [id])
+  event    Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user     User            @relation(fields: [userId], references: [id], onDelete: SetNull)
   payments TicketPayment[]
 
   @@index([eventId])
@@ -318,7 +318,7 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  artisan    User        @relation(fields: [artisanId], references: [id])
+  artisan    User        @relation(fields: [artisanId], references: [id], onDelete: SetNull)
   orderItems OrderItem[]
   favorites  Favorite[]
 
@@ -336,7 +336,7 @@ model Order {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
-  user  User        @relation(fields: [userId], references: [id])
+  user  User        @relation(fields: [userId], references: [id], onDelete: SetNull)
   items OrderItem[]
 }
 
@@ -348,7 +348,7 @@ model OrderItem {
   price     Decimal @db.Decimal(10, 2)
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: SetNull)
 }
 
 model Favorite {
@@ -412,7 +412,7 @@ model OfficielContent {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  author User @relation(fields: [authorId], references: [id])
+  author User @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   @@index([type])
   @@index([category])
@@ -569,7 +569,7 @@ model DetectedArticle {
   createdAt       DateTime               @default(now())
   updatedAt       DateTime               @updatedAt
 
-  feed RssFeed @relation(fields: [feedId], references: [id])
+  feed RssFeed @relation(fields: [feedId], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([feedId])
@@ -579,10 +579,13 @@ model DetectedArticle {
 // ─── NEWSLETTER ─────────────────────────────────────────
 
 model NewsletterSubscriber {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  isActive     Boolean  @default(true)
-  subscribedAt DateTime @default(now())
+  id              String    @id @default(cuid())
+  email           String    @unique
+  isActive        Boolean   @default(true)
+  emailVerified   Boolean   @default(false)
+  verifyToken     String?   @unique
+  verifyExpiresAt DateTime?
+  subscribedAt    DateTime  @default(now())
 }
 
 model NewsletterCampaign {
@@ -605,7 +608,7 @@ model NewsletterCampaign {
 model EventReservation {
   id          String   @id @default(cuid())
   eventId     String
-  event       Event    @relation(fields: [eventId], references: [id])
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   firstName   String
   lastName    String
   email       String
@@ -649,7 +652,7 @@ model ExposantLead {
 model ExhibitorBooking {
   id                   String         @id @default(cuid())
   userId               String
-  user                 User           @relation(fields: [userId], references: [id])
+  user                 User           @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   // Infos exposant
   companyName          String
@@ -746,10 +749,11 @@ model ExhibitorProfile {
   bookingId     String   @unique
   booking       ExhibitorBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   userId        String?
-  user          User?    @relation(fields: [userId], references: [id])
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  // Token unique pour le formulaire public
+  // Token unique pour le formulaire public (expire après 90 jours)
   token         String   @unique @default(cuid())
+  tokenExpiresAt DateTime?
 
   // Infos exposant
   companyName   String?
@@ -912,7 +916,7 @@ model SocialPost {
   postedAt    DateTime?
   createdAt   DateTime         @default(now())
 
-  article Article @relation(fields: [articleId], references: [id])
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@index([articleId])
   @@index([platform])
@@ -958,7 +962,7 @@ model SocialDraft {
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
-  article       Article?          @relation(fields: [articleId], references: [id])
+  article       Article?          @relation(fields: [articleId], references: [id], onDelete: SetNull)
 
   @@index([status])
   @@index([platform])

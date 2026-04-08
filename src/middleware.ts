@@ -308,6 +308,22 @@ export function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // ── CSRF: Origin validation on state-changing API requests ──
+  if (pathname.startsWith("/api/") && ["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) {
+    const origin = request.headers.get("origin");
+    const allowedOrigins = [
+      `https://${PRIMARY_DOMAIN}`,
+      "https://www.dreamteamafrica.com",
+      "http://localhost:3000",
+      "http://localhost:4000",
+    ];
+    // Webhooks from external services don't send Origin — skip for webhook paths
+    const isWebhook = pathname.startsWith("/api/webhooks/") || pathname.startsWith("/api/webhook/");
+    if (!isWebhook && origin && !allowedOrigins.includes(origin)) {
+      return NextResponse.json({ error: "Origin not allowed" }, { status: 403 });
+    }
+  }
+
   // Exact path redirects
   const pathRedirect = PATH_REDIRECTS[pathname];
   if (pathRedirect) {

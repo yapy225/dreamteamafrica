@@ -37,6 +37,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Profil introuvable." }, { status: 404 });
   }
 
+  // Check token expiration
+  if (profile.tokenExpiresAt && new Date() > profile.tokenExpiresAt) {
+    return NextResponse.json({ error: "Ce lien a expiré. Contactez-nous pour en obtenir un nouveau." }, { status: 410 });
+  }
+
   return NextResponse.json({
     id: profile.id,
     token: profile.token,

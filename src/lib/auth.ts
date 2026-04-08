@@ -144,14 +144,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.role = (user as { role: string }).role;
         token.id = user.id!;
+        token.roleRefreshedAt = Date.now();
       }
-      // Refresh role from DB on every sign-in (in case it was upgraded)
-      if (trigger === "signIn" && token.id) {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          select: { role: true },
-        });
-        if (dbUser) token.role = dbUser.role;
+      // Refresh role from DB on sign-in or every 5 minutes
+      const ROLE_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 min
+      const lastRefresh = (token.roleRefreshedAt as number) || 0;
+      const shouldRefresh = trigger === "signIn" || (Date.now() - lastRefresh > ROLE_REFRESH_INTERVAL);
+
+      if (shouldRefresh && token.id) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { role: true },
+          });
+          if (dbUser) {
+            token.role = dbUser.role;
+            token.roleRefreshedAt = Date.now();
+          }
+        } catch {
+          // DB error — keep existing role
+        }
       }
       return token;
     },

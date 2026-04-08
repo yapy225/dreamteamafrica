@@ -1,3 +1,4 @@
+import { verifyCronAuth } from "@/lib/cron-auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { slugify } from "@/lib/utils";
@@ -8,12 +9,8 @@ import OpenAI from "openai";
 const BATCH_SIZE = 6;
 
 export async function GET(request: Request) {
-  // Vérifier le secret CRON
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-  }
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
   const admin = await prisma.user.findFirst({ where: { role: "ADMIN" } });
   if (!admin) {

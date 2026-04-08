@@ -1,3 +1,4 @@
+import { verifyCronAuth } from "@/lib/cron-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { searchPexelsPhoto, buildPexelsQuery } from "@/lib/pexels";
@@ -9,11 +10,8 @@ export const maxDuration = 60;
 const BATCH_SIZE = 5; // 5 articles par exécution
 
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-  }
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
   // Trouver les articles dont la cover n'a pas encore été remplacée par Pexels
   // On marque les covers remplacées en ajoutant un tag "pexels-cover"

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { verifyCronAuth } from "@/lib/cron-auth";
 
 const USER_TOKEN = process.env.META_LONG_LIVED_TOKEN!;
 const IMAGE_URL = "https://dreamteamafricamedia.b-cdn.net/campaigns/foire-afrique-danseuse-j24.png";
@@ -95,10 +96,8 @@ async function getPageTokens(): Promise<Map<string, string>> {
 }
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
   try {
     const idx = getRotationIndex(FB_MESSAGES.length);

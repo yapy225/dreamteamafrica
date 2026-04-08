@@ -4,16 +4,19 @@ import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await auth();
   if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
   }
 
   const reservations = await prisma.eventReservation.findMany({
     include: { event: { select: { title: true } } },
     orderBy: { createdAt: "desc" },
+    take: 10000, // Safety limit
   });
+
+  console.log(`[ADMIN EXPORT] ${session.user.email} exported reservations (${reservations.length} rows) at ${new Date().toISOString()}`);
 
   const header = "Événement,Prénom,Nom,Email,Téléphone,Places,Statut,Date";
   const rows = reservations.map((r) => {

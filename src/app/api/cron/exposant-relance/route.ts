@@ -1,3 +1,4 @@
+import { verifyCronAuth } from "@/lib/cron-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendWhatsAppText } from "@/lib/whatsapp";
@@ -10,11 +11,8 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com"
  * Runs every hour via Vercel cron.
  */
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-  }
+  const authError = verifyCronAuth(req);
+  if (authError) return authError;
 
   const now = new Date();
   // Leads created between 22h and 24h ago, not yet reminded, not yet paid

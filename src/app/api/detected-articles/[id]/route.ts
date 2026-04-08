@@ -27,11 +27,18 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const data = await request.json();
+  const body = await request.json();
+
+  // Whitelist allowed fields — prevent mass assignment
+  const allowedFields = ["status", "title", "excerpt", "content", "coverImage", "category", "sourceUrl", "errorMessage"] as const;
+  const safeData: Record<string, unknown> = {};
+  for (const key of allowedFields) {
+    if (body[key] !== undefined) safeData[key] = body[key];
+  }
 
   const article = await prisma.detectedArticle.update({
     where: { id },
-    data,
+    data: safeData,
   });
 
   return NextResponse.json(article);

@@ -1,3 +1,4 @@
+import { verifyCronAuth } from "@/lib/cron-auth";
 export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
@@ -38,12 +39,8 @@ const parser = new Parser({
 });
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
   try {
     // ══════════════════════════════════════════════

@@ -1,3 +1,4 @@
+import { verifyCronAuth } from "@/lib/cron-auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
@@ -39,13 +40,8 @@ function getPositionForDay(day: number) {
 }
 
 export async function GET(request: Request) {
-  // Verify CRON secret (always required in production)
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const authError = verifyCronAuth(request);
+  if (authError) return authError;
 
   try {
     // Get all non-archived articles

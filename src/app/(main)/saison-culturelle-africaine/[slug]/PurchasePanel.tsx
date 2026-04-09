@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Loader2, Minus, Plus, X } from "lucide-react";
+import { Loader2, Minus, Plus, X, Tag, Check } from "lucide-react";
 
 interface PurchasePanelProps {
   open: boolean;
@@ -76,6 +76,10 @@ export default function PurchasePanel({
   });
   const [selectedDate, setSelectedDate] = useState<string>(fixedVisitDate || eventDate);
   const [installments, setInstallments] = useState(1);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoApplied, setPromoApplied] = useState<{ id: string; name: string; amountOff?: number; percentOff?: number } | null>(null);
+  const [promoError, setPromoError] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -117,11 +121,53 @@ export default function PurchasePanel({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, handleKeyDown]);
 
+  /* ── promo code validation ────────────────────────────── */
+  const handleApplyPromo = async () => {
+    const code = promoCode.trim().toUpperCase();
+    if (!code) return;
+    setPromoLoading(true);
+    setPromoError("");
+    try {
+      const res = await fetch("/api/coupons/validate-stripe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPromoError(data.error || "Code invalide");
+        setPromoApplied(null);
+      } else {
+        setPromoApplied(data);
+        setPromoError("");
+      }
+    } catch {
+      setPromoError("Erreur réseau");
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setPromoApplied(null);
+    setPromoCode("");
+    setPromoError("");
+  };
+
   /* ── derived ─────────────────────────────────────────── */
   const total = tier.price * quantity;
   const deposit = installments > 1 ? 5 * quantity : total;
   const remainingBalance = total - deposit;
   const monthlyAmount = installments > 1 ? Math.ceil((remainingBalance / (installments - 1)) * 100) / 100 : 0;
+
+  // Promo discount
+  const promoDiscount = promoApplied
+    ? promoApplied.amountOff
+      ? Math.min(promoApplied.amountOff / 100, total)
+      : promoApplied.percentOff
+        ? Math.round(total * promoApplied.percentOff) / 100
+        : 0
+    : 0;
 
   // Frais de gestion 3% (min 0.50€)
   const payableAmount = installments > 1 ? deposit : total;
@@ -182,6 +228,7 @@ export default function PurchasePanel({
           phone: form.phone,
           visitDate: selectedDate,
           installments,
+          ...(promoApplied && { promotionCode: promoApplied.id }),
         }),
       });
 
@@ -382,6 +429,56 @@ export default function PurchasePanel({
             />
           </div>
 
+          {/* promo code */}
+          {tier.price > 0 && (
+            <div>
+              <label className="mb-1 block text-sm font-medium text-dta-char">
+                Code promo
+              </label>
+              {promoApplied ? (
+                <div className="flex items-center justify-between rounded-[var(--radius-input)] border border-green-300 bg-green-50 px-4 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <Check size={14} className="text-green-600" />
+                    <span className="text-sm font-medium text-green-700">{promoCode.toUpperCase()}</span>
+                    <span className="text-xs text-green-600">
+                      &minus;{promoApplied.amountOff
+                        ? formatCurrency(promoApplied.amountOff / 100)
+                        : `${promoApplied.percentOff}%`}
+                    </span>
+                  </div>
+                  <button type="button" onClick={handleRemovePromo} className="text-dta-char/40 hover:text-red-500">
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-dta-taupe" />
+                    <input
+                      type="text"
+                      value={promoCode}
+                      onChange={(e) => { setPromoCode(e.target.value.toUpperCase()); setPromoError(""); }}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleApplyPromo(); } }}
+                      className={`${inputClass} pl-9`}
+                      placeholder="Entrez votre code"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    disabled={!promoCode.trim() || promoLoading}
+                    className="flex-shrink-0 rounded-[var(--radius-button)] bg-dta-dark px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-dta-char disabled:opacity-50"
+                  >
+                    {promoLoading ? <Loader2 size={14} className="animate-spin" /> : "Appliquer"}
+                  </button>
+                </div>
+              )}
+              {promoError && (
+                <p className="mt-1 text-xs text-red-500">{promoError}</p>
+              )}
+            </div>
+          )}
+
           {/* installments selector — Culture pour Tous */}
           {tier.price > 5 && (
             <div>
@@ -442,6 +539,12 @@ export default function PurchasePanel({
                   {tier.price === 0 ? "Gratuit" : formatCurrency(installments > 1 ? deposit : total)}
                 </span>
               </div>
+              {promoDiscount > 0 && (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-green-600">Code promo</span>
+                  <span className="text-green-600">&minus;{formatCurrency(promoDiscount)}</span>
+                </div>
+              )}
               {tier.price > 0 && roundedFees > 0 && (
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-dta-char/50">Frais de gestion (3%)</span>

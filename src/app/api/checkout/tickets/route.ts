@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { eventId, tier, quantity, sessionLabel, firstName, lastName, email, phone, visitDate, installments } =
+    const { eventId, tier, quantity, sessionLabel, firstName, lastName, email, phone, visitDate, installments, promotionCode } =
       await request.json();
 
     // Validate required nominative fields
@@ -292,7 +292,9 @@ export async function POST(request: Request) {
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: paymentMethods,
-        allow_promotion_codes: true,
+        ...(promotionCode
+          ? { discounts: [{ promotion_code: promotionCode }] }
+          : { allow_promotion_codes: true }),
         customer_email: trimmedEmail,
         line_items: lineItems,
         metadata: {

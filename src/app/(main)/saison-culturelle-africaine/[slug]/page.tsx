@@ -604,7 +604,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
       })()}
 
       {/* E — Tickets / Reservation Section */}
-      <div className="bg-dta-beige py-16">
+      <div id="billetterie" className="bg-dta-beige py-16 scroll-mt-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {(() => {
             const sectionTitle = isFreeEvent ? "Réservation" : "Billetterie";

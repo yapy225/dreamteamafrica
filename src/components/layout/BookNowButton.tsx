@@ -1,17 +1,32 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Ticket } from "lucide-react";
-import Link from "next/link";
 
 export default function BookNowButton() {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const section = document.getElementById("billetterie");
+    if (!section) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(!entry.isIntersecting),
+      { threshold: 0.1 },
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  if (!visible) return null;
+
   return (
-    <Link
-      href="/saison-culturelle-africaine/foire-dafrique-paris"
+    <button
+      onClick={() => document.getElementById("billetterie")?.scrollIntoView({ behavior: "smooth" })}
       aria-label="Réserver mes billets"
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 sm:left-6 sm:translate-x-0 z-50 flex items-center gap-2 rounded-full bg-gradient-to-r from-[#D94F30] to-[#C4704B] px-4 py-2.5 sm:px-5 sm:py-3 text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl animate-bounce-slow"
+      className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full bg-gradient-to-r from-[#D94F30] to-[#C4704B] px-4 py-2.5 text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl animate-bounce-slow sm:left-6 sm:translate-x-0 sm:px-5 sm:py-3"
     >
       <Ticket className="h-5 w-5" />
       <span className="text-sm font-bold">Prévente — 10€</span>
-    </Link>
+    </button>
   );
 }

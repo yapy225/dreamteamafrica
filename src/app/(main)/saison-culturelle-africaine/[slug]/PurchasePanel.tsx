@@ -223,8 +223,8 @@ export default function PurchasePanel({
 
       {/* panel */}
       <div
-        className={`relative z-10 w-full max-w-lg transform rounded-t-xl bg-white shadow-xl transition-transform duration-300 ease-out sm:rounded-xl ${
-          visible ? "translate-y-0" : "translate-y-full"
+        className={`relative z-10 w-full max-w-lg transform rounded-t-xl bg-white shadow-xl transition-all duration-300 ease-out sm:rounded-xl ${
+          visible ? "translate-y-0 sm:translate-y-0 opacity-100" : "translate-y-full sm:translate-y-4 opacity-0 sm:opacity-0"
         }`}
         role="dialog"
         aria-modal="true"

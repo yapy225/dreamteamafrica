@@ -35,8 +35,13 @@ export default function TicketSelector({
 
   useEffect(() => {
     if (!highlight) return;
+    // Open from sticky button event
     const handler = () => setOpen(true);
     window.addEventListener("open-prevente", handler);
+    // Open if arriving with #billetterie hash
+    if (window.location.hash === "#billetterie") {
+      setTimeout(() => setOpen(true), 600);
+    }
     return () => window.removeEventListener("open-prevente", handler);
   }, [highlight]);
 

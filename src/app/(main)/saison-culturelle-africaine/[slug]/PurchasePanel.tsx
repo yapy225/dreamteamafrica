@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Loader2, Minus, Plus, X } from "lucide-react";
 
 interface PurchasePanelProps {
@@ -209,7 +210,7 @@ export default function PurchasePanel({
   /* ── don't render in the DOM when fully closed ───────── */
   if (!open && !visible) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:py-4">
       {/* backdrop */}
       <div
@@ -382,7 +383,7 @@ export default function PurchasePanel({
           </div>
 
           {/* installments selector — Culture pour Tous */}
-          {tier.price > 0 && total >= 15 && (
+          {tier.price > 5 && (
             <div>
               <label className="mb-2 block text-sm font-medium text-dta-char">
                 Mode de paiement
@@ -485,6 +486,7 @@ export default function PurchasePanel({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

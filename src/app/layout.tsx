@@ -80,6 +80,8 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <head>
+        <link rel="preconnect" href="https://dreamteamafricamedia.b-cdn.net" />
+        <link rel="dns-prefetch" href="https://dreamteamafricamedia.b-cdn.net" />
         {/* Google Consent Mode v2 — default denied before user choice */}
         <Script id="consent-default" strategy="beforeInteractive">{`
           window.dataLayer = window.dataLayer || [];
@@ -120,7 +122,7 @@ export default function RootLayout({
           fbq('set', 'autoConfig', true, '${FB_PIXEL_ID}');
         `}</Script>
         <noscript>
-          <img height="1" width="1" style={{display: "none"}}
+          <img height="1" width="1" style={{display: "none"}} alt=""
             src={`https://www.facebook.com/tr?id=${FB_PIXEL_ID}&ev=PageView&noscript=1`}
           />
         </noscript>

@@ -35,11 +35,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!event) return { title: "Événement introuvable" };
   const eventDate = new Date(event.date);
   const dateStr = eventDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
-  const description = `${event.title} le ${dateStr} à ${event.venue}, Paris. ${event.description.slice(0, 100).trim()}… Réservez vos places.`;
+  const rawDesc = `${event.title} le ${dateStr} à ${event.venue}, Paris. ${event.description.slice(0, 120).trim()}. Réservez vos places.`;
+  const description = rawDesc.length > 155 ? rawDesc.slice(0, rawDesc.lastIndexOf(" ", 155)) + "…" : rawDesc;
   const altText = `${event.title} — ${event.venue}, ${dateStr}`;
   return {
     title: `${event.title} — Saison Culturelle Africaine 2026`,
-    description: description.slice(0, 160),
+    description,
     keywords: [
       event.title,
       "événement africain Paris",
@@ -54,15 +55,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     ],
     openGraph: {
       title: event.title,
-      description: description.slice(0, 160),
-      type: "website",
+      description,
+      type: "article",
       url: `${siteUrl}/saison-culturelle-africaine/${slug}`,
       ...(event.coverImage && { images: [{ url: event.coverImage, width: 1200, height: 630, alt: altText }] }),
     },
     twitter: {
       card: "summary_large_image",
       title: event.title,
-      description: description.slice(0, 160),
+      description,
       ...(event.coverImage && { images: [event.coverImage] }),
     },
     alternates: {
@@ -175,41 +176,43 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           validFrom: event.createdAt ? event.createdAt.toISOString() : "2026-01-01T00:00:00Z",
           availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
         }
-      : {
-          "@type": "AggregateOffer",
-          lowPrice: 5,
-          highPrice: Math.max(event.priceEarly, event.priceStd, event.priceVip),
-          offerCount: (customTiers?.length || 0) + 1,
-          priceCurrency: "EUR",
-          url: eventUrl,
-          validFrom: event.createdAt ? event.createdAt.toISOString() : "2026-01-01T00:00:00Z",
-          availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
-          offers: [
-            {
-              "@type": "Offer",
-              name: "Culture pour Tous",
-              description: "Réservez dès 5€ et payez à votre rythme",
-              price: 5,
-              priceCurrency: "EUR",
-              url: eventUrl,
-              availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
-            },
-            ...((customTiers?.length ?? 0) > 0
-              ? (customTiers ?? []).map((t: { id: string; name: string; price: number }) => ({
-                  "@type": "Offer" as const,
-                  name: t.name,
-                  price: t.price,
-                  priceCurrency: "EUR",
-                  url: eventUrl,
-                  availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
-                }))
-              : [
-                  { "@type": "Offer", name: "Early Bird", price: event.priceEarly, priceCurrency: "EUR", url: eventUrl },
-                  { "@type": "Offer", name: "Standard", price: event.priceStd, priceCurrency: "EUR", url: eventUrl },
-                  { "@type": "Offer", name: "VIP", price: event.priceVip, priceCurrency: "EUR", url: eventUrl },
-                ]),
-          ],
-        },
+      : (() => {
+          const tierAvailability = (tierId: string, tierQuota?: number | null) => {
+            if (soldOut) return "https://schema.org/SoldOut";
+            if (tierQuota != null && tierQuota > 0) {
+              const sold = (soldByTier[tierId] ?? 0) + ((customTiers ?? []).find((t) => t.id === tierId)?.soldOffset ?? 0);
+              return sold >= tierQuota ? "https://schema.org/SoldOut" : "https://schema.org/InStock";
+            }
+            return "https://schema.org/InStock";
+          };
+          const tierOffers = (customTiers?.length ?? 0) > 0
+            ? (customTiers ?? []).map((t) => ({
+                "@type": "Offer" as const,
+                name: t.name,
+                price: t.price,
+                priceCurrency: "EUR",
+                url: eventUrl,
+                availability: tierAvailability(t.id, t.quota),
+              }))
+            : [
+                { "@type": "Offer" as const, name: "Early Bird", price: event.priceEarly, priceCurrency: "EUR", url: eventUrl, availability: tierAvailability("EARLY_BIRD") },
+                { "@type": "Offer" as const, name: "Standard", price: event.priceStd, priceCurrency: "EUR", url: eventUrl, availability: tierAvailability("STANDARD") },
+                { "@type": "Offer" as const, name: "VIP", price: event.priceVip, priceCurrency: "EUR", url: eventUrl, availability: tierAvailability("VIP") },
+              ];
+          const availablePrices = tierOffers.filter((o) => o.availability === "https://schema.org/InStock").map((o) => o.price);
+          const lowestAvailable = availablePrices.length > 0 ? Math.min(...availablePrices) : Math.min(...tierOffers.map((o) => o.price));
+          return {
+            "@type": "AggregateOffer",
+            lowPrice: lowestAvailable,
+            highPrice: Math.max(...tierOffers.map((o) => o.price)),
+            offerCount: tierOffers.length,
+            priceCurrency: "EUR",
+            url: eventUrl,
+            validFrom: event.createdAt ? event.createdAt.toISOString() : "2026-01-01T00:00:00Z",
+            availability: soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+            offers: tierOffers,
+          };
+        })(),
     organizer: {
       "@type": "Organization",
       name: "Dream Team Africa",

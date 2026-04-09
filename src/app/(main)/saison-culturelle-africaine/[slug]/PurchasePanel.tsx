@@ -251,7 +251,7 @@ export default function PurchasePanel({
         {/* scrollable body */}
         <form
           onSubmit={handleSubmit}
-          className="max-h-[80vh] space-y-5 overflow-y-auto px-5 py-5"
+          className="max-h-[90vh] space-y-4 overflow-y-auto px-5 py-4 pb-safe"
         >
           {/* error */}
           {error && (

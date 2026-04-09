@@ -211,7 +211,7 @@ export default function PurchasePanel({
   if (!open && !visible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:py-4">
       {/* backdrop */}
       <div
         className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${
@@ -223,7 +223,7 @@ export default function PurchasePanel({
 
       {/* panel */}
       <div
-        className={`relative z-10 w-full max-w-lg transform rounded-t-xl bg-white shadow-xl transition-transform duration-300 ease-out ${
+        className={`relative z-10 w-full max-w-lg transform rounded-t-xl bg-white shadow-xl transition-transform duration-300 ease-out sm:rounded-xl ${
           visible ? "translate-y-0" : "translate-y-full"
         }`}
         role="dialog"
@@ -251,7 +251,7 @@ export default function PurchasePanel({
         {/* scrollable body */}
         <form
           onSubmit={handleSubmit}
-          className="max-h-[80vh] space-y-5 overflow-y-auto px-5 py-5 sm:max-h-[85vh]"
+          className="max-h-[80vh] space-y-5 overflow-y-auto px-5 py-5"
         >
           {/* error */}
           {error && (
@@ -383,7 +383,7 @@ export default function PurchasePanel({
           </div>
 
           {/* installments selector — Culture pour Tous */}
-          {tier.price > 0 && total >= 10 && (
+          {tier.price > 0 && total >= 15 && (
             <div>
               <label className="mb-2 block text-sm font-medium text-dta-char">
                 Mode de paiement

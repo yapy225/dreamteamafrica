@@ -13,7 +13,6 @@ export async function POST(request: Request) {
       code: code.trim().toUpperCase(),
       active: true,
       limit: 1,
-      expand: ["data.coupon"],
     });
 
     const promo = promotionCodes.data[0];
@@ -29,8 +28,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Ce code promo a expiré" }, { status: 410 });
     }
 
+    // Fetch the coupon details — in newer API versions coupon ID is nested in promo.promotion
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const coupon = (promo as any).coupon as { name?: string; amount_off?: number; percent_off?: number };
+    const promoAny = promo as any;
+    const couponId: string = typeof promoAny.coupon === "string"
+      ? promoAny.coupon
+      : promoAny.promotion?.coupon || promoAny.coupon?.id;
+
+    const coupon = await stripe.coupons.retrieve(couponId);
 
     return NextResponse.json({
       id: promo.id,

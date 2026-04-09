@@ -14,14 +14,17 @@ export default function BookNowButton() {
 
   useEffect(() => {
     if (!isEventPage) { setVisible(true); return; }
-    const section = document.getElementById("billetterie");
-    if (!section) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setVisible(!entry.isIntersecting),
-      { rootMargin: "0px 0px 200px 0px", threshold: 0 },
-    );
-    observer.observe(section);
-    return () => observer.disconnect();
+    const check = () => {
+      const section = document.getElementById("billetterie");
+      if (!section) { setVisible(true); return; }
+      const rect = section.getBoundingClientRect();
+      // Hide when section top is within 300px of viewport bottom (approaching)
+      // or when section is already in/above the viewport
+      setVisible(rect.top > window.innerHeight + 100);
+    };
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    return () => window.removeEventListener("scroll", check);
   }, [isEventPage]);
 
   if (!visible) return null;

@@ -10,12 +10,13 @@ export type MonthlyRevenue = {
   tickets: number;
   ticketsStripe: number;
   ticketsHorsStripe: number;
+  ticketsCPT: number;
   exposants: number;
   total: number;
 };
 
 export type TodayStats = {
-  tickets: { count: number; revenue: number; stripe: number; horsStripe: number };
+  tickets: { count: number; revenue: number; stripe: number; horsStripe: number; cpt: number; cptCount: number };
   exposants: { count: number; revenue: number };
   total: number;
   hourly: Array<{ hour: string; total: number }>;
@@ -28,6 +29,7 @@ export type RevenueSummary = {
     tickets: number;
     ticketsStripe: number;
     ticketsHorsStripe: number;
+    ticketsCPT: number;
     exposants: number;
     total: number;
   };
@@ -54,7 +56,7 @@ export async function getRevenueData(): Promise<RevenueSummary> {
     // Revenus billetterie
     prisma.ticket.findMany({
       where: { purchasedAt: { gte: startDate } },
-      select: { price: true, purchasedAt: true, stripeSessionId: true },
+      select: { price: true, purchasedAt: true, stripeSessionId: true, installments: true, totalPaid: true },
     }),
     // Revenus exposants (paiements enregistrés)
     prisma.exhibitorPayment.findMany({
@@ -83,6 +85,9 @@ export async function getRevenueData(): Promise<RevenueSummary> {
   const isStripeTicket = (t: { stripeSessionId: string | null }) =>
     t.stripeSessionId != null && t.stripeSessionId.startsWith("cs_");
 
+  // Helper: un billet est "Culture pour Tous" s'il a installments > 1
+  const isCPT = (t: { installments: number }) => t.installments > 1;
+
   const monthly: MonthlyRevenue[] = buckets.map((bucket) => {
     const bucketTickets = tickets.filter(
       (t) => t.purchasedAt >= bucket.start && t.purchasedAt < bucket.end,
@@ -92,6 +97,9 @@ export async function getRevenueData(): Promise<RevenueSummary> {
       .filter(isStripeTicket)
       .reduce((sum, t) => sum + t.price, 0);
     const ticketHorsStripe = ticketRev - ticketStripe;
+    const ticketCPT = bucketTickets
+      .filter(isCPT)
+      .reduce((sum, t) => sum + t.totalPaid, 0);
 
     const exposantRev = allExposantPayments
       .filter((p) => p.paidAt >= bucket.start && p.paidAt < bucket.end)
@@ -102,6 +110,7 @@ export async function getRevenueData(): Promise<RevenueSummary> {
       tickets: Math.round(ticketRev * 100) / 100,
       ticketsStripe: Math.round(ticketStripe * 100) / 100,
       ticketsHorsStripe: Math.round(ticketHorsStripe * 100) / 100,
+      ticketsCPT: Math.round(ticketCPT * 100) / 100,
       exposants: Math.round(exposantRev * 100) / 100,
       total: Math.round((ticketRev + exposantRev) * 100) / 100,
     };
@@ -112,10 +121,11 @@ export async function getRevenueData(): Promise<RevenueSummary> {
       tickets: acc.tickets + m.tickets,
       ticketsStripe: acc.ticketsStripe + m.ticketsStripe,
       ticketsHorsStripe: acc.ticketsHorsStripe + m.ticketsHorsStripe,
+      ticketsCPT: acc.ticketsCPT + m.ticketsCPT,
       exposants: acc.exposants + m.exposants,
       total: acc.total + m.total,
     }),
-    { tickets: 0, ticketsStripe: 0, ticketsHorsStripe: 0, exposants: 0, total: 0 },
+    { tickets: 0, ticketsStripe: 0, ticketsHorsStripe: 0, ticketsCPT: 0, exposants: 0, total: 0 },
   );
 
   // Stats du jour
@@ -126,6 +136,8 @@ export async function getRevenueData(): Promise<RevenueSummary> {
   const todayTicketRev = todayTickets.reduce((s, t) => s + t.price, 0);
   const todayTicketStripe = todayTickets.filter(isStripeTicket).reduce((s, t) => s + t.price, 0);
   const todayTicketHorsStripe = todayTicketRev - todayTicketStripe;
+  const todayCPT = todayTickets.filter(isCPT);
+  const todayCPTRev = todayCPT.reduce((s, t) => s + t.totalPaid, 0);
   const todayExposantRev = todayExhibitor.reduce((s, p) => s + p.amount, 0);
 
   // Progression heure par heure aujourd'hui
@@ -163,6 +175,8 @@ export async function getRevenueData(): Promise<RevenueSummary> {
       revenue: Math.round(todayTicketRev * 100) / 100,
       stripe: Math.round(todayTicketStripe * 100) / 100,
       horsStripe: Math.round(todayTicketHorsStripe * 100) / 100,
+      cpt: Math.round(todayCPTRev * 100) / 100,
+      cptCount: todayCPT.length,
     },
     exposants: { count: todayExhibitor.length, revenue: Math.round(todayExposantRev * 100) / 100 },
     total: Math.round((todayTicketRev + todayExposantRev) * 100) / 100,

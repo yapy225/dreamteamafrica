@@ -77,17 +77,16 @@ export default function PurchasePanel({
   const [installments, setInstallments] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [rgpd, setRgpd] = useState(false);
 
   /* ── multi-day dates ─────────────────────────────────── */
   const isMultiDay = !!eventEndDate && !fixedVisitDate;
   const days = isMultiDay ? getDaysBetween(eventDate, eventEndDate!) : [];
 
-  /* ── animation: delay the translate so the backdrop fades in first ── */
+  /* ── animation: delay so the initial state is painted before transition ── */
   useEffect(() => {
     if (open) {
-      // allow a frame so the initial translate-y-full is painted
-      requestAnimationFrame(() => setVisible(true));
+      const timeout = setTimeout(() => setVisible(true), 20);
+      return () => clearTimeout(timeout);
     } else {
       setVisible(false);
     }
@@ -223,8 +222,8 @@ export default function PurchasePanel({
 
       {/* panel */}
       <div
-        className={`relative z-10 w-full max-w-lg transform rounded-t-xl bg-white shadow-xl transition-all duration-300 ease-out sm:rounded-xl ${
-          visible ? "translate-y-0 sm:translate-y-0 opacity-100" : "translate-y-full sm:translate-y-4 opacity-0 sm:opacity-0"
+        className={`relative z-10 w-full max-w-lg rounded-t-xl bg-white shadow-xl sm:rounded-xl transition-all duration-300 ease-out ${
+          visible ? "translate-y-0 opacity-100" : "translate-y-full sm:translate-y-0 sm:opacity-0 opacity-100"
         }`}
         role="dialog"
         aria-modal="true"

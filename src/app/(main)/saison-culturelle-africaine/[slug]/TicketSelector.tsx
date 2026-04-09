@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PurchasePanel from "./PurchasePanel";
 
 interface TicketSelectorProps {
@@ -32,6 +32,13 @@ export default function TicketSelector({
   fixedVisitDate,
 }: TicketSelectorProps) {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!highlight) return;
+    const handler = () => setOpen(true);
+    window.addEventListener("open-prevente", handler);
+    return () => window.removeEventListener("open-prevente", handler);
+  }, [highlight]);
 
   return (
     <>

@@ -223,9 +223,10 @@ export default function PurchasePanel({
 
       {/* panel — slide-up mobile, centered modal desktop */}
       <div
-        className={`relative z-10 w-full max-w-lg transform rounded-t-xl bg-white shadow-xl transition-transform duration-300 ease-out sm:rounded-xl sm:max-h-[90vh] ${
+        className={`relative z-10 flex w-full max-w-lg transform flex-col rounded-t-xl bg-white shadow-xl transition-transform duration-300 ease-out sm:rounded-xl ${
           visible ? "translate-y-0 sm:scale-100" : "translate-y-full sm:translate-y-0 sm:scale-95"
         }`}
+        style={{ maxHeight: "min(90vh, 700px)" }}
         role="dialog"
         aria-modal="true"
       >
@@ -251,7 +252,7 @@ export default function PurchasePanel({
         {/* scrollable body */}
         <form
           onSubmit={handleSubmit}
-          className="max-h-[90vh] space-y-4 overflow-y-auto px-5 py-4 pb-safe"
+          className="flex-1 space-y-4 overflow-y-auto px-5 py-4"
         >
           {/* error */}
           {error && (
@@ -429,62 +430,63 @@ export default function PurchasePanel({
             </div>
           )}
 
-          {/* RGPD info — base légale : exécution du contrat (Art. 6.1.b RGPD) */}
-          <p className="text-[10px] leading-relaxed text-dta-char/50">
+
+        </form>
+
+        {/* Fixed bottom — total + submit (always visible) */}
+        <div className="shrink-0 border-t border-dta-sand bg-white px-5 py-4 rounded-b-xl">
+          <div className="space-y-1.5 mb-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-dta-char/70">
+                {quantity} billet{quantity > 1 ? "s" : ""}
+                {tier.price > 0 && <> &times; {formatCurrency(tier.price)}</>}
+              </span>
+              <span className="text-dta-dark">
+                {tier.price === 0 ? "Gratuit" : formatCurrency(installments > 1 ? deposit : total)}
+              </span>
+            </div>
+            {tier.price > 0 && roundedFees > 0 && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-dta-char/50">Frais de gestion (3%)</span>
+                <span className="text-dta-char/50">{formatCurrency(roundedFees)}</span>
+              </div>
+            )}
+            {tier.price > 0 && (
+              <div className="flex items-center justify-between text-sm font-semibold border-t border-dta-sand/50 pt-1.5">
+                <span className="text-dta-dark">Total</span>
+                <span className="font-serif text-lg font-bold text-dta-dark">{formatCurrency(totalWithFees)}</span>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            disabled={!canSubmit || loading}
+            className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-dta-accent-dark disabled:opacity-50"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                {tier.price === 0 ? "Réservation en cours\u2026" : "Redirection\u2026"}
+              </>
+            ) : tier.price === 0 ? (
+              "Réserver gratuitement"
+            ) : (
+              installments > 1
+                ? `Payer l'acompte — ${formatCurrency(totalWithFees)}`
+                : `Passer au paiement — ${formatCurrency(totalWithFees)}`
+            )}
+          </button>
+
+          <p className="mt-2 text-center text-[10px] leading-relaxed text-dta-char/50">
             En réservant, vous acceptez nos{" "}
             <a href="/conditions-generales" target="_blank" className="underline hover:text-dta-accent">CGV</a>{" "}
             et notre{" "}
             <a href="/politique-de-confidentialite" target="_blank" className="underline hover:text-dta-accent">
               politique de confidentialité
-            </a>. Vos données sont traitées pour la gestion de votre réservation.
+            </a>.
           </p>
-
-          {/* total + fees + submit */}
-          <div className="border-t border-dta-sand pt-4">
-            <div className="space-y-1.5 mb-3">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-dta-char/70">
-                  {quantity} billet{quantity > 1 ? "s" : ""}
-                  {tier.price > 0 && <> &times; {formatCurrency(tier.price)}</>}
-                </span>
-                <span className="text-dta-dark">
-                  {tier.price === 0 ? "Gratuit" : formatCurrency(installments > 1 ? deposit : total)}
-                </span>
-              </div>
-              {tier.price > 0 && roundedFees > 0 && (
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-dta-char/50">Frais de gestion (3%)</span>
-                  <span className="text-dta-char/50">{formatCurrency(roundedFees)}</span>
-                </div>
-              )}
-              {tier.price > 0 && (
-                <div className="flex items-center justify-between text-sm font-semibold border-t border-dta-sand/50 pt-1.5">
-                  <span className="text-dta-dark">Total</span>
-                  <span className="font-serif text-lg font-bold text-dta-dark">{formatCurrency(totalWithFees)}</span>
-                </div>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={!canSubmit || loading}
-              className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-dta-accent-dark disabled:opacity-50"
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  {tier.price === 0 ? "Réservation en cours\u2026" : "Redirection\u2026"}
-                </>
-              ) : tier.price === 0 ? (
-                "Réserver gratuitement"
-              ) : (
-                installments > 1
-                  ? `Payer l'acompte — ${formatCurrency(totalWithFees)}`
-                  : `Passer au paiement — ${formatCurrency(totalWithFees)}`
-              )}
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );

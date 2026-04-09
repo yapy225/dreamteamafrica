@@ -383,7 +383,7 @@ export default function PurchasePanel({
           </div>
 
           {/* installments selector — Culture pour Tous */}
-          {tier.price > 0 && total > 10 && (
+          {tier.price > 0 && total >= 10 && (
             <div>
               <label className="mb-2 block text-sm font-medium text-dta-char">
                 Mode de paiement

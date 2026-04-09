@@ -18,7 +18,7 @@ export default function BookNowButton() {
     if (!section) return;
     const observer = new IntersectionObserver(
       ([entry]) => setVisible(!entry.isIntersecting),
-      { threshold: 0.1 },
+      { rootMargin: "0px 0px 200px 0px", threshold: 0 },
     );
     observer.observe(section);
     return () => observer.disconnect();

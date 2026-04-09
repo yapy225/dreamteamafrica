@@ -211,7 +211,7 @@ export default function PurchasePanel({
   if (!open && !visible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
       {/* backdrop */}
       <div
         className={`absolute inset-0 bg-black/50 transition-opacity duration-300 ${
@@ -221,10 +221,10 @@ export default function PurchasePanel({
         aria-hidden="true"
       />
 
-      {/* panel */}
+      {/* panel — slide-up mobile, centered modal desktop */}
       <div
-        className={`relative z-10 w-full max-w-lg transform rounded-t-xl bg-white shadow-xl transition-transform duration-300 ease-out ${
-          visible ? "translate-y-0" : "translate-y-full"
+        className={`relative z-10 w-full max-w-lg transform rounded-t-xl bg-white shadow-xl transition-transform duration-300 ease-out sm:rounded-xl sm:max-h-[90vh] ${
+          visible ? "translate-y-0 sm:scale-100" : "translate-y-full sm:translate-y-0 sm:scale-95"
         }`}
         role="dialog"
         aria-modal="true"

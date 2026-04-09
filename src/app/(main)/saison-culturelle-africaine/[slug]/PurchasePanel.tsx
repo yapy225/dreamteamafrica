@@ -251,6 +251,7 @@ export default function PurchasePanel({
 
         {/* scrollable body */}
         <form
+          id="purchase-form"
           onSubmit={handleSubmit}
           className="flex-1 space-y-4 overflow-y-auto px-5 py-4"
         >
@@ -460,7 +461,8 @@ export default function PurchasePanel({
           </div>
 
           <button
-            onClick={handleSubmit}
+            type="submit"
+            form="purchase-form"
             disabled={!canSubmit || loading}
             className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-dta-accent-dark disabled:opacity-50"
           >

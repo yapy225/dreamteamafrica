@@ -134,8 +134,7 @@ export default function PurchasePanel({
     form.firstName.trim() &&
     form.lastName.trim() &&
     form.email.trim() &&
-    form.phone.trim() &&
-    rgpd;
+    form.phone.trim();
 
   /* ── submit ──────────────────────────────────────────── */
   const handleSubmit = async (e: React.FormEvent) => {
@@ -430,21 +429,15 @@ export default function PurchasePanel({
             </div>
           )}
 
-          {/* RGPD consent */}
-          <label className="flex items-start gap-2.5 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={rgpd}
-              onChange={(e) => setRgpd(e.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-dta-sand text-dta-accent accent-dta-accent"
-            />
-            <span className="text-[11px] leading-relaxed text-dta-char/60">
-              J&apos;accepte que mes données soient traitées pour la gestion de ma réservation conformément à la{" "}
-              <a href="/politique-de-confidentialite" target="_blank" className="underline text-dta-accent">
-                politique de confidentialité
-              </a>. Je peux exercer mes droits (accès, rectification, suppression) à tout moment.
-            </span>
-          </label>
+          {/* RGPD info — base légale : exécution du contrat (Art. 6.1.b RGPD) */}
+          <p className="text-[10px] leading-relaxed text-dta-char/50">
+            En réservant, vous acceptez nos{" "}
+            <a href="/conditions-generales" target="_blank" className="underline hover:text-dta-accent">CGV</a>{" "}
+            et notre{" "}
+            <a href="/politique-de-confidentialite" target="_blank" className="underline hover:text-dta-accent">
+              politique de confidentialité
+            </a>. Vos données sont traitées pour la gestion de votre réservation.
+          </p>
 
           {/* total + fees + submit */}
           <div className="border-t border-dta-sand pt-4">

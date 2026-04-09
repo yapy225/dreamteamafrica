@@ -48,8 +48,11 @@ export default function ReservationForm() {
   const totalPrice = unitTotal * stands;
   const fullPrice = unitFull * stands;
   const savings = fullPrice - totalPrice;
-  const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalPrice);
-  const remainingBalance = totalPrice - deposit;
+  const INSTALLMENT_FEE_RATE = 0.05;
+  const installmentFees = installments > 1 ? Math.round(totalPrice * INSTALLMENT_FEE_RATE * 100) / 100 : 0;
+  const totalWithFees = totalPrice + installmentFees;
+  const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalWithFees);
+  const remainingBalance = totalWithFees - deposit;
   const installmentAmount =
     installments > 1 && remainingBalance > 0
       ? Math.ceil((remainingBalance / (installments - 1)) * 100) / 100
@@ -426,7 +429,8 @@ export default function ReservationForm() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {Array.from({ length: MAX_INSTALLMENTS - 1 }, (_, i) => i + 2).map((n) => {
-                    const monthly = Math.ceil((remainingBalance / (n - 1)) * 100) / 100;
+                    const rb = totalWithFees - Math.min(DEPOSIT_AMOUNT * stands, totalWithFees);
+                    const monthly = Math.ceil((rb / (n - 1)) * 100) / 100;
                     return (
                       <button
                         key={n}
@@ -471,9 +475,15 @@ export default function ReservationForm() {
                         </div>
                       );
                     })}
+                    {installmentFees > 0 && (
+                      <div className="mt-1 flex items-center justify-between text-xs">
+                        <span className="text-dta-taupe">Frais de gestion (5%)</span>
+                        <span className="text-dta-taupe">{fmt.format(installmentFees)}</span>
+                      </div>
+                    )}
                     <div className="mt-2 flex items-center justify-between border-t border-dta-sand pt-2 text-sm">
                       <span className="font-medium text-dta-char">Total</span>
-                      <span className="font-bold text-dta-dark">{fmt.format(totalPrice)}</span>
+                      <span className="font-bold text-dta-dark">{fmt.format(totalWithFees)}</span>
                     </div>
                   </div>
                 </div>

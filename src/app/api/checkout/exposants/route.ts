@@ -93,9 +93,13 @@ export async function POST(request: Request) {
     }
 
     // ── Payment calculation ──
+    // 5% management fees on installment payments
+    const INSTALLMENT_FEE_RATE = 0.05;
+    const installmentFees = nbInstallments > 1 ? Math.round(totalPrice * INSTALLMENT_FEE_RATE * 100) / 100 : 0;
+    const totalWithFees = totalPrice + installmentFees;
     // Deposit is paid upfront, remaining balance in N monthly installments
-    const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalPrice);
-    const remainingBalance = totalPrice - deposit;
+    const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalWithFees);
+    const remainingBalance = totalWithFees - deposit;
     const installmentAmount = nbInstallments > 1 && remainingBalance > 0
       ? Math.ceil((remainingBalance / (nbInstallments - 1)) * 100) / 100
       : 0;
@@ -104,9 +108,10 @@ export async function POST(request: Request) {
     const selectedEvents = EXHIBITOR_EVENTS.filter((e) => eventIds.includes(e.id));
     const eventNames = selectedEvents.map((e) => e.title).join(", ");
     const standsLabel = stands > 1 ? ` × ${stands} stands` : "";
-    const description = `${selectedPack.name}${standsLabel} — ${eventNames} (${totalDays} jour${totalDays > 1 ? "s" : ""})`;
+    const feesLabel = installmentFees > 0 ? ` (dont ${installmentFees} € de frais de gestion)` : "";
+    const description = `${selectedPack.name}${standsLabel} — ${eventNames} (${totalDays} jour${totalDays > 1 ? "s" : ""})${feesLabel}`;
 
-    // Create booking in DB
+    // Create booking in DB (totalPrice includes fees for installment payments)
     const booking = await prisma.exhibitorBooking.create({
       data: {
         userId: session.user.id,
@@ -118,7 +123,7 @@ export async function POST(request: Request) {
         pack: effectivePackId,
         events: eventIds,
         totalDays,
-        totalPrice,
+        totalPrice: totalWithFees,
         stands,
         installments: nbInstallments,
         installmentAmount: nbInstallments === 1 ? totalPrice : installmentAmount,
@@ -197,7 +202,7 @@ export async function POST(request: Request) {
         eventTitle: eventNames,
         packName: selectedPack.name,
         totalDays,
-        totalPrice,
+        totalPrice: totalWithFees,
         installments: nbInstallments,
         installmentAmount: nbInstallments === 1 ? totalPrice : installmentAmount,
         bookingId: booking.id,
@@ -223,7 +228,7 @@ export async function POST(request: Request) {
       friction === "card_only" ? ["card"] : ["card", "paypal"];
 
     // Montant restant après crédit de l'acompte lead
-    const amountDue = totalPrice - leadDepositCredit;
+    const amountDue = totalWithFees - leadDepositCredit;
 
     // Si le lead a déjà payé la totalité (cas rare: prix = 50€)
     if (amountDue <= 0) {
@@ -282,7 +287,7 @@ export async function POST(request: Request) {
         // Le webhook exhibitor_early_payment ou le checkout normal prendra le relais
         // Pour l'instant, redirigeons vers la page de confirmation avec statut PARTIAL
         // Le solde sera géré par les mensualités automatiques configurées par le webhook
-        const adjustedRemainingBalance = totalPrice - leadDepositCredit;
+        const adjustedRemainingBalance = totalWithFees - leadDepositCredit;
         const adjustedInstallmentAmount = nbInstallments > 1 && adjustedRemainingBalance > 0
           ? Math.ceil((adjustedRemainingBalance / (nbInstallments - 1)) * 100) / 100
           : 0;
@@ -348,7 +353,7 @@ export async function POST(request: Request) {
               unit_amount: Math.round(deposit * 100),
               product_data: {
                 name: `Acompte de réservation${standsLabel} — ${selectedPack.name}`,
-                description: `Acompte ${deposit} € sur ${totalPrice} € total. Solde restant (${remainingBalance} €) en ${nbInstallments - 1} mensualité${nbInstallments - 1 > 1 ? "s" : ""}.`,
+                description: `Acompte ${deposit} € sur ${totalWithFees} € total${feesLabel}. Solde restant (${remainingBalance} €) en ${nbInstallments - 1} mensualité${nbInstallments - 1 > 1 ? "s" : ""}.`,
               },
             },
             quantity: 1,

@@ -911,6 +911,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                   answer: `Vous pouvez acheter vos billets directement en ligne sur dreamteamafrica.com. Le paiement est sécurisé par Stripe. Vous recevrez votre billet par e-mail et WhatsApp avec un QR code à présenter à l'entrée.`,
                 },
               ]),
+          ...(!isFreeEvent
+            ? [
+                {
+                  question: "Qu'est-ce que Culture pour Tous ?",
+                  answer: `Culture pour Tous est un programme qui vous permet de réserver votre billet pour ${event.title} avec seulement 5 €. Vous recevez immédiatement votre billet avec QR code, puis vous complétez le paiement à votre rythme (minimum 1 € par versement). Pas de prélèvement automatique, pas de vérification de solvabilité. En savoir plus sur dreamteamafrica.com/culture-pour-tous.`,
+                },
+              ]
+            : []),
           {
             question: "Qui organise la Saison Culturelle Africaine ?",
             answer: "La Saison Culturelle Africaine est organisée par Dream Team Africa, association loi 1901 dédiée à la promotion de la culture africaine à Paris. 7 événements sont programmés d'avril à décembre 2026.",

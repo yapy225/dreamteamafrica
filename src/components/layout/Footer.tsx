@@ -6,6 +6,7 @@ const footerSections = [
     title: "Découvrir",
     links: [
       { href: "/saison-culturelle-africaine", label: "Saison Culturelle" },
+      { href: "/culture-pour-tous", label: "Culture pour Tous — dès 5€" },
       { href: "/danse-zaouli-paris", label: "Danse Zaouli" },
       { href: "/lafropeen", label: "L'Afropéen" },
       { href: "/lofficiel-dafrique", label: "L'Officiel d'Afrique" },
@@ -53,6 +54,17 @@ const footerSections = [
       { href: "/exposants", label: "Tous les packs exposants" },
       { href: "/auth/signup?role=artisan", label: "Devenir artisan" },
       { href: "/dashboard", label: "Espace pro" },
+    ],
+  },
+  {
+    title: "Culture pour Tous",
+    links: [
+      { href: "/culture-pour-tous", label: "Comment ça marche" },
+      { href: "/reserver-sans-payer-tout-de-suite", label: "Réserver sans tout payer" },
+      { href: "/billet-en-plusieurs-fois-evenement", label: "Billet en plusieurs fois" },
+      { href: "/culture-accessible-paris", label: "Culture accessible à Paris" },
+      { href: "/billet-pas-cher-concert", label: "Billet pas cher" },
+      { href: "/sortir-pas-cher-paris", label: "Sortir pas cher à Paris" },
     ],
   },
 ];

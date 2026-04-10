@@ -203,7 +203,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
           const lowestAvailable = availablePrices.length > 0 ? Math.min(...availablePrices) : Math.min(...tierOffers.map((o) => o.price));
           return {
             "@type": "AggregateOffer",
-            lowPrice: lowestAvailable,
+            lowPrice: lowestAvailable > 0 ? 5 : 0, // Culture pour Tous: dès 5€
             highPrice: Math.max(...tierOffers.map((o) => o.price)),
             offerCount: tierOffers.length,
             priceCurrency: "EUR",
@@ -814,8 +814,22 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
       {/* G — Cross-links */}
       <div className="bg-white py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-            {/* Journal */}
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Culture pour Tous */}
+            <div className="rounded-[var(--radius-card)] border border-green-200 bg-green-50/50 p-5">
+              <div className="mb-2 flex items-center gap-2">
+                <Ticket size={16} className="text-green-600" />
+                <h3 className="text-sm font-bold text-green-800">Culture pour Tous</h3>
+              </div>
+              <p className="text-xs text-green-700/70">
+                R&eacute;servez d&egrave;s 5&nbsp;&euro; et payez &agrave; votre rythme.
+              </p>
+              <Link href="/culture-pour-tous" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-green-700">
+                En savoir plus <ArrowRight size={12} />
+              </Link>
+            </div>
+
+            {/* Billetterie */}
             <div className="rounded-[var(--radius-card)] border border-dta-sand/50 p-5">
               <div className="mb-2 flex items-center gap-2">
                 <Ticket size={16} className="text-dta-accent" />

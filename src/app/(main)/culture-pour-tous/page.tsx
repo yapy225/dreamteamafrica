@@ -1,5 +1,10 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Metadata } from "next";
+import { prisma } from "@/lib/db";
+import { formatPrice } from "@/lib/utils";
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Culture pour Tous — Réservez dès 5€ et payez à votre rythme | Dream Team Africa",
@@ -34,6 +39,30 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://dreamteamafrica.com/culture-pour-tous",
   },
+};
+
+const howToJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: "Comment réserver un billet dès 5€ avec Culture pour Tous",
+  description: "Réservez votre place pour un événement culturel africain à Paris dès 5€ et payez à votre rythme.",
+  totalTime: "PT2M",
+  estimatedCost: { "@type": "MonetaryAmount", currency: "EUR", value: "5" },
+  step: [
+    { "@type": "HowToStep", name: "Choisir un événement", text: "Rendez-vous sur la page de l'événement et sélectionnez votre formule." },
+    { "@type": "HowToStep", name: "Payer l'acompte de 5€", text: "Cliquez sur 'Culture pour Tous' et payez 5€. Vous recevez immédiatement votre billet avec QR code." },
+    { "@type": "HowToStep", name: "Recharger à votre rythme", text: "Depuis votre espace personnel, rechargez quand vous voulez (minimum 1€ par versement)." },
+    { "@type": "HowToStep", name: "Profiter de l'événement", text: "Présentez votre QR code à l'entrée. Le complément éventuel est payable sur place." },
+  ],
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Accueil", item: "https://dreamteamafrica.com" },
+    { "@type": "ListItem", position: 2, name: "Culture pour Tous", item: "https://dreamteamafrica.com/culture-pour-tous" },
+  ],
 };
 
 const jsonLd = {
@@ -95,12 +124,30 @@ const jsonLd = {
   },
 };
 
-export default function CulturePourTousPage() {
+export default async function CulturePourTousPage() {
+  // Compteur global Culture pour Tous (billets en plusieurs fois)
+  const [cptCount, events] = await Promise.all([
+    prisma.ticket.count({ where: { installments: { gt: 1 } } }),
+    prisma.event.findMany({
+      where: { published: true, date: { gte: new Date() } },
+      orderBy: { date: "asc" },
+      select: { id: true, title: true, slug: true, coverImage: true, venue: true, date: true, tiers: true, priceStd: true },
+    }),
+  ]);
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
@@ -118,6 +165,15 @@ export default function CulturePourTousPage() {
               Réservez votre place dès 5&nbsp;&euro; et payez comme vous pouvez.
             </strong>
           </p>
+          {cptCount > 0 && (
+            <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-green-50 px-5 py-2.5 text-sm font-medium text-green-700">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500" />
+              </span>
+              {cptCount} personne{cptCount > 1 ? "s" : ""} {cptCount > 1 ? "ont" : "a"} déjà réservé avec Culture pour Tous
+            </p>
+          )}
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
               href="/saison-culturelle-africaine"
@@ -257,6 +313,57 @@ export default function CulturePourTousPage() {
             />
           </div>
         </section>
+
+        {/* ÉVÉNEMENTS DISPONIBLES */}
+        {events.length > 0 && (
+          <section className="mb-14" aria-labelledby="evenements">
+            <h2 id="evenements" className="mb-6 text-center font-serif text-2xl font-bold text-dta-dark">
+              Événements disponibles dès 5&nbsp;&euro;
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {events.map((event) => {
+                const tiers = (event.tiers as Array<{ price: number }>) || [];
+                const lowestPrice = tiers.length > 0
+                  ? Math.min(...tiers.map((t) => t.price).filter((p) => p > 0))
+                  : event.priceStd;
+                const dateStr = new Date(event.date).toLocaleDateString("fr-FR", {
+                  day: "numeric",
+                  month: "short",
+                });
+                return (
+                  <Link
+                    key={event.id}
+                    href={`/culture-pour-tous/${event.slug}`}
+                    className="group overflow-hidden rounded-xl border border-dta-sand bg-white transition-all hover:border-dta-accent hover:shadow-md"
+                  >
+                    {event.coverImage && (
+                      <div className="relative aspect-[16/7]">
+                        <Image
+                          src={event.coverImage}
+                          alt={event.title}
+                          fill
+                          className="object-cover transition-transform group-hover:scale-105"
+                          sizes="(max-width: 640px) 100vw, 50vw"
+                        />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <h3 className="font-serif text-base font-bold text-dta-dark group-hover:text-dta-accent">
+                        {event.title}
+                      </h3>
+                      <p className="mt-1 text-xs text-dta-char/60">
+                        {dateStr} · {event.venue}
+                      </p>
+                      <p className="mt-2 text-sm font-semibold text-green-700">
+                        dès 5&nbsp;&euro; <span className="font-normal text-green-600/70">au lieu de {formatPrice(lowestPrice)}</span>
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* CTA FINAL */}
         <section className="text-center">

@@ -744,17 +744,15 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
             );
           })()}
           {/* Bouton Exposant */}
-          <div className="mx-auto mt-10 max-w-md text-center">
-            <p className="text-sm text-dta-char/70">
+          <div className="mx-auto mt-10 max-w-[200px] text-center">
+            <p className="mb-3 text-sm text-dta-char/70">
               Vous êtes artisan, créateur ou entrepreneur ?
             </p>
-            <div className="mt-3">
-              <ExposantButton
-                eventName={event.title}
-                className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-dta-accent-dark"
-                size={16}
-              />
-            </div>
+            <ExposantButton
+              eventName={event.title}
+              className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-button)] bg-dta-accent px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-dta-accent-dark"
+              size={14}
+            />
           </div>
         </div>
       </div>

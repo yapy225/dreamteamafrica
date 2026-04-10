@@ -45,10 +45,7 @@ export default function BookNowButton() {
       className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full bg-gradient-to-r from-[#D94F30] to-[#C4704B] px-4 py-2.5 text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl animate-bounce-slow sm:left-6 sm:translate-x-0 sm:px-5 sm:py-3"
     >
       <Ticket className="h-5 w-5" />
-      <span className="flex flex-col items-start leading-tight">
-        <span className="text-sm font-bold">Prévente — 10€</span>
-        <span className="text-xs font-semibold text-green-200">ou dès 5€ · Culture pour Tous</span>
-      </span>
+      <span className="text-sm font-bold">Prévente — 10€</span>
     </button>
   );
 }

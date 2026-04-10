@@ -60,6 +60,14 @@ export default function TicketSelector({
           currency: "EUR",
         }).format(price)}`}
       </button>
+      {price > 0 && (
+        <button
+          onClick={() => { setOpen(true); }}
+          className="mt-2 w-full rounded-[var(--radius-button)] border border-green-600 bg-green-50 px-4 py-2.5 text-xs font-semibold text-green-700 transition-all duration-200 hover:bg-green-100"
+        >
+          ou dès 5&nbsp;&euro; · Culture pour Tous
+        </button>
+      )}
 
       <PurchasePanel
         open={open}

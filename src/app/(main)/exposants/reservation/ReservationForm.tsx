@@ -48,9 +48,9 @@ export default function ReservationForm() {
   const totalPrice = unitTotal * stands;
   const fullPrice = unitFull * stands;
   const savings = fullPrice - totalPrice;
-  const INSTALLMENT_FEE_RATE = 0.05;
-  const installmentFees = installments > 1 ? Math.round(totalPrice * INSTALLMENT_FEE_RATE * 100) / 100 : 0;
-  const totalWithFees = totalPrice + installmentFees;
+  const FEE_RATE = 0.03;
+  const managementFees = Math.round(totalPrice * FEE_RATE * 100) / 100;
+  const totalWithFees = totalPrice + managementFees;
   const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalWithFees);
   const remainingBalance = totalWithFees - deposit;
   const installmentAmount =
@@ -475,10 +475,10 @@ export default function ReservationForm() {
                         </div>
                       );
                     })}
-                    {installmentFees > 0 && (
+                    {managementFees > 0 && (
                       <div className="mt-1 flex items-center justify-between text-xs">
-                        <span className="text-dta-taupe">Frais de gestion (5%)</span>
-                        <span className="text-dta-taupe">{fmt.format(installmentFees)}</span>
+                        <span className="text-dta-taupe">Frais de gestion (3%)</span>
+                        <span className="text-dta-taupe">{fmt.format(managementFees)}</span>
                       </div>
                     )}
                     <div className="mt-2 flex items-center justify-between border-t border-dta-sand pt-2 text-sm">

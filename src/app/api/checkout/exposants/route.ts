@@ -93,10 +93,10 @@ export async function POST(request: Request) {
     }
 
     // ── Payment calculation ──
-    // 5% management fees on installment payments
-    const INSTALLMENT_FEE_RATE = 0.05;
-    const installmentFees = nbInstallments > 1 ? Math.round(totalPrice * INSTALLMENT_FEE_RATE * 100) / 100 : 0;
-    const totalWithFees = totalPrice + installmentFees;
+    // 3% management fees on all payments
+    const FEE_RATE = 0.03;
+    const managementFees = Math.round(totalPrice * FEE_RATE * 100) / 100;
+    const totalWithFees = totalPrice + managementFees;
     // Deposit is paid upfront, remaining balance in N monthly installments
     const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalWithFees);
     const remainingBalance = totalWithFees - deposit;
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
     const selectedEvents = EXHIBITOR_EVENTS.filter((e) => eventIds.includes(e.id));
     const eventNames = selectedEvents.map((e) => e.title).join(", ");
     const standsLabel = stands > 1 ? ` × ${stands} stands` : "";
-    const feesLabel = installmentFees > 0 ? ` (dont ${installmentFees} € de frais de gestion)` : "";
+    const feesLabel = ` (dont ${managementFees} € de frais de gestion)`;
     const description = `${selectedPack.name}${standsLabel} — ${eventNames} (${totalDays} jour${totalDays > 1 ? "s" : ""})${feesLabel}`;
 
     // Create booking in DB (totalPrice includes fees for installment payments)
@@ -243,25 +243,35 @@ export async function POST(request: Request) {
 
     if (nbInstallments === 1) {
       // ── Single full payment (minus lead credit) ──
+      const baseAmount = amountDue - managementFees;
+      const singleLineItems: Array<{ price_data: { currency: string; unit_amount: number; product_data: { name: string; description?: string } }; quantity: number }> = [
+        {
+          price_data: {
+            currency: "eur",
+            unit_amount: Math.round(baseAmount * 100),
+            product_data: {
+              name: `Stand Exposant${standsLabel} — ${selectedPack.name}`,
+              description: leadDepositCredit > 0
+                ? `${description} (${leadDepositCredit} € d'acompte déduit)`
+                : description,
+            },
+          },
+          quantity: 1,
+        },
+        {
+          price_data: {
+            currency: "eur",
+            unit_amount: Math.round(managementFees * 100),
+            product_data: { name: "Frais de gestion (3%)" },
+          },
+          quantity: 1,
+        },
+      ];
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: paymentMethods,
         customer_email: email.trim(),
-        line_items: [
-          {
-            price_data: {
-              currency: "eur",
-              unit_amount: Math.round(amountDue * 100),
-              product_data: {
-                name: `Stand Exposant${standsLabel} — ${selectedPack.name}`,
-                description: leadDepositCredit > 0
-                  ? `${description} (${leadDepositCredit} € d'acompte déduit)`
-                  : description,
-              },
-            },
-            quantity: 1,
-          },
-        ],
+        line_items: singleLineItems,
         metadata: {
           type: "exhibitor",
           bookingId: booking.id,

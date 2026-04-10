@@ -58,6 +58,7 @@ const footerSections = [
   },
   {
     title: "Culture pour Tous",
+    accent: true,
     links: [
       { href: "/culture-pour-tous", label: "Comment ça marche" },
       { href: "/reserver-sans-payer-tout-de-suite", label: "Réserver sans tout payer" },
@@ -94,7 +95,9 @@ export default function Footer() {
           {/* Link sections */}
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h3 className="font-serif text-sm font-semibold uppercase tracking-wider text-dta-dark">
+              <h3 className={`font-serif text-sm font-semibold uppercase tracking-wider ${
+                "accent" in section && section.accent ? "text-green-700" : "text-dta-dark"
+              }`}>
                 {section.title}
               </h3>
               <ul className="mt-4 space-y-2">
@@ -102,7 +105,11 @@ export default function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-dta-char/70 transition-colors duration-200 hover:text-dta-accent"
+                      className={`text-sm transition-colors duration-200 ${
+                        "accent" in section && section.accent
+                          ? "text-green-600/70 hover:text-green-700"
+                          : "text-dta-char/70 hover:text-dta-accent"
+                      }`}
                     >
                       {link.label}
                     </Link>

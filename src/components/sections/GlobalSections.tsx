@@ -5,7 +5,7 @@ import NewsletterSection from "./NewsletterSection";
 import Testimonials from "./Testimonials";
 
 const TESTIMONIAL_SLUGS = [
-  "/saison-culturelle-africaine/festival-autre-culture",
+  "/saison-culturelle-africaine/festival-de-lautre-culture",
 ];
 
 export default function GlobalSections() {

@@ -120,13 +120,14 @@ export const EXHIBITOR_PACKS: ExhibitorPackInfo[] = [
     name: "Pack Restauration 2 jours",
     pricePerDay: 500,
     allEventsPricePerDay: 450,
-    description: "Espace restauration — pour les traiteurs et food entrepreneurs",
+    description: "Espace restauration — pour les traiteurs et food entrepreneurs (dernier stand disponible !)",
     kit: [
       "2 tables",
       "4 chaises",
       "4 badges exposants",
     ],
     highlight: true,
+    soldOut: true,
   },
 ];
 

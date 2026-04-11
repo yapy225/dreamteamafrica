@@ -169,6 +169,32 @@ const testimonialsByEvent: Record<string, { label: string; items: Testimonial[] 
       },
     ],
   },
+  "evasion-paris": {
+    label: "\u00c9vasion Paris \u2014 Soir\u00e9e sur la Seine",
+    items: [
+      {
+        name: "Salom\u00e9 Ndiaye",
+        role: "Consultante",
+        title: "Une soir\u00e9e magique sur la Seine",
+        text: "Naviguer sur la Seine avec de la musique live africaine, un cocktail \u00e0 la main et Paris illumin\u00e9\u2026 C\u2019\u00e9tait un r\u00eave \u00e9veill\u00e9. L\u2019exp\u00e9rience est unique, je n\u2019ai jamais rien v\u00e9cu de pareil \u00e0 Paris.",
+        rating: 5,
+      },
+      {
+        name: "Yannick Obiang",
+        role: "Cadre en finance",
+        title: "Le luxe accessible",
+        text: "J\u2019h\u00e9sitais vu le prix, mais avec Culture pour Tous j\u2019ai r\u00e9serv\u00e9 pour 5\u00a0\u20ac et j\u2019ai pay\u00e9 le reste tranquillement. La soir\u00e9e valait chaque euro. Ambiance chic et d\u00e9contract\u00e9e \u00e0 la fois.",
+        rating: 5,
+      },
+      {
+        name: "Amandine Kourouma",
+        role: "Organisatrice d\u2019\u00e9v\u00e9nements",
+        title: "Un concept brillant",
+        text: "Marier la culture africaine avec une croisi\u00e8re sur la Seine, c\u2019est du g\u00e9nie. La musique, la gastronomie, la vue\u2026 tout \u00e9tait parfait. Dream Team Africa a frapp\u00e9 fort avec \u00c9vasion Paris.",
+        rating: 5,
+      },
+    ],
+  },
   "salon-made-in-africa": {
     label: "Salon Made In Africa",
     items: [

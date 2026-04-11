@@ -2,6 +2,11 @@
 
 import { usePathname } from "next/navigation";
 import NewsletterSection from "./NewsletterSection";
+import Testimonials from "./Testimonials";
+
+const TESTIMONIAL_SLUGS = [
+  "/saison-culturelle-africaine/festival-autre-culture",
+];
 
 export default function GlobalSections() {
   const pathname = usePathname();
@@ -10,6 +15,7 @@ export default function GlobalSections() {
 
   return (
     <>
+      {TESTIMONIAL_SLUGS.some((s) => pathname.startsWith(s)) && <Testimonials />}
       <NewsletterSection />
     </>
   );

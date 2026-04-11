@@ -54,6 +54,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Anti-spam: reject gibberish names (no vowels, too many consecutive consonants, or too long)
+    const hasVowel = /[aeiouyàâéèêëïîôùûüæœ]/i;
+    const tooManyConsonants = /[^aeiouyàâéèêëïîôùûüæœ\s\-'&.]{6,}/i;
+    const nameToCheck = `${firstName} ${lastName || ""}`;
+    if (!hasVowel.test(firstName) || tooManyConsonants.test(nameToCheck) || firstName.length > 50) {
+      return NextResponse.json(
+        { error: "Nom invalide." },
+        { status: 400 },
+      );
+    }
+
+    // Anti-spam: reject disposable/suspicious email patterns
+    const suspiciousEmail = /^[a-z]{8,}@(aol|mail|temp|yopmail|guerrilla)/i;
+    if (suspiciousEmail.test(email.trim())) {
+      return NextResponse.json(
+        { error: "Adresse email non acceptée." },
+        { status: 400 },
+      );
+    }
+
     const trimmedEmail = email.trim().toLowerCase();
     const trimmedFirstName = firstName.trim();
     const trimmedLastName = lastName.trim();

@@ -22,6 +22,15 @@ export async function POST(req: NextRequest) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Adresse email invalide." }, { status: 400 });
     }
+
+    // Anti-spam: reject gibberish names
+    const hasVowel = /[aeiouyàâéèêëïîôùûüæœ]/i;
+    const tooManyConsonants = /[^aeiouyàâéèêëïîôùûüæœ\s\-'&.]{6,}/i;
+    if (!hasVowel.test(firstName) || !hasVowel.test(lastName) ||
+        tooManyConsonants.test(firstName) || tooManyConsonants.test(lastName)) {
+      return NextResponse.json({ error: "Nom invalide." }, { status: 400 });
+    }
+
     if (firstName.length > 100 || lastName.length > 100) {
       return NextResponse.json({ error: "Le nom ne doit pas dépasser 100 caractères." }, { status: 400 });
     }

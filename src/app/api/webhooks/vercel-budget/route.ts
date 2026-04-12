@@ -1,6 +1,6 @@
 /**
  * Webhook Vercel Spend Management
- * Déclenché quand le budget on-demand (10$) est atteint.
+ * Déclenché quand le budget on-demand (20$) est atteint.
  * Envoie une alerte WhatsApp immédiate.
  */
 import { NextResponse } from "next/server";
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   try {
     await sendWhatsAppText(
       ALERT_PHONE,
-      `ALERTE VERCEL - Budget on-demand atteint (10$) !\n\nLes crons risquent de depasser le budget.\n\nActions a faire :\n1. Verifier la conso sur vercel.com/dashboard\n2. Reduire les crons si necessaire\n3. Le budget se reinitialise au prochain cycle\n\nDate : ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}\n\nDream Team Africa - Alerte automatique`,
+      `ALERTE VERCEL - Budget on-demand atteint (20$) !\n\nLes crons risquent de depasser le budget.\n\nActions a faire :\n1. Verifier la conso sur vercel.com/dashboard\n2. Reduire les crons si necessaire\n3. Le budget se reinitialise au prochain cycle\n\nDate : ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}\n\nDream Team Africa - Alerte automatique`,
     );
 
     return NextResponse.json({ ok: true, action: "whatsapp_alert_sent" });

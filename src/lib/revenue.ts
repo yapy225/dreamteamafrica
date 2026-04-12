@@ -257,11 +257,10 @@ export async function getRevenueData(): Promise<RevenueSummary> {
     return s + fee;
   }, 0);
 
-  // Frais exposants échelonnés (3% par paiement)
-  // Note: pas de frais rétroactifs sur les devis existants
-  // Les frais s'appliqueront uniquement sur les prochains événements
-  // où le devis mentionne explicitement "Frais de gestion 3%"
-  const fraisExposants = 0;
+  // Frais exposants (3% par paiement, min 0.50€)
+  const fraisExposants = exhibitorPaymentsAll.reduce((s, p) => {
+    return s + Math.max(Number(p.amount) * 0.03, 0.50);
+  }, 0);
 
   const fraisTotal = Math.round((fraisBilletterie + fraisCPT + fraisExposants) * 100) / 100;
 

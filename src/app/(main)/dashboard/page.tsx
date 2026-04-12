@@ -42,25 +42,11 @@ export default async function DashboardPage() {
       color: "bg-amber-100 text-amber-600",
     },
     {
-      href: "/dashboard/payer",
-      icon: QrCode,
-      label: "Payer avec QR",
-      count: null,
-      color: "bg-emerald-100 text-emerald-600",
-    },
-    {
       href: "/dashboard/tickets",
       icon: Ticket,
       label: "Mes billets",
       count: ticketCount,
       color: "bg-blue-100 text-blue-600",
-    },
-    {
-      href: "/dashboard/parrainage",
-      icon: Gift,
-      label: "Parrainage — 4 NTBC",
-      count: null,
-      color: "bg-pink-100 text-pink-600",
     },
     {
       href: "/dashboard/orders",
@@ -89,13 +75,6 @@ export default async function DashboardPage() {
       : []),
     ...(exhibitorBooking || session.user.role === "EXPOSANT" || session.user.role === "ADMIN"
       ? [
-          {
-            href: "/dashboard/scanner-ntbc",
-            icon: ScanLine,
-            label: "Encaisser NTBC",
-            count: null,
-            color: "bg-teal-100 text-teal-600",
-          },
           {
             href: "/dashboard/mon-stand",
             icon: FileImage,

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { Wallet, ArrowUpRight, ArrowDownLeft, QrCode, Gift } from "lucide-react";
+import { Wallet, ArrowUpRight, ArrowDownLeft, QrCode, Gift, ScanLine } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -77,18 +77,27 @@ export default async function WalletPage() {
       </div>
 
       {/* Actions */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-2">
         <Link
           href="/dashboard/payer"
-          className="flex items-center justify-center gap-2 rounded-xl bg-[#0D2B1E] px-4 py-3 font-semibold text-white hover:bg-[#1a4a35]"
+          className="flex flex-col items-center gap-1 rounded-xl bg-[#0D2B1E] px-3 py-3 font-semibold text-white hover:bg-[#1a4a35]"
         >
-          <QrCode className="h-5 w-5" /> Payer
+          <QrCode className="h-5 w-5" />
+          <span className="text-xs">Payer</span>
         </Link>
         <Link
           href="/dashboard/parrainage"
-          className="flex items-center justify-center gap-2 rounded-xl bg-[#C9A84C] px-4 py-3 font-semibold text-[#0D2B1E] hover:bg-[#d4ba6a]"
+          className="flex flex-col items-center gap-1 rounded-xl bg-[#C9A84C] px-3 py-3 font-semibold text-[#0D2B1E] hover:bg-[#d4ba6a]"
         >
-          <Gift className="h-5 w-5" /> Parrainage
+          <Gift className="h-5 w-5" />
+          <span className="text-xs">Parrainage</span>
+        </Link>
+        <Link
+          href="/dashboard/scanner-ntbc"
+          className="flex flex-col items-center gap-1 rounded-xl bg-slate-100 px-3 py-3 font-semibold text-slate-700 hover:bg-slate-200"
+        >
+          <ScanLine className="h-5 w-5" />
+          <span className="text-xs">Encaisser</span>
         </Link>
       </div>
 

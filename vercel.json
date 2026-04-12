@@ -17,10 +17,6 @@
       "schedule": "0 8 * * 2,5"
     },
     {
-      "path": "/api/cron/auto-post-social",
-      "schedule": "0 6,10,14,18,22 * * *"
-    },
-    {
       "path": "/api/cron/newsletter-send",
       "schedule": "0 8 * * 2"
     }

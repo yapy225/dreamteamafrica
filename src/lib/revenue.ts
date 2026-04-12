@@ -235,7 +235,7 @@ export async function getRevenueData(): Promise<RevenueSummary> {
     }),
     // Tous les paiements exposants échelonnés
     prisma.exhibitorPayment.findMany({
-      select: { amount: true },
+      select: { amount: true, paidAt: true },
     }),
   ]);
 
@@ -245,14 +245,16 @@ export async function getRevenueData(): Promise<RevenueSummary> {
     p.ticket.payments.some((pp) => pp.type === "cpt_deposit") ||
     p.ticket.installments > 1;
 
-  // Frais billetterie classique : 3% sur chaque billet payé Stripe hors CPT (min 0.50€)
-  // Les tickets classiques ne créent pas de TicketPayment, on calcule depuis Ticket.price.
+  // Frais billetterie classique : 3% min 0.50€ par billet.
+  // Introduits le 2026-04-08 16:23 (commit 9e52bc4) — pas de frais rétroactifs.
+  const FEES_START_DATE = new Date("2026-04-08T16:23:00+02:00");
   const ticketsClassiqueStripe = tickets.filter(
     (t) =>
       isStripeTicket(t) &&
       Number(t.price) > 0 &&
       !t.payments.some((p) => p.type === "cpt_deposit") &&
-      t.installments <= 1,
+      t.installments <= 1 &&
+      t.purchasedAt >= FEES_START_DATE,
   );
   const fraisBilletterie = ticketsClassiqueStripe.reduce((s, t) => {
     return s + Math.max(Number(t.price) * 0.03, 0.50);
@@ -265,10 +267,12 @@ export async function getRevenueData(): Promise<RevenueSummary> {
     return s + fee;
   }, 0);
 
-  // Frais exposants (3% par paiement, min 0.50€)
-  const fraisExposants = exhibitorPaymentsAll.reduce((s, p) => {
-    return s + Math.max(Number(p.amount) * 0.03, 0.50);
-  }, 0);
+  // Frais exposants : 3% par paiement (introduit le 2026-04-09 23:30, commit eddb004).
+  // Pas de frais rétroactifs sur les devis antérieurs.
+  const EXPO_FEES_START_DATE = new Date("2026-04-09T23:30:51+02:00");
+  const fraisExposants = exhibitorPaymentsAll
+    .filter((p) => p.paidAt && p.paidAt >= EXPO_FEES_START_DATE)
+    .reduce((s, p) => s + Number(p.amount) * 0.03, 0);
 
   const fraisTotal = Math.round((fraisBilletterie + fraisCPT + fraisExposants) * 100) / 100;
 

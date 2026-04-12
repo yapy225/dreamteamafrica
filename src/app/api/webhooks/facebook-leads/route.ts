@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
-import { sendWhatsAppTemplate } from "@/lib/whatsapp";
+import { sendSurveyWelcome } from "@/lib/whatsapp-survey";
 import { prisma } from "@/lib/db";
 
 const VERIFY_TOKEN = process.env.FB_LEADS_VERIFY_TOKEN;
@@ -98,30 +98,14 @@ export async function POST(request: Request) {
           console.error("Lead save error (may be duplicate):", dbErr);
         }
 
-        // Send WhatsApp confirmation
+        // Send WhatsApp survey (visiteur / exposant)
         if (phone) {
           try {
-            await sendWhatsAppTemplate({
-              to: phone,
-              templateName: "ticket_confirmation",
-              languageCode: "fr",
-              components: [
-                {
-                  type: "body",
-                  parameters: [
-                    { type: "text", text: name },
-                    { type: "text", text: "1x Early Bird" },
-                    { type: "text", text: "Foire d'Afrique Paris — 6ème Édition" },
-                    { type: "text", text: "1er & 2 mai 2026" },
-                    { type: "text", text: "Espace MAS, Paris 13e" },
-                    { type: "text", text: "7,00 €" },
-                  ],
-                },
-              ],
-            });
-            console.log(`WhatsApp sent to ${phone}`);
+            const firstName = fields.first_name || (fields.full_name ? fields.full_name.split(" ")[0] : undefined);
+            await sendSurveyWelcome(phone, firstName);
+            console.log(`Survey sent to ${phone}`);
           } catch (waErr) {
-            console.error(`WhatsApp send failed for ${phone}:`, waErr);
+            console.error(`Survey send failed for ${phone}:`, waErr);
           }
         }
       }

@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { sendWhatsAppText } from "@/lib/whatsapp";
 import { generateAndStoreDraft } from "@/lib/whatsapp-ai";
+import { SURVEY_BUTTON_EXPOSANT, SURVEY_BUTTON_VISITEUR, sendExposantResponse, sendVisiteurResponse } from "@/lib/whatsapp-survey";
 
 const VERIFY_TOKEN = process.env.FB_LEADS_VERIFY_TOKEN ?? process.env.CRON_SECRET!;
 const APP_SECRET = process.env.WHATSAPP_APP_SECRET!;
@@ -192,6 +193,36 @@ export async function POST(request: Request) {
           });
         } catch (dbErr) {
           console.error("WhatsApp message save error:", dbErr);
+        }
+
+        // Survey button reply routing (exposant / visiteur)
+        if (type === "interactive") {
+          const interactive = msg.interactive as { button_reply?: { id?: string } } | undefined;
+          const buttonId = interactive?.button_reply?.id;
+          if (buttonId === SURVEY_BUTTON_EXPOSANT || buttonId === SURVEY_BUTTON_VISITEUR) {
+            try {
+              const phoneSuffix = from.replace(/^33/, "");
+              const lead = await prisma.lead.findFirst({
+                where: { phone: { contains: phoneSuffix }, source: "facebook_leads" },
+                orderBy: { createdAt: "desc" },
+              });
+              const email = lead?.email || null;
+              if (buttonId === SURVEY_BUTTON_EXPOSANT) {
+                await sendExposantResponse(from, email);
+              } else {
+                await sendVisiteurResponse(from, email);
+              }
+              if (lead) {
+                await prisma.lead.update({
+                  where: { id: lead.id },
+                  data: { profile: buttonId === SURVEY_BUTTON_EXPOSANT ? "Exposant" : "Visiteur" },
+                });
+              }
+              console.log(`[Survey] ${buttonId} sent to ${from}`);
+            } catch (surveyErr) {
+              console.error("[Survey] Response error:", surveyErr);
+            }
+          }
         }
 
         // AI auto-reply drafts — DISABLED

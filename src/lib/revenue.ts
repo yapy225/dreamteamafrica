@@ -23,6 +23,16 @@ export type TodayStats = {
   lastSale: { time: string; amount: number; type: "billet" | "exposant" } | null;
 };
 
+export type NtbcStats = {
+  ntbcEnCirculation: number;
+  ntbcBonus: number;
+  commissionTotale: number;
+  fraisBilletterie: number;
+  transactionsCount: number;
+  volumeTotal: number;
+  parrainages: number;
+};
+
 export type RevenueSummary = {
   monthly: MonthlyRevenue[];
   totals: {
@@ -34,6 +44,7 @@ export type RevenueSummary = {
     total: number;
   };
   today: TodayStats;
+  ntbc: NtbcStats;
 };
 
 export async function getRevenueData(): Promise<RevenueSummary> {
@@ -186,5 +197,32 @@ export async function getRevenueData(): Promise<RevenueSummary> {
       : null,
   };
 
-  return { monthly, totals, today };
+  // ── Stats NTBC ──
+  const [ntbcCirculation, ntbcTransactions, ntbcParrainages, ntbcFraisBillets] = await Promise.all([
+    prisma.user.aggregate({
+      _sum: { soldeNtbc: true, soldeBonus: true },
+    }),
+    prisma.ntbcTransaction.aggregate({
+      _sum: { montantNtbc: true, commissionNtbc: true },
+      _count: true,
+    }),
+    prisma.ntbcParrainage.count(),
+    prisma.ticketPayment.aggregate({
+      _sum: { amount: true },
+    }),
+  ]);
+
+  const totalBilletsMontant = Number(ntbcFraisBillets._sum.amount || 0);
+
+  const ntbc: NtbcStats = {
+    ntbcEnCirculation: (ntbcCirculation._sum.soldeNtbc || 0) + (ntbcCirculation._sum.soldeBonus || 0),
+    ntbcBonus: ntbcCirculation._sum.soldeBonus || 0,
+    commissionTotale: ntbcTransactions._sum.commissionNtbc || 0,
+    fraisBilletterie: Math.round(totalBilletsMontant * 0.03 * 100) / 100,
+    transactionsCount: ntbcTransactions._count,
+    volumeTotal: ntbcTransactions._sum.montantNtbc || 0,
+    parrainages: ntbcParrainages,
+  };
+
+  return { monthly, totals, today, ntbc };
 }

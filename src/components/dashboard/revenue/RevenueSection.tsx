@@ -48,6 +48,46 @@ export function RevenueSection({ data: initialData }: RevenueSectionProps) {
         </div>
       </div>
       <KpiCards totals={data.totals} />
+
+      {/* NTBC Stats */}
+      {data.ntbc && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
+          <h3 className="mb-3 text-sm font-semibold text-amber-800">NTBC — Cashless & Frais</h3>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-lg bg-white p-3 text-center shadow-sm">
+              <p className="text-lg font-bold text-amber-600">{data.ntbc.ntbcEnCirculation}</p>
+              <p className="text-[10px] text-slate-500">NTBC en circulation</p>
+            </div>
+            <div className="rounded-lg bg-white p-3 text-center shadow-sm">
+              <p className="text-lg font-bold text-green-600">{data.ntbc.commissionTotale} NTBC</p>
+              <p className="text-[10px] text-slate-500">Commission 4% (exposants)</p>
+            </div>
+            <div className="rounded-lg bg-white p-3 text-center shadow-sm">
+              <p className="text-lg font-bold text-blue-600">{data.ntbc.fraisBilletterie} EUR</p>
+              <p className="text-[10px] text-slate-500">Frais 3% (billets)</p>
+            </div>
+            <div className="rounded-lg bg-white p-3 text-center shadow-sm">
+              <p className="text-lg font-bold text-slate-700">{data.ntbc.transactionsCount}</p>
+              <p className="text-[10px] text-slate-500">Transactions NTBC</p>
+            </div>
+          </div>
+          <div className="mt-3 grid grid-cols-3 gap-3">
+            <div className="rounded-lg bg-white p-2 text-center shadow-sm">
+              <p className="text-sm font-bold text-amber-600">{data.ntbc.volumeTotal}</p>
+              <p className="text-[10px] text-slate-500">Volume total NTBC</p>
+            </div>
+            <div className="rounded-lg bg-white p-2 text-center shadow-sm">
+              <p className="text-sm font-bold text-pink-600">{data.ntbc.parrainages}</p>
+              <p className="text-[10px] text-slate-500">Parrainages</p>
+            </div>
+            <div className="rounded-lg bg-white p-2 text-center shadow-sm">
+              <p className="text-sm font-bold text-green-500">{data.ntbc.ntbcBonus}</p>
+              <p className="text-[10px] text-slate-500">Bonus offerts</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <TodayProgress today={data.today} />
       <TotalRevenueChart data={data.monthly} />
       <RevenueBreakdownCharts data={data.monthly} />

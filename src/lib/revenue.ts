@@ -245,10 +245,18 @@ export async function getRevenueData(): Promise<RevenueSummary> {
     p.ticket.payments.some((pp) => pp.type === "cpt_deposit") ||
     p.ticket.installments > 1;
 
-  // Frais billetterie classique (paiement unique, 3% min 0.50€)
-  const billetsUniques = allTicketPayments.filter(p => !isPayCPT(p) && (p.type === "full_payment" || (p.type === "deposit" && p.ticket.installments === 1)));
-  const montantBilletsUniques = billetsUniques.reduce((s, p) => s + Number(p.amount), 0);
-  const fraisBilletterie = Math.round(Math.max(montantBilletsUniques * 0.03, billetsUniques.length * 0.50) * 100) / 100;
+  // Frais billetterie classique : 3% sur chaque billet payé Stripe hors CPT (min 0.50€)
+  // Les tickets classiques ne créent pas de TicketPayment, on calcule depuis Ticket.price.
+  const ticketsClassiqueStripe = tickets.filter(
+    (t) =>
+      isStripeTicket(t) &&
+      Number(t.price) > 0 &&
+      !t.payments.some((p) => p.type === "cpt_deposit") &&
+      t.installments <= 1,
+  );
+  const fraisBilletterie = ticketsClassiqueStripe.reduce((s, t) => {
+    return s + Math.max(Number(t.price) * 0.03, 0.50);
+  }, 0);
 
   // Frais Culture pour Tous (acomptes + recharges, 3% min 0.50€ par paiement)
   const billetsCPT = allTicketPayments.filter(isPayCPT);

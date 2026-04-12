@@ -176,25 +176,7 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
     console.error("Ticket confirmation email failed:", emailErr);
   }
 
-  // Send WhatsApp confirmation if user has a phone number
-  try {
-    const whatsappPhone = phone || user?.phone;
-    const customerName = (`${firstName || ""} ${lastName || ""}`.trim() || user?.name || "Client").replace(/[\n\r]/g, " ");
-    if (whatsappPhone && event) {
-      await sendTicketConfirmationWhatsApp({
-        phone: whatsappPhone,
-        customerName,
-        eventTitle: event.title,
-        tier,
-        quantity: qty,
-        totalPrice: unitPriceNum * qty,
-        eventDate: new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(visitDate ? new Date(visitDate) : event.date),
-        eventVenue: event.venue,
-      });
-    }
-  } catch (waErr) {
-    console.error("WhatsApp ticket confirmation failed:", waErr);
-  }
+  // WhatsApp confirmation disabled — coût Meta trop élevé, email suffit
 }
 
 async function handleTicketInstallment(session: Stripe.Checkout.Session) {

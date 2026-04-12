@@ -193,21 +193,7 @@ export async function POST(request: Request) {
         console.error("Free ticket confirmation email failed:", emailErr);
       }
 
-      // Send WhatsApp confirmation
-      try {
-        await sendTicketConfirmationWhatsApp({
-          phone: trimmedPhone,
-          customerName: `${trimmedFirstName} ${trimmedLastName}`,
-          eventTitle: event.title,
-          tier: tierName,
-          quantity,
-          totalPrice: 0,
-          eventDate: new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(visitDate ? new Date(visitDate) : event.date),
-          eventVenue: event.venue,
-        });
-      } catch (waErr) {
-        console.error("WhatsApp free ticket confirmation failed:", waErr);
-      }
+      // WhatsApp confirmation disabled — coût Meta trop élevé, email suffit
 
       // Return first ticket ID for confirmation page
       return NextResponse.json({

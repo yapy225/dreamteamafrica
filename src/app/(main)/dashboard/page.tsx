@@ -17,7 +17,7 @@ export default async function DashboardPage() {
 
   const isAdmin = session.user.role === "ADMIN";
 
-  const [ticketCount, orderCount, revenueData, exhibitorBooking, unreadWhatsApp, unreadContacts, unreadEmails, ntbcUser] = await Promise.all([
+  const [ticketCount, orderCount, revenueData, exhibitorBooking, unreadWhatsApp, unreadContacts, unreadEmails, ntbcUser, cptUnpaidCount] = await Promise.all([
     prisma.ticket.count({ where: { userId: session.user.id } }),
     prisma.order.count({ where: { userId: session.user.id } }),
     isAdmin ? getRevenueData() : null,
@@ -29,6 +29,14 @@ export default async function DashboardPage() {
     isAdmin ? prisma.contactMessage.count({ where: { read: false } }) : 0,
     isAdmin ? prisma.email.count({ where: { isRead: false, isArchived: false, folder: "INBOX" } }) : 0,
     prisma.user.findUnique({ where: { id: session.user.id }, select: { soldeNtbc: true, soldeBonus: true, tier: true } }),
+    isAdmin
+      ? prisma.ticket.count({
+          where: {
+            payments: { some: { type: "cpt_deposit" } },
+            totalPaid: { lt: prisma.ticket.fields.price },
+          },
+        })
+      : 0,
   ]);
 
   const soldeTotal = (ntbcUser?.soldeNtbc || 0) + (ntbcUser?.soldeBonus || 0);
@@ -86,6 +94,13 @@ export default async function DashboardPage() {
       : []),
     ...(session.user.role === "ADMIN"
       ? [
+          {
+            href: "/dashboard/cpt",
+            icon: Gift,
+            label: "Culture pour Tous",
+            count: cptUnpaidCount || null,
+            color: "bg-emerald-100 text-emerald-600",
+          },
           {
             href: "/dashboard/events",
             icon: CalendarDays,

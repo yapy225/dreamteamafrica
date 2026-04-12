@@ -70,7 +70,15 @@ export async function getRevenueData(): Promise<RevenueSummary> {
     // Revenus billetterie
     prisma.ticket.findMany({
       where: { purchasedAt: { gte: startDate } },
-      select: { price: true, purchasedAt: true, stripeSessionId: true, installments: true, totalPaid: true },
+      select: {
+        id: true,
+        price: true,
+        purchasedAt: true,
+        stripeSessionId: true,
+        installments: true,
+        totalPaid: true,
+        payments: { select: { type: true } },
+      },
     }),
     // Revenus exposants (paiements enregistrés)
     prisma.exhibitorPayment.findMany({
@@ -99,8 +107,10 @@ export async function getRevenueData(): Promise<RevenueSummary> {
   const isStripeTicket = (t: { stripeSessionId: string | null }) =>
     t.stripeSessionId != null && t.stripeSessionId.startsWith("cs_");
 
-  // Helper: un billet est "Culture pour Tous" s'il a installments > 1
-  const isCPT = (t: { installments: number }) => t.installments > 1;
+  // Helper: un billet est "Culture pour Tous" s'il a un paiement cpt_deposit
+  // (ou l'ancien critère legacy installments > 1 pour les billets pré-migration)
+  const isCPT = (t: { installments: number; payments: Array<{ type: string }> }) =>
+    t.payments.some((p) => p.type === "cpt_deposit") || t.installments > 1;
 
   const monthly: MonthlyRevenue[] = buckets.map((bucket) => {
     const bucketTickets = tickets.filter(
@@ -212,7 +222,16 @@ export async function getRevenueData(): Promise<RevenueSummary> {
     prisma.ntbcParrainage.count(),
     // Tous les paiements billets pour calculer les frais
     prisma.ticketPayment.findMany({
-      select: { amount: true, type: true, ticket: { select: { installments: true } } },
+      select: {
+        amount: true,
+        type: true,
+        ticket: {
+          select: {
+            installments: true,
+            payments: { select: { type: true } },
+          },
+        },
+      },
     }),
     // Tous les paiements exposants échelonnés
     prisma.exhibitorPayment.findMany({
@@ -220,13 +239,19 @@ export async function getRevenueData(): Promise<RevenueSummary> {
     }),
   ]);
 
+  // Un paiement est CPT si son type est cpt_deposit/recharge/cash OU si le ticket a un cpt_deposit
+  const isPayCPT = (p: { type: string; ticket: { installments: number; payments: Array<{ type: string }> } }) =>
+    ["cpt_deposit", "recharge", "cash"].includes(p.type) ||
+    p.ticket.payments.some((pp) => pp.type === "cpt_deposit") ||
+    p.ticket.installments > 1;
+
   // Frais billetterie classique (paiement unique, 3% min 0.50€)
-  const billetsUniques = allTicketPayments.filter(p => p.type === "full_payment" || (p.type === "deposit" && p.ticket.installments === 1));
+  const billetsUniques = allTicketPayments.filter(p => !isPayCPT(p) && (p.type === "full_payment" || (p.type === "deposit" && p.ticket.installments === 1)));
   const montantBilletsUniques = billetsUniques.reduce((s, p) => s + Number(p.amount), 0);
   const fraisBilletterie = Math.round(Math.max(montantBilletsUniques * 0.03, billetsUniques.length * 0.50) * 100) / 100;
 
   // Frais Culture pour Tous (acomptes + recharges, 3% min 0.50€ par paiement)
-  const billetsCPT = allTicketPayments.filter(p => p.ticket.installments > 1);
+  const billetsCPT = allTicketPayments.filter(isPayCPT);
   const fraisCPT = billetsCPT.reduce((s, p) => {
     const fee = Math.max(Number(p.amount) * 0.03, 0.50);
     return s + fee;

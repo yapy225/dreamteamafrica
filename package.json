@@ -34,7 +34,7 @@
     "html5-qrcode": "^2.3.8",
     "imapflow": "^1.2.13",
     "jsqr": "^1.4.0",
-    "lucide-react": "^0.575.0",
+    "lucide-react": "^0.577.0",
     "mailparser": "^3.9.4",
     "marked": "^17.0.4",
     "next": "16.1.6",

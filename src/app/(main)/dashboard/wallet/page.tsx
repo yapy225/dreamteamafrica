@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { Wallet, ArrowUpRight, ArrowDownLeft, QrCode, Gift, ScanLine } from "lucide-react";
+import { Wallet, ArrowUpRight, ArrowDownLeft, QrCode, Gift, ScanLine, Info } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +19,10 @@ export default async function WalletPage() {
 
   const userId = session.user.id;
 
-  const [user, transactions] = await Promise.all([
+  const [user, transactions, commissionPayees, fraisBillets] = await Promise.all([
     prisma.user.findUniqueOrThrow({
       where: { id: userId },
-      select: { soldeNtbc: true, soldeBonus: true, tier: true, qrToken: true },
+      select: { soldeNtbc: true, soldeBonus: true, tier: true, qrToken: true, role: true },
     }),
     prisma.ntbcTransaction.findMany({
       where: { OR: [{ emetteurId: userId }, { receveurId: userId }] },
@@ -33,9 +33,28 @@ export default async function WalletPage() {
         receveur: { select: { name: true } },
       },
     }),
+    // Total commission payée (exposant = receveur, commission prélevée)
+    prisma.ntbcTransaction.aggregate({
+      where: { receveurId: userId },
+      _sum: { commissionNtbc: true, montantNtbc: true, netNtbc: true },
+      _count: true,
+    }),
+    // Frais billetterie payés
+    prisma.ticketPayment.aggregate({
+      where: { ticket: { userId } },
+      _sum: { amount: true },
+      _count: true,
+    }),
   ]);
 
   const soldeTotal = user.soldeNtbc + user.soldeBonus;
+  const isExposant = user.role === "EXPOSANT" || user.role === "ADMIN";
+  const totalCommission = commissionPayees._sum.commissionNtbc || 0;
+  const totalVendu = commissionPayees._sum.montantNtbc || 0;
+  const totalNetRecu = commissionPayees._sum.netNtbc || 0;
+  const nbVentes = commissionPayees._count;
+  const totalBilletsPaies = Number(fraisBillets._sum.amount || 0);
+  const fraisGestion = Math.round(totalBilletsPaies * 0.03 * 100) / 100;
   const tier = TIER_CONFIG[user.tier] || TIER_CONFIG.SEMENCE;
 
   return (
@@ -99,6 +118,60 @@ export default async function WalletPage() {
           <ScanLine className="h-5 w-5" />
           <span className="text-xs">Encaisser</span>
         </Link>
+      </div>
+
+      {/* Frais de gestion */}
+      <div className="rounded-xl bg-white p-4 shadow-sm">
+        <div className="mb-3 flex items-center gap-2">
+          <Info className="h-4 w-4 text-slate-400" />
+          <h2 className="text-sm font-semibold text-slate-700">Frais de gestion</h2>
+        </div>
+
+        {isExposant ? (
+          // ── Vue Exposant ──
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-slate-500">Commission (4%)</span>
+              <span className="font-medium text-slate-700">{totalCommission} NTBC</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500">Total encaisse</span>
+              <span className="font-medium">{totalVendu} NTBC</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500">Net recu</span>
+              <span className="font-semibold text-green-600">{totalNetRecu} NTBC</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500">Nombre de ventes</span>
+              <span className="font-medium">{nbVentes}</span>
+            </div>
+            <div className="mt-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-700">
+              4% de commission preleve sur chaque paiement NTBC recu.
+              Solde convertible en euros a tout moment (1 NTBC = 1 EUR).
+            </div>
+          </div>
+        ) : (
+          // ── Vue Visiteur ──
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-slate-500">Billets achetes</span>
+              <span className="font-medium">{totalBilletsPaies} EUR</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500">Frais de gestion (3%)</span>
+              <span className="font-medium text-slate-700">{fraisGestion} EUR</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500">NTBC credites</span>
+              <span className="font-semibold text-green-600">{soldeTotal} NTBC</span>
+            </div>
+            <div className="mt-2 rounded-lg bg-blue-50 p-2 text-xs text-blue-700">
+              3% de frais de gestion (min 0,50 EUR) sur chaque achat de billet.
+              Chaque euro verse = 1 NTBC dans votre wallet pour payer sur place.
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Historique */}

@@ -16,6 +16,7 @@ interface TicketSelectorProps {
   sessionLabel?: string;
   fixedVisitDate?: string;
   maxQuantity?: number;
+  isCulturePourTous?: boolean;
 }
 
 export default function TicketSelector({
@@ -30,6 +31,7 @@ export default function TicketSelector({
   eventEndDate,
   sessionLabel,
   fixedVisitDate,
+  isCulturePourTous,
 }: TicketSelectorProps) {
   const [open, setOpen] = useState(false);
 
@@ -50,31 +52,26 @@ export default function TicketSelector({
       <button
         onClick={() => setOpen(true)}
         className={`mt-4 w-full rounded-[var(--radius-button)] px-4 py-3 text-sm font-semibold transition-all duration-200 ${
-          highlight
+          isCulturePourTous
+            ? "bg-emerald-600 text-white hover:bg-emerald-700"
+            : highlight
             ? "bg-dta-accent text-white hover:bg-dta-accent-dark"
             : "bg-dta-dark text-white hover:bg-dta-char"
         }`}
       >
-        {price === 0 ? "Réserver gratuitement" : `Réserver — ${new Intl.NumberFormat("fr-FR", {
-          style: "currency",
-          currency: "EUR",
-        }).format(price)}`}
+        {isCulturePourTous
+          ? "Réserver avec 5€ — Culture pour Tous"
+          : price === 0
+          ? "Réserver gratuitement"
+          : `Réserver — ${new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(price)}`}
       </button>
-      {price > 0 && (
-        <button
-          onClick={() => { setOpen(true); }}
-          className="mt-2 w-full rounded-[var(--radius-button)] border border-green-600 bg-green-50 px-4 py-2.5 text-xs font-semibold text-green-700 transition-all duration-200 hover:bg-green-100"
-        >
-          ou dès 5&nbsp;&euro; · Culture pour Tous
-        </button>
-      )}
 
       <PurchasePanel
         open={open}
         onClose={() => setOpen(false)}
         eventId={eventId}
         eventSlug={eventSlug}
-        tier={{ id: tier, name: tierName, price }}
+        tier={{ id: tier, name: tierName, price, isCulturePourTous }}
         eventTitle={eventTitle}
         eventDate={eventDate}
         eventEndDate={fixedVisitDate ? undefined : eventEndDate}

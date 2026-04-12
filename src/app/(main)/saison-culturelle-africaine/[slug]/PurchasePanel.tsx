@@ -9,7 +9,7 @@ interface PurchasePanelProps {
   onClose: () => void;
   eventId: string;
   eventSlug: string;
-  tier: { id: string; name: string; price: number };
+  tier: { id: string; name: string; price: number; isCulturePourTous?: boolean };
   eventTitle: string;
   eventDate: string;
   eventEndDate?: string;
@@ -215,7 +215,10 @@ export default function PurchasePanel({
 
     try {
       const bfp = typeof window !== "undefined" ? localStorage.getItem("dta_bfp") || "" : "";
-      const res = await fetch("/api/checkout/tickets", {
+      const endpoint = tier.isCulturePourTous
+        ? "/api/checkout/culture-pour-tous"
+        : "/api/checkout/tickets";
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-behavior-fp": bfp },
         body: JSON.stringify({
@@ -227,8 +230,8 @@ export default function PurchasePanel({
           email: form.email,
           phone: form.phone,
           visitDate: selectedDate,
-          installments,
-          ...(promoApplied && { promotionCode: promoApplied.id }),
+          ...(!tier.isCulturePourTous && { installments }),
+          ...(promoApplied && !tier.isCulturePourTous && { promotionCode: promoApplied.id }),
         }),
       });
 
@@ -479,50 +482,13 @@ export default function PurchasePanel({
             </div>
           )}
 
-          {/* installments selector — Culture pour Tous */}
-          {tier.price > 5 && (
-            <div>
-              <label className="mb-2 block text-sm font-medium text-dta-char">
-                Mode de paiement
-              </label>
-              <div className="mb-3 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2">
-                <span className="text-base">✨</span>
-                <p className="text-xs font-medium text-green-700">
-                  <strong>Culture pour Tous</strong> — Réserve ta place dès 5&nbsp;&euro; et paie à ton rythme.{" "}
-                  <a href="/culture-pour-tous" target="_blank" className="underline hover:text-green-900">En savoir plus</a>
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setInstallments(1)}
-                  className={`rounded-[var(--radius-button)] border px-4 py-2 text-sm font-medium transition-colors ${
-                    installments === 1
-                      ? "border-dta-accent bg-dta-accent text-white"
-                      : "border-dta-sand bg-white text-dta-char hover:border-dta-accent/50"
-                  }`}
-                >
-                  Paiement unique
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setInstallments(2)}
-                  className={`rounded-[var(--radius-button)] border px-4 py-2 text-sm font-medium transition-colors ${
-                    installments === 2
-                      ? "border-green-600 bg-green-600 text-white"
-                      : "border-green-300 bg-green-50 text-green-700 hover:border-green-500"
-                  }`}
-                >
-                  Dès 5&euro; — Culture pour Tous
-                </button>
-              </div>
-              {installments > 1 && (
-                <div className="mt-2 rounded-lg border border-green-200 bg-green-50 p-3 text-xs text-green-800">
-                  <p>Aujourd&apos;hui : <strong>{formatCurrency(deposit)}</strong> (acompte)</p>
-                  <p>Puis rechargez à votre rythme — reste <strong>{formatCurrency(remainingBalance)}</strong> à régler</p>
-                  <p className="mt-1 text-green-600">Minimum 1&nbsp;&euro; par recharge · Solde avant l&apos;événement</p>
-                </div>
-              )}
+          {/* CPT info banner for non-CPT tiers */}
+          {tier.price > 5 && !tier.isCulturePourTous && (
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5">
+              <p className="text-xs font-medium text-emerald-800">
+                ✨ Budget serré ? Essayez <strong>Culture pour Tous</strong> — réservez dès 5&nbsp;€ et payez à votre rythme jusqu&apos;à la veille de l&apos;événement.{" "}
+                <a href="/culture-pour-tous" target="_blank" className="underline hover:text-emerald-900">En savoir plus</a>
+              </p>
             </div>
           )}
 

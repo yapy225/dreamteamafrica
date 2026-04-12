@@ -987,3 +987,103 @@ export async function sendExhibitorProfileInviteEmail(opts: {
     throw new Error(`Failed to send exhibitor invite: ${error.message}`);
   }
 }
+
+const DTA_WA_NUMBER = "33782801852";
+
+function waReplyLink(message: string): string {
+  return `https://wa.me/${DTA_WA_NUMBER}?text=${encodeURIComponent(message)}`;
+}
+
+export async function sendCptWelcomeEmail(opts: {
+  to: string;
+  firstName: string;
+  eventTitle: string;
+  eventDate: Date;
+  eventVenue: string;
+  targetPrice: number;
+  deposit: number;
+  tickets: Array<{ id: string; magicLink: string }>;
+}) {
+  const { to, firstName, eventTitle, eventDate, eventVenue, targetPrice, deposit, tickets } = opts;
+  const remaining = (targetPrice - deposit).toFixed(2);
+  const dateStr = new Date(eventDate).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  const waMsg = `Bonjour, j'ai une question sur mon billet Culture pour Tous pour ${eventTitle}`;
+
+  const ticketsHtml = tickets.map((t, i) => `
+    <div style="margin:16px 0;padding:16px;border:1px solid #e5e7eb;border-radius:8px;">
+      <div style="font-size:13px;color:#6b7280;margin-bottom:8px;">Billet ${i + 1} • ID ${t.id.slice(0, 8)}</div>
+      <a href="${esc(t.magicLink)}" style="display:inline-block;background:#111;color:#fff;padding:12px 20px;border-radius:6px;text-decoration:none;font-weight:600;">Gérer mon billet →</a>
+    </div>
+  `).join("");
+
+  const html = `<!DOCTYPE html><html><body style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#111;">
+    <h1 style="color:#111;">Bienvenue dans Culture pour Tous ${esc(firstName)} 🎉</h1>
+    <p>Votre acompte de <strong>${deposit.toFixed(2)}€</strong> a bien été reçu pour <strong>${esc(eventTitle)}</strong>.</p>
+    <div style="background:#fef3c7;padding:16px;border-radius:8px;margin:20px 0;">
+      <div style="font-size:14px;color:#92400e;"><strong>Solde à régler : ${remaining}€</strong></div>
+      <div style="font-size:13px;color:#92400e;margin-top:4px;">Payez comme vous voulez, à votre rythme, jusqu'à la veille de l'événement (${dateStr} — ${esc(eventVenue)}).</div>
+    </div>
+    <p>Depuis votre espace billet, vous pouvez recharger à tout moment. Pas besoin de compte — le lien ci-dessous est personnel et sécurisé.</p>
+    ${ticketsHtml}
+    <p style="font-size:13px;color:#6b7280;margin-top:24px;">
+      Votre QR d'entrée sera généré automatiquement dès que votre billet sera entièrement soldé.<br>
+      Sinon, le complément sera à régler sur place le jour J.
+    </p>
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
+    <p style="font-size:13px;">Une question ? <a href="${waReplyLink(waMsg)}">Répondez-nous sur WhatsApp</a></p>
+    <p style="font-size:12px;color:#6b7280;">L'équipe Dream Team Africa</p>
+  </body></html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to,
+    subject: `Bienvenue — votre billet ${eventTitle} (acompte reçu)`,
+    html,
+  });
+  if (error) {
+    console.error("CPT welcome email error:", error);
+    throw new Error(`Failed to send CPT welcome: ${error.message}`);
+  }
+}
+
+export async function sendCptRelanceEmail(opts: {
+  to: string;
+  firstName: string;
+  eventTitle: string;
+  eventDate: Date;
+  remaining: number;
+  daysLeft: number;
+  magicLink: string;
+  ticketId: string;
+}) {
+  const { to, firstName, eventTitle, eventDate, remaining, daysLeft, magicLink, ticketId } = opts;
+  const dateStr = new Date(eventDate).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+  const urgency = daysLeft <= 1 ? "Dernier jour" : `J-${daysLeft}`;
+  const waMsg = `Bonjour, concernant mon billet Culture pour Tous pour ${eventTitle} (ID ${ticketId.slice(0, 8)})`;
+
+  const html = `<!DOCTYPE html><html><body style="font-family:system-ui,sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#111;">
+    <div style="background:${daysLeft <= 1 ? "#fee2e2" : "#fef3c7"};padding:12px 16px;border-radius:6px;font-weight:600;color:${daysLeft <= 1 ? "#991b1b" : "#92400e"};display:inline-block;">${urgency} — ${esc(eventTitle)}</div>
+    <h2 style="margin-top:20px;">Bonjour ${esc(firstName)},</h2>
+    <p>Votre billet Culture pour Tous pour <strong>${esc(eventTitle)}</strong> (${dateStr}) n'est pas encore soldé.</p>
+    <div style="background:#f3f4f6;padding:20px;border-radius:8px;margin:20px 0;text-align:center;">
+      <div style="font-size:14px;color:#6b7280;">Solde restant</div>
+      <div style="font-size:36px;font-weight:700;color:#111;margin:8px 0;">${remaining.toFixed(2)} €</div>
+      <a href="${esc(magicLink)}" style="display:inline-block;background:#111;color:#fff;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:600;margin-top:12px;">Solder mon billet →</a>
+    </div>
+    <p style="font-size:13px;color:#6b7280;">Vous pouvez régler en plusieurs fois ou en une seule fois. Si vous ne soldez pas, le complément sera à payer sur place à l'entrée.</p>
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
+    <p style="font-size:13px;">Une question ? <a href="${waReplyLink(waMsg)}">Répondez-nous sur WhatsApp</a> — nous vous lisons.</p>
+    <p style="font-size:12px;color:#6b7280;">L'équipe Dream Team Africa</p>
+  </body></html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to,
+    subject: `${urgency} — Soldez votre billet ${eventTitle} (${remaining.toFixed(2)}€ restants)`,
+    html,
+  });
+  if (error) {
+    console.error("CPT relance email error:", error);
+    throw new Error(`Failed to send CPT relance: ${error.message}`);
+  }
+}

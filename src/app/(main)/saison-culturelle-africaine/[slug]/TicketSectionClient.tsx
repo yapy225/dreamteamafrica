@@ -16,7 +16,7 @@ interface ProgramSession {
 }
 
 interface Tier {
-  id: "EARLY_BIRD" | "STANDARD" | "VIP";
+  id: string;
   name: string;
   price: number;
   description: string;
@@ -25,6 +25,7 @@ interface Tier {
   quota: number | null;
   sold: number;
   onSiteOnly?: boolean;
+  isCulturePourTous?: boolean;
 }
 
 interface TicketSectionClientProps {
@@ -266,6 +267,7 @@ export default function TicketSectionClient({
                     sessionLabel={sessionLabel}
                     fixedVisitDate={selected?.date ? `${selected.date}T12:00:00Z` : undefined}
                     maxQuantity={tierRemaining != null ? Math.min(10, tierRemaining) : 10}
+                    isCulturePourTous={tier.isCulturePourTous}
                   />
                 )}
               </div>

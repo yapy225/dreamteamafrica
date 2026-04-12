@@ -4,26 +4,29 @@ import { getStripe } from "@/lib/stripe";
 import { auth } from "@/lib/auth";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { calculateFees } from "@/lib/fees";
+import { verifyTicketToken } from "@/lib/cpt-token";
 
 export async function POST(request: Request) {
   try {
-    // 1. Authentication
+    const ip = getClientIp(request);
+    const { ticketId, amount, token } = await request.json();
+
+    // Auth: either session user OR valid magic token on the ticketId
     const session = await auth();
-    if (!session?.user?.id) {
+    const hasValidToken = typeof token === "string" && typeof ticketId === "string" && verifyTicketToken(ticketId, token);
+
+    if (!session?.user?.id && !hasValidToken) {
       return NextResponse.json({ error: "Non autorisé." }, { status: 401 });
     }
 
-    // 2. Rate limiting
-    const ip = getClientIp(request);
-    const rl = rateLimit(`recharge:${session.user.id}`, { limit: 5, windowSec: 60 });
+    const rlKey = session?.user?.id || `cpt-token:${ticketId}`;
+    const rl = rateLimit(`recharge:${rlKey}`, { limit: 5, windowSec: 60 });
     if (!rl.success) {
       return NextResponse.json(
         { error: "Trop de tentatives. Réessayez dans quelques minutes." },
         { status: 429 },
       );
     }
-
-    const { ticketId, amount } = await request.json();
 
     // 3. Input validation
     if (!ticketId || typeof ticketId !== "string") {
@@ -45,8 +48,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Billet introuvable." }, { status: 404 });
     }
 
-    // 5. Ownership check (IDOR protection)
-    if (ticket.userId !== session.user.id) {
+    // 5. Ownership check (IDOR protection) — skip if magic token already validated for this ticketId
+    if (!hasValidToken && ticket.userId !== session?.user?.id) {
       return NextResponse.json({ error: "Accès interdit." }, { status: 403 });
     }
 
@@ -91,19 +94,23 @@ export async function POST(request: Request) {
       });
     }
 
+    const successBase = hasValidToken
+      ? `${process.env.NEXT_PUBLIC_APP_URL}/cpt/${ticket.id}?t=${token}`
+      : `${process.env.NEXT_PUBLIC_APP_URL}/mon-espace`;
+
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card", "paypal"],
-      customer_email: session.user.email || ticket.email || undefined,
+      customer_email: session?.user?.email || ticket.email || undefined,
       line_items: rechargeLineItems,
       metadata: {
         type: "ticket_recharge",
         ticketId: ticket.id,
-        userId: session.user.id,
+        userId: ticket.userId,
         amount: String(rechargeAmount),
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/mon-espace?success=1`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/mon-espace`,
+      success_url: `${successBase}${successBase.includes("?") ? "&" : "?"}success=1`,
+      cancel_url: successBase,
     });
 
     return NextResponse.json({ url: checkoutSession.url });

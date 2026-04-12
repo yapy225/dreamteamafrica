@@ -89,7 +89,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   const soldOut = remaining <= 0;
   const progressPercent = Math.min(100, Math.round((soldCount / event.capacity) * 100));
 
-  const customTiers = event.tiers as Array<{ id: string; name: string; price: number; description: string; features: string[]; highlight: boolean; quota?: number; onSiteOnly?: boolean; soldOffset?: number }> | null;
+  const customTiers = event.tiers as Array<{ id: string; name: string; price: number; description: string; features: string[]; highlight: boolean; quota?: number; onSiteOnly?: boolean; soldOffset?: number; isCulturePourTous?: boolean }> | null;
 
   // Count tickets sold per tier for quota tracking
   const ticketsByTier = await prisma.ticket.groupBy({
@@ -104,7 +104,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
 
   const tiers = Array.isArray(customTiers) && customTiers.length > 0
     ? customTiers.map((t) => ({
-        id: t.id as "EARLY_BIRD" | "STANDARD" | "VIP",
+        id: t.id,
         name: t.name,
         price: t.price,
         description: t.description,
@@ -113,6 +113,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
         quota: t.quota ?? null,
         sold: (soldByTier[t.id] ?? 0) + (t.soldOffset ?? 0),
         onSiteOnly: t.onSiteOnly ?? false,
+        isCulturePourTous: t.isCulturePourTous ?? false,
       }))
     : [
         { id: "EARLY_BIRD" as const, name: "Early Bird", price: event.priceEarly, description: "Accès général — Tarif réduit pour les premiers acheteurs", features: ["Accès à l'événement", "Badge nominatif"], highlight: false, quota: null as number | null, sold: soldByTier["EARLY_BIRD"] ?? 0, onSiteOnly: false },

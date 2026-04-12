@@ -57,6 +57,8 @@ export async function POST(request: Request) {
       await handleTicketInstallment(session);
     } else if (metadata?.type === "ticket_recharge") {
       await handleTicketRecharge(session);
+    } else if (metadata?.type === "culture_pour_tous") {
+      await handleCulturePourTousPurchase(session);
     } else if (metadata?.type === "order") {
       await handleOrderPurchase(session);
     } else if (metadata?.type === "exhibitor") {
@@ -189,6 +191,10 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
   // WhatsApp confirmation disabled — coût Meta trop élevé, email suffit
 }
 
+/**
+ * @deprecated Kept for historical sessions. New flow uses "culture_pour_tous" (handleCulturePourTousPurchase).
+ * UI no longer offers the installment option — CPT replaces it with free-pace recharges.
+ */
 async function handleTicketInstallment(session: Stripe.Checkout.Session) {
   const {
     eventId, userId, tier, quantity, unitPrice,
@@ -441,6 +447,88 @@ async function handleTicketRecharge(session: Stripe.Checkout.Session) {
   }
 
   console.log(`Ticket ${ticketId} recharged +${safeAmount}€ (user: ${userId})`);
+}
+
+async function handleCulturePourTousPurchase(session: Stripe.Checkout.Session) {
+  const { eventId, userId, tier, quantity, targetPrice, deposit, firstName, lastName, email, phone, visitDate } = session.metadata!;
+  const qty = Math.min(Math.max(parseInt(quantity) || 1, 1), 10);
+  const depositPerTicket = parseFloat(deposit) / qty;
+  const targetPriceNum = parseFloat(targetPrice);
+
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    select: { title: true, date: true, venue: true, address: true, coverImage: true, tiers: true, slug: true },
+  });
+  if (!event) {
+    console.error(`CPT purchase: event ${eventId} not found`);
+    return;
+  }
+
+  // Re-validate price from DB — never trust metadata
+  const customTiers = event.tiers as Array<{ id: string; name: string; price: number; isCulturePourTous?: boolean }> | null;
+  const matched = Array.isArray(customTiers) ? customTiers.find((t) => t.id === tier) : null;
+  if (!matched || !matched.isCulturePourTous) {
+    console.error(`CPT purchase rejected: tier "${tier}" not CPT for event ${eventId}`);
+    return;
+  }
+  const verifiedPrice = Number(matched.price);
+  if (verifiedPrice !== targetPriceNum) {
+    console.error(`CPT price mismatch: metadata=${targetPriceNum}, db=${verifiedPrice}`);
+  }
+
+  const { signTicketToken, buildMagicLink } = await import("@/lib/cpt-token");
+  const { sendCptWelcomeEmail } = await import("@/lib/email");
+
+  const created: Array<{ id: string; magicLink: string }> = [];
+  for (let i = 0; i < qty; i++) {
+    const ticketId = crypto.randomUUID();
+    await prisma.$transaction([
+      prisma.ticket.create({
+        data: {
+          id: ticketId,
+          eventId,
+          userId,
+          tier,
+          price: verifiedPrice,
+          totalPaid: depositPerTicket,
+          qrCode: null, // QR only when fully paid
+          stripeSessionId: session.id,
+          firstName: firstName || null,
+          lastName: lastName || null,
+          email: email || null,
+          phone: phone || null,
+          visitDate: visitDate ? new Date(visitDate) : null,
+        },
+      }),
+      prisma.ticketPayment.create({
+        data: {
+          ticketId,
+          amount: depositPerTicket,
+          type: "cpt_deposit",
+          label: `Acompte Culture pour Tous`,
+          stripeId: session.id,
+        },
+      }),
+    ]);
+    created.push({ id: ticketId, magicLink: buildMagicLink(ticketId) });
+  }
+  console.log(`Created ${qty} CPT ticket(s) for event ${eventId}`);
+
+  // Welcome email with magic link
+  try {
+    await sendCptWelcomeEmail({
+      to: email || "",
+      firstName: firstName || "",
+      eventTitle: event.title,
+      eventDate: event.date,
+      eventVenue: event.venue,
+      targetPrice: verifiedPrice,
+      deposit: depositPerTicket,
+      tickets: created,
+    });
+  } catch (emailErr) {
+    console.error("CPT welcome email failed:", emailErr);
+  }
 }
 
 async function handleOrderPurchase(session: Stripe.Checkout.Session) {

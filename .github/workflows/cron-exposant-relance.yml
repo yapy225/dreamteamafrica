@@ -1,0 +1,18 @@
+name: Cron — Relance Exposants
+
+on:
+  schedule:
+    - cron: '0 8 * * 2,5'
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Trigger cron
+        run: |
+          curl -sf -X GET "https://dreamteamafrica.com/api/cron/exposant-relance" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 60

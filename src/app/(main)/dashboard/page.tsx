@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail, ScanLine, MessageSquare, Inbox, MessageCircle, FileImage, Sparkles, FileText, Calculator, ShieldCheck } from "lucide-react";
+import { Ticket, ShoppingBag, Newspaper, CalendarDays, BookOpen, Rss, Bot, Search, Store, ClipboardList, Mail, ScanLine, MessageSquare, Inbox, MessageCircle, FileImage, Sparkles, FileText, Calculator, ShieldCheck, Wallet, QrCode, Gift } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getRevenueData } from "@/lib/revenue";
@@ -17,7 +17,7 @@ export default async function DashboardPage() {
 
   const isAdmin = session.user.role === "ADMIN";
 
-  const [ticketCount, orderCount, revenueData, exhibitorBooking, unreadWhatsApp, unreadContacts, unreadEmails] = await Promise.all([
+  const [ticketCount, orderCount, revenueData, exhibitorBooking, unreadWhatsApp, unreadContacts, unreadEmails, ntbcUser] = await Promise.all([
     prisma.ticket.count({ where: { userId: session.user.id } }),
     prisma.order.count({ where: { userId: session.user.id } }),
     isAdmin ? getRevenueData() : null,
@@ -28,15 +28,39 @@ export default async function DashboardPage() {
     isAdmin ? prisma.whatsAppMessage.count({ where: { read: false, direction: "inbound" } }) : 0,
     isAdmin ? prisma.contactMessage.count({ where: { read: false } }) : 0,
     isAdmin ? prisma.email.count({ where: { isRead: false, isArchived: false, folder: "INBOX" } }) : 0,
+    prisma.user.findUnique({ where: { id: session.user.id }, select: { soldeNtbc: true, soldeBonus: true, tier: true } }),
   ]);
 
+  const soldeTotal = (ntbcUser?.soldeNtbc || 0) + (ntbcUser?.soldeBonus || 0);
+
   const quickLinks = [
+    {
+      href: "/dashboard/wallet",
+      icon: Wallet,
+      label: `Mon wallet — ${soldeTotal} NTBC`,
+      count: null,
+      color: "bg-amber-100 text-amber-600",
+    },
+    {
+      href: "/dashboard/payer",
+      icon: QrCode,
+      label: "Payer avec QR",
+      count: null,
+      color: "bg-emerald-100 text-emerald-600",
+    },
     {
       href: "/dashboard/tickets",
       icon: Ticket,
       label: "Mes billets",
       count: ticketCount,
       color: "bg-blue-100 text-blue-600",
+    },
+    {
+      href: "/dashboard/parrainage",
+      icon: Gift,
+      label: "Parrainage — 4 NTBC",
+      count: null,
+      color: "bg-pink-100 text-pink-600",
     },
     {
       href: "/dashboard/orders",

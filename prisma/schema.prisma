@@ -7,135 +7,62 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─── BEHAVIORAL SCORING ─────────────────────────────────
-
 model BehaviorScore {
-  id            String   @id @default(cuid())
-  fingerprint   String   @unique // hash of IP + user-agent
-  score         Int      @default(0)
-  signals       Json     @default("{}") // { "cgv_views": 5, "devtools": true, ... }
-  flagged       Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String   @id @default(cuid())
+  fingerprint String   @unique
+  score       Int      @default(0)
+  signals     Json     @default("{}")
+  flagged     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([fingerprint])
   @@index([flagged])
 }
 
-// ─── STRIPE WEBHOOK IDEMPOTENCY ─────────────────────────
-
 model StripeEvent {
-  id          String   @id // Stripe event ID (evt_...)
-  type        String   // e.g. "checkout.session.completed"
+  id          String   @id
+  type        String
   processedAt DateTime @default(now())
 
   @@index([processedAt])
 }
 
-// ─── ENUMS ───────────────────────────────────────────────
-
-enum Role {
-  USER
-  ARTISAN
-  EXPOSANT
-  ADMIN
-}
-
-enum ArticlePosition {
-  UNE            // J1-3: Front page
-  FACE_UNE       // J4-6: Second page
-  PAGES_4_5      // J7-8
-  PAGES_6_7      // J9-10
-  PAGES_8_9      // J11-12
-  PAGES_10_11    // J13-16
-  PAGES_12_13    // J17-21
-  ARCHIVES       // J22+
-}
-
-enum ArticleCategory {
-  ACTUALITE
-  CULTURE
-  CINEMA
-  MUSIQUE
-  SPORT
-  DIASPORA
-  BUSINESS
-  LIFESTYLE
-  OPINION
-}
-
-enum InscriptionStatus {
-  PENDING
-  VALIDATED
-  REJECTED
-}
-
-// Legacy enum kept for reference — tier is now a free String on Ticket
-// Allows custom tiers like PROMO_100, JOUR1_DAHOMEY, etc.
-enum TicketTier {
-  EARLY_BIRD
-  STANDARD
-  VIP
-}
-
-enum OrderStatus {
-  PENDING
-  PAID
-  SHIPPED
-  DELIVERED
-  CANCELLED
-}
-
-
-enum ArticleStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
-}
-
-enum ExhibitorPack {
-  ENTREPRENEUR_1J
-  ENTREPRENEUR
-  RESTAURATION
-  SAISON
-}
-
-enum BookingStatus {
-  PENDING
-  PARTIAL
-  CONFIRMED
-  CANCELLED
-}
-
-
-// ─── AUTH MODELS ─────────────────────────────────────────
-
 model User {
-  id             String    @id @default(cuid())
-  name           String?
-  email          String    @unique
-  emailVerified  DateTime?
-  image          String?
-  password       String?
-  role           Role      @default(USER)
-  bio            String?
-  country        String?
-  phone          String?
-  totpSecret     String?   // TOTP secret (encrypted), null = 2FA disabled
-  totpEnabled    Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  accounts    Account[]
-  sessions    Session[]
-  articles    Article[]
-  products    Product[]
-  orders      Order[]
-  tickets     Ticket[]
-  favorites   Favorite[]
-  officielContents OfficielContent[]
-  exhibitorBookings ExhibitorBooking[]
-  exhibitorProfiles ExhibitorProfile[]
+  id                     String             @id @default(cuid())
+  name                   String?
+  email                  String             @unique
+  emailVerified          DateTime?
+  image                  String?
+  password               String?
+  role                   Role               @default(USER)
+  bio                    String?
+  country                String?
+  phone                  String?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  totpEnabled            Boolean            @default(false)
+  totpSecret             String?
+  parrainCode            String?            @unique
+  qrToken                String?            @unique
+  soldeBonus             Float              @default(0)
+  soldeNtbc              Float              @default(0)
+  tier                   NtbcTier           @default(SEMENCE)
+  accounts               Account[]
+  articles               Article[]
+  exhibitorBookings      ExhibitorBooking[]
+  exhibitorProfiles      ExhibitorProfile[]
+  favorites              Favorite[]
+  avisEmis               NtbcAvis[]
+  parrainagesRecus       NtbcParrainage[]   @relation("filleul")
+  parrainagesEmis        NtbcParrainage[]   @relation("parrain")
+  ntbcTransactionsEmises NtbcTransaction[]  @relation("ntbc_emetteur")
+  ntbcTransactionsRecues NtbcTransaction[]  @relation("ntbc_receveur")
+  officielContents       OfficielContent[]
+  orders                 Order[]
+  products               Product[]
+  sessions               Session[]
+  tickets                Ticket[]
 }
 
 model Account {
@@ -144,15 +71,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -162,8 +88,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -174,53 +99,45 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ─── JOURNAL (L'AFROPÉEN) ───────────────────────────────
-
 model Article {
-  id          String          @id @default(cuid())
-  title       String
-  slug        String          @unique
-  excerpt     String
-  content     String          @db.Text
-  coverImage     String?
-  altText        String?
-  gradientClass  String?
-  category       ArticleCategory
-  tags           String[]        @default([])
-  position       ArticlePosition @default(UNE)
-  publishedAt    DateTime        @default(now())
-  dayCount       Int             @default(1)
-  featured       Boolean         @default(false)
-  isSponsored    Boolean         @default(false)
-  sponsorName    String?
-  readingTimeMin Int?
-  status         ArticleStatus   @default(PUBLISHED)
-  views          Int             @default(0)
-  source         String          @default("manual")
-  sourceUrl      String?
-  authorType     String          @default("humain")
-
-  // SEO
-  metaTitle       String?
+  id              String          @id @default(cuid())
+  title           String
+  slug            String          @unique
+  excerpt         String
+  content         String
+  coverImage      String?
+  gradientClass   String?
+  category        ArticleCategory
+  position        ArticlePosition @default(UNE)
+  publishedAt     DateTime        @default(now())
+  dayCount        Int             @default(1)
+  featured        Boolean         @default(false)
+  isSponsored     Boolean         @default(false)
+  sponsorName     String?
+  readingTimeMin  Int?
+  status          ArticleStatus   @default(PUBLISHED)
+  views           Int             @default(0)
+  authorId        String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  altText         String?
   metaDescription String?
-  seoKeywords     String[]        @default([])
-
-  // Réseaux sociaux
-  socialTwitter   String?
+  metaTitle       String?
+  socialFacebook  String?
   socialInstagram String?
   socialLinkedin  String?
-  socialFacebook  String?
   socialTiktok    String?
-
-  authorId    String
-  eventId     String?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-
-  author       User          @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  event        Event?        @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  socialPosts  SocialPost[]
-  socialDrafts SocialDraft[]
+  socialTwitter   String?
+  source          String          @default("manual")
+  tags            String[]        @default([])
+  authorType      String          @default("humain")
+  sourceUrl       String?
+  seoKeywords     String[]        @default([])
+  eventId         String?
+  author          User            @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  event           Event?          @relation(fields: [eventId], references: [id])
+  socialDrafts    SocialDraft[]
+  socialPosts     SocialPost[]
 
   @@index([slug])
   @@index([status])
@@ -230,61 +147,55 @@ model Article {
   @@index([eventId])
 }
 
-// ─── EVENTS + TICKETING ─────────────────────────────────
-
 model Event {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  description String   @db.Text
-  coverImage  String?
-  venue       String
-  address     String
-  venues      Json?      // [{name, address}] — multi-venue support
-  date        DateTime
-  endDate     DateTime?
-  capacity     Int
-  showCapacity Boolean  @default(true)
-  program      Json?
-  tiers        Json?
-  priceEarly   Decimal @db.Decimal(10, 2)
-  priceStd     Decimal @db.Decimal(10, 2)
-  priceVip     Decimal @db.Decimal(10, 2)
-  published   Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  tickets      Ticket[]
-  reservations EventReservation[]
-  articles     Article[]
+  id               String             @id @default(cuid())
+  title            String
+  slug             String             @unique
+  description      String
+  coverImage       String?
+  venue            String
+  address          String
+  date             DateTime
+  endDate          DateTime?
+  capacity         Int
+  showCapacity     Boolean            @default(true)
+  program          Json?
+  tiers            Json?
+  priceEarly       Decimal            @db.Decimal(10, 2)
+  priceStd         Decimal            @db.Decimal(10, 2)
+  priceVip         Decimal            @db.Decimal(10, 2)
+  published        Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  venues           Json?
+  articles         Article[]
+  reservations     EventReservation[]
+  ntbcTransactions NtbcTransaction[]
+  tickets          Ticket[]
 
   @@index([date])
 }
 
 model Ticket {
-  id              String     @id @default(cuid())
+  id              String          @id @default(cuid())
   eventId         String
   userId          String
-  tier            String
-  price           Decimal @db.Decimal(10, 2)
+  price           Decimal         @db.Decimal(10, 2)
   qrCode          String?
   stripeSessionId String?
-  purchasedAt     DateTime   @default(now())
+  purchasedAt     DateTime        @default(now())
+  tier            String
   checkedInAt     DateTime?
-
+  email           String?
   firstName       String?
   lastName        String?
-  email           String?
   phone           String?
   visitDate       DateTime?
-
-  // Installment tracking
-  totalPaid       Decimal @db.Decimal(10, 2) @default(0)
-  installments    Int        @default(1)
-
-  event    Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user     User            @relation(fields: [userId], references: [id], onDelete: SetNull)
-  payments TicketPayment[]
+  installments    Int             @default(1)
+  totalPaid       Decimal         @default(0) @db.Decimal(10, 2)
+  event           Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  payments        TicketPayment[]
 
   @@index([eventId])
   @@index([userId])
@@ -293,36 +204,33 @@ model Ticket {
 model TicketPayment {
   id       String   @id @default(cuid())
   ticketId String
-  ticket   Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  amount   Decimal @db.Decimal(10, 2)
-  type     String   // "deposit" | "installment" | "recharge" | "full_payment"
-  label    String   // e.g. "Acompte", "Recharge", "Paiement complet"
+  amount   Decimal  @db.Decimal(10, 2)
+  type     String
+  label    String
   stripeId String?
   paidAt   DateTime @default(now())
+  ticket   Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
   @@index([ticketId])
 }
 
-// ─── MARKETPLACE ────────────────────────────────────────
-
 model Product {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
-  slug        String   @unique
-  description String   @db.Text
-  price       Decimal @db.Decimal(10, 2)
-  images      String[] // array of URLs
+  slug        String      @unique
+  description String
+  price       Decimal     @db.Decimal(10, 2)
+  images      String[]
   category    String
   country     String
-  stock       Int      @default(0)
-  published   Boolean  @default(true)
+  stock       Int         @default(0)
+  published   Boolean     @default(true)
   artisanId   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  artisan    User        @relation(fields: [artisanId], references: [id], onDelete: SetNull)
-  orderItems OrderItem[]
-  favorites  Favorite[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  favorites   Favorite[]
+  orderItems  OrderItem[]
+  artisan     User        @relation(fields: [artisanId], references: [id], onDelete: SetNull)
 
   @@index([category])
   @@index([country])
@@ -333,24 +241,22 @@ model Order {
   id              String      @id @default(cuid())
   userId          String
   status          OrderStatus @default(PENDING)
-  total           Decimal @db.Decimal(10, 2)
+  total           Decimal     @db.Decimal(10, 2)
   stripeSessionId String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
-
-  user  User        @relation(fields: [userId], references: [id], onDelete: SetNull)
-  items OrderItem[]
+  user            User        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items           OrderItem[]
 }
 
 model OrderItem {
-  id        String @id @default(cuid())
+  id        String  @id @default(cuid())
   orderId   String
   productId String
   quantity  Int
   price     Decimal @db.Decimal(10, 2)
-
-  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: SetNull)
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: SetNull)
 }
 
 model Favorite {
@@ -358,17 +264,14 @@ model Favorite {
   userId    String
   productId String
   createdAt DateTime @default(now())
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
 }
 
-// ─── L'OFFICIEL D'AFRIQUE — INSCRIPTIONS ────────────────
-
 model Inscription {
-  id          String   @id @default(cuid())
+  id          String            @id @default(cuid())
   entreprise  String
   categorie   String
   directeur   String
@@ -386,7 +289,7 @@ model Inscription {
   whatsapp    String?
   youtube     String?
   linkedin    String?
-  description String            @db.Text
+  description String
   motsCles    String?
   newsletter  Boolean           @default(false)
   status      InscriptionStatus @default(PENDING)
@@ -398,14 +301,12 @@ model Inscription {
   @@index([status])
 }
 
-// ─── L'OFFICIEL D'AFRIQUE — CONTENU ÉDITORIAL ────────────
-
 model OfficielContent {
   id         String   @id @default(cuid())
   title      String
   slug       String   @unique
-  type       String   // "article", "interview", "portrait", "guide"
-  content    String   @db.Text
+  type       String
+  content    String
   excerpt    String?
   coverImage String?
   category   String
@@ -413,88 +314,83 @@ model OfficielContent {
   authorId   String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-  author User @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  author     User     @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   @@index([type])
   @@index([category])
   @@index([published])
 }
 
-// ─── ANNUAIRE / DIRECTORY ────────────────────────────────
-
 model DirectoryEntry {
-  id            String   @id @default(cuid())
-  companyName   String?
-  contactName   String
-  category      String   // Exposant, Artiste, Mannequin, Média, etc.
-  city          String?
-  country       String?
-  phone         String?
-  email         String?
-  website       String?
-  facebook      String?
-  instagram     String?
-  tiktok        String?
-  whatsapp      String?
-  linkedin      String?
-  youtube       String?
-  description   String   @db.Text
-  logoUrl       String?
-  event         String?  // Événement intéressé
-  published     Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String   @id @default(cuid())
+  companyName String?
+  contactName String
+  category    String
+  city        String?
+  country     String?
+  phone       String?
+  email       String?
+  website     String?
+  facebook    String?
+  instagram   String?
+  tiktok      String?
+  whatsapp    String?
+  linkedin    String?
+  youtube     String?
+  description String
+  event       String?
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  logoUrl     String?
 
   @@index([category])
   @@index([country])
   @@index([published])
 }
 
-// ─── MODEL APPLICATIONS (CANDIDATURES MANNEQUINS) ─────────
 model ModelApplication {
-  id          String   @id @default(cuid())
-  firstName   String
-  lastName    String
-  email       String
-  phone       String
-  height      String?
+  id           String   @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String
+  phone        String
+  height       String?
   measurements String?
-  experience  String?  @db.Text
-  instagram   String?
-  bookUrl     String?
-  photo1Url   String?
-  photo2Url   String?
-  photo3Url   String?
-  event       String?
-  status      String   @default("PENDING") // PENDING, SELECTED, REJECTED
-  notes       String?  @db.Text
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  experience   String?
+  instagram    String?
+  bookUrl      String?
+  photo1Url    String?
+  photo2Url    String?
+  photo3Url    String?
+  event        String?
+  status       String   @default("PENDING")
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([email])
   @@index([status])
   @@index([event])
 }
 
-// ─── ARTIST APPLICATIONS (CANDIDATURES ARTISTES) ──────────
 model ArtistApplication {
   id          String   @id @default(cuid())
   firstName   String
   lastName    String
   email       String
   phone       String
-  discipline  String   // Danse, Musique, Conte, Performance, Chant, DJ, etc.
-  groupName   String?  // Nom du groupe/compagnie
+  discipline  String
+  groupName   String?
   country     String?
-  description String?  @db.Text
+  description String?
   videoUrl    String?
   instagram   String?
   facebook    String?
   website     String?
   event       String?
-  status      String   @default("PENDING") // PENDING, SELECTED, REJECTED
-  notes       String?  @db.Text
+  status      String   @default("PENDING")
+  notes       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -503,225 +399,181 @@ model ArtistApplication {
   @@index([discipline])
 }
 
-// ─── COMMENTS (AVIS PUBLICS) ──────────────────────────────
-
 model Comment {
   id        String   @id @default(cuid())
   name      String
   email     String
-  rating    Int      // 1–5
-  message   String   @db.Text
+  rating    Int
+  message   String
   approved  Boolean  @default(true)
   createdAt DateTime @default(now())
 
   @@index([createdAt])
 }
 
-// ─── RSS AUTOMATION ─────────────────────────────────────
-
-enum DetectedArticleStatus {
-  PENDING     // Detected, not yet scored
-  SCORED      // Scored by AI
-  REWRITING   // Being rewritten
-  REWRITTEN   // Rewritten, awaiting publication
-  PUBLISHED   // Published to journal
-  IGNORED     // Score too low or manually ignored
-  ERROR       // Processing error
-}
-
 model RssFeed {
-  id             String   @id @default(cuid())
-  name           String
-  url            String   @unique
-  website        String?
-  category       String   @default("ACTUALITE")
-  language       String   @default("fr")
-  region         String?
-  reliability    Int      @default(5)
-  active         Boolean  @default(true)
-  lastFetchedAt  DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
+  id               String            @id @default(cuid())
+  name             String
+  url              String            @unique
+  website          String?
+  category         String            @default("ACTUALITE")
+  language         String            @default("fr")
+  region           String?
+  reliability      Int               @default(5)
+  active           Boolean           @default(true)
+  lastFetchedAt    DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
   detectedArticles DetectedArticle[]
 
   @@index([active])
 }
 
 model DetectedArticle {
-  id              String                 @id @default(cuid())
-  title           String
-  sourceUrl       String                 @unique
-  summary         String?                @db.Text
-  sourceCategory  String?
-  sourceName      String?
-  sourceImageUrl  String?
-  sourcePubDate   DateTime?
-  score           Int?
-  scoreReason     String?
-  rewrittenTitle  String?
-  rewrittenContent String?               @db.Text
-  rewrittenExcerpt String?
-  rewrittenMeta   String?
-  rewrittenKeywords String[]             @default([])
-  status          DetectedArticleStatus  @default(PENDING)
+  id                 String                @id @default(cuid())
+  title              String
+  sourceUrl          String                @unique
+  summary            String?
+  sourceCategory     String?
+  sourceName         String?
+  sourceImageUrl     String?
+  sourcePubDate      DateTime?
+  score              Int?
+  scoreReason        String?
+  rewrittenTitle     String?
+  rewrittenContent   String?
+  rewrittenExcerpt   String?
+  rewrittenMeta      String?
+  rewrittenKeywords  String[]              @default([])
+  status             DetectedArticleStatus @default(PENDING)
   publishedArticleId String?
-  errorMessage    String?
-  feedId          String
-  createdAt       DateTime               @default(now())
-  updatedAt       DateTime               @updatedAt
-
-  feed RssFeed @relation(fields: [feedId], references: [id], onDelete: Cascade)
+  errorMessage       String?
+  feedId             String
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  feed               RssFeed               @relation(fields: [feedId], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([feedId])
   @@index([createdAt])
 }
 
-// ─── NEWSLETTER ─────────────────────────────────────────
-
 model NewsletterSubscriber {
   id              String    @id @default(cuid())
   email           String    @unique
   isActive        Boolean   @default(true)
-  emailVerified   Boolean   @default(false)
-  verifyToken     String?   @unique
-  verifyExpiresAt DateTime?
   subscribedAt    DateTime  @default(now())
+  emailVerified   Boolean   @default(false)
+  verifyExpiresAt DateTime?
+  verifyToken     String?   @unique
 }
 
 model NewsletterCampaign {
-  id           String   @id @default(cuid())
-  subject      String
-  htmlContent  String   @db.Text
-  status       String   @default("PENDING") // PENDING, SENDING, COMPLETED
-  totalEmails  Int      @default(0)
-  sentEmails   Int      @default(0)
-  lastSentAt   DateTime?
-  scheduledAt  DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String    @id @default(cuid())
+  subject     String
+  htmlContent String
+  status      String    @default("PENDING")
+  totalEmails Int       @default(0)
+  sentEmails  Int       @default(0)
+  lastSentAt  DateTime?
+  scheduledAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([status])
 }
 
-// ─── RÉSERVATIONS GRATUITES ─────────────────────────────
-
 model EventReservation {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   eventId     String
-  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   firstName   String
   lastName    String
   email       String
   phone       String
-  guests      Int      @default(1)
-  status      String   @default("CONFIRMED") // CONFIRMED | CANCELLED
+  guests      Int       @default(1)
+  status      String    @default("CONFIRMED")
+  createdAt   DateTime  @default(now())
   checkedInAt DateTime?
-  createdAt   DateTime @default(now())
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@index([eventId])
   @@index([email])
 }
 
-// ─── PROSPECTS EXPOSANTS ──────────────────────────────
-
 model ExposantLead {
-  id          String   @id @default(cuid())
-  firstName   String
-  lastName    String
-  brand       String
-  sector      String
-  phone       String
-  email       String
-  eventName   String
-  // Suivi
-  status      String   @default("SENT")  // SENT, DEPOSIT_PAID, QUOTED, CONFIRMED, CANCELLED
-  depositPaidAt DateTime?
-  bookingId   String?  // lien vers ExhibitorBooking après paiement
+  id              String    @id @default(cuid())
+  firstName       String
+  lastName        String
+  brand           String
+  sector          String
+  phone           String
+  email           String
+  eventName       String
+  status          String    @default("SENT")
+  depositPaidAt   DateTime?
+  bookingId       String?
   stripeSessionId String?
-  remindedAt  DateTime? // date de relance 24h
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  remindedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([status])
   @@index([email])
   @@index([createdAt])
 }
 
-// ─── BILLETTERIE EXPOSANTS ─────────────────────────────
-
 model ExhibitorBooking {
-  id                   String         @id @default(cuid())
+  id                   String             @id @default(cuid())
   userId               String
-  user                 User           @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  // Infos exposant
   companyName          String
   contactName          String
   email                String
   phone                String
   sector               String
-
-  // Réservation
   pack                 ExhibitorPack
-  events               String[]       // ["foire-afrique", "juste-une-danse", ...]
+  events               String[]
   totalDays            Int
-  stands               Int            @default(1)
-  totalPrice           Decimal @db.Decimal(10, 2)
-
-  // Paiement fractionné
-  installments         Int            @default(1)  // 1 à 5
-  installmentAmount    Decimal @db.Decimal(10, 2)
-  paidInstallments     Int            @default(0)
-
-  // Stripe
+  totalPrice           Decimal            @db.Decimal(10, 2)
+  installments         Int                @default(1)
+  installmentAmount    Decimal            @db.Decimal(10, 2)
+  paidInstallments     Int                @default(0)
   stripeSessionId      String?
   stripeSubscriptionId String?
-
-  // Facture
-  invoiceNumber        String?        @unique
-
-  // Statut
-  status               BookingStatus  @default(PENDING)
-
+  status               BookingStatus      @default(PENDING)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  stands               Int                @default(1)
+  invoiceNumber        String?            @unique
   standNumber          Int?
-
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
-
-  profile  ExhibitorProfile?
-  payments ExhibitorPayment[]
+  user                 User               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  payments             ExhibitorPayment[]
+  profile              ExhibitorProfile?
 
   @@index([userId])
   @@index([status])
   @@index([email])
 }
 
-// ─── COUPONS (stands gratuits associations) ──────────────
-
 model Coupon {
-  id          String    @id @default(cuid())
-  code        String    @unique
-  type        String    @default("FREE_STAND") // FREE_STAND, PERCENTAGE, FIXED
-  value       Decimal @db.Decimal(10, 2) @default(0)            // 0 = gratuit, ou % ou montant fixe
-  label       String                           // "Stand gratuit — Association"
-  maxUses     Int       @default(1)
-  usedCount   Int       @default(0)
-  usedBy      String?                          // email de l'utilisateur
-  bookingId   String?                          // réservation liée
-  expiresAt   DateTime?
-  active      Boolean   @default(true)
-  createdAt   DateTime  @default(now())
+  id        String    @id @default(cuid())
+  code      String    @unique
+  type      String    @default("FREE_STAND")
+  value     Decimal   @default(0) @db.Decimal(10, 2)
+  label     String
+  maxUses   Int       @default(1)
+  usedCount Int       @default(0)
+  usedBy    String?
+  bookingId String?
+  expiresAt DateTime?
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
 
   @@index([code])
   @@index([active])
 }
 
-// ─── STANDS (blocage admin) ─────────────────────────────
-
 model StandBlock {
-  id          String  @id @default(cuid())
+  id          String   @id @default(cuid())
   eventId     String
   standNumber Int
   reason      String?
@@ -732,105 +584,85 @@ model StandBlock {
 }
 
 model ExhibitorPayment {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   bookingId String
+  amount    Decimal          @db.Decimal(10, 2)
+  type      String
+  label     String
+  stripeId  String?
+  paidAt    DateTime         @default(now())
   booking   ExhibitorBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  amount    Decimal @db.Decimal(10, 2)
-  type      String   // "deposit" | "installment" | "early_payment" | "full_payment"
-  label     String   // e.g. "Acompte", "Mensualité 3/9", "Paiement anticipé (2 mois)"
-  stripeId  String?  // Stripe session or invoice ID
-  paidAt    DateTime @default(now())
 
   @@index([bookingId])
 }
 
-// ─── PROFIL VISIBILITÉ EXPOSANT ─────────────────────────
-
 model ExhibitorProfile {
-  id            String   @id @default(cuid())
-  bookingId     String   @unique
-  booking       ExhibitorBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  userId        String?
-  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  // Token unique pour le formulaire public (expire après 90 jours)
-  token         String   @unique @default(cuid())
+  id             String                 @id @default(cuid())
+  bookingId      String                 @unique
+  userId         String?
+  token          String                 @unique @default(cuid())
+  companyName    String?
+  sector         String?
+  firstName      String?
+  lastName       String?
+  phone          String?
+  email          String?
+  facebook       String?
+  instagram      String?
+  description    String?
+  logoUrl        String?
+  image1Url      String?
+  image2Url      String?
+  image3Url      String?
+  videoUrl       String?
+  masterclass    Boolean                @default(false)
+  daysPresent    String[]
+  submittedAt    DateTime?
+  promoStatus    String                 @default("PENDING")
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  linkedin       String?
+  tiktok         String?
+  twitter        String?
+  website        String?
   tokenExpiresAt DateTime?
-
-  // Infos exposant
-  companyName   String?
-  sector        String?
-  firstName     String?
-  lastName      String?
-  phone         String?
-  email         String?
-
-  // Réseaux sociaux
-  facebook      String?
-  instagram     String?
-  twitter       String?
-  linkedin      String?
-  tiktok        String?
-  website       String?
-
-  // Description
-  description   String?  @db.Text
-
-  // Médias (URLs Bunny CDN)
-  logoUrl       String?
-  image1Url     String?
-  image2Url     String?
-  image3Url     String?
-  videoUrl      String?
-
-  // Options
-  masterclass   Boolean  @default(false)
-  daysPresent   String[] // ["1er-mai", "2-mai"]
-
-  // Statut
-  submittedAt   DateTime?
-  promoStatus   String   @default("PENDING") // PENDING, SCHEDULED, POSTED
-
-  publications  ExhibitorPublication[]
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  booking        ExhibitorBooking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user           User?                  @relation(fields: [userId], references: [id])
+  publications   ExhibitorPublication[]
 
   @@index([token])
   @@index([bookingId])
 }
 
 model ExhibitorPublication {
-  id          String    @id @default(cuid())
-  profileId   String
-  profile     ExhibitorProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  platform    String    // facebook, instagram, twitter, linkedin, tiktok, lafropeen, officiel
-  status      String    @default("PENDING") // PENDING, SCHEDULED, POSTED
-  postUrl     String?
-  postedAt    DateTime?
-  createdAt   DateTime  @default(now())
+  id        String           @id @default(cuid())
+  profileId String
+  platform  String
+  status    String           @default("PENDING")
+  postUrl   String?
+  postedAt  DateTime?
+  createdAt DateTime         @default(now())
+  profile   ExhibitorProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@unique([profileId, platform])
   @@index([profileId])
 }
 
-// ─── MESSAGES DE CONTACT ──────────────────────────────
-
 model ContactMessage {
-  id         String   @id @default(cuid())
-  category   String   // EXPOSANT, MANNEQUIN, PRESTATAIRE, PARTENAIRE, INSTITUTION, MEDIA, ARTISTE
+  id         String         @id @default(cuid())
+  category   String
   firstName  String
   lastName   String
   email      String
   phone      String?
   company    String?
-  message    String   @db.Text
-  read       Boolean  @default(false)
-  status     String   @default("NOUVEAU") // NOUVEAU, CONTACTE, INTERESSE, ACOMPTE, CONFIRME, PERDU
-  notes      String?  @db.Text
-  draftReply String?  @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
+  message    String
+  read       Boolean        @default(false)
+  createdAt  DateTime       @default(now())
+  notes      String?
+  status     String         @default("NOUVEAU")
+  updatedAt  DateTime       @default(now()) @updatedAt
+  draftReply String?
   replies    ContactReply[]
 
   @@index([category])
@@ -840,106 +672,68 @@ model ContactMessage {
 }
 
 model ContactReply {
-  id        String   @id @default(cuid())
+  id        String         @id @default(cuid())
   messageId String
+  body      String
+  sentBy    String
+  sentAt    DateTime       @default(now())
   message   ContactMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  body      String   @db.Text
-  sentBy    String   // admin user id
-  sentAt    DateTime @default(now())
 
   @@index([messageId])
 }
 
-// ─── ACCRÉDITATIONS MÉDIA ────────────────────────────────
-
 model MediaAccreditation {
-  id          String   @id @default(cuid())
-  name        String
-  email       String
-  phone       String?
-  outlet      String   // nom du média (Le Média Citoyen, etc.)
-  type        String   @default("PRESSE") // PRESSE, TV, RADIO, WEB, PHOTO, BLOG
-  event       String?
-  status      String   @default("PENDING") // PENDING, SELECTED, REJECTED
-  notes       String?  @db.Text
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  outlet    String
+  type      String   @default("PRESSE")
+  event     String?
+  status    String   @default("PENDING")
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@index([status])
   @@index([createdAt])
 }
 
-// ─── LEADS (Facebook Ads) ────────────────────────────────
-
 model Lead {
-  id         String   @id @default(cuid())
-  name       String
-  email      String
-  phone      String
-  source     String   // facebook_leads, manual, etc.
-  profile    String   @default("Visiteur") // Visiteur, Exposant, Artiste, Média, Autre
-  formId     String?
-  fbLeadId   String?  @unique
-  converted  Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  source    String
+  profile   String   @default("Visiteur")
+  formId    String?
+  fbLeadId  String?  @unique
+  converted Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   @@index([source])
   @@index([converted])
   @@index([createdAt])
 }
 
-// ─── PUBLICATIONS RÉSEAUX SOCIAUX ────────────────────────
-
-enum SocialPlatform {
-  TWITTER
-  FACEBOOK
-  INSTAGRAM
-  LINKEDIN
-  TIKTOK
-}
-
-enum SocialPostStatus {
-  PENDING
-  POSTED
-  FAILED
-}
-
 model SocialPost {
-  id          String           @id @default(cuid())
-  articleId   String
-  platform    SocialPlatform
-  status      SocialPostStatus @default(PENDING)
-  postId      String?          // ID renvoyé par la plateforme
-  postUrl     String?          // URL du post publié
-  content     String           @db.Text
-  hashtags    String[]         @default([])
-  imageUrl    String?
+  id           String           @id @default(cuid())
+  articleId    String
+  platform     SocialPlatform
+  status       SocialPostStatus @default(PENDING)
+  postId       String?
+  postUrl      String?
+  content      String
+  hashtags     String[]         @default([])
+  imageUrl     String?
   errorMessage String?
-  postedAt    DateTime?
-  createdAt   DateTime         @default(now())
-
-  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  postedAt     DateTime?
+  createdAt    DateTime         @default(now())
+  article      Article          @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@index([articleId])
   @@index([platform])
   @@index([status])
-}
-
-// ─── SOCIAL DRAFTS (BROUILLONS ENGAGEMENT) ──────────────
-
-enum SocialDraftType {
-  COMMENT       // Commentaire sur un post existant
-  REPLY         // Réponse à un commentaire
-  PROMO         // Post promotionnel autonome (L'Officiel, Marketplace, etc.)
-  ENGAGEMENT    // Like + commentaire d'engagement
-}
-
-enum SocialDraftStatus {
-  DRAFT         // Brouillon généré par IA
-  APPROVED      // Validé par l'admin
-  REJECTED      // Rejeté par l'admin
-  POSTED        // Publié sur la plateforme
-  FAILED        // Échec de publication
 }
 
 model SocialDraft {
@@ -947,24 +741,23 @@ model SocialDraft {
   platform      SocialPlatform
   type          SocialDraftType   @default(COMMENT)
   status        SocialDraftStatus @default(DRAFT)
-  content       String            @db.Text
-  editedContent String?           @db.Text    // Contenu modifié par l'admin
+  content       String
+  editedContent String?
   imageUrl      String?
-  targetPostId  String?           // ID du post social cible (pour commentaire/reply)
-  targetPostUrl String?           // URL du post social cible
-  articleId     String?           // Article lié (optionnel)
-  section       String?           // "lafropeen", "officiel", "marketplace", "saison-culturelle"
-  postId        String?           // ID renvoyé après publication
-  postUrl       String?           // URL du commentaire publié
-  reviewedBy    String?           // Admin qui a validé
+  targetPostId  String?
+  targetPostUrl String?
+  articleId     String?
+  section       String?
+  postId        String?
+  postUrl       String?
+  reviewedBy    String?
   reviewedAt    DateTime?
   postedAt      DateTime?
   errorMessage  String?
-  scheduledFor  DateTime?         // Publication programmée
+  scheduledFor  DateTime?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
-
-  article       Article?          @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  article       Article?          @relation(fields: [articleId], references: [id])
 
   @@index([status])
   @@index([platform])
@@ -973,22 +766,20 @@ model SocialDraft {
   @@index([createdAt])
 }
 
-// ─── WHATSAPP MESSAGES ──────────────────────────────
-
 model WhatsAppMessage {
-  id             String   @id @default(cuid())
-  waMessageId    String   @unique // WhatsApp message ID (wamid.xxx)
-  from           String   // sender phone number
-  to             String   // receiver phone number
-  contactName    String   @default("Inconnu")
-  direction      String   // "inbound" or "outbound"
-  type           String   @default("text") // text, image, button, etc.
-  body           String?  @db.Text
-  mediaUrl       String?
-  status         String?  // sent, delivered, read (for outbound)
-  read           Boolean  @default(false)
-  archived       Boolean  @default(false)
-  createdAt      DateTime @default(now())
+  id          String   @id @default(cuid())
+  waMessageId String   @unique
+  from        String
+  to          String
+  contactName String   @default("Inconnu")
+  direction   String
+  type        String   @default("text")
+  body        String?
+  mediaUrl    String?
+  status      String?
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  archived    Boolean  @default(false)
 
   @@index([from])
   @@index([direction])
@@ -996,8 +787,6 @@ model WhatsAppMessage {
   @@index([createdAt])
   @@index([archived])
 }
-
-// ─── EMAIL INBOX ──────────────────────────────────────
 
 model Email {
   id             String   @id @default(cuid())
@@ -1009,8 +798,8 @@ model Email {
   toEmails       String[]
   ccEmails       String[] @default([])
   subject        String
-  bodyText       String?  @db.Text
-  bodyHtml       String?  @db.Text
+  bodyText       String?
+  bodyHtml       String?
   snippet        String?
   hasAttachments Boolean  @default(false)
   attachments    Json?
@@ -1019,9 +808,9 @@ model Email {
   isRead         Boolean  @default(false)
   isArchived     Boolean  @default(false)
   isStarred      Boolean  @default(false)
-  label          String?
   receivedAt     DateTime
   syncedAt       DateTime @default(now())
+  label          String?
 
   @@index([isArchived, isRead])
   @@index([fromEmail])
@@ -1038,28 +827,26 @@ model EmailSyncState {
 }
 
 model SocialCredential {
-  id                  String         @id @default(cuid())
-  platform            SocialPlatform @unique
-  accessToken         String         @db.Text // Deprecated: use encryptedAccessToken
-  refreshToken        String?        @db.Text // Deprecated: use encryptedRefreshToken
-  encryptedAccessToken  String?      @db.Text // AES-256-GCM encrypted
-  encryptedRefreshToken String?      @db.Text // AES-256-GCM encrypted
-  expiresAt           DateTime?
-  memberId            String?        // LinkedIn member ID, etc.
-  metadata            Json?          // Extra platform-specific data
-  updatedAt           DateTime       @updatedAt
-  createdAt           DateTime       @default(now())
+  id                    String         @id @default(cuid())
+  platform              SocialPlatform @unique
+  accessToken           String
+  refreshToken          String?
+  expiresAt             DateTime?
+  memberId              String?
+  metadata              Json?
+  updatedAt             DateTime       @updatedAt
+  createdAt             DateTime       @default(now())
+  encryptedAccessToken  String?
+  encryptedRefreshToken String?
 }
-
-// ─── AUDIT LOG ──────────────────────────────────────────
 
 model AuditLog {
   id        String   @id @default(cuid())
   userId    String?
   userEmail String?
-  action    String   // "ticket.create", "admin.export", "account.delete", etc.
-  target    String?  // ID of the affected resource
-  details   Json?    // Extra context
+  action    String
+  target    String?
+  details   Json?
   ip        String?
   createdAt DateTime @default(now())
 
@@ -1068,10 +855,8 @@ model AuditLog {
   @@index([createdAt])
 }
 
-// ─── DB RATE LIMITING (serverless-safe) ─────────────────
-
 model RateLimitEntry {
-  id        String   @id // key: "checkout:192.168.1.1"
+  id        String   @id
   count     Int      @default(1)
   resetAt   DateTime
   createdAt DateTime @default(now())
@@ -1079,50 +864,204 @@ model RateLimitEntry {
   @@index([resetAt])
 }
 
-// ─── SONDAGE EXPOSANTS ──────────────────────────────────
+model ExhibitorSurvey {
+  id        String       @id @default(cuid())
+  email     String       @unique
+  name      String
+  phone     String?
+  answer    SurveyAnswer
+  days      Int[]
+  comment   String?
+  sentAt    DateTime?
+  createdAt DateTime     @default(now())
+}
+
+model ExhibitorFormEntry {
+  id            String    @id @default(cuid())
+  submittedAt   DateTime?
+  societe       String
+  firstName     String?
+  lastName      String?
+  phone         String?
+  email         String?
+  description   String?
+  secteur       String?
+  besoinPrise   Boolean   @default(false)
+  instagram     String?
+  facebook      String?
+  visibilite    String?
+  salon         String    @default("Foire Afrique 2024")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  joursPresence String[]  @default([])
+  masterclass   Boolean   @default(false)
+
+  @@index([email])
+  @@index([secteur])
+  @@index([salon])
+}
+
+model NtbcTransaction {
+  id             String   @id @default(cuid())
+  emetteurId     String
+  receveurId     String
+  montantNtbc    Float
+  commissionNtbc Float
+  netNtbc        Float
+  label          String?
+  eventId        String?
+  createdAt      DateTime @default(now())
+  emetteur       User     @relation("ntbc_emetteur", fields: [emetteurId], references: [id])
+  event          Event?   @relation(fields: [eventId], references: [id])
+  receveur       User     @relation("ntbc_receveur", fields: [receveurId], references: [id])
+
+  @@index([emetteurId])
+  @@index([receveurId])
+}
+
+model NtbcParrainage {
+  id        String   @id @default(cuid())
+  parrainId String
+  filleulId String
+  bonusNtbc Float    @default(4)
+  createdAt DateTime @default(now())
+  filleul   User     @relation("filleul", fields: [filleulId], references: [id])
+  parrain   User     @relation("parrain", fields: [parrainId], references: [id])
+
+  @@unique([parrainId, filleulId])
+}
+
+model NtbcAvis {
+  id          String   @id @default(cuid())
+  userId      String
+  eventId     String
+  exposantId  String
+  note        Int
+  commentaire String?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, eventId, exposantId])
+  @@index([exposantId])
+}
+
+enum Role {
+  USER
+  ARTISAN
+  ADMIN
+  EXPOSANT
+}
+
+enum ArticlePosition {
+  UNE
+  FACE_UNE
+  PAGES_4_5
+  PAGES_6_7
+  PAGES_8_9
+  PAGES_10_11
+  PAGES_12_13
+  ARCHIVES
+}
+
+enum ArticleCategory {
+  ACTUALITE
+  CULTURE
+  DIASPORA
+  BUSINESS
+  LIFESTYLE
+  OPINION
+  CINEMA
+  MUSIQUE
+  SPORT
+}
+
+enum InscriptionStatus {
+  PENDING
+  VALIDATED
+  REJECTED
+}
+
+enum TicketTier {
+  EARLY_BIRD
+  STANDARD
+  VIP
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ExhibitorPack {
+  ENTREPRENEUR
+  RESTAURATION
+  SAISON
+  ENTREPRENEUR_1J
+}
+
+enum BookingStatus {
+  PENDING
+  PARTIAL
+  CONFIRMED
+  CANCELLED
+}
+
+enum DetectedArticleStatus {
+  PENDING
+  SCORED
+  REWRITING
+  REWRITTEN
+  PUBLISHED
+  IGNORED
+  ERROR
+}
+
+enum SocialPlatform {
+  TWITTER
+  FACEBOOK
+  INSTAGRAM
+  LINKEDIN
+  TIKTOK
+}
+
+enum SocialPostStatus {
+  PENDING
+  POSTED
+  FAILED
+}
+
+enum SocialDraftType {
+  COMMENT
+  REPLY
+  PROMO
+  ENGAGEMENT
+}
+
+enum SocialDraftStatus {
+  DRAFT
+  APPROVED
+  REJECTED
+  POSTED
+  FAILED
+}
 
 enum SurveyAnswer {
   YES
   NO
 }
 
-model ExhibitorSurvey {
-  id        String       @id @default(cuid())
-  email     String
-  name      String
-  phone     String?
-  answer    SurveyAnswer
-  days      Int[]        // [1], [2], or [1, 2]
-  comment   String?
-  sentAt    DateTime?    // date d'envoi de la proposition WhatsApp
-  createdAt DateTime     @default(now())
-
-  @@unique([email])
-}
-
-// ─── SOUMISSIONS FORMULAIRE EXPOSANTS (données brutes) ──────
-
-model ExhibitorFormEntry {
-  id              String   @id @default(cuid())
-  submittedAt     DateTime?
-  societe         String
-  firstName       String?
-  lastName        String?
-  phone           String?
-  email           String?
-  description     String?  @db.Text
-  secteur         String?
-  besoinPrise     Boolean  @default(false)
-  instagram       String?
-  facebook        String?
-  visibilite      String?  // "Interview avec notre journaliste", etc.
-  masterclass     Boolean  @default(false)
-  joursPresence   String[] @default([])
-  salon           String   @default("Foire Afrique 2024")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@index([email])
-  @@index([secteur])
-  @@index([salon])
+enum NtbcTier {
+  SEMENCE
+  RACINE
+  TRONC
+  BAOBAB
 }

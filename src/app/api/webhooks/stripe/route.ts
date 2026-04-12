@@ -155,6 +155,16 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
   await Promise.all(ticketPromises);
   console.log(`Created ${qty} ticket(s) for event ${eventId}, user ${userId}`);
 
+  // ── NTBC: créditer le montant payé en NTBC dans le wallet ──
+  try {
+    const { crediterNtbc } = await import("@/lib/ntbc");
+    const totalPaid = unitPriceNum * qty;
+    await crediterNtbc(userId, totalPaid, `Billet ${tierName} — ${event.title}`);
+    console.log(`[NTBC] +${totalPaid} NTBC crédités à ${userId} (billet ${tierName})`);
+  } catch (ntbcErr) {
+    console.error("[NTBC] Credit failed:", ntbcErr);
+  }
+
   // Send confirmation email
   try {
     if (event) {
@@ -402,6 +412,15 @@ async function handleTicketRecharge(session: Stripe.Checkout.Session) {
     where: { id: ticketId },
     data: { totalPaid: { increment: safeAmount } },
   });
+
+  // ── NTBC: créditer la recharge en NTBC ──
+  try {
+    const { crediterNtbc } = await import("@/lib/ntbc");
+    await crediterNtbc(ticket.userId, safeAmount, `Recharge billet +${safeAmount} €`);
+    console.log(`[NTBC] +${safeAmount} NTBC crédités à ${ticket.userId} (recharge billet)`);
+  } catch (ntbcErr) {
+    console.error("[NTBC] Recharge credit failed:", ntbcErr);
+  }
 
   // If now fully paid → generate QR code
   if (updatedTicket.totalPaid >= updatedTicket.price && !updatedTicket.qrCode) {

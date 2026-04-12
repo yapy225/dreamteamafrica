@@ -30,12 +30,10 @@ export default async function DashboardPage() {
     isAdmin ? prisma.email.count({ where: { isRead: false, isArchived: false, folder: "INBOX" } }) : 0,
     prisma.user.findUnique({ where: { id: session.user.id }, select: { soldeNtbc: true, soldeBonus: true, tier: true } }),
     isAdmin
-      ? prisma.ticket.count({
-          where: {
-            payments: { some: { type: "cpt_deposit" } },
-            totalPaid: { lt: prisma.ticket.fields.price },
-          },
-        })
+      ? prisma.ticket.findMany({
+          where: { payments: { some: { type: "cpt_deposit" } } },
+          select: { price: true, totalPaid: true },
+        }).then((rows) => rows.filter((r) => Number(r.totalPaid) < Number(r.price)).length)
       : 0,
   ]);
 

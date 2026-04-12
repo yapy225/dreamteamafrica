@@ -28,6 +28,9 @@ export type NtbcStats = {
   ntbcBonus: number;
   commissionTotale: number;
   fraisBilletterie: number;
+  fraisCulturePourTous: number;
+  fraisExposantsEchelonne: number;
+  fraisTotal: number;
   transactionsCount: number;
   volumeTotal: number;
   parrainages: number;
@@ -198,7 +201,7 @@ export async function getRevenueData(): Promise<RevenueSummary> {
   };
 
   // ── Stats NTBC ──
-  const [ntbcCirculation, ntbcTransactions, ntbcParrainages, ntbcFraisBillets] = await Promise.all([
+  const [ntbcCirculation, ntbcTransactions, ntbcParrainages, allTicketPayments, exhibitorPaymentsAll] = await Promise.all([
     prisma.user.aggregate({
       _sum: { soldeNtbc: true, soldeBonus: true },
     }),
@@ -207,18 +210,43 @@ export async function getRevenueData(): Promise<RevenueSummary> {
       _count: true,
     }),
     prisma.ntbcParrainage.count(),
-    prisma.ticketPayment.aggregate({
-      _sum: { amount: true },
+    // Tous les paiements billets pour calculer les frais
+    prisma.ticketPayment.findMany({
+      select: { amount: true, type: true, ticket: { select: { installments: true } } },
+    }),
+    // Tous les paiements exposants échelonnés
+    prisma.exhibitorPayment.findMany({
+      select: { amount: true },
     }),
   ]);
 
-  const totalBilletsMontant = Number(ntbcFraisBillets._sum.amount || 0);
+  // Frais billetterie classique (paiement unique, 3% min 0.50€)
+  const billetsUniques = allTicketPayments.filter(p => p.type === "full_payment" || (p.type === "deposit" && p.ticket.installments === 1));
+  const montantBilletsUniques = billetsUniques.reduce((s, p) => s + Number(p.amount), 0);
+  const fraisBilletterie = Math.round(Math.max(montantBilletsUniques * 0.03, billetsUniques.length * 0.50) * 100) / 100;
+
+  // Frais Culture pour Tous (acomptes + recharges, 3% min 0.50€ par paiement)
+  const billetsCPT = allTicketPayments.filter(p => p.ticket.installments > 1);
+  const fraisCPT = billetsCPT.reduce((s, p) => {
+    const fee = Math.max(Number(p.amount) * 0.03, 0.50);
+    return s + fee;
+  }, 0);
+
+  // Frais exposants échelonnés (3% par paiement)
+  const fraisExposants = exhibitorPaymentsAll.reduce((s, p) => {
+    return s + Number(p.amount) * 0.03;
+  }, 0);
+
+  const fraisTotal = Math.round((fraisBilletterie + fraisCPT + fraisExposants) * 100) / 100;
 
   const ntbc: NtbcStats = {
     ntbcEnCirculation: (ntbcCirculation._sum.soldeNtbc || 0) + (ntbcCirculation._sum.soldeBonus || 0),
     ntbcBonus: ntbcCirculation._sum.soldeBonus || 0,
     commissionTotale: ntbcTransactions._sum.commissionNtbc || 0,
-    fraisBilletterie: Math.round(totalBilletsMontant * 0.03 * 100) / 100,
+    fraisBilletterie: Math.round(fraisBilletterie * 100) / 100,
+    fraisCulturePourTous: Math.round(fraisCPT * 100) / 100,
+    fraisExposantsEchelonne: Math.round(fraisExposants * 100) / 100,
+    fraisTotal,
     transactionsCount: ntbcTransactions._count,
     volumeTotal: ntbcTransactions._sum.montantNtbc || 0,
     parrainages: ntbcParrainages,

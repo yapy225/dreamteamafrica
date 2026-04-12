@@ -52,37 +52,63 @@ export function RevenueSection({ data: initialData }: RevenueSectionProps) {
       {/* NTBC Stats */}
       {data.ntbc && (
         <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4">
-          <h3 className="mb-3 text-sm font-semibold text-amber-800">NTBC — Cashless & Frais</h3>
+          <h3 className="mb-3 text-sm font-semibold text-amber-800">NTBC — Cashless</h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-lg bg-white p-3 text-center shadow-sm">
               <p className="text-lg font-bold text-amber-600">{data.ntbc.ntbcEnCirculation}</p>
               <p className="text-[10px] text-slate-500">NTBC en circulation</p>
             </div>
             <div className="rounded-lg bg-white p-3 text-center shadow-sm">
-              <p className="text-lg font-bold text-green-600">{data.ntbc.commissionTotale} NTBC</p>
-              <p className="text-[10px] text-slate-500">Commission 4% (exposants)</p>
-            </div>
-            <div className="rounded-lg bg-white p-3 text-center shadow-sm">
-              <p className="text-lg font-bold text-blue-600">{data.ntbc.fraisBilletterie} EUR</p>
-              <p className="text-[10px] text-slate-500">Frais 3% (billets)</p>
+              <p className="text-lg font-bold text-slate-700">{data.ntbc.volumeTotal}</p>
+              <p className="text-[10px] text-slate-500">Volume total NTBC</p>
             </div>
             <div className="rounded-lg bg-white p-3 text-center shadow-sm">
               <p className="text-lg font-bold text-slate-700">{data.ntbc.transactionsCount}</p>
-              <p className="text-[10px] text-slate-500">Transactions NTBC</p>
+              <p className="text-[10px] text-slate-500">Transactions</p>
+            </div>
+            <div className="rounded-lg bg-white p-3 text-center shadow-sm">
+              <p className="text-lg font-bold text-green-500">{data.ntbc.ntbcBonus}</p>
+              <p className="text-[10px] text-slate-500">Bonus offerts</p>
             </div>
           </div>
-          <div className="mt-3 grid grid-cols-3 gap-3">
-            <div className="rounded-lg bg-white p-2 text-center shadow-sm">
-              <p className="text-sm font-bold text-amber-600">{data.ntbc.volumeTotal}</p>
-              <p className="text-[10px] text-slate-500">Volume total NTBC</p>
+
+          {/* Frais de gestion — détail */}
+          <h3 className="mb-2 mt-4 text-sm font-semibold text-amber-800">Frais de gestion</h3>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-lg bg-white p-3 text-center shadow-sm">
+              <p className="text-lg font-bold text-green-600">{data.ntbc.commissionTotale} NTBC</p>
+              <p className="text-[10px] text-slate-500">Commission 4%</p>
+              <p className="text-[9px] text-slate-400">Paiements exposants</p>
             </div>
-            <div className="rounded-lg bg-white p-2 text-center shadow-sm">
+            <div className="rounded-lg bg-white p-3 text-center shadow-sm">
+              <p className="text-lg font-bold text-blue-600">{data.ntbc.fraisBilletterie} €</p>
+              <p className="text-[10px] text-slate-500">Frais 3% billets</p>
+              <p className="text-[9px] text-slate-400">Paiement unique</p>
+            </div>
+            <div className="rounded-lg bg-white p-3 text-center shadow-sm">
+              <p className="text-lg font-bold text-purple-600">{data.ntbc.fraisCulturePourTous} €</p>
+              <p className="text-[10px] text-slate-500">Frais Culture pour Tous</p>
+              <p className="text-[9px] text-slate-400">Acomptes + recharges</p>
+            </div>
+            <div className="rounded-lg bg-white p-3 text-center shadow-sm">
+              <p className="text-lg font-bold text-teal-600">{data.ntbc.fraisExposantsEchelonne} €</p>
+              <p className="text-[10px] text-slate-500">Frais exposants</p>
+              <p className="text-[9px] text-slate-400">Paiement echelonne</p>
+            </div>
+          </div>
+
+          {/* Total frais */}
+          <div className="mt-3 rounded-lg bg-[#0D2B1E] p-3 text-center">
+            <p className="text-xs text-white/60">Total frais de gestion perçus</p>
+            <p className="text-2xl font-bold text-[#C9A84C]">{data.ntbc.fraisTotal} €</p>
+            <p className="text-[10px] text-white/40">+ {data.ntbc.commissionTotale} NTBC de commission</p>
+          </div>
+
+          {/* Parrainage */}
+          <div className="mt-3 flex gap-3">
+            <div className="flex-1 rounded-lg bg-white p-2 text-center shadow-sm">
               <p className="text-sm font-bold text-pink-600">{data.ntbc.parrainages}</p>
-              <p className="text-[10px] text-slate-500">Parrainages</p>
-            </div>
-            <div className="rounded-lg bg-white p-2 text-center shadow-sm">
-              <p className="text-sm font-bold text-green-500">{data.ntbc.ntbcBonus}</p>
-              <p className="text-[10px] text-slate-500">Bonus offerts</p>
+              <p className="text-[10px] text-slate-500">Parrainages (coût 0 €)</p>
             </div>
           </div>
         </div>

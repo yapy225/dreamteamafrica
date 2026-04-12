@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Conditions Générales de Vente — Dream Team Africa",
-  description: "Conditions générales de vente du site dreamteamafrica.com — billets, NTBC, frais, remboursement, RGPD.",
+  description: "Conditions générales de vente du site dreamteamafrica.com — billets, paiement cashless, frais, remboursement.",
   alternates: { canonical: "https://dreamteamafrica.com/conditions-generales" },
 };
 
@@ -17,15 +17,28 @@ export default function CGVPage() {
         Dream Team Africa — www.dreamteamafrica.com — Dernière mise à jour : 12 avril 2026
       </p>
 
+      {/* Résumé */}
+      <div className="mb-10 rounded-xl border border-dta-accent/20 bg-dta-accent/5 p-5">
+        <h2 className="mb-3 font-serif text-lg font-bold text-dta-dark">En résumé</h2>
+        <ul className="space-y-2 text-sm text-dta-char/80">
+          <li>• Frais de gestion : <strong>3 % (min 0,50 €)</strong> sur chaque achat de billet</li>
+          <li>• Paiement sur place : <strong>100 % cashless</strong> via votre wallet personnel</li>
+          <li>• Commission exposants : <strong>4 %</strong> sur les paiements reçus</li>
+          <li>• Parrainage : <strong>crédits bonus offerts</strong> (non retirables)</li>
+          <li>• Remboursement : <strong>non</strong>, sauf annulation par l&apos;organisateur</li>
+        </ul>
+      </div>
+
       <div className="space-y-10 text-sm leading-relaxed text-dta-char/80">
         {/* 1 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            1. Présentation de l&apos;entreprise
+            1. Présentation
           </h2>
           <p>
-            Dream Team Africa est une organisation culturelle dédiée à la promotion des
-            talents africains et à la création d&apos;événements uniques à Paris et en Europe.
+            Dream Team Africa est une organisation culturelle dédiée à la promotion
+            de la culture africaine à Paris et en Europe, notamment à travers la
+            Saison Culturelle Africaine.
           </p>
           <ul className="mt-3 space-y-1">
             <li>Siège social : Draveil, Île-de-France</li>
@@ -41,13 +54,12 @@ export default function CGVPage() {
             2. Objet
           </h2>
           <p>
-            Les présentes Conditions Générales de Vente définissent les droits et obligations
-            des parties dans le cadre de la vente en ligne de billets, formules exposants,
-            et de l&apos;utilisation du système de paiement cashless NTÉBY Coin (NTBC)
-            proposé par Dream Team Africa.
+            Les présentes CGV définissent les droits et obligations des parties
+            dans le cadre de l&apos;achat de billets, de l&apos;utilisation du système
+            de paiement cashless et des services proposés sur dreamteamafrica.com.
           </p>
           <p className="mt-2">
-            Toute commande ou utilisation du service implique l&apos;acceptation sans réserve
+            Toute commande ou utilisation du service implique l&apos;acceptation
             des présentes conditions.
           </p>
         </section>
@@ -55,102 +67,71 @@ export default function CGVPage() {
         {/* 3 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            3. Produits et services proposés
+            3. Services proposés
           </h2>
-          <p>Dream Team Africa propose :</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5">
-            <li>Des billets électroniques pour ses événements culturels</li>
-            <li>Un système de paiement échelonné « Culture pour Tous » (dès 5 €)</li>
-            <li>Un système de paiement cashless NTBC pour les événements</li>
-            <li>Des formules d&apos;exposition et de partenariat</li>
-            <li>Un programme de parrainage</li>
+          <ul className="list-disc space-y-1 pl-5">
+            <li>Billets pour les événements de la Saison Culturelle Africaine</li>
+            <li>Réservation échelonnée « Culture pour Tous » (dès 5 €)</li>
+            <li>Paiement cashless sur place via un wallet personnel</li>
+            <li>Formules d&apos;exposition pour les artisans et commerçants</li>
+            <li>Programme de parrainage</li>
           </ul>
         </section>
 
         {/* 4 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            4. Prix, frais de gestion et paiement
+            4. Prix et frais de gestion
           </h2>
-          <p>Les prix affichés sont en euros TTC.</p>
+          <p>Les prix sont indiqués en euros TTC.</p>
 
           <h3 className="mt-4 font-semibold text-dta-dark">4.1 Frais de gestion — Visiteurs</h3>
           <p className="mt-2">
             Des frais de gestion de <strong>3 % (minimum 0,50 €)</strong> sont appliqués
-            sur chaque transaction de billetterie, qu&apos;il s&apos;agisse d&apos;un paiement unique
-            ou d&apos;un versement échelonné « Culture pour Tous ».
+            sur chaque transaction de billetterie. Ces frais couvrent le traitement
+            sécurisé du paiement, la génération du billet et la maintenance de la
+            plateforme.
           </p>
           <p className="mt-2">
-            Ces frais couvrent les coûts de traitement du paiement sécurisé (Stripe),
-            la génération du billet électronique et la maintenance de la plateforme.
+            Les frais s&apos;appliquent aussi bien pour un paiement unique que pour
+            chaque versement dans le cadre du programme « Culture pour Tous ».
           </p>
           <p className="mt-2">
-            Les frais sont clairement affichés avant la validation du paiement.
+            Les frais sont affichés avant la validation de chaque paiement.
           </p>
 
-          <h3 className="mt-4 font-semibold text-dta-dark">4.2 Commission — Exposants (NTBC)</h3>
+          <h3 className="mt-4 font-semibold text-dta-dark">4.2 Commission — Exposants</h3>
           <p className="mt-2">
-            Une commission de <strong>4 %</strong> est prélevée automatiquement sur chaque
-            paiement NTBC reçu par un exposant lors d&apos;un événement.
-          </p>
-          <p className="mt-2">
-            L&apos;exposant reçoit 96 % du montant payé par le visiteur. La commission est
-            déduite instantanément et de manière transparente.
+            Une commission de <strong>4 %</strong> est prélevée sur chaque paiement
+            cashless reçu par un exposant lors d&apos;un événement. L&apos;exposant reçoit
+            96 % du montant payé par le visiteur.
           </p>
 
           <h3 className="mt-4 font-semibold text-dta-dark">4.3 Moyens de paiement</h3>
           <p className="mt-2">
-            Le paiement s&apos;effectue en ligne via Stripe (carte bancaire). Aucune donnée
-            bancaire n&apos;est stockée par Dream Team Africa.
+            Les paiements en ligne sont effectués par carte bancaire via Stripe.
+            Aucune donnée bancaire n&apos;est stockée par Dream Team Africa.
           </p>
         </section>
 
         {/* 5 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            5. Système cashless NTÉBY Coin (NTBC)
+            5. Paiement cashless sur place
           </h2>
-
-          <h3 className="mt-3 font-semibold text-dta-dark">5.1 Définition</h3>
-          <p className="mt-2">
-            Le NTBC est un token utilitaire cashless utilisé exclusivement lors des
-            événements Dream Team Africa. Sa parité est fixe : <strong>1 NTBC = 1 €</strong>.
-            Le NTBC n&apos;est pas une cryptomonnaie et n&apos;a pas vocation à être échangé
-            en dehors de l&apos;écosystème Dream Team Africa.
+          <p>
+            Les événements de la Saison Culturelle Africaine fonctionnent en
+            <strong> 100 % cashless</strong>. Chaque visiteur dispose d&apos;un wallet
+            personnel crédité automatiquement lors de l&apos;achat de son billet.
           </p>
-
-          <h3 className="mt-4 font-semibold text-dta-dark">5.2 Acquisition de NTBC</h3>
           <p className="mt-2">
-            Les NTBC sont crédités automatiquement dans le wallet du visiteur :
+            <strong>1 € payé = 1 crédit</strong> dans le wallet. Les crédits
+            servent à payer les exposants sur place via un QR code personnel.
+            Pas de monnaie, pas d&apos;attente.
           </p>
-          <ul className="mt-2 list-disc space-y-1 pl-5">
-            <li>À l&apos;achat d&apos;un billet (1 € payé = 1 NTBC crédité)</li>
-            <li>À chaque recharge « Culture pour Tous » (1 € = 1 NTBC)</li>
-            <li>Via le programme de parrainage (bonus NTBC)</li>
-          </ul>
-
-          <h3 className="mt-4 font-semibold text-dta-dark">5.3 Utilisation</h3>
           <p className="mt-2">
-            Les NTBC permettent de payer les exposants sur place via un QR code personnel.
-            Aucun espèce, aucune carte bancaire n&apos;est nécessaire pendant l&apos;événement.
-          </p>
-
-          <h3 className="mt-4 font-semibold text-dta-dark">5.4 Système de tiers</h3>
-          <p className="mt-2">
-            Le solde NTBC détermine un niveau de fidélité :
-          </p>
-          <ul className="mt-2 list-disc space-y-1 pl-5">
-            <li>🌱 Semence : 0 à 9 NTBC</li>
-            <li>🌿 Racine : 10 à 49 NTBC</li>
-            <li>🌳 Tronc : 50 à 199 NTBC</li>
-            <li>🌴 Baobab : 200 NTBC et plus</li>
-          </ul>
-
-          <h3 className="mt-4 font-semibold text-dta-dark">5.5 Conversion exposant</h3>
-          <p className="mt-2">
-            Les exposants peuvent convertir leurs NTBC en euros (virement IBAN)
-            après l&apos;événement. La conversion est effectuée au taux fixe 1 NTBC = 1 €,
-            après déduction de la commission de 4 %.
+            Les crédits sont utilisables uniquement lors des événements
+            Dream Team Africa.
           </p>
         </section>
 
@@ -160,21 +141,19 @@ export default function CGVPage() {
             6. Programme « Culture pour Tous »
           </h2>
           <p>
-            Le programme « Culture pour Tous » permet de réserver un billet avec un
-            acompte minimum de <strong>5 €</strong> et de compléter le paiement à son rythme
-            par versements libres (minimum 1 € par versement).
+            Ce programme permet de réserver un billet avec un acompte de
+            <strong> 5 € minimum</strong> et de compléter le paiement à son rythme
+            (minimum 1 € par versement).
           </p>
           <p className="mt-2">
-            Le prix du billet est verrouillé au moment de la réservation. Aucune
-            majoration n&apos;est appliquée en cas de hausse tarifaire ultérieure.
+            Le prix du billet est verrouillé au moment de la réservation.
+            Chaque euro versé est crédité dans le wallet du visiteur.
           </p>
           <p className="mt-2">
-            Des frais de gestion de 3 % (minimum 0,50 €) sont appliqués sur chaque
-            versement.
+            Des frais de gestion de 3 % (min 0,50 €) s&apos;appliquent sur chaque versement.
           </p>
           <p className="mt-2">
-            Le billet est valide dès le premier versement. Le solde restant doit être
-            réglé avant le jour de l&apos;événement ou sur place.
+            Le billet est valide dès le premier versement.
           </p>
         </section>
 
@@ -184,32 +163,33 @@ export default function CGVPage() {
             7. Programme de parrainage
           </h2>
           <p>
-            Chaque utilisateur dispose d&apos;un code de parrainage unique. Lorsqu&apos;un
-            filleul s&apos;inscrit avec ce code, le parrain et le filleul reçoivent chacun
-            <strong> 4 NTBC bonus</strong>.
+            Chaque utilisateur dispose d&apos;un code de parrainage. Lorsqu&apos;un
+            ami s&apos;inscrit avec ce code, les deux reçoivent des
+            <strong> crédits bonus</strong>.
           </p>
           <p className="mt-2">
-            Les NTBC bonus sont <strong>non retirables et non convertibles en euros</strong>.
-            Ils sont utilisables uniquement pour payer les exposants lors des événements.
+            Les crédits bonus sont utilisables pour payer les exposants lors
+            des événements. Ils ne sont <strong>ni retirables, ni convertibles
+            en euros, ni remboursables</strong>.
           </p>
           <p className="mt-2">
-            Dream Team Africa se réserve le droit de modifier le montant du bonus
-            ou de suspendre le programme à tout moment.
+            Dream Team Africa se réserve le droit de modifier les conditions
+            du programme à tout moment.
           </p>
         </section>
 
         {/* 8 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            8. Billets électroniques
+            8. Billets
           </h2>
           <p>Les billets sont nominatifs et uniques.</p>
           <p className="mt-2">
-            Ils doivent être présentés à l&apos;entrée de l&apos;événement via le QR code
-            généré dans l&apos;espace personnel du visiteur.
+            Ils doivent être présentés à l&apos;entrée via le QR code généré
+            dans l&apos;espace personnel du visiteur.
           </p>
           <p className="mt-2">
-            Toute duplication, revente non autorisée ou usage frauduleux entraînera
+            Toute duplication, revente ou usage frauduleux entraînera
             l&apos;annulation du billet sans remboursement.
           </p>
         </section>
@@ -217,90 +197,74 @@ export default function CGVPage() {
         {/* 9 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            9. Annulation, report et remboursement
+            9. Annulation et remboursement
           </h2>
           <p>
-            En cas d&apos;annulation de l&apos;événement par l&apos;organisateur, les billets seront
-            remboursés intégralement (hors frais de gestion).
+            En cas d&apos;annulation par l&apos;organisateur : remboursement
+            intégral (hors frais de gestion).
           </p>
           <p className="mt-2">
-            En cas de report, les billets restent valables pour la nouvelle date.
+            En cas de report : les billets restent valables.
           </p>
           <p className="mt-2">
-            Aucun remboursement n&apos;est possible en cas de désistement du participant.
+            En cas de désistement du visiteur : aucun remboursement.
           </p>
           <p className="mt-2">
-            Les NTBC bonus (parrainage) ne sont en aucun cas remboursables.
+            Les crédits bonus ne sont en aucun cas remboursables.
           </p>
         </section>
 
         {/* 10 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            10. Formules exposants
+            10. Exposants
           </h2>
           <p>
-            Les exposants réservent un stand via la plateforme. Le paiement peut être
-            effectué en une ou plusieurs fois selon la formule choisie.
+            Les exposants réservent un stand via la plateforme. Le paiement
+            peut être échelonné selon la formule choisie.
           </p>
           <p className="mt-2">
-            Lors de l&apos;événement, les exposants reçoivent les paiements des visiteurs
-            en NTBC. Une commission de 4 % est automatiquement prélevée sur chaque
-            transaction reçue.
+            Lors de l&apos;événement, les exposants reçoivent les paiements
+            cashless des visiteurs. Une commission de 4 % est prélevée
+            sur chaque transaction.
           </p>
           <p className="mt-2">
-            Les NTBC reçus sont convertibles en euros par virement bancaire après
-            l&apos;événement, sur demande de l&apos;exposant.
+            Les crédits reçus sont convertibles en euros par virement
+            bancaire après l&apos;événement.
           </p>
         </section>
 
         {/* 11 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            11. Protection des données (RGPD)
+            11. Données personnelles
           </h2>
           <p>
-            Dream Team Africa collecte les données personnelles nécessaires à la
-            gestion des commandes, du wallet NTBC et de la communication.
+            Les données collectées servent à la gestion des commandes et
+            du wallet. Elles ne sont jamais revendues.
           </p>
           <p className="mt-2">
-            Les données ne sont jamais revendues à des tiers. Le site est protégé
-            par un certificat SSL.
-          </p>
-          <p className="mt-2">
-            Conformément au RGPD, vous disposez d&apos;un droit d&apos;accès, de rectification
-            et de suppression de vos données en contactant hello@dreamteamafrica.com.
+            Conformément au RGPD, vous pouvez exercer vos droits d&apos;accès,
+            de rectification et de suppression en écrivant à
+            hello@dreamteamafrica.com.
           </p>
         </section>
 
         {/* 12 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            12. Propriété intellectuelle
+            12. Droit applicable
           </h2>
           <p>
-            L&apos;ensemble des contenus du site (textes, visuels, logos, marques NTBC
-            et NTÉBY) est la propriété exclusive de Dream Team Africa. Toute
-            reproduction sans autorisation est interdite.
+            CGV régies par le droit français. En cas de litige, recherche
+            d&apos;une solution amiable avant toute action judiciaire.
           </p>
         </section>
 
         {/* 13 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            13. Droit applicable et litiges
-          </h2>
-          <p>Les présentes CGV sont régies par le droit français.</p>
-          <p className="mt-2">
-            En cas de litige, une solution amiable sera recherchée avant toute action
-            judiciaire. À défaut, les tribunaux français seront compétents.
-          </p>
-        </section>
-
-        {/* 14 */}
-        <section>
-          <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            14. Contact
+            13. Contact
           </h2>
           <ul className="space-y-1">
             <li>E-mail : <a href="mailto:hello@dreamteamafrica.com" className="text-dta-accent hover:underline">hello@dreamteamafrica.com</a></li>
@@ -309,7 +273,6 @@ export default function CGVPage() {
           </ul>
         </section>
 
-        {/* Esprit */}
         <section className="rounded-xl border border-dta-sand/50 bg-dta-sand/10 p-6">
           <p className="font-serif text-base italic text-dta-dark">
             Dream Team Africa — La culture africaine rayonne à Paris.

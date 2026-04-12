@@ -48,11 +48,12 @@ export default function ReservationForm() {
   const totalPrice = unitTotal * stands;
   const fullPrice = unitFull * stands;
   const savings = fullPrice - totalPrice;
+  const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalPrice);
+  const remainingBalance = totalPrice - deposit;
   const FEE_RATE = 0.03;
-  const managementFees = Math.round(totalPrice * FEE_RATE * 100) / 100;
-  const totalWithFees = totalPrice + managementFees;
-  const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalWithFees);
-  const remainingBalance = totalWithFees - deposit;
+  const amountDueNow = installments === 1 ? totalPrice : deposit;
+  const managementFees = Math.round(amountDueNow * FEE_RATE * 100) / 100;
+  const totalWithFees = amountDueNow + managementFees;
   const installmentAmount =
     installments > 1 && remainingBalance > 0
       ? Math.ceil((remainingBalance / (installments - 1)) * 100) / 100

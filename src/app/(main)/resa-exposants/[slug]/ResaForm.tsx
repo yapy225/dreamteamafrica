@@ -38,15 +38,17 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
 
   const effectiveDays = pack.id === "ENTREPRENEUR_1J" ? 1 : event.days;
   const unitPrice = effectiveDays * pack.pricePerDay;
-  const basePrice = unitPrice * stands;
-  const FEE_RATE = 0.03;
-  const managementFees = Math.round(basePrice * FEE_RATE * 100) / 100;
-  const totalPrice = basePrice + managementFees;
+  const totalPrice = unitPrice * stands;
   const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalPrice);
   const remainingBalance = totalPrice - deposit;
   const installmentAmount = installments > 1 && remainingBalance > 0
     ? Math.ceil((remainingBalance / (installments - 1)) * 100) / 100
     : 0;
+  // Frais de gestion 3% calculés sur le montant payé maintenant
+  const FEE_RATE = 0.03;
+  const amountDueNow = installments === 1 ? totalPrice : deposit;
+  const managementFees = Math.round(amountDueNow * FEE_RATE * 100) / 100;
+  const totalDueNow = amountDueNow + managementFees;
 
   const canSubmit =
     form.companyName.trim() &&
@@ -347,9 +349,9 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
 
         <div className="rounded-[var(--radius-card)] border border-dta-sand bg-white p-5">
           <div className="mb-2 flex items-baseline justify-between">
-            <span className="text-sm text-dta-char/70">Sous-total</span>
+            <span className="text-sm text-dta-char/70">{installments === 1 ? "Total stand" : "Acompte"}</span>
             <span className="text-sm text-dta-char/70">
-              {formatter.format(basePrice)}
+              {formatter.format(amountDueNow)}
             </span>
           </div>
           {managementFees > 0 && (
@@ -361,11 +363,16 @@ export default function ResaForm({ event }: { event: ExhibitorEvent }) {
             </div>
           )}
           <div className="mb-4 flex items-baseline justify-between border-t border-dta-sand pt-2">
-            <span className="text-sm font-medium text-dta-char">Total</span>
+            <span className="text-sm font-medium text-dta-char">À payer maintenant</span>
             <span className="font-serif text-2xl font-bold text-dta-dark">
-              {formatter.format(totalPrice)}
+              {formatter.format(totalDueNow)}
             </span>
           </div>
+          {installments > 1 && (
+            <p className="mb-4 text-xs text-dta-char/50">
+              Solde restant : {formatter.format(remainingBalance)} (frais de 3% appliqués à chaque paiement)
+            </p>
+          )}
 
           {/* Choix : paiement intégral ou acompte */}
           <div className="space-y-2">

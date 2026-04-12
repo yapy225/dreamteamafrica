@@ -93,22 +93,22 @@ export async function POST(request: Request) {
     }
 
     // ── Payment calculation ──
-    // 3% management fees on all payments
+    // 3% management fees applied per payment (not on total)
     const FEE_RATE = 0.03;
-    const managementFees = Math.round(totalPrice * FEE_RATE * 100) / 100;
-    const totalWithFees = totalPrice + managementFees;
-    // Deposit is paid upfront, remaining balance in N monthly installments
-    const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalWithFees);
-    const remainingBalance = totalWithFees - deposit;
+    const deposit = Math.min(DEPOSIT_AMOUNT * stands, totalPrice);
+    const remainingBalance = totalPrice - deposit;
     const installmentAmount = nbInstallments > 1 && remainingBalance > 0
       ? Math.ceil((remainingBalance / (nbInstallments - 1)) * 100) / 100
       : 0;
+    // Fees on the amount paid now
+    const amountDueNow = nbInstallments === 1 ? totalPrice : deposit;
+    const managementFees = Math.round(amountDueNow * FEE_RATE * 100) / 100;
 
     // Build event description
     const selectedEvents = EXHIBITOR_EVENTS.filter((e) => eventIds.includes(e.id));
     const eventNames = selectedEvents.map((e) => e.title).join(", ");
     const standsLabel = stands > 1 ? ` × ${stands} stands` : "";
-    const feesLabel = ` (dont ${managementFees} € de frais de gestion)`;
+    const feesLabel = ` (frais de gestion 3% inclus)`;
     const description = `${selectedPack.name}${standsLabel} — ${eventNames} (${totalDays} jour${totalDays > 1 ? "s" : ""})${feesLabel}`;
 
     // Create booking in DB (totalPrice includes fees for installment payments)
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
         pack: effectivePackId,
         events: eventIds,
         totalDays,
-        totalPrice: totalWithFees,
+        totalPrice: totalPrice,
         stands,
         installments: nbInstallments,
         installmentAmount: nbInstallments === 1 ? totalPrice : installmentAmount,
@@ -202,7 +202,7 @@ export async function POST(request: Request) {
         eventTitle: eventNames,
         packName: selectedPack.name,
         totalDays,
-        totalPrice: totalWithFees,
+        totalPrice: totalPrice,
         installments: nbInstallments,
         installmentAmount: nbInstallments === 1 ? totalPrice : installmentAmount,
         bookingId: booking.id,
@@ -228,7 +228,7 @@ export async function POST(request: Request) {
       friction === "card_only" ? ["card"] : ["card", "paypal"];
 
     // Montant restant après crédit de l'acompte lead
-    const amountDue = totalWithFees - leadDepositCredit;
+    const amountDue = totalPrice - leadDepositCredit;
 
     // Si le lead a déjà payé la totalité (cas rare: prix = 50€)
     if (amountDue <= 0) {
@@ -297,7 +297,7 @@ export async function POST(request: Request) {
         // Le webhook exhibitor_early_payment ou le checkout normal prendra le relais
         // Pour l'instant, redirigeons vers la page de confirmation avec statut PARTIAL
         // Le solde sera géré par les mensualités automatiques configurées par le webhook
-        const adjustedRemainingBalance = totalWithFees - leadDepositCredit;
+        const adjustedRemainingBalance = totalPrice - leadDepositCredit;
         const adjustedInstallmentAmount = nbInstallments > 1 && adjustedRemainingBalance > 0
           ? Math.ceil((adjustedRemainingBalance / (nbInstallments - 1)) * 100) / 100
           : 0;
@@ -352,6 +352,7 @@ export async function POST(request: Request) {
       }
 
       // Pas de crédit lead, checkout normal pour l'acompte
+      const depositFees = Math.round(deposit * FEE_RATE * 100) / 100;
       const checkoutSession = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: paymentMethods,
@@ -363,8 +364,16 @@ export async function POST(request: Request) {
               unit_amount: Math.round(deposit * 100),
               product_data: {
                 name: `Acompte de réservation${standsLabel} — ${selectedPack.name}`,
-                description: `Acompte ${deposit} € sur ${totalWithFees} € total${feesLabel}. Solde restant (${remainingBalance} €) en ${nbInstallments - 1} mensualité${nbInstallments - 1 > 1 ? "s" : ""}.`,
+                description: `Acompte ${deposit} € sur ${totalPrice} € total. Solde restant (${remainingBalance} €) en ${nbInstallments - 1} mensualité${nbInstallments - 1 > 1 ? "s" : ""}.`,
               },
+            },
+            quantity: 1,
+          },
+          {
+            price_data: {
+              currency: "eur",
+              unit_amount: Math.round(depositFees * 100),
+              product_data: { name: "Frais de gestion (3%)" },
             },
             quantity: 1,
           },

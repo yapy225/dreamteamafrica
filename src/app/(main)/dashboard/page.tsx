@@ -87,8 +87,15 @@ export default async function DashboardPage() {
           },
         ]
       : []),
-    ...(exhibitorBooking || session.user.role === "EXPOSANT"
+    ...(exhibitorBooking || session.user.role === "EXPOSANT" || session.user.role === "ADMIN"
       ? [
+          {
+            href: "/dashboard/scanner-ntbc",
+            icon: ScanLine,
+            label: "Encaisser NTBC",
+            count: null,
+            color: "bg-teal-100 text-teal-600",
+          },
           {
             href: "/dashboard/mon-stand",
             icon: FileImage,

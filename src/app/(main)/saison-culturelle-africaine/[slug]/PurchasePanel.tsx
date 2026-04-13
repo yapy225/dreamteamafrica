@@ -155,10 +155,12 @@ export default function PurchasePanel({
   };
 
   /* ── derived ─────────────────────────────────────────── */
+  const CPT_DEPOSIT = 5;
   const total = tier.price * quantity;
-  const deposit = installments > 1 ? 5 * quantity : total;
+  const cptDeposit = tier.isCulturePourTous ? CPT_DEPOSIT * quantity : 0;
+  const deposit = tier.isCulturePourTous ? cptDeposit : installments > 1 ? 5 * quantity : total;
   const remainingBalance = total - deposit;
-  const monthlyAmount = installments > 1 ? Math.ceil((remainingBalance / (installments - 1)) * 100) / 100 : 0;
+  const monthlyAmount = installments > 1 && !tier.isCulturePourTous ? Math.ceil((remainingBalance / (installments - 1)) * 100) / 100 : 0;
 
   // Promo discount
   const promoDiscount = promoApplied
@@ -169,8 +171,8 @@ export default function PurchasePanel({
         : 0
     : 0;
 
-  // Frais de gestion 3% (min 0.50€)
-  const payableAmount = installments > 1 ? deposit : total;
+  // Frais de gestion 3% (min 0.50€) — sur le montant payé maintenant
+  const payableAmount = tier.isCulturePourTous ? cptDeposit : installments > 1 ? deposit : total;
   const rawFee = payableAmount * 0.03;
   const fees = tier.price > 0 ? Math.max(rawFee, 0.50) : 0;
   const roundedFees = Math.round(fees * 100) / 100;
@@ -495,6 +497,13 @@ export default function PurchasePanel({
 
           {/* total + submit */}
           <div className="border-t border-dta-sand pt-4">
+            {tier.isCulturePourTous && (
+              <div className="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5">
+                <p className="text-xs text-emerald-800">
+                  <strong>Acompte {formatCurrency(CPT_DEPOSIT)} par billet</strong> — solde de {formatCurrency(tier.price - CPT_DEPOSIT)} payable quand vous voulez, jusqu&apos;à la veille de l&apos;événement. QR code débloqué une fois soldé.
+                </p>
+              </div>
+            )}
             <div className="space-y-1.5 mb-3">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-dta-char/70">
@@ -502,9 +511,15 @@ export default function PurchasePanel({
                   {tier.price > 0 && <> &times; {formatCurrency(tier.price)}</>}
                 </span>
                 <span className="text-dta-dark">
-                  {tier.price === 0 ? "Gratuit" : formatCurrency(installments > 1 ? deposit : total)}
+                  {tier.price === 0 ? "Gratuit" : formatCurrency(total)}
                 </span>
               </div>
+              {tier.isCulturePourTous && (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-emerald-700">Acompte aujourd&apos;hui</span>
+                  <span className="text-emerald-700">{formatCurrency(cptDeposit)}</span>
+                </div>
+              )}
               {promoDiscount > 0 && (
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-green-600">Code promo</span>
@@ -537,6 +552,8 @@ export default function PurchasePanel({
                 </>
               ) : tier.price === 0 ? (
                 "Réserver gratuitement"
+              ) : tier.isCulturePourTous ? (
+                `Payer l'acompte — ${formatCurrency(totalWithFees)}`
               ) : (
                 installments > 1
                   ? `Payer l'acompte — ${formatCurrency(totalWithFees)}`

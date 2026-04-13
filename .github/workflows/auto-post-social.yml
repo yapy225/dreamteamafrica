@@ -19,7 +19,9 @@ jobs:
         run: |
           node << 'SCRIPT'
           const USER_TOKEN = process.env.META_LONG_LIVED_TOKEN;
-          const IMAGE_URL = "https://dreamteamafricamedia.b-cdn.net/campaigns/foire-afrique-danseuse-j24.png";
+          const DEFAULT_IMAGE_URL = "https://dreamteamafricamedia.b-cdn.net/campaigns/foire-afrique-danseuse-j24.png";
+          const EDENIQUE_IMAGE_1 = "https://dreamteamafricamedia.b-cdn.net/campaigns/edenique-coffee-sachet-yirgacheffe.png";
+          const EDENIQUE_IMAGE_2 = "https://dreamteamafricamedia.b-cdn.net/campaigns/edenique-coffee-tasse-ethiopie.png";
           const EVENT_URL = "https://dreamteamafrica.com/saison-culturelle-africaine/foire-dafrique-paris";
 
           const IG_EXPOSANT_GROUPS = [
@@ -36,26 +38,42 @@ jobs:
           const IG_MENTIONS = `\n\n.\n.\n.\nNos exposants :\n${getExposantMentions()}`;
 
           const FB_MESSAGES = [
-            `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Prévente en ligne à 10€ — Avant passage à 15€ sur place !\n\nMode • Artisanat • Gastronomie • Bijoux\n+60 exposants\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS — Paris 13e\n\n🎟 ${EVENT_URL}`,
-            `✨ Le Grand Marché Africain revient à Paris !\n\n+60 exposants vous attendent pour célébrer la culture africaine.\n\nTextiles wax, bogolan, bijoux, gastronomie...\n\n🎟 Billets à 10€ en prévente (15€ sur place)\n\n🗓 1er & 2 Mai 2026\n📍 Espace MAS — Paris 13e\n\n👉 ${EVENT_URL}`,
-            `🎉 Plus que quelques jours avant la Foire d'Afrique Paris 2026 !\n\nDéjà 348 billets vendus. Profitez du tarif prévente à 10€ avant le passage à 15€.\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS — 10 rue des Terres au Curé, 75013 Paris\n\n🎟 ${EVENT_URL}`,
-            `🌍 La diaspora africaine se retrouve à Paris !\n\nFoire d'Afrique 2026 — 6ème édition\nMode, artisanat, gastronomie, bijoux, musique live\n\n+60 exposants • DJ sets • Masterclass\n\n🎟 Prévente 10€ (tarif plein 15€)\n🗓 1er & 2 Mai 2026 · Espace MAS Paris\n\n👉 ${EVENT_URL}`,
-            `💎 Bijoux, textiles, saveurs d'Afrique...\n\nTout ça à la Foire d'Afrique Paris — 6ème Édition !\n\n🗓 1er & 2 Mai 2026\n🕐 12h — 22h\n📍 Espace MAS — Paris 13e\n\n🎟 Billets à 10€ en prévente\n👉 ${EVENT_URL}`,
-            `🔥 L'événement incontournable de la diaspora africaine à Paris !\n\nFoire d'Afrique 2026 : le Grand Marché Africain\n\n+60 exposants · Mode · Artisanat · Gastronomie · Bijoux\n\n🎟 10€ en prévente — 15€ sur place\n🗓 1er & 2 Mai 2026\n📍 Espace MAS, Paris 13e\n\n👉 ${EVENT_URL}`,
+            `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Prévente en ligne à 10€ — Avant passage à 15€ sur place !\n\nMode • Artisanat • Gastronomie • Bijoux\n+60 exposants\n\n🗓 Du 14 au 16 Mai 2026 · 12h-22h\n📍 Espace MAS — Paris 13e\n\n🎟 ${EVENT_URL}`,
+            `✨ Le Grand Marché Africain revient à Paris !\n\n+60 exposants vous attendent pour célébrer la culture africaine.\n\nTextiles wax, bogolan, bijoux, gastronomie...\n\n🎟 Billets à 10€ en prévente (15€ sur place)\n\n🗓 Du 14 au 16 Mai 2026\n📍 Espace MAS — Paris 13e\n\n👉 ${EVENT_URL}`,
+            `🎉 Plus que quelques jours avant la Foire d'Afrique Paris 2026 !\n\nDéjà 348 billets vendus. Profitez du tarif prévente à 10€ avant le passage à 15€.\n\n🗓 Du 14 au 16 Mai 2026 · 12h-22h\n📍 Espace MAS — 10 rue des Terres au Curé, 75013 Paris\n\n🎟 ${EVENT_URL}`,
+            `🌍 La diaspora africaine se retrouve à Paris !\n\nFoire d'Afrique 2026 — 6ème édition\nMode, artisanat, gastronomie, bijoux, musique live\n\n+60 exposants • DJ sets • Masterclass\n\n🎟 Prévente 10€ (tarif plein 15€)\n🗓 Du 14 au 16 Mai 2026 · Espace MAS Paris\n\n👉 ${EVENT_URL}`,
+            `💎 Bijoux, textiles, saveurs d'Afrique...\n\nTout ça à la Foire d'Afrique Paris — 6ème Édition !\n\n🗓 Du 14 au 16 Mai 2026\n🕐 12h — 22h\n📍 Espace MAS — Paris 13e\n\n🎟 Billets à 10€ en prévente\n👉 ${EVENT_URL}`,
+            `🔥 L'événement incontournable de la diaspora africaine à Paris !\n\nFoire d'Afrique 2026 : le Grand Marché Africain\n\n+60 exposants · Mode · Artisanat · Gastronomie · Bijoux\n\n🎟 10€ en prévente — 15€ sur place\n🗓 Du 14 au 16 Mai 2026\n📍 Espace MAS, Paris 13e\n\n👉 ${EVENT_URL}`,
+            `🌍 EDENIQUE COFFEE × FOIRE D'AFRIQUE PARIS 2026\n\n☕ Bienvenue dans l'univers du café éthiopien — berceau du café.\n\nDe la torréfaction à la tasse, Edenique Coffee vous invite à une immersion sensorielle et culturelle. Dégustations, cérémonie authentique, café 100% Arabica traçable du Yirgacheffe.\n\n✨ Plus qu'un café : une expérience humaine, un voyage, une tradition.\n\n🗓 Du 14 au 16 Mai 2026 · 12h — 22h\n📍 Espace MAS — 10 rue des Terres au Curé, 75013 Paris\n✉️ hello@edeniquecoffee.com\n\n🎟 Réservez vos billets : ${EVENT_URL}`,
+            `☕ Le café éthiopien à l'honneur à la Foire d'Afrique Paris !\n\nEdenique Coffee vous fait vivre la cérémonie traditionnelle du café — là où tout a commencé.\n\n🗓 Du 14 au 16 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n🎟 ${EVENT_URL}`,
+            `✨ Une tasse, mille histoires.\n\nDécouvrez le savoir-faire d'Edenique Coffee — Yirgacheffe, Idido — à la Foire d'Afrique Paris.\n\n🗓 Du 14 au 16 Mai 2026 · Espace MAS Paris\n🎟 ${EVENT_URL}`,
           ];
 
           const IG_CAPTIONS = [
-            `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Prévente en ligne à 10€ — Avant passage à 15€ sur place !\n\n+60 exposants · Mode · Artisanat · Gastronomie · Bijoux\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #Afrique #DiasporaAfricaine #Wax #Artisanat #MadeInAfrica${IG_MENTIONS}`,
-            `✨ Le Grand Marché Africain revient !\n\n+60 exposants • Mode • Artisanat • Gastronomie • Bijoux\n\n🎟 Prévente 10€ (15€ sur place)\n🗓 1er & 2 Mai 2026\n📍 Espace MAS Paris\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #MadeInAfrica #Bogolan #BijouxAfricains #GastronomieAfricaine${IG_MENTIONS}`,
-            `🎉 Compte à rebours lancé !\n\nFoire d'Afrique Paris — 6ème Édition\nDéjà 348 billets vendus 🔥\n\n🎟 10€ en prévente\n📍 Espace MAS — Paris 13e\n🗓 1er & 2 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #Afrique #Culture #EspaceMAS${IG_MENTIONS}`,
-            `💎 Bijoux, textiles wax, gastronomie africaine...\n\nTout ça à la Foire d'Afrique Paris 2026 !\n\n🎟 10€ en prévente (15€ sur place)\n🗓 1er & 2 Mai · 12h-22h\n📍 Paris 13e\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #Wax #BijouxAfricains #Artisanat #DiasporaAfricaine${IG_MENTIONS}`,
-            `🌍 La diaspora se retrouve à Paris !\n\nFoire d'Afrique 2026 — +60 exposants\nMusique live • DJ sets • Masterclass\n\n🎟 Billets 10€ en prévente\n🗓 1er & 2 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #GrandMarcheAfricain #Afrique #MadeInAfrica${IG_MENTIONS}`,
-            `🔥 L'événement incontournable !\n\nFoire d'Afrique Paris — 6ème Édition\nMode • Artisanat • Gastronomie • Bijoux\n\n🎟 Prévente 10€ — Tarif plein 15€\n📍 Espace MAS Paris 13e\n🗓 1er & 2 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #Afrique${IG_MENTIONS}`,
+            `🌍 FOIRE D'AFRIQUE PARIS 2026 — 6ème Édition\n\n🔥 Prévente en ligne à 10€ — Avant passage à 15€ sur place !\n\n+60 exposants · Mode · Artisanat · Gastronomie · Bijoux\n\n🗓 Du 14 au 16 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #Afrique #DiasporaAfricaine #Wax #Artisanat #MadeInAfrica${IG_MENTIONS}`,
+            `✨ Le Grand Marché Africain revient !\n\n+60 exposants • Mode • Artisanat • Gastronomie • Bijoux\n\n🎟 Prévente 10€ (15€ sur place)\n🗓 Du 14 au 16 Mai 2026\n📍 Espace MAS Paris\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #MadeInAfrica #Bogolan #BijouxAfricains #GastronomieAfricaine${IG_MENTIONS}`,
+            `🎉 Compte à rebours lancé !\n\nFoire d'Afrique Paris — 6ème Édition\nDéjà 348 billets vendus 🔥\n\n🎟 10€ en prévente\n📍 Espace MAS — Paris 13e\n🗓 Du 14 au 16 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #Afrique #Culture #EspaceMAS${IG_MENTIONS}`,
+            `💎 Bijoux, textiles wax, gastronomie africaine...\n\nTout ça à la Foire d'Afrique Paris 2026 !\n\n🎟 10€ en prévente (15€ sur place)\n🗓 Du 14 au 16 Mai · 12h-22h\n📍 Paris 13e\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #Wax #BijouxAfricains #Artisanat #DiasporaAfricaine${IG_MENTIONS}`,
+            `🌍 La diaspora se retrouve à Paris !\n\nFoire d'Afrique 2026 — +60 exposants\nMusique live • DJ sets • Masterclass\n\n🎟 Billets 10€ en prévente\n🗓 Du 14 au 16 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #CultureAfricaine #GrandMarcheAfricain #Afrique #MadeInAfrica${IG_MENTIONS}`,
+            `🔥 L'événement incontournable !\n\nFoire d'Afrique Paris — 6ème Édition\nMode • Artisanat • Gastronomie • Bijoux\n\n🎟 Prévente 10€ — Tarif plein 15€\n📍 Espace MAS Paris 13e\n🗓 Du 14 au 16 Mai 2026\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #SaisonCulturelleAfricaine #Afrique${IG_MENTIONS}`,
+            `🌍 EDENIQUE COFFEE × FOIRE D'AFRIQUE PARIS 2026\n\n☕ Bienvenue dans l'univers du café éthiopien — berceau du café.\n\nDe la torréfaction à la tasse, immersion sensorielle et culturelle. Dégustations, cérémonie authentique, café 100% Arabica traçable du Yirgacheffe.\n\n✨ Plus qu'un café : une expérience humaine, un voyage, une tradition.\n\n🗓 Du 14 au 16 Mai 2026 · 12h — 22h\n📍 Espace MAS Paris 13e\n✉️ hello@edeniquecoffee.com\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #EdeniqueCoffee #CaféÉthiopien #Yirgacheffe #SpecialtyCoffee #Arabica #CultureAfricaine #SaisonCulturelleAfricaine #MadeInAfrica${IG_MENTIONS}`,
+            `☕ Le café éthiopien à l'honneur à la Foire d'Afrique Paris !\n\n@edeniquecoffee vous fait vivre la cérémonie traditionnelle du café — là où tout a commencé.\n\n🗓 Du 14 au 16 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #EdeniqueCoffee #CaféÉthiopien #CérémonieDuCafé #Ethiopie${IG_MENTIONS}`,
+            `✨ Une tasse, mille histoires.\n\nDécouvrez le savoir-faire d'Edenique Coffee — Yirgacheffe, Idido — à la Foire d'Afrique Paris.\n\n🗓 Du 14 au 16 Mai 2026\n📍 Espace MAS Paris\n\n🔗 Lien en bio\n\n#FoiredAfrique #Paris2026 #EdeniqueCoffee #Yirgacheffe #Idido #SpecialtyCoffee #CaféDeSpécialité${IG_MENTIONS}`,
+          ];
+
+          // Visuel par index de rotation (aligné sur FB_MESSAGES / IG_CAPTIONS)
+          const IMAGE_ROTATION = [
+            DEFAULT_IMAGE_URL, DEFAULT_IMAGE_URL, DEFAULT_IMAGE_URL,
+            DEFAULT_IMAGE_URL, DEFAULT_IMAGE_URL, DEFAULT_IMAGE_URL,
+            EDENIQUE_IMAGE_1, // post Edenique principal
+            EDENIQUE_IMAGE_2, // rediffusion 1 (cérémonie)
+            EDENIQUE_IMAGE_1, // rediffusion 2 (Yirgacheffe Idido)
           ];
 
           const LINKEDIN_MESSAGES = [
-            `Foire d'Afrique Paris 2026 — 6ème Édition\n\nLe Grand Marché Africain réunit plus de 60 entrepreneurs et artisans de la diaspora africaine.\n\nMode, artisanat, gastronomie, bijouterie, masterclass.\n\nDates : 1er et 2 Mai 2026\nLieu : Espace MAS, Paris 13e\nBillets : 10€ en prévente (15€ sur place)\n\n${EVENT_URL}`,
-            `L'entrepreneuriat africain à l'honneur à Paris\n\nLa 6ème édition de la Foire d'Afrique rassemble +60 exposants de la diaspora africaine.\n\nUn événement qui valorise le savoir-faire et les talents africains en France.\n\n1er et 2 Mai 2026 — Espace MAS, Paris\nPrévente : 10€\n\n${EVENT_URL}`,
+            `Foire d'Afrique Paris 2026 — 6ème Édition\n\nLe Grand Marché Africain réunit plus de 60 entrepreneurs et artisans de la diaspora africaine.\n\nMode, artisanat, gastronomie, bijouterie, masterclass.\n\nDates : du 14 au 16 Mai 2026\nLieu : Espace MAS, Paris 13e\nBillets : 10€ en prévente (15€ sur place)\n\n${EVENT_URL}`,
+            `L'entrepreneuriat africain à l'honneur à Paris\n\nLa 6ème édition de la Foire d'Afrique rassemble +60 exposants de la diaspora africaine.\n\nUn événement qui valorise le savoir-faire et les talents africains en France.\n\nDu 14 au 16 Mai 2026 — Espace MAS, Paris\nPrévente : 10€\n\n${EVENT_URL}`,
+            `Edenique Coffee — Le café éthiopien à la Foire d'Afrique Paris\n\nDe la torréfaction à la tasse, Edenique Coffee propose une immersion dans la culture du café éthiopien : Yirgacheffe, Idido, café 100% Arabica traçable.\n\nDégustations et cérémonie traditionnelle au programme — un voyage sensoriel et culturel.\n\nDu 14 au 16 Mai 2026 — Espace MAS, Paris 13e\nContact : hello@edeniquecoffee.com\n\n${EVENT_URL}`,
           ];
 
           const ALL_PAGES = [
@@ -96,6 +114,7 @@ jobs:
             const fbMessage = FB_MESSAGES[idx];
             const igCaption = IG_CAPTIONS[idx];
             const liMessage = LINKEDIN_MESSAGES[idx % LINKEDIN_MESSAGES.length];
+            const IMAGE_URL = IMAGE_ROTATION[idx] || DEFAULT_IMAGE_URL;
 
             const tokens = await getPageTokens();
             let fbOk = 0, igOk = 0;
@@ -110,7 +129,7 @@ jobs:
                 if (page.fbPageId === "100771645843324") {
                   params.append("message", fbMessage);
                 } else {
-                  params.append("message", `🌍 La Foire d'Afrique Paris revient les 1er & 2 Mai !\n\nBillets 10€ en prévente (15€ sur place)\n+60 exposants · Mode · Artisanat · Gastronomie\n\n👉 ${EVENT_URL}`);
+                  params.append("message", `🌍 La Foire d'Afrique Paris revient du 14 au 16 Mai !\n\nBillets 10€ en prévente (15€ sur place)\n+60 exposants · Mode · Artisanat · Gastronomie\n\n👉 ${EVENT_URL}`);
                 }
                 params.append("link", EVENT_URL);
 

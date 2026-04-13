@@ -140,6 +140,7 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
         userId,
         tier,
         price: unitPriceNum,
+        totalPaid: unitPriceNum,
         qrCode: qrCdnUrl,
         stripeSessionId: session.id,
         firstName: firstName || null,
@@ -147,6 +148,16 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
         email: email || null,
         phone: phone || null,
         visitDate: visitDate ? new Date(visitDate) : null,
+      },
+    });
+
+    await prisma.ticketPayment.create({
+      data: {
+        ticketId: ticket.id,
+        amount: unitPriceNum,
+        type: "full",
+        label: `Paiement Stripe — ${tierName}`,
+        stripeId: session.id,
       },
     });
 

@@ -78,6 +78,13 @@ export async function POST(request: Request) {
     const legacyTiers = ["EARLY_BIRD", "STANDARD", "VIP"];
 
     if (matchedTier) {
+      // CPT tiers must go through /api/checkout/culture-pour-tous — reject here
+      if ((matchedTier as { isCulturePourTous?: boolean }).isCulturePourTous) {
+        return NextResponse.json(
+          { error: "Ce tier nécessite le parcours Culture pour Tous." },
+          { status: 400 },
+        );
+      }
       unitPrice = matchedTier.price;
       tierName = matchedTier.name;
 

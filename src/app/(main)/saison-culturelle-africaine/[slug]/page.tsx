@@ -674,8 +674,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                      {tiers.map((tier) => {
+                      {tiers.filter((t) => !t.cptVariantOf).map((tier) => {
                         const tierSoldOut = tier.quota != null && tier.quota > 0 && tier.sold >= tier.quota;
+                        const cptVariant = tiers.find((x) => x.cptVariantOf === tier.id);
                         return (
                         <div
                           key={tier.id}
@@ -733,6 +734,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                             eventTitle={event.title}
                             eventDate={event.date.toISOString()}
                             eventEndDate={event.endDate?.toISOString()}
+                            isCulturePourTous={tier.isCulturePourTous}
+                            cptVariant={cptVariant ? { id: cptVariant.id, name: cptVariant.name, price: cptVariant.price, deposit: cptVariant.deposit ?? 5 } : undefined}
                           />
                           )}
                         </div>

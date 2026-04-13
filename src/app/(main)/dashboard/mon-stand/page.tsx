@@ -214,6 +214,11 @@ export default async function MonStandPage() {
                 <dt className="text-dta-taupe">Stands</dt>
                 <dd className="font-medium text-dta-dark">
                   {stands} stand{stands > 1 ? "s" : ""} ({stands * 2} m&sup2;)
+                  {booking.standNumber && (
+                    <span className="ml-2 inline-flex items-center rounded-full bg-dta-accent/10 px-2 py-0.5 text-xs font-semibold text-dta-accent">
+                      N°{booking.standNumber}
+                    </span>
+                  )}
                 </dd>
               </div>
               <div>
@@ -230,26 +235,38 @@ export default async function MonStandPage() {
                 <CalendarDays size={14} className="text-dta-accent" />
                 &Eacute;v&eacute;nements
               </h3>
-              <ul className="space-y-1.5">
+              <ul className="space-y-2.5">
                 {events.map((e) => (
                   <li
                     key={e.id}
-                    className="flex items-center justify-between text-sm"
+                    className="flex items-center gap-3 text-sm"
                   >
-                    <span className="text-dta-dark">{e.title}</span>
-                    <span className="text-dta-taupe text-xs">
-                      {new Date(e.date + "T12:00:00").toLocaleDateString(
-                        "fr-FR",
-                        { day: "numeric", month: "long" }
-                      )}
-                      {e.endDate &&
-                        ` – ${new Date(
-                          e.endDate + "T12:00:00"
-                        ).toLocaleDateString("fr-FR", {
-                          day: "numeric",
-                          month: "long",
-                        })}`}
-                    </span>
+                    {e.coverImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={e.coverImage}
+                        alt={e.title}
+                        className="h-12 w-12 flex-shrink-0 rounded-lg border border-dta-sand object-cover"
+                      />
+                    ) : (
+                      <div className="h-12 w-12 flex-shrink-0 rounded-lg border border-dta-sand bg-gradient-to-br from-dta-accent/20 to-dta-accent/5" />
+                    )}
+                    <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                      <span className="truncate text-dta-dark">{e.title}</span>
+                      <span className="flex-shrink-0 text-xs text-dta-taupe">
+                        {new Date(e.date + "T12:00:00").toLocaleDateString(
+                          "fr-FR",
+                          { day: "numeric", month: "long" }
+                        )}
+                        {e.endDate &&
+                          ` – ${new Date(
+                            e.endDate + "T12:00:00"
+                          ).toLocaleDateString("fr-FR", {
+                            day: "numeric",
+                            month: "long",
+                          })}`}
+                      </span>
+                    </div>
                   </li>
                 ))}
               </ul>

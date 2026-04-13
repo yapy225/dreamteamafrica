@@ -311,7 +311,7 @@ const PREFIX_REDIRECTS: Array<[string, string]> = [
   ["/festival-international-du-cinema-africa", "/saison-culturelle-africaine"],
 ];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const host = request.headers.get("host")?.replace(/:\d+$/, "") ?? "";
 
   // Domain-level redirects

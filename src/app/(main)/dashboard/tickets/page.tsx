@@ -250,56 +250,57 @@ function TicketCard({
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
       {/* Top section */}
-      <div className="flex">
-        {/* Cover image */}
-        <div className="relative hidden w-32 flex-shrink-0 sm:block">
-          {ticket.event.coverImage ? (
-            <Image
-              src={ticket.event.coverImage}
-              alt={ticket.event.title}
-              fill
-              className="object-cover"
-              sizes="128px"
-            />
-          ) : (
-            <div className="h-full w-full bg-gradient-to-br from-dta-accent/20 to-dta-accent/5" />
-          )}
-        </div>
-
-        {/* Info */}
-        <div className="flex flex-1 items-start justify-between gap-4 p-5">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className={`inline-block rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${tierColor}`}>
-                {tierLabel}
-              </span>
-              <span className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                isPaid ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"
-              }`}>
-                {isPaid ? "Soldé" : `${percent}% payé`}
-              </span>
-            </div>
-
-            <h3 className="mt-2 font-serif text-lg font-bold text-slate-900">
-              <Link href={`/saison-culturelle-africaine/${ticket.event.slug}`} className="hover:text-dta-accent">
-                {ticket.event.title}
-              </Link>
-            </h3>
-
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-              <span className="flex items-center gap-1">
-                <Calendar size={12} />
-                {formatDate(ticket.event.date)}
-              </span>
-              <span className="flex items-center gap-1">
-                <MapPin size={12} />
-                {ticket.event.venue}
-              </span>
-            </div>
+      <div className="flex items-start justify-between gap-4 p-5">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`inline-block rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${tierColor}`}>
+              {tierLabel}
+            </span>
+            <span className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+              isPaid ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"
+            }`}>
+              {isPaid ? "Soldé" : `${percent}% payé`}
+            </span>
           </div>
 
-          {/* Date badge */}
-          <div className="flex-shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-center">
+          <h3 className="mt-2 font-serif text-lg font-bold text-slate-900">
+            <Link href={`/saison-culturelle-africaine/${ticket.event.slug}`} className="hover:text-dta-accent">
+              {ticket.event.title}
+            </Link>
+          </h3>
+
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+            <span className="flex items-center gap-1">
+              <Calendar size={12} />
+              {formatDate(ticket.event.date)}
+            </span>
+            <span className="flex items-center gap-1">
+              <MapPin size={12} />
+              {ticket.event.venue}
+            </span>
+          </div>
+        </div>
+
+        {/* Cover image (top-right) + date badge */}
+        <div className="flex flex-shrink-0 items-start gap-3">
+          <Link
+            href={`/saison-culturelle-africaine/${ticket.event.slug}`}
+            className="relative block h-20 w-20 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 sm:h-24 sm:w-24"
+          >
+            {ticket.event.coverImage ? (
+              <Image
+                src={ticket.event.coverImage}
+                alt={ticket.event.title}
+                fill
+                className="object-cover"
+                sizes="(min-width: 640px) 96px, 80px"
+              />
+            ) : (
+              <div className="h-full w-full bg-gradient-to-br from-dta-accent/20 to-dta-accent/5" />
+            )}
+          </Link>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-center">
             <span className="block text-[10px] font-bold uppercase text-dta-accent">
               {eventDate.toLocaleDateString("fr-FR", { month: "short" })}
             </span>

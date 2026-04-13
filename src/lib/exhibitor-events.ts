@@ -7,6 +7,7 @@ export interface ExhibitorEvent {
   venue: string;
   address: string;
   hours: string;
+  coverImage?: string;
 }
 
 export const EXHIBITOR_EVENTS: ExhibitorEvent[] = [
@@ -19,6 +20,7 @@ export const EXHIBITOR_EVENTS: ExhibitorEvent[] = [
     venue: "Espace MAS",
     address: "10 rue des terres au curé, Paris 13e",
     hours: "12h – 22h",
+    coverImage: "https://dreamteamafricamedia.b-cdn.net/campaigns/foire-afrique-danseuse-j24.png",
   },
   {
     id: "festival-autre-culture",
@@ -28,6 +30,7 @@ export const EXHIBITOR_EVENTS: ExhibitorEvent[] = [
     venue: "Espace Culturel",
     address: "28 Av. de Neuilly, 94120 Fontenay-sous-Bois",
     hours: "12h – 22h",
+    coverImage: "https://dreamteamafricamedia.b-cdn.net/festivaldelautreculture/affiche-festivaldelautreculture-carre%20(1).png",
   },
   {
     id: "festival-cinema-africain",
@@ -37,6 +40,7 @@ export const EXHIBITOR_EVENTS: ExhibitorEvent[] = [
     venue: "Maison des Citoyens",
     address: "Fontenay-sous-Bois",
     hours: "10h – 22h",
+    coverImage: "https://dreamteamafricamedia.b-cdn.net/saisonculturelleafricaine/fica/fica.png",
   },
   {
     id: "fashion-week-africa",
@@ -46,6 +50,7 @@ export const EXHIBITOR_EVENTS: ExhibitorEvent[] = [
     venue: "Espace MAS",
     address: "10 rue des terres au curé, Paris 13e",
     hours: "12h – 22h",
+    coverImage: "https://dreamteamafricamedia.b-cdn.net/fashionweekafrica/fillesudafrica.png",
   },
   {
     id: "juste-une-danse",
@@ -55,6 +60,7 @@ export const EXHIBITOR_EVENTS: ExhibitorEvent[] = [
     venue: "Espace MAS",
     address: "Paris 13e",
     hours: "12h – 22h",
+    coverImage: "https://dreamteamafricamedia.b-cdn.net/saisonculturelleafricaine/justeunedanse/justeunedanse11.png",
   },
   {
     id: "festival-conte-africain",
@@ -64,6 +70,7 @@ export const EXHIBITOR_EVENTS: ExhibitorEvent[] = [
     venue: "Espace MAS",
     address: "Paris 13e",
     hours: "12h – 22h",
+    coverImage: "https://dreamteamafricamedia.b-cdn.net/saisonculturelleafricaine/conteafricain/conte-africain-festival.png",
   },
   {
     id: "salon-made-in-africa",
@@ -74,6 +81,7 @@ export const EXHIBITOR_EVENTS: ExhibitorEvent[] = [
     venue: "Espace MAS",
     address: "Paris 13e",
     hours: "12h – 22h",
+    coverImage: "https://dreamteamafricamedia.b-cdn.net/saisonculturelleafricaine/salonmadeinafrica/salonmadeinafrica.png",
   },
 ];
 

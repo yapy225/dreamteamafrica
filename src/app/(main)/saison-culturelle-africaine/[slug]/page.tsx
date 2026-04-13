@@ -89,7 +89,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   const soldOut = remaining <= 0;
   const progressPercent = Math.min(100, Math.round((soldCount / event.capacity) * 100));
 
-  const customTiers = event.tiers as Array<{ id: string; name: string; price: number; description: string; features: string[]; highlight: boolean; quota?: number; onSiteOnly?: boolean; soldOffset?: number; isCulturePourTous?: boolean }> | null;
+  const customTiers = event.tiers as Array<{ id: string; name: string; price: number; description: string; features: string[]; highlight: boolean; quota?: number; onSiteOnly?: boolean; soldOffset?: number; isCulturePourTous?: boolean; cptVariantOf?: string; deposit?: number }> | null;
 
   // Count tickets sold per tier for quota tracking
   const ticketsByTier = await prisma.ticket.groupBy({
@@ -114,11 +114,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
         sold: (soldByTier[t.id] ?? 0) + (t.soldOffset ?? 0),
         onSiteOnly: t.onSiteOnly ?? false,
         isCulturePourTous: t.isCulturePourTous ?? false,
+        cptVariantOf: t.cptVariantOf ?? null,
+        deposit: t.deposit ?? null,
       }))
     : [
-        { id: "EARLY_BIRD" as const, name: "Early Bird", price: event.priceEarly, description: "Accès général — Tarif réduit pour les premiers acheteurs", features: ["Accès à l'événement", "Badge nominatif"], highlight: false, quota: null as number | null, sold: soldByTier["EARLY_BIRD"] ?? 0, onSiteOnly: false },
-        { id: "STANDARD" as const, name: "Standard", price: event.priceStd, description: "Accès complet à l'événement avec avantages inclus", features: ["Accès à l'événement", "Badge nominatif", "Programme officiel", "Accès au networking"], highlight: true, quota: null as number | null, sold: soldByTier["STANDARD"] ?? 0, onSiteOnly: false },
-        { id: "VIP" as const, name: "VIP", price: event.priceVip, description: "L'expérience premium avec accès exclusif et privilèges", features: ["Accès prioritaire", "Badge VIP nominatif", "Programme officiel", "Accès backstage", "Cocktail privé", "Place réservée"], highlight: false, quota: null as number | null, sold: soldByTier["VIP"] ?? 0, onSiteOnly: false },
+        { id: "EARLY_BIRD" as const, name: "Early Bird", price: event.priceEarly, description: "Accès général — Tarif réduit pour les premiers acheteurs", features: ["Accès à l'événement", "Badge nominatif"], highlight: false, quota: null as number | null, sold: soldByTier["EARLY_BIRD"] ?? 0, onSiteOnly: false, isCulturePourTous: false, cptVariantOf: null, deposit: null },
+        { id: "STANDARD" as const, name: "Standard", price: event.priceStd, description: "Accès complet à l'événement avec avantages inclus", features: ["Accès à l'événement", "Badge nominatif", "Programme officiel", "Accès au networking"], highlight: true, quota: null as number | null, sold: soldByTier["STANDARD"] ?? 0, onSiteOnly: false, isCulturePourTous: false, cptVariantOf: null, deposit: null },
+        { id: "VIP" as const, name: "VIP", price: event.priceVip, description: "L'expérience premium avec accès exclusif et privilèges", features: ["Accès prioritaire", "Badge VIP nominatif", "Programme officiel", "Accès backstage", "Cocktail privé", "Place réservée"], highlight: false, quota: null as number | null, sold: soldByTier["VIP"] ?? 0, onSiteOnly: false, isCulturePourTous: false, cptVariantOf: null, deposit: null },
       ];
 
   const eventDate = new Date(event.date);

@@ -26,6 +26,8 @@ interface Tier {
   sold: number;
   onSiteOnly?: boolean;
   isCulturePourTous?: boolean;
+  cptVariantOf?: string | null;
+  deposit?: number | null;
 }
 
 interface TicketSectionClientProps {
@@ -84,9 +86,18 @@ export default function TicketSectionClient({
     ? `${selected.title} — ${formatSessionDateLong(selected.date)}${selected.time ? ` à ${selected.time.replace(":", "h")}` : ""}`
     : undefined;
 
+  /* Map CPT-variant tiers to their parent (e.g. CULTURE_POUR_TOUS → STANDARD) */
+  const cptVariantByParent = new Map<string, Tier>();
+  for (const t of tiers) {
+    if (t.cptVariantOf) cptVariantByParent.set(t.cptVariantOf, t);
+  }
+
+  /* Hide tiers that are CPT variants of another tier — they're shown as a 2nd button on parent */
+  const parentTiers = tiers.filter((t) => !t.cptVariantOf);
+
   /* When sessions and tiers match 1:1, show only the tier for the selected session */
-  const oneToOne = sessions.length > 0 && sessions.length === tiers.length;
-  const visibleTiers = oneToOne ? [tiers[selectedIdx]] : tiers;
+  const oneToOne = sessions.length > 0 && sessions.length === parentTiers.length;
+  const visibleTiers = oneToOne ? [parentTiers[selectedIdx]] : parentTiers;
 
   return (
     <div>
@@ -268,6 +279,12 @@ export default function TicketSectionClient({
                     fixedVisitDate={selected?.date ? `${selected.date}T12:00:00Z` : undefined}
                     maxQuantity={tierRemaining != null ? Math.min(10, tierRemaining) : 10}
                     isCulturePourTous={tier.isCulturePourTous}
+                    cptVariant={cptVariantByParent.get(tier.id) ? {
+                      id: cptVariantByParent.get(tier.id)!.id,
+                      name: cptVariantByParent.get(tier.id)!.name,
+                      price: cptVariantByParent.get(tier.id)!.price,
+                      deposit: cptVariantByParent.get(tier.id)!.deposit ?? 5,
+                    } : undefined}
                   />
                 )}
               </div>

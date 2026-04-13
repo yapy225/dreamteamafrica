@@ -82,7 +82,7 @@ export default function TicketSelector({
             className="w-full rounded-[var(--radius-button)] border-2 border-emerald-600 bg-white px-4 py-3 text-sm font-semibold text-emerald-700 transition-all duration-200 hover:bg-emerald-50"
             aria-label={`Culture pour Tous dès ${cptVariant.deposit}€`}
           >
-            CPT dès {cptVariant.deposit}€ →
+            ✨ CPT dès {cptVariant.deposit}€ →
           </button>
         )}
       </div>

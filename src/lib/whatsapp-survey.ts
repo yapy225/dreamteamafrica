@@ -68,9 +68,10 @@ const VISITEUR_TEXT = `Génial, on a hâte de vous accueillir ! 🎉
 
 Au programme : +50 exposants (mode, cosmétiques, gastronomie, artisanat), défilés, concerts, ateliers, restauration africaine 🌍✨
 
-🎟️ Billets : https://dreamteamafrica.com/billetterie/foire-dafrique-paris
+🎟️ Billet Early Bird : 10 € (au lieu de 15 €)
+👉 https://dreamteamafrica.com/billetterie/foire-dafrique-paris
 
-🎭 Et découvrez notre programme Culture Pour Tous — des places offertes aux jeunes & familles pour vivre la Saison Culturelle Africaine :
+🎭 Avec le programme Culture Pour Tous, réservez dès 5 € votre place et soutenez la Saison Culturelle Africaine :
 👉 https://dreamteamafrica.com/saison-culturelle-africaine
 
 À très vite !`;
@@ -120,8 +121,9 @@ export async function sendVisiteurResponse(phone: string, email?: string | null)
 📍 Espace MAS, 10 rue des Terres au Curé, Paris 13e<br>
 ⏰ 12h — 22h</p>
 <p>Au programme : <strong>+50 exposants</strong> (mode, cosmétiques, gastronomie, artisanat), défilés, concerts, ateliers, restauration africaine 🌍✨</p>
-<p>🎟️ <a href="https://dreamteamafrica.com/billetterie/foire-dafrique-paris">Réserver mes billets</a></p>
-<p>🎭 Et découvrez notre programme <strong>Culture Pour Tous</strong> — des places offertes aux jeunes & familles pour vivre la Saison Culturelle Africaine :<br>
+<p>🎟️ <strong>Billet Early Bird : 10 €</strong> (au lieu de 15 €)<br>
+👉 <a href="https://dreamteamafrica.com/billetterie/foire-dafrique-paris">Réserver mon billet</a></p>
+<p>🎭 Avec le programme <strong>Culture Pour Tous</strong>, réservez <strong>dès 5 €</strong> votre place et soutenez la Saison Culturelle Africaine :<br>
 👉 <a href="https://dreamteamafrica.com/saison-culturelle-africaine">Voir le programme</a></p>
 <p>À très vite !<br>— L'équipe Dream Team Africa</p>`,
     });

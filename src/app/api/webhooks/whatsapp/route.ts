@@ -131,8 +131,14 @@ export async function POST(request: Request) {
   const expectedSig =
     "sha256=" +
     crypto.createHmac("sha256", APP_SECRET).update(rawBody).digest("hex");
-  if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
-    console.error("WhatsApp webhook: invalid signature");
+  try {
+    const a = Buffer.from(signature);
+    const b = Buffer.from(expectedSig);
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+      console.error("WhatsApp webhook: invalid signature");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
+    }
+  } catch {
     return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
   }
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { uploadFile } from "@/lib/bunny";
+import crypto from "crypto";
 
 /**
  * POST /api/webhooks/tally
@@ -10,15 +11,28 @@ import { uploadFile } from "@/lib/bunny";
  */
 const TALLY_SIGNING_SECRET = process.env.TALLY_SIGNING_SECRET;
 
+function timingSafeEqualStr(a: string, b: string): boolean {
+  try {
+    const ab = Buffer.from(a);
+    const bb = Buffer.from(b);
+    if (ab.length !== bb.length) return false;
+    return crypto.timingSafeEqual(ab, bb);
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(request: Request) {
   try {
-    // Verify webhook authenticity
-    if (TALLY_SIGNING_SECRET) {
-      const signature = request.headers.get("tally-signature");
-      if (!signature || signature !== TALLY_SIGNING_SECRET) {
-        console.error("[Tally Webhook] Invalid signature");
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
+    // Verify webhook authenticity — fail closed
+    if (!TALLY_SIGNING_SECRET) {
+      console.error("[Tally Webhook] TALLY_SIGNING_SECRET not configured");
+      return NextResponse.json({ error: "Server not configured" }, { status: 500 });
+    }
+    const signature = request.headers.get("tally-signature");
+    if (!signature || !timingSafeEqualStr(signature, TALLY_SIGNING_SECRET)) {
+      console.error("[Tally Webhook] Invalid signature");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const payload = await request.json();

@@ -42,17 +42,29 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
-    // Verify Facebook webhook signature (X-Hub-Signature-256)
+    // Verify Facebook webhook signature (X-Hub-Signature-256) — fail closed
     const rawBody = await request.text();
     const fbSignature = request.headers.get("x-hub-signature-256");
     const appSecret = process.env.WHATSAPP_APP_SECRET || process.env.META_APP_SECRET;
-    if (appSecret && fbSignature) {
-      const { createHmac } = await import("crypto");
-      const expectedSig = "sha256=" + createHmac("sha256", appSecret).update(rawBody).digest("hex");
-      if (fbSignature !== expectedSig) {
+    if (!appSecret) {
+      console.error("[Facebook Leads] app secret not configured");
+      return NextResponse.json({ error: "Server not configured" }, { status: 500 });
+    }
+    if (!fbSignature) {
+      console.error("[Facebook Leads] missing signature header");
+      return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+    }
+    const { createHmac, timingSafeEqual } = await import("crypto");
+    const expectedSig = "sha256=" + createHmac("sha256", appSecret).update(rawBody).digest("hex");
+    try {
+      const a = Buffer.from(fbSignature);
+      const b = Buffer.from(expectedSig);
+      if (a.length !== b.length || !timingSafeEqual(a, b)) {
         console.error("[Facebook Leads] Invalid signature");
         return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
       }
+    } catch {
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     const body = JSON.parse(rawBody);

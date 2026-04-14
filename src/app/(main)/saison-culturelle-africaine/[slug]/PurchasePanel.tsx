@@ -82,6 +82,7 @@ export default function PurchasePanel({
   const [promoError, setPromoError] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [cptDepositInput, setCptDepositInput] = useState(5);
 
   /* ── multi-day dates ─────────────────────────────────── */
   const isMultiDay = !!eventEndDate && !fixedVisitDate;
@@ -157,7 +158,12 @@ export default function PurchasePanel({
   /* ── derived ─────────────────────────────────────────── */
   const CPT_DEPOSIT = 5;
   const total = tier.price * quantity;
-  const cptDeposit = tier.isCulturePourTous ? CPT_DEPOSIT * quantity : 0;
+  // Clamp CPT deposit per ticket: min 5€, max tier.price
+  const clampedCptDepositPerTicket = Math.min(
+    Math.max(Number.isFinite(cptDepositInput) ? cptDepositInput : CPT_DEPOSIT, CPT_DEPOSIT),
+    tier.price || CPT_DEPOSIT,
+  );
+  const cptDeposit = tier.isCulturePourTous ? clampedCptDepositPerTicket * quantity : 0;
   const deposit = tier.isCulturePourTous ? cptDeposit : installments > 1 ? 5 * quantity : total;
   const remainingBalance = total - deposit;
   const monthlyAmount = installments > 1 && !tier.isCulturePourTous ? Math.ceil((remainingBalance / (installments - 1)) * 100) / 100 : 0;
@@ -234,6 +240,7 @@ export default function PurchasePanel({
           visitDate: selectedDate,
           ...(!tier.isCulturePourTous && { installments }),
           ...(promoApplied && !tier.isCulturePourTous && { promotionCode: promoApplied.id }),
+          ...(tier.isCulturePourTous && { depositPerTicket: clampedCptDepositPerTicket }),
         }),
       });
 
@@ -498,10 +505,40 @@ export default function PurchasePanel({
           {/* total + submit */}
           <div className="border-t border-dta-sand pt-4">
             {tier.isCulturePourTous && (
-              <div className="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5">
+              <div className="mb-3 space-y-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5">
                 <p className="text-xs text-emerald-800">
-                  <strong>Acompte {formatCurrency(CPT_DEPOSIT)} par billet</strong> — solde de {formatCurrency(tier.price - CPT_DEPOSIT)} payable quand vous voulez, jusqu&apos;à la veille de l&apos;événement. QR code débloqué une fois soldé.
+                  Choisissez le montant de votre <strong>acompte</strong> (min {formatCurrency(CPT_DEPOSIT)}, max {formatCurrency(tier.price)}). Solde payable quand vous voulez, jusqu&apos;à la veille. QR débloqué une fois soldé.
                 </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  {[5, 10, 20, tier.price].filter((v, i, arr) => v >= CPT_DEPOSIT && v <= tier.price && arr.indexOf(v) === i).map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setCptDepositInput(preset)}
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                        clampedCptDepositPerTicket === preset
+                          ? "border-emerald-600 bg-emerald-600 text-white"
+                          : "border-emerald-300 bg-white text-emerald-700 hover:bg-emerald-100"
+                      }`}
+                    >
+                      {preset === tier.price ? `Tout payer (${formatCurrency(preset)})` : formatCurrency(preset)}
+                    </button>
+                  ))}
+                  <label className="flex items-center gap-1.5 text-xs text-emerald-800">
+                    ou
+                    <input
+                      type="number"
+                      min={CPT_DEPOSIT}
+                      max={tier.price}
+                      step={1}
+                      value={cptDepositInput}
+                      onChange={(e) => setCptDepositInput(Number(e.target.value))}
+                      className="w-20 rounded-md border border-emerald-300 bg-white px-2 py-1 text-xs font-semibold text-emerald-900 focus:border-emerald-600 focus:outline-none"
+                      aria-label="Montant de l'acompte"
+                    />
+                    € / billet
+                  </label>
+                </div>
               </div>
             )}
             <div className="space-y-1.5 mb-3">

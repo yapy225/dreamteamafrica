@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Trop de tentatives. Réessayez." }, { status: 429 });
     }
 
-    const { eventId, tier, quantity, firstName, lastName, email, phone, visitDate, sessionLabel } =
+    const { eventId, tier, quantity, firstName, lastName, email, phone, visitDate, sessionLabel, depositPerTicket } =
       await request.json();
 
     const trimmedFirstName = firstName?.trim();
@@ -57,7 +57,13 @@ export async function POST(request: Request) {
     }
 
     const targetPrice = Number(matched.price);
-    const deposit = CPT_CONFIG.depositAmount * qty;
+    // Validate custom deposit: >= CPT_CONFIG.depositAmount, <= targetPrice (capped at full price)
+    const rawDeposit = Number(depositPerTicket);
+    const validDeposit = Number.isFinite(rawDeposit) && rawDeposit >= CPT_CONFIG.depositAmount
+      ? Math.min(Math.round(rawDeposit * 100) / 100, targetPrice)
+      : CPT_CONFIG.depositAmount;
+    const depositUnit = validDeposit;
+    const deposit = depositUnit * qty;
     const { fees } = calculateFees(deposit);
 
     const remaining = event.capacity - event._count.tickets;
@@ -77,10 +83,12 @@ export async function POST(request: Request) {
       {
         price_data: {
           currency: "eur",
-          unit_amount: Math.round(CPT_CONFIG.depositAmount * 100),
+          unit_amount: Math.round(depositUnit * 100),
           product_data: {
             name: `Acompte Culture pour Tous — ${productName}`,
-            description: `Acompte de ${CPT_CONFIG.depositAmount}€ sur ${targetPrice}€. Complétez à votre rythme jusqu'à la veille de l'événement.`,
+            description: depositUnit >= targetPrice
+              ? `Paiement complet de ${targetPrice}€ via Culture pour Tous.`
+              : `Acompte de ${depositUnit}€ sur ${targetPrice}€. Complétez à votre rythme jusqu'à la veille de l'événement.`,
           },
         },
         quantity: qty,

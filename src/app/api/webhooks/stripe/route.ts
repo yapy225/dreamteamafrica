@@ -475,11 +475,13 @@ async function handleCulturePourTousPurchase(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // Re-validate price from DB — never trust metadata
-  const customTiers = event.tiers as Array<{ id: string; name: string; price: number; isCulturePourTous?: boolean }> | null;
+  // Re-validate price from DB — never trust metadata.
+  // CPT can apply to ANY paid tier of an event that has CPT enabled (any tier with isCulturePourTous=true).
+  const customTiers = event.tiers as Array<{ id: string; name: string; price: number; isCulturePourTous?: boolean; onSiteOnly?: boolean }> | null;
+  const cptEnabled = Array.isArray(customTiers) && customTiers.some((t) => t.isCulturePourTous);
   const matched = Array.isArray(customTiers) ? customTiers.find((t) => t.id === tier) : null;
-  if (!matched || !matched.isCulturePourTous) {
-    console.error(`CPT purchase rejected: tier "${tier}" not CPT for event ${eventId}`);
+  if (!cptEnabled || !matched || matched.isCulturePourTous || matched.onSiteOnly || Number(matched.price) <= 0) {
+    console.error(`CPT purchase rejected: tier "${tier}" not eligible for event ${eventId}`);
     return;
   }
   const verifiedPrice = Number(matched.price);

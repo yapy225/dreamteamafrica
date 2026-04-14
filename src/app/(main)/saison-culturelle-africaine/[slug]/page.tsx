@@ -674,10 +674,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                      {tiers.filter((t) => !t.cptVariantOf).map((tier) => {
-                        const tierSoldOut = tier.quota != null && tier.quota > 0 && tier.sold >= tier.quota;
-                        const cptVariant = tiers.find((x) => x.cptVariantOf === tier.id);
-                        return (
+                      {(() => {
+                        const cptEnabled = tiers.some((t) => t.isCulturePourTous);
+                        return tiers.filter((t) => !t.isCulturePourTous && !t.cptVariantOf).map((tier) => {
+                          const tierSoldOut = tier.quota != null && tier.quota > 0 && tier.sold >= tier.quota;
+                          const showCpt = cptEnabled && !tierSoldOut && !tier.onSiteOnly && tier.price > 0;
+                          const cptVariant = showCpt ? { id: tier.id, name: tier.name, price: tier.price, deposit: 5 } : undefined;
+                          return (
                         <div
                           key={tier.id}
                           className={`relative overflow-hidden rounded-[var(--radius-card)] bg-white p-6 shadow-[var(--shadow-card)] transition-all duration-200 ${
@@ -740,7 +743,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                           )}
                         </div>
                         );
-                      })}
+                        });
+                      })()}
                     </div>
                   )}
                 </div>

@@ -50,10 +50,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "L'événement est passé." }, { status: 400 });
     }
 
-    const customTiers = event.tiers as Array<{ id: string; name: string; price: number; isCulturePourTous?: boolean }> | null;
+    const customTiers = event.tiers as Array<{ id: string; name: string; price: number; isCulturePourTous?: boolean; onSiteOnly?: boolean }> | null;
+    const cptEnabled = Array.isArray(customTiers) && customTiers.some((t) => t.isCulturePourTous);
+    if (!cptEnabled) {
+      return NextResponse.json({ error: "Culture pour Tous n'est pas activé pour cet événement." }, { status: 400 });
+    }
     const matched = Array.isArray(customTiers) ? customTiers.find((t) => t.id === tier) : null;
-    if (!matched || !matched.isCulturePourTous) {
-      return NextResponse.json({ error: "Ce tier n'est pas disponible en Culture pour Tous." }, { status: 400 });
+    if (!matched || matched.isCulturePourTous || matched.onSiteOnly || Number(matched.price) <= 0) {
+      return NextResponse.json({ error: "Ce tier n'est pas éligible à Culture pour Tous." }, { status: 400 });
     }
 
     const targetPrice = Number(matched.price);

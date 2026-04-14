@@ -86,14 +86,11 @@ export default function TicketSectionClient({
     ? `${selected.title} — ${formatSessionDateLong(selected.date)}${selected.time ? ` à ${selected.time.replace(":", "h")}` : ""}`
     : undefined;
 
-  /* Map CPT-variant tiers to their parent (e.g. CULTURE_POUR_TOUS → STANDARD) */
-  const cptVariantByParent = new Map<string, Tier>();
-  for (const t of tiers) {
-    if (t.cptVariantOf) cptVariantByParent.set(t.cptVariantOf, t);
-  }
+  /* CPT enabled when at least one tier is marked isCulturePourTous (signal per event) */
+  const cptEnabled = tiers.some((t) => t.isCulturePourTous);
 
-  /* Hide tiers that are CPT variants of another tier — they're shown as a 2nd button on parent */
-  const parentTiers = tiers.filter((t) => !t.cptVariantOf);
+  /* Hide CPT tiers themselves — CPT is shown as a 2nd button on every paid parent tier */
+  const parentTiers = tiers.filter((t) => !t.isCulturePourTous && !t.cptVariantOf);
 
   /* When sessions and tiers match 1:1, show only the tier for the selected session */
   const oneToOne = sessions.length > 0 && sessions.length === parentTiers.length;
@@ -279,11 +276,11 @@ export default function TicketSectionClient({
                     fixedVisitDate={selected?.date ? `${selected.date}T12:00:00Z` : undefined}
                     maxQuantity={tierRemaining != null ? Math.min(10, tierRemaining) : 10}
                     isCulturePourTous={tier.isCulturePourTous}
-                    cptVariant={cptVariantByParent.get(tier.id) ? {
-                      id: cptVariantByParent.get(tier.id)!.id,
-                      name: cptVariantByParent.get(tier.id)!.name,
-                      price: cptVariantByParent.get(tier.id)!.price,
-                      deposit: cptVariantByParent.get(tier.id)!.deposit ?? 5,
+                    cptVariant={cptEnabled && !tierSoldOut && !tier.onSiteOnly && tier.price > 0 ? {
+                      id: tier.id,
+                      name: tier.name,
+                      price: tier.price,
+                      deposit: 5,
                     } : undefined}
                   />
                 )}

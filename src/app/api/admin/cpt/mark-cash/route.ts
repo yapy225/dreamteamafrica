@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import QRCode from "qrcode";
 import { uploadBuffer } from "@/lib/bunny";
-import crypto from "crypto";
+import { signQr } from "@/lib/qr-sig";
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
   if (updated && Number(updated.totalPaid) >= Number(updated.price) && !updated.qrCode) {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://dreamteamafrica.com";
-      const sig = crypto.createHmac("sha256", process.env.NEXTAUTH_SECRET || "dta-secret").update(ticketId).digest("hex").slice(0, 32);
+      const sig = signQr(ticketId);
       const qrUrl = `${baseUrl}/check/${ticketId}?sig=${sig}`;
       const qrBuffer = await QRCode.toBuffer(qrUrl, { width: 600, margin: 2 });
       const { url: qrCdnUrl } = await uploadBuffer(Buffer.from(qrBuffer), `qrcodes/tickets/${ticketId}.png`);

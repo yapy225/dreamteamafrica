@@ -106,6 +106,14 @@ export async function POST(request: Request) {
     }
 
     const MAX_PER_EMAIL = 5;
+    // Concurrent-purchase guard (race bypass)
+    const lockRl = rateLimit(`cap:${trimmedEmail}:${event.id}`, { limit: 1, windowSec: 5 });
+    if (!lockRl.success) {
+      return NextResponse.json(
+        { error: "Un achat est déjà en cours pour ce billet. Patientez quelques secondes." },
+        { status: 429 },
+      );
+    }
     const existing = await prisma.ticket.count({ where: { email: trimmedEmail, eventId: event.id } });
     if (existing + qty > MAX_PER_EMAIL) {
       return NextResponse.json({ error: `Limite de ${MAX_PER_EMAIL} billets par email.` }, { status: 400 });

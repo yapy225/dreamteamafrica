@@ -10,6 +10,7 @@ import { generateInvoicePDF, generateInvoiceNumber } from "@/lib/generate-invoic
 import { DEPOSIT_AMOUNT } from "@/lib/exhibitor-events";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { signQr } from "@/lib/qr-sig";
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -125,7 +126,7 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
     const ticketId = crypto.randomUUID();
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://dreamteamafrica.com";
     // HMAC signature to prevent QR URL guessing
-    const sig = crypto.createHmac("sha256", process.env.NEXTAUTH_SECRET || "dta-secret").update(ticketId).digest("hex").slice(0, 32);
+    const sig = signQr(ticketId);
     const qrUrl = `${baseUrl}/check/${ticketId}?sig=${sig}`;
 
     const qrBuffer = await QRCode.toBuffer(qrUrl, { width: 600, margin: 2 });
@@ -444,7 +445,7 @@ async function handleTicketRecharge(session: Stripe.Checkout.Session) {
   if (updatedTicket.totalPaid >= updatedTicket.price && !updatedTicket.qrCode) {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://dreamteamafrica.com";
-      const sig = crypto.createHmac("sha256", process.env.NEXTAUTH_SECRET || "dta-secret").update(ticketId).digest("hex").slice(0, 32);
+      const sig = signQr(ticketId);
       const qrUrl = `${baseUrl}/check/${ticketId}?sig=${sig}`;
       const qrBuffer = await QRCode.toBuffer(qrUrl, { width: 600, margin: 2 });
       const { url: qrCdnUrl } = await uploadBuffer(Buffer.from(qrBuffer), `qrcodes/tickets/${ticketId}.png`);

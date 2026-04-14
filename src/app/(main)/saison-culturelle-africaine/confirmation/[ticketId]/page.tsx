@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
-import { CheckCircle, Calendar, MapPin, Download, ArrowLeft } from "lucide-react";
+import { CheckCircle, Calendar, MapPin, Download, ArrowLeft, Mail } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { sendTicketConfirmationEmail } from "@/lib/email";
+import { auth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -86,6 +87,45 @@ export default async function ConfirmationPage({
   const totalAmount = finalTickets.reduce((sum, t) => sum + t.price, 0);
   const eventDate = new Date(event.date);
   const holderName = `${finalTickets[0].firstName ?? ""} ${finalTickets[0].lastName ?? ""}`.trim();
+
+  // Access control : full PII/QR shown only to:
+  //   (a) visitors redirected from Stripe recently (<15 min after ticket creation)
+  //   (b) authenticated owner (session.user.email === ticket.email)
+  const session = await auth();
+  const ticketAge = Date.now() - new Date(finalTickets[0].purchasedAt).getTime();
+  const WINDOW_MS = 15 * 60 * 1000;
+  const isOwner = !!session?.user?.email &&
+    session.user.email.toLowerCase() === (finalTickets[0].email ?? "").toLowerCase();
+  const canShowPII = ticketAge < WINDOW_MS || isOwner;
+
+  if (!canShowPII) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-20 text-center">
+        <div className="mx-auto mb-4 inline-flex rounded-full bg-emerald-100 p-3">
+          <Mail size={32} className="text-emerald-600" />
+        </div>
+        <h1 className="font-serif text-3xl font-bold text-dta-dark">Billets déjà envoyés</h1>
+        <p className="mt-4 text-dta-char/70">
+          Pour protéger vos données, cette page ne s&apos;affiche plus après 15 minutes.
+          Vos billets et votre QR code ont été envoyés par email. Retrouvez-les également
+          dans votre{" "}
+          <Link href="/mon-espace" className="font-medium text-dta-accent hover:underline">
+            espace personnel
+          </Link>
+          {" "}ou{" "}
+          <Link href="/mes-billets" className="font-medium text-dta-accent hover:underline">
+            via votre email
+          </Link>.
+        </p>
+        <Link
+          href="/mes-billets"
+          className="mt-8 inline-flex items-center rounded-[var(--radius-button)] bg-dta-accent px-6 py-3 text-sm font-semibold text-white hover:bg-dta-accent-dark"
+        >
+          Retrouver mes billets
+        </Link>
+      </div>
+    );
+  }
 
   // Backup: send confirmation email only if ticket was purchased within the last 5 minutes
   // This prevents email spam on page refresh while ensuring delivery on first visit

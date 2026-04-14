@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { rateLimit, rateLimitStrict, getClientIp } from "@/lib/rate-limit";
 import { calculateFees } from "@/lib/fees";
 import { CPT_CONFIG } from "@/lib/culture-pour-tous";
 import { getFrictionLevel, SCORE_TTL_MS } from "@/lib/behavior";
+import {
+  acquireCheckoutLock,
+  attachSessionToLock,
+  releaseCheckoutLock,
+  DuplicateCheckoutError,
+} from "@/lib/pending-checkout";
 
 function validateVisitDate(input: unknown, eventStart: Date, eventEnd: Date | null): Date | null {
   if (!input || typeof input !== "string") return null;
@@ -16,6 +22,7 @@ function validateVisitDate(input: unknown, eventStart: Date, eventEnd: Date | nu
 }
 
 export async function POST(request: Request) {
+  let pendingLockIdForRelease: string | null = null;
   try {
     const ip = getClientIp(request);
     const rl = rateLimit(`cpt-checkout:${ip}`, { limit: 10, windowSec: 60 });
@@ -106,9 +113,9 @@ export async function POST(request: Request) {
     }
 
     const MAX_PER_EMAIL = 5;
-    // Concurrent-purchase guard (race bypass)
-    const lockRl = rateLimit(`cap:${trimmedEmail}:${event.id}`, { limit: 1, windowSec: 5 });
-    if (!lockRl.success) {
+    // DB-backed concurrent-purchase guard (serverless-safe across instances)
+    const lockStrict = await rateLimitStrict(`cap:${trimmedEmail}:${event.id}`, { limit: 1, windowSec: 10 });
+    if (!lockStrict.success) {
       return NextResponse.json(
         { error: "Un achat est déjà en cours pour ce billet. Patientez quelques secondes." },
         { status: 429 },
@@ -133,6 +140,19 @@ export async function POST(request: Request) {
         { error: "Un paiement récent a déjà été détecté pour ce billet. Vérifiez votre email." },
         { status: 409 },
       );
+    }
+
+    /* ── Distributed lock: block concurrent Stripe session creation ── */
+    let pendingLockId: string;
+    try {
+      const lock = await acquireCheckoutLock({ email: trimmedEmail, eventId: event.id, tier });
+      pendingLockId = lock.id;
+      pendingLockIdForRelease = lock.id;
+    } catch (lockErr) {
+      if (lockErr instanceof DuplicateCheckoutError) {
+        return NextResponse.json({ error: lockErr.message }, { status: 409 });
+      }
+      throw lockErr;
     }
 
     // Behavioral friction check (bot / abuse protection)
@@ -202,9 +222,13 @@ export async function POST(request: Request) {
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/culture-pour-tous/${event.slug}`,
     });
 
+    await attachSessionToLock(pendingLockId, checkoutSession.id);
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error) {
     console.error("CPT checkout error:", error);
+    if (pendingLockIdForRelease) {
+      await releaseCheckoutLock(pendingLockIdForRelease).catch(() => {});
+    }
     return NextResponse.json({ error: "Erreur lors du checkout." }, { status: 500 });
   }
 }

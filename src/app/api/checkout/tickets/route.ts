@@ -5,9 +5,15 @@ import QRCode from "qrcode";
 import { uploadBuffer } from "@/lib/bunny";
 import { sendTicketConfirmationEmail } from "@/lib/email";
 import { sendTicketConfirmationWhatsApp } from "@/lib/whatsapp";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { rateLimit, rateLimitStrict, getClientIp } from "@/lib/rate-limit";
 import { getFrictionLevel, SCORE_TTL_MS } from "@/lib/behavior";
 import { calculateFees } from "@/lib/fees";
+import {
+  acquireCheckoutLock,
+  attachSessionToLock,
+  releaseCheckoutLock,
+  DuplicateCheckoutError,
+} from "@/lib/pending-checkout";
 
 function validateVisitDate(input: unknown, eventStart: Date, eventEnd: Date | null): Date | null {
   if (!input || typeof input !== "string") return null;
@@ -19,6 +25,7 @@ function validateVisitDate(input: unknown, eventStart: Date, eventEnd: Date | nu
 }
 
 export async function POST(request: Request) {
+  let pendingLockIdForRelease: string | null = null;
   try {
     const ip = getClientIp(request);
     const rl = rateLimit(`checkout:${ip}`, { limit: 10, windowSec: 60 });
@@ -151,9 +158,9 @@ export async function POST(request: Request) {
     const existingTickets = await prisma.ticket.count({
       where: { email: trimmedEmail, eventId: event.id },
     });
-    // Concurrent-purchase guard: short window lock per (email, eventId) to prevent race bypass of the cap
-    const lockRl = rateLimit(`cap:${trimmedEmail}:${event.id}`, { limit: 1, windowSec: 5 });
-    if (!lockRl.success) {
+    // DB-backed concurrent-purchase guard (serverless-safe across instances)
+    const lockStrict = await rateLimitStrict(`cap:${trimmedEmail}:${event.id}`, { limit: 1, windowSec: 10 });
+    if (!lockStrict.success) {
       return NextResponse.json(
         { error: "Un achat est déjà en cours pour ce billet. Patientez quelques secondes." },
         { status: 429 },
@@ -248,6 +255,19 @@ export async function POST(request: Request) {
       );
     }
 
+    /* ── Distributed lock: block concurrent Stripe session creation ── */
+    let pendingLockId: string;
+    try {
+      const lock = await acquireCheckoutLock({ email: trimmedEmail, eventId: event.id, tier });
+      pendingLockId = lock.id;
+      pendingLockIdForRelease = lock.id;
+    } catch (lockErr) {
+      if (lockErr instanceof DuplicateCheckoutError) {
+        return NextResponse.json({ error: lockErr.message }, { status: 409 });
+      }
+      throw lockErr;
+    }
+
     /* ── BEHAVIORAL FRICTION CHECK ──────────────────────────── */
     const clientFp = request.headers.get("x-behavior-fp") || "";
     const fingerprint = `${clientFp}:${ip}`;
@@ -332,6 +352,7 @@ export async function POST(request: Request) {
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/saison-culturelle-africaine/${event.slug}`,
       });
 
+      await attachSessionToLock(pendingLockId, checkoutSession.id);
       return NextResponse.json({ url: checkoutSession.url });
     } else {
       // ── Deposit (5€/billet) + remaining in (N-1) monthly installments ──
@@ -392,10 +413,14 @@ export async function POST(request: Request) {
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/saison-culturelle-africaine/${event.slug}`,
       });
 
+      await attachSessionToLock(pendingLockId, checkoutSession.id);
       return NextResponse.json({ url: checkoutSession.url });
     }
   } catch (error) {
     console.error("Checkout error:", error);
+    if (pendingLockIdForRelease) {
+      await releaseCheckoutLock(pendingLockIdForRelease).catch(() => {});
+    }
     return NextResponse.json(
       { error: "Une erreur est survenue lors du paiement. Veuillez réessayer." },
       { status: 500 },

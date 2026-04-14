@@ -28,6 +28,20 @@ model StripeEvent {
   @@index([processedAt])
 }
 
+model PendingCheckout {
+  id               String   @id @default(cuid())
+  email            String
+  eventId          String
+  tier             String
+  stripeSessionId  String?
+  createdAt        DateTime @default(now())
+  expiresAt        DateTime
+
+  @@unique([email, eventId, tier])
+  @@index([expiresAt])
+  @@index([stripeSessionId])
+}
+
 model User {
   id                     String             @id @default(cuid())
   name                   String?

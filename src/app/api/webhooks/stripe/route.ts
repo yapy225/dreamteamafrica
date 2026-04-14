@@ -11,6 +11,7 @@ import { DEPOSIT_AMOUNT } from "@/lib/exhibitor-events";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { signQr } from "@/lib/qr-sig";
+import { releaseLockBySession } from "@/lib/pending-checkout";
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -169,6 +170,7 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
 
   await Promise.all(ticketPromises);
   console.log(`Created ${qty} ticket(s) for event ${eventId}, user ${userId}`);
+  await releaseLockBySession(session.id).catch(() => {});
 
   // ── NTBC: créditer le montant payé en NTBC dans le wallet ──
   try {
@@ -528,6 +530,7 @@ async function handleCulturePourTousPurchase(session: Stripe.Checkout.Session) {
     created.push({ id: ticketId, magicLink: buildMagicLink(ticketId) });
   }
   console.log(`Created ${qty} CPT ticket(s) for event ${eventId}`);
+  await releaseLockBySession(session.id).catch(() => {});
 
   // Welcome email with magic link
   try {

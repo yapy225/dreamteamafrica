@@ -4,6 +4,16 @@ import { getStripe } from "@/lib/stripe";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { calculateFees } from "@/lib/fees";
 import { CPT_CONFIG } from "@/lib/culture-pour-tous";
+import { getFrictionLevel, SCORE_TTL_MS } from "@/lib/behavior";
+
+function validateVisitDate(input: unknown, eventStart: Date, eventEnd: Date | null): Date | null {
+  if (!input || typeof input !== "string") return null;
+  const d = new Date(input);
+  if (isNaN(d.getTime())) return null;
+  const lo = new Date(eventStart); lo.setHours(0, 0, 0, 0);
+  const hi = new Date(eventEnd || eventStart); hi.setHours(23, 59, 59, 999);
+  return d >= lo && d <= hi ? d : null;
+}
 
 export async function POST(request: Request) {
   try {
@@ -50,7 +60,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "L'événement est passé." }, { status: 400 });
     }
 
-    const customTiers = event.tiers as Array<{ id: string; name: string; price: number; isCulturePourTous?: boolean; onSiteOnly?: boolean }> | null;
+    const customTiers = event.tiers as Array<{ id: string; name: string; price: number; quota?: number; isCulturePourTous?: boolean; onSiteOnly?: boolean }> | null;
     const cptEnabled = Array.isArray(customTiers) && customTiers.some((t) => t.isCulturePourTous);
     if (!cptEnabled) {
       return NextResponse.json({ error: "Culture pour Tous n'est pas activé pour cet événement." }, { status: 400 });
@@ -58,6 +68,26 @@ export async function POST(request: Request) {
     const matched = Array.isArray(customTiers) ? customTiers.find((t) => t.id === tier) : null;
     if (!matched || matched.isCulturePourTous || matched.onSiteOnly || Number(matched.price) <= 0) {
       return NextResponse.json({ error: "Ce tier n'est pas éligible à Culture pour Tous." }, { status: 400 });
+    }
+
+    // Validate visitDate against event range
+    const safeVisitDate = validateVisitDate(visitDate, new Date(event.date), event.endDate);
+    if (visitDate && !safeVisitDate) {
+      return NextResponse.json({ error: "Date de visite invalide." }, { status: 400 });
+    }
+
+    // Check per-tier quota (parent tier) — CPT consumes the parent tier's stock
+    if (matched.quota != null) {
+      const tierSold = await prisma.ticket.count({ where: { eventId: event.id, tier } });
+      const tierRemaining = matched.quota - tierSold;
+      if (tierRemaining < qty) {
+        return NextResponse.json(
+          { error: tierRemaining <= 0
+            ? `Plus de places disponibles pour "${matched.name}".`
+            : `Seulement ${tierRemaining} place(s) restante(s) pour "${matched.name}".` },
+          { status: 400 },
+        );
+      }
     }
 
     const targetPrice = Number(matched.price);
@@ -80,6 +110,37 @@ export async function POST(request: Request) {
     if (existing + qty > MAX_PER_EMAIL) {
       return NextResponse.json({ error: `Limite de ${MAX_PER_EMAIL} billets par email.` }, { status: 400 });
     }
+
+    // Duplicate-payment detection (5-min window)
+    const recentSession = await prisma.ticket.findFirst({
+      where: {
+        email: trimmedEmail,
+        eventId: event.id,
+        tier,
+        purchasedAt: { gte: new Date(Date.now() - 5 * 60 * 1000) },
+      },
+    });
+    if (recentSession) {
+      return NextResponse.json(
+        { error: "Un paiement récent a déjà été détecté pour ce billet. Vérifiez votre email." },
+        { status: 409 },
+      );
+    }
+
+    // Behavioral friction check (bot / abuse protection)
+    const clientFp = request.headers.get("x-behavior-fp") || "";
+    const fingerprint = `${clientFp}:${ip}`;
+    const behaviorRecord = await prisma.behaviorScore.findUnique({ where: { fingerprint } });
+    const scoreAge = behaviorRecord ? Date.now() - behaviorRecord.updatedAt.getTime() : 0;
+    const effectiveScore = behaviorRecord && scoreAge < SCORE_TTL_MS ? behaviorRecord.score : 0;
+    const friction = getFrictionLevel(effectiveScore);
+    if (friction === "block") {
+      return NextResponse.json(
+        { error: "Trop de tentatives inhabituelles détectées. Réessayez plus tard ou contactez-nous." },
+        { status: 403 },
+      );
+    }
+    const paymentMethods: ("card" | "paypal")[] = friction === "card_only" ? ["card"] : ["card", "paypal"];
 
     const stripe = getStripe();
     const productName = `${event.title} — ${matched.name}`;
@@ -111,7 +172,7 @@ export async function POST(request: Request) {
 
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card", "paypal"],
+      payment_method_types: paymentMethods,
       customer_email: trimmedEmail,
       line_items: lineItems,
       metadata: {
@@ -126,7 +187,7 @@ export async function POST(request: Request) {
         lastName: trimmedLastName,
         email: trimmedEmail,
         phone: trimmedPhone,
-        ...(visitDate && { visitDate: String(visitDate) }),
+        ...(safeVisitDate && { visitDate: safeVisitDate.toISOString() }),
         ...(sessionLabel && { sessionLabel }),
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/cpt/success?session_id={CHECKOUT_SESSION_ID}`,

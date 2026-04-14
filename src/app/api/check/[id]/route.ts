@@ -6,9 +6,12 @@ import crypto from "crypto";
 function verifyTicketSig(ticketId: string, sig: string | null): boolean {
   if (!sig) return false;
   const secret = process.env.NEXTAUTH_SECRET || "dta-secret";
-  const expected = crypto.createHmac("sha256", secret).update(ticketId).digest("hex").slice(0, 16);
+  const full = crypto.createHmac("sha256", secret).update(ticketId).digest("hex");
+  // Accept 32-char (new, 128-bit) or 16-char (legacy, grandfathered for already-issued QRs)
+  const len = sig.length === 32 ? 32 : sig.length === 16 ? 16 : 0;
+  if (!len) return false;
   try {
-    return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
+    return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(full.slice(0, len)));
   } catch {
     return false;
   }

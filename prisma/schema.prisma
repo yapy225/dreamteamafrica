@@ -211,6 +211,7 @@ model TicketPayment {
   paidAt   DateTime @default(now())
   ticket   Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
+  @@unique([ticketId, stripeId, type])
   @@index([ticketId])
 }
 

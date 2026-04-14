@@ -9,6 +9,15 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { getFrictionLevel, SCORE_TTL_MS } from "@/lib/behavior";
 import { calculateFees } from "@/lib/fees";
 
+function validateVisitDate(input: unknown, eventStart: Date, eventEnd: Date | null): Date | null {
+  if (!input || typeof input !== "string") return null;
+  const d = new Date(input);
+  if (isNaN(d.getTime())) return null;
+  const lo = new Date(eventStart); lo.setHours(0, 0, 0, 0);
+  const hi = new Date(eventEnd || eventStart); hi.setHours(23, 59, 59, 999);
+  return d >= lo && d <= hi ? d : null;
+}
+
 export async function POST(request: Request) {
   try {
     const ip = getClientIp(request);
@@ -64,6 +73,12 @@ export async function POST(request: Request) {
         { error: "Événement introuvable." },
         { status: 404 },
       );
+    }
+
+    // Validate visitDate against event range (prevent arbitrary dates)
+    const safeVisitDate = validateVisitDate(visitDate, new Date(event.date), event.endDate);
+    if (visitDate && !safeVisitDate) {
+      return NextResponse.json({ error: "Date de visite invalide." }, { status: 400 });
     }
 
     // Resolve price: custom tiers JSON > legacy price fields
@@ -172,7 +187,7 @@ export async function POST(request: Request) {
             lastName: trimmedLastName,
             email: trimmedEmail,
             phone: trimmedPhone,
-            visitDate: visitDate ? new Date(visitDate) : null,
+            visitDate: safeVisitDate,
           },
         });
         createdTickets.push({ id: ticket.id, qrCode: qrCdnUrl });
@@ -189,7 +204,7 @@ export async function POST(request: Request) {
           eventTitle: event.title,
           eventVenue: event.venue,
           eventAddress: event.address,
-          eventDate: visitDate ? new Date(visitDate) : event.date,
+          eventDate: safeVisitDate || event.date,
           eventCoverImage: event.coverImage,
           tier: tierName,
           price: 0,
@@ -302,7 +317,7 @@ export async function POST(request: Request) {
           email: trimmedEmail,
           phone: trimmedPhone,
           installments: "1",
-          ...(visitDate && { visitDate: String(visitDate) }),
+          ...(safeVisitDate && { visitDate: safeVisitDate.toISOString() }),
           ...(sessionLabel && { sessionLabel }),
         },
         success_url: `${process.env.NEXT_PUBLIC_APP_URL}/saison-culturelle-africaine/confirmation/{CHECKOUT_SESSION_ID}`,
@@ -362,7 +377,7 @@ export async function POST(request: Request) {
           deposit: String(deposit),
           remainingBalance: String(remainingBalance),
           installmentAmount: String(installmentAmount),
-          ...(visitDate && { visitDate: String(visitDate) }),
+          ...(safeVisitDate && { visitDate: safeVisitDate.toISOString() }),
           ...(sessionLabel && { sessionLabel }),
         },
         success_url: `${process.env.NEXT_PUBLIC_APP_URL}/saison-culturelle-africaine/confirmation/{CHECKOUT_SESSION_ID}`,

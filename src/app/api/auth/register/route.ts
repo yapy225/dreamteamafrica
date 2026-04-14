@@ -41,14 +41,20 @@ export async function POST(request: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Check if exhibitor bookings exist with this email → auto-assign EXPOSANT role
-    const hasExhibitorBookings = await prisma.exhibitorBooking.findFirst({
-      where: { email: { equals: email, mode: "insensitive" } },
+    // Check if exhibitor bookings exist with this email AND are owned by a placeholder user
+    // (no password set — e.g. created by admin before the exposant registered).
+    // Do NOT auto-link bookings owned by a real user (with password) — risque de vol
+    // de bookings en cas de saisie email incorrecte côté admin.
+    const linkableBooking = await prisma.exhibitorBooking.findFirst({
+      where: {
+        email: { equals: email, mode: "insensitive" },
+        user: { password: null },
+      },
       select: { id: true },
     });
 
     // Role is determined server-side only — never trust client input
-    const finalRole = hasExhibitorBookings ? "EXPOSANT" : "USER";
+    const finalRole = linkableBooking ? "EXPOSANT" : "USER";
 
     const user = await prisma.user.create({
       data: {
@@ -59,19 +65,25 @@ export async function POST(request: Request) {
       },
     });
 
-    // Link orphan bookings to this new user
-    if (hasExhibitorBookings) {
+    // Link ghost-user bookings to this new user
+    if (linkableBooking) {
+      const linkable = await prisma.exhibitorBooking.findMany({
+        where: {
+          email: { equals: email, mode: "insensitive" },
+          user: { password: null },
+        },
+        select: { id: true },
+      });
+      const ids = linkable.map((b) => b.id);
       await prisma.exhibitorBooking.updateMany({
-        where: { email: { equals: email, mode: "insensitive" } },
+        where: { id: { in: ids } },
         data: { userId: user.id },
       });
       await prisma.exhibitorProfile.updateMany({
-        where: {
-          booking: { email: { equals: email, mode: "insensitive" } },
-        },
+        where: { bookingId: { in: ids } },
         data: { userId: user.id },
       });
-      console.log(`[REGISTER] Linked exhibitor bookings to new user ${user.id} (${email})`);
+      console.log(`[REGISTER] Linked ${ids.length} ghost-user booking(s) to new user ${user.id} (${email})`);
     }
 
     return NextResponse.json(

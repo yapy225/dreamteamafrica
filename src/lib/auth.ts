@@ -12,11 +12,14 @@ import { prisma } from "./db";
  */
 async function linkExhibitorBookings(userId: string, email: string) {
   try {
-    // Find bookings with this email that belong to a different user (or no user match)
+    // Link ONLY bookings that belong to a placeholder/ghost user (no password set yet).
+    // This prevents a data-entry mistake (admin assigning a booking to the wrong user with
+    // the same email) from letting one user sign in and silently steal another's bookings.
     const orphanBookings = await prisma.exhibitorBooking.findMany({
       where: {
         email: { equals: email, mode: "insensitive" },
         userId: { not: userId },
+        user: { password: null },
       },
       select: { id: true },
     });

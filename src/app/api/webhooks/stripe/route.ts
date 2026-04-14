@@ -76,6 +76,13 @@ export async function POST(request: Request) {
   } else if (event.type === "invoice.paid") {
     const invoice = event.data.object as Stripe.Invoice;
     await handleExhibitorInstallment(invoice);
+  } else if (
+    event.type === "checkout.session.expired" ||
+    event.type === "checkout.session.async_payment_failed"
+  ) {
+    // Libérer le verrou PendingCheckout pour permettre au client de retenter
+    const session = event.data.object as Stripe.Checkout.Session;
+    await releaseLockBySession(session.id).catch(() => {});
   }
 
   return NextResponse.json({ received: true });

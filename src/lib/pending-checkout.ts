@@ -7,7 +7,7 @@ import { prisma } from "@/lib/db";
  * from opening two Stripe sessions for the same triplet.
  */
 
-const LOCK_TTL_MS = 10 * 60 * 1000; // 10 min — exceeds typical Stripe Checkout completion
+const LOCK_TTL_MS = 3 * 60 * 1000; // 3 min — couvre un checkout Stripe normal sans pénaliser les abandons
 
 export class DuplicateCheckoutError extends Error {
   constructor(message: string) {
@@ -38,7 +38,7 @@ export async function acquireCheckoutLock(params: {
     const err = e as { code?: string };
     if (err.code === "P2002") {
       throw new DuplicateCheckoutError(
-        "Un paiement est déjà en cours pour ce billet. Vérifiez votre email ou patientez 10 minutes.",
+        "Un paiement est déjà en cours pour ce billet. Patientez quelques minutes ou vérifiez votre email.",
       );
     }
     throw e;

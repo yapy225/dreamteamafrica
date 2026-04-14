@@ -29,9 +29,12 @@ const ALLOWED_MIME_TYPES = new Set([
   "image/gif",
   "image/avif",
   "application/pdf",
+  "video/mp4",
+  "video/quicktime",
 ]);
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_FILE_SIZE_IMAGE = 10 * 1024 * 1024; // 10 MB
+const MAX_FILE_SIZE_VIDEO = 100 * 1024 * 1024; // 100 MB
 
 export async function uploadFile(
   file: File,
@@ -41,9 +44,11 @@ export async function uploadFile(
   if (!ALLOWED_MIME_TYPES.has(file.type)) {
     throw new Error(`Type de fichier non autorisé : ${file.type}`);
   }
-  // Validate file size
-  if (file.size > MAX_FILE_SIZE) {
-    throw new Error(`Fichier trop volumineux (max ${MAX_FILE_SIZE / 1024 / 1024} Mo)`);
+  // Validate file size (different cap for video)
+  const isVideo = file.type.startsWith("video/");
+  const maxSize = isVideo ? MAX_FILE_SIZE_VIDEO : MAX_FILE_SIZE_IMAGE;
+  if (file.size > maxSize) {
+    throw new Error(`Fichier trop volumineux (max ${maxSize / 1024 / 1024} Mo)`);
   }
 
   const safeName = sanitizeFileName(file.name);

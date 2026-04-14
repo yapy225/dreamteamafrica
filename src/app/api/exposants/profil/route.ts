@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { uploadFile } from "@/lib/bunny";
 import { sendExhibitorProfileNotification } from "@/lib/email";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 /**
  * GET /api/exposants/profil?token=xxx
@@ -79,6 +80,12 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rl = rateLimit(`profil-exposant:${ip}`, { limit: 10, windowSec: 10 * 60 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Trop de soumissions. Réessayez plus tard." }, { status: 429 });
+    }
+
     const formData = await request.formData();
     const token = formData.get("token") as string;
 
@@ -92,6 +99,11 @@ export async function POST(request: Request) {
 
     if (!profile) {
       return NextResponse.json({ error: "Profil introuvable." }, { status: 404 });
+    }
+
+    // Enforce token expiration on POST (GET already checks it)
+    if (profile.tokenExpiresAt && new Date() > profile.tokenExpiresAt) {
+      return NextResponse.json({ error: "Ce lien a expiré. Contactez-nous pour en obtenir un nouveau." }, { status: 410 });
     }
 
     // Upload files if present

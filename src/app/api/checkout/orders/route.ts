@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
+import { rateLimit } from "@/lib/rate-limit";
+
+const MAX_CART_ITEMS = 50;
+const MAX_QUANTITY_PER_ITEM = 20;
 
 export async function POST(request: Request) {
   try {
@@ -10,10 +14,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
 
+    const rl = rateLimit(`checkout-orders:${session.user.id}`, { limit: 10, windowSec: 60 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Trop de tentatives. Réessayez dans une minute." }, { status: 429 });
+    }
+
     const { items } = await request.json();
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "Panier vide." }, { status: 400 });
+    }
+
+    if (items.length > MAX_CART_ITEMS) {
+      return NextResponse.json({ error: `Panier limité à ${MAX_CART_ITEMS} produits.` }, { status: 400 });
+    }
+
+    for (const it of items as Array<{ quantity: unknown }>) {
+      const q = Number(it.quantity);
+      if (!Number.isFinite(q) || q < 1 || q > MAX_QUANTITY_PER_ITEM) {
+        return NextResponse.json({ error: `Quantité invalide (1-${MAX_QUANTITY_PER_ITEM} par produit).` }, { status: 400 });
+      }
     }
 
     // Validate products and stock

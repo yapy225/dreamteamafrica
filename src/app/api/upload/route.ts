@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import { uploadFile } from "@/lib/bunny";
 import { auth } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
+    }
+
+    const rl = rateLimit(`upload:${session.user.id}`, { limit: 30, windowSec: 10 * 60 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Trop d'uploads. Réessayez dans quelques minutes." }, { status: 429 });
     }
 
     const formData = await request.formData();
@@ -17,11 +23,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Aucun fichier fourni." }, { status: 400 });
     }
 
-    // File size limit: 10MB
-    if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json({ error: "Fichier trop volumineux (max 10 Mo)." }, { status: 400 });
-    }
-
     // Allowed MIME types
     const allowedTypes = [
       "image/jpeg", "image/png", "image/webp", "image/gif",
@@ -30,6 +31,13 @@ export async function POST(request: Request) {
     ];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json({ error: "Type de fichier non autorisé." }, { status: 400 });
+    }
+
+    // Size limit : 10 MB images/PDF, 100 MB vidéos
+    const isVideo = file.type.startsWith("video/");
+    const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      return NextResponse.json({ error: `Fichier trop volumineux (max ${maxSize / 1024 / 1024} Mo).` }, { status: 400 });
     }
 
     // Sanitize folder path (prevent directory traversal)

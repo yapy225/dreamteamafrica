@@ -19,8 +19,17 @@ export async function POST(req: NextRequest) {
 
     const { leadId } = await req.json();
 
-    if (!leadId) {
+    if (!leadId || typeof leadId !== "string") {
       return NextResponse.json({ error: "leadId manquant." }, { status: 400 });
+    }
+
+    // Per-leadId rate-limit: prevents Stripe session spam if leadId leaks
+    const perLeadRl = rateLimit(`exposant-deposit-lead:${leadId}`, { limit: 3, windowSec: 60 * 60 });
+    if (!perLeadRl.success) {
+      return NextResponse.json(
+        { error: "Trop de tentatives sur cette demande. Vérifiez votre email pour le lien de paiement." },
+        { status: 429 },
+      );
     }
 
     const lead = await prisma.exposantLead.findUnique({ where: { id: leadId } });

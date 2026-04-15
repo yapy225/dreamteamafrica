@@ -31,6 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/foire-paris-2026`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${baseUrl}/sortir-paris-ce-soir`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${baseUrl}/boutique-africaine-paris`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${baseUrl}/beurre-de-karite-paris`, lastModified: now, changeFrequency: "monthly", priority: 0.75 },
     { url: `${baseUrl}/concert-afro-paris`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${baseUrl}/weekend-paris-pas-cher`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${baseUrl}/sejour-culturel-africain-paris`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },

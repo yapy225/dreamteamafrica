@@ -104,9 +104,53 @@ const EVENTS = [
   },
 ];
 
+const EVENT_DATES: Record<string, { start: string; end: string }> = {
+  "/saison-culturelle-africaine/foire-dafrique-paris": { start: "2026-05-01T12:00:00+02:00", end: "2026-05-02T22:00:00+02:00" },
+  "/saison-culturelle-africaine/festival-autre-culture-2026": { start: "2026-06-27T12:00:00+02:00", end: "2026-06-27T22:00:00+02:00" },
+  "/saison-culturelle-africaine/evasion-paris-2026": { start: "2026-06-13T19:00:00+02:00", end: "2026-06-13T23:00:00+02:00" },
+  "/saison-culturelle-africaine/festival-cinema-africain": { start: "2026-09-01T10:00:00+02:00", end: "2026-09-01T22:00:00+02:00" },
+  "/saison-culturelle-africaine/fashion-week-africa": { start: "2026-10-03T12:00:00+02:00", end: "2026-10-03T22:00:00+02:00" },
+  "/saison-culturelle-africaine/juste-une-danse": { start: "2026-10-29T12:00:00+02:00", end: "2026-10-29T22:00:00+02:00" },
+  "/saison-culturelle-africaine/festival-conte-africain-2026": { start: "2026-11-11T12:00:00+02:00", end: "2026-11-11T22:00:00+02:00" },
+  "/saison-culturelle-africaine/salon-made-in-africa-2026": { start: "2026-12-11T12:00:00+01:00", end: "2026-12-12T22:00:00+01:00" },
+};
+
+const SITE_URL = "https://dreamteamafrica.com";
+
+const itemListJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Foires & salons africains à Paris 2026",
+  description: "Calendrier 2026 des foires, salons et festivals culturels africains à Paris organisés par Dream Team Africa.",
+  itemListElement: EVENTS.map((evt, idx) => {
+    const d = EVENT_DATES[evt.href];
+    return {
+      "@type": "ListItem",
+      position: idx + 1,
+      item: {
+        "@type": "Event",
+        name: evt.title,
+        description: evt.desc,
+        startDate: d?.start,
+        endDate: d?.end,
+        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+        eventStatus: "https://schema.org/EventScheduled",
+        url: `${SITE_URL}${evt.href}`,
+        location: {
+          "@type": "Place",
+          name: evt.lieu,
+          address: { "@type": "PostalAddress", addressLocality: "Paris", addressCountry: "FR" },
+        },
+        organizer: { "@type": "Organization", name: "Dream Team Africa", url: SITE_URL },
+      },
+    };
+  }),
+};
+
 export default function FoireParis2026() {
   return (
     <div className="min-h-screen bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       {/* Hero */}
       <section className="bg-gradient-to-b from-dta-beige/60 to-white px-4 pb-12 pt-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">

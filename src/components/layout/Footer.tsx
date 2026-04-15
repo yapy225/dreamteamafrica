@@ -57,6 +57,19 @@ const footerSections = [
     ],
   },
   {
+    title: "Guides shopping",
+    links: [
+      { href: "/made-in-africa", label: "Marketplace Made in Africa" },
+      { href: "/cosmetique-africaine-paris", label: "Cosmétique africaine" },
+      { href: "/beurre-de-karite-paris", label: "Beurre de karité" },
+      { href: "/huile-de-chebe-paris", label: "Huile de chebé" },
+      { href: "/tissu-wax-paris", label: "Tissu wax" },
+      { href: "/epicerie-africaine-paris", label: "Épicerie africaine" },
+      { href: "/marche-africain-paris", label: "Marché africain" },
+      { href: "/boutique-africaine-paris", label: "Boutiques africaines" },
+    ],
+  },
+  {
     title: "Culture pour Tous",
     accent: true,
     links: [
@@ -74,7 +87,7 @@ export default function Footer() {
   return (
     <footer aria-label="Pied de page" className="border-t border-dta-sand/50 bg-dta-beige">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-6">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
           {/* Brand */}
           <div>
             <Link href="/" className="inline-block">

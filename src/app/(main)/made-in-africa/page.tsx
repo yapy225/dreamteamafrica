@@ -5,15 +5,25 @@ import NewsletterSection from "@/components/sections/NewsletterSection";
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com";
 
 export const metadata = {
-  title: "Made in Africa — Marketplace Artisanat & Produits Naturels Africains",
+  title: "Made in Africa — Marketplace produits africains, cosmétiques & artisanat",
   description:
-    "Bientôt : achetez des produits naturels africains en ligne. Beurre de karité, cosmétiques, artisanat, mode, bijoux. Marketplace Dream Team Africa.",
+    "Marketplace Made in Africa : produits africains authentiques. Beurre de karité, huile de chebé, huile de coco, beurre de cacao, cosmétiques naturels, mode, artisanat.",
   keywords: [
+    "produits africains",
+    "produits africains en ligne",
     "produits naturels africains",
-    "artisanat africain en ligne",
-    "beurre de karité pur africain",
+    "cosmétique afrique",
+    "cosmétique africaine",
     "cosmétiques naturels africains",
-    "boutique produits africains en ligne",
+    "beurre de karité",
+    "beurre de karité pur africain",
+    "beurre de cacao",
+    "beurre de vache",
+    "huile de chebé",
+    "huile de chebe bienfaits",
+    "huile de coco",
+    "artisanat africain en ligne",
+    "marketplace africaine",
     "marketplace africaine Paris",
   ],
   openGraph: {

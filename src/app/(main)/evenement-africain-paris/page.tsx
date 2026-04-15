@@ -3,14 +3,19 @@ import Link from "next/link";
 import { ArrowRight, Globe, Calendar, Music, Palette, UtensilsCrossed } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Événements africains à Paris — Foires, spectacles, concerts 2026",
+  title: "Événements africains à Paris 2026 — Festivals, fêtes, foires & concerts",
   description:
     "Calendrier complet des événements africains à Paris en 2026. Foire d'Afrique, spectacles, concerts, expositions, gastronomie. Réservez dès 5€ avec Culture pour Tous.",
   keywords: [
     "événement africain paris",
+    "fête africaine",
     "fête africaine paris",
+    "festival africain",
+    "festival africain 2026",
     "festival africain paris 2026",
     "foire africaine paris",
+    "soirée africaine",
+    "soirée africaine paris",
     "concert africain paris",
     "culture africaine paris",
     "sortie africaine paris",
@@ -55,7 +60,7 @@ export default function EvenementAfricainParis() {
             Saison 2026
           </div>
           <h1 className="mt-4 font-serif text-4xl font-bold leading-tight text-dta-dark sm:text-5xl">
-            Événements africains à Paris
+            Événements africains à Paris 2026
           </h1>
           <p className="mt-4 text-lg text-dta-char/70">
             La richesse de la culture africaine à Paris. Foires, spectacles, concerts, gastronomie.<br />

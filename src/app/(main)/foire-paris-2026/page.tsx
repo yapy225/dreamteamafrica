@@ -4,16 +4,19 @@ import { ArrowRight, CalendarDays, MapPin, Clock, Ticket, Star } from "lucide-re
 import { GetYourGuideWidget } from "@/components/affiliate";
 
 export const metadata: Metadata = {
-  title: "Foires et salons a Paris en 2026 — Calendrier complet",
+  title: "Foires & salons africains à Paris 2026 — Foire d'Afrique, expositions",
   description:
-    "Calendrier complet des foires et salons a Paris en 2026 : Foire d'Afrique, Fashion Week Africa, Salon Made In Africa et plus. Dates, lieux et billets.",
+    "Calendrier 2026 des foires, salons et expositions africaines à Paris : Foire d'Afrique (1-2 mai), Fashion Week Africa, Salon Made In Africa. Dates, lieux et billets.",
   keywords: [
-    "foire paris 2026",
-    "salon paris 2026",
-    "exposition paris 2026",
-    "evenement paris 2026",
     "foire afrique paris",
-    "salon culturel paris",
+    "foire afrique paris 2026",
+    "exposition afrique paris 2026",
+    "exposition africaine paris",
+    "salon afrique paris",
+    "salon africain paris",
+    "paris africa",
+    "afrique paris",
+    "foire paris 2026",
   ],
   alternates: { canonical: "https://dreamteamafrica.com/foire-paris-2026" },
 };
@@ -112,7 +115,7 @@ export default function FoireParis2026() {
             Foires &amp; salons
           </div>
           <h1 className="mt-3 font-serif text-3xl font-bold text-dta-dark sm:text-4xl lg:text-5xl">
-            Foires et salons a Paris en 2026 — Calendrier complet
+            Foires &amp; salons africains à Paris en 2026
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-dta-char/80">
             Paris est la capitale des foires et salons. En 2026, la{" "}

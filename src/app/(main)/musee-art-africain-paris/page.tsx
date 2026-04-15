@@ -4,16 +4,19 @@ import { ArrowRight, Landmark, MapPin, Clock, ExternalLink } from "lucide-react"
 import { GetYourGuideWidget } from "@/components/affiliate";
 
 export const metadata: Metadata = {
-  title: "Musées d'art africain à Paris — Guide complet 2026",
+  title: "Musées & expositions d'art africain à Paris 2026 — Guide complet",
   description:
-    "Découvrez les meilleurs musées d'art africain à Paris : quai Branly, Dapper, Louvre, Institut du Monde Arabe. Horaires, tarifs et billets coupe-file.",
+    "Musées et expositions d'art africain à Paris : quai Branly, Louvre, Institut du Monde Arabe. Guide 2026 des expo art africain paris, horaires et billets coupe-file.",
   keywords: [
     "musée art africain paris",
-    "musée quai branly",
+    "expo art africain paris",
+    "exposition art africain paris",
     "art africain paris",
-    "exposition africaine paris 2026",
-    "musée afrique paris",
     "art contemporain africain paris",
+    "exposition africaine paris 2026",
+    "exposition paris afrique",
+    "musée quai branly",
+    "musée afrique paris",
   ],
   alternates: { canonical: "https://dreamteamafrica.com/musee-art-africain-paris" },
 };
@@ -63,7 +66,7 @@ export default function MuseeArtAfricainParis() {
             Musées & expositions
           </div>
           <h1 className="mt-3 font-serif text-3xl font-bold text-dta-dark sm:text-4xl lg:text-5xl">
-            Musées d&apos;art africain à Paris
+            Musées &amp; expositions d&apos;art africain à Paris 2026
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-dta-char/80">
             Paris est l&apos;une des capitales mondiales de l&apos;art africain. Du{" "}

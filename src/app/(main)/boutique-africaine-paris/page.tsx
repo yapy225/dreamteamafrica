@@ -4,16 +4,21 @@ import { ArrowRight, ShoppingBag, Palette, Gem, Store, Globe } from "lucide-reac
 import { GetYourGuideWidget } from "@/components/affiliate";
 
 export const metadata: Metadata = {
-  title: "Boutiques africaines a Paris — mode, deco & artisanat 2026",
+  title: "Boutiques africaines à Paris 2026 — mode, cosmétiques, déco & épicerie",
   description:
-    "Decouvrez les meilleures boutiques africaines a Paris : mode wax, decoration, artisanat, tissu africain. Shopping en ville et en ligne sur Made in Africa.",
+    "Les meilleures boutiques africaines à Paris : mode wax, cosmétiques naturels, beurre de karité, décoration, artisanat, épicerie. Shopping en ville et en ligne.",
   keywords: [
     "boutique africaine paris",
     "magasin africain paris",
     "mode africaine paris",
+    "cosmétique afrique",
+    "cosmétique africaine paris",
+    "produits africains",
+    "produits africains paris",
     "wax paris",
     "tissu africain paris",
     "artisanat africain paris",
+    "salon de coiffure afro paris",
   ],
   alternates: { canonical: "https://dreamteamafrica.com/boutique-africaine-paris" },
 };

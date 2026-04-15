@@ -4,16 +4,18 @@ import { MapPin, Calendar, ArrowRight, Store, ShoppingBag } from "lucide-react";
 import { GetYourGuideWidget } from "@/components/affiliate";
 
 export const metadata: Metadata = {
-  title: "Marché africain à Paris — Foires, salons & marchés 2026",
+  title: "Marché africain à Paris 2026 — Foires, salons & marchés de la diaspora",
   description:
-    "Où trouver un marché africain à Paris ? Découvrez les foires, salons et marchés de la diaspora : artisanat, tissus wax, épices, cosmétiques naturels. Calendrier 2026.",
+    "Marché africain à Paris : calendrier 2026 des foires, salons et marchés de la diaspora. Artisanat, tissus wax, épices, cosmétiques naturels, beurre de karité.",
   keywords: [
+    "marché africain",
     "marché africain paris",
     "foire africaine paris",
     "salon africain paris",
     "marché wax paris",
     "marché artisanat africain paris",
     "épices africaines paris",
+    "produits africains paris",
   ],
   alternates: { canonical: "https://dreamteamafrica.com/marche-africain-paris" },
 };
@@ -55,7 +57,7 @@ export default function MarcheAfricainParis() {
             Guide shopping
           </div>
           <h1 className="mt-3 font-serif text-3xl font-bold text-dta-dark sm:text-4xl lg:text-5xl">
-            Marché africain à Paris
+            Marché africain à Paris 2026 — Foires &amp; salons de la diaspora
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-dta-char/80">
             Tissus wax, beurre de karité, bijoux artisanaux, épices et gastronomie : Paris abrite une scène marchande africaine riche et diversifiée. Voici les meilleurs rendez-vous de la{" "}

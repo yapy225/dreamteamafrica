@@ -1,0 +1,129 @@
+name: Repost Campaigns Foire d'Afrique (Daily)
+
+on:
+  schedule:
+    # 8h UTC = 10h Paris (CEST mai 2026)
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  repost:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Repost 1 campaign/day (rotation, arrêt auto après le 2 mai 2026)
+        env:
+          META_LONG_LIVED_TOKEN: ${{ secrets.META_LONG_LIVED_TOKEN }}
+        run: |
+          node << 'SCRIPT'
+          // Stop after event day
+          const STOP_DATE = new Date("2026-05-03T00:00:00Z");
+          if (Date.now() >= STOP_DATE.getTime()) {
+            console.log("Campagne terminée (après 2 mai 2026). Workflow inactif.");
+            process.exit(0);
+          }
+
+          const USER_TOKEN = process.env.META_LONG_LIVED_TOKEN;
+          const EVENT_URL = "https://dreamteamafrica.com/saison-culturelle-africaine/foire-dafrique-paris";
+          const FOIRE_FB = "100771645843324";
+          const FOIRE_IG = "17841451573905367";
+          const CDN = "https://dreamteamafricamedia.b-cdn.net/campaigns";
+
+          const CAMPAIGNS = [
+            // --- Edenique Coffee ---
+            {
+              slug: "edenique-principal",
+              media: `${CDN}/edenique-foire-video.mp4`,
+              type: "video",
+              caption: `🌍 EDENIQUE COFFEE × FOIRE D'AFRIQUE PARIS 2026\n\n☕ Bienvenue dans l'univers du café éthiopien — berceau du café.\n\nEdenique Coffee propose une immersion dans la culture du café éthiopien. De la torréfaction à la tasse, chaque expérience raconte une histoire de tradition et de savoir-faire. À travers dégustations et cérémonie authentique, nous reconnectons au vrai sens du café.\n\nPlus qu'un café : une expérience culturelle, sensorielle et humaine.\n\n✨ AU STAND EDENIQUE COFFEE :\n• Dégustations de cafés d'origine (Yirgacheffe, Idido, Kaffa–Bonga Forest)\n• Cérémonie traditionnelle éthiopienne du café\n• Café 100% Arabica traçable, torréfaction artisanale\n• Rencontre avec nos producteurs & conseils de préparation\n• Vente de sachets 250g (en grain)\n\n🗓 1er & 2 Mai 2026\n🕛 12h — 22h\n📍 Espace MAS — 10 rue des Terres au Curé, 75013 Paris\n✉️ hello@edeniquecoffee.com\n\n🎟 Réservez vos billets :\n👉 ${EVENT_URL}\n\n#FoireAfrique2026 #FoiredAfriqueParis #EdeniqueCoffee #CaféÉthiopien #Yirgacheffe #Idido #KaffaBongaForest #SpecialtyCoffee #Arabica #CérémonieDuCafé #CultureAfricaine #SaisonCulturelleAfricaine #MadeInAfrica #Paris2026 #EspaceMAS`,
+            },
+            { slug: "edenique-kaffa", media: `${CDN}/edenique-coffee-tasse-ethiopie.png`, type: "image", caption: `☕ Kaffa–Bonga Forest — là où le café est né.\n\nDu berceau éthiopien à votre tasse : la forêt primaire du Kaffa abrite les caféiers sauvages d'origine. Un goût de terroir, une histoire millénaire.\n\nVenez découvrir ce café d'exception au stand Edenique Coffee à la Foire d'Afrique Paris — 6ème édition.\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n✉️ hello@edeniquecoffee.com\n\n🎟 Lien en post épinglé ↑\n👉 ${EVENT_URL}\n\n#FoireAfrique2026 #EdeniqueCoffee #KaffaBongaForest #CaféÉthiopien #SpecialtyCoffee #BerceauDuCafé #Arabica #CultureAfricaine #SaisonCulturelleAfricaine` },
+            { slug: "edenique-yirga", media: `${CDN}/edenique-coffee-sachet-yirgacheffe.png`, type: "image", caption: `✨ Yirgacheffe · Idido — deux origines légendaires d'Éthiopie.\n\n100% Arabica traçable, et la cérémonie traditionnelle du café pour sublimer l'instant — rituel de partage transmis depuis des siècles.\n\nRendez-vous au stand Edenique Coffee pour vivre l'expérience.\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n✉️ hello@edeniquecoffee.com\n\n🎟 Lien en post épinglé ↑\n👉 ${EVENT_URL}\n\n#FoireAfrique2026 #EdeniqueCoffee #Yirgacheffe #Idido #CaféÉthiopien #CérémonieDuCafé #SpecialtyCoffee #Ethiopie #Paris2026 #MadeInAfrica` },
+
+            // --- ElGlorious ---
+            { slug: "elglorious-principal", media: `${CDN}/elglorious-model-products.png`, type: "image", caption: `✨ ELGLORIOUS × FOIRE D'AFRIQUE PARIS 2026\n\n🌿 Le soin naturel BIO qui révolutionne ta routine beauté.\n\nElGlorious est une jeune marque dynamique qui révolutionne le soin naturel avec audace. Une gamme BIO qui allie exigence de qualité, conseils personnalisés et écoute attentive de notre communauté.\n\nEngagés pour le bien-être, nous proposons des solutions saines, conçues avec respect pour la nature et pour nos clients.\n\n✨ AU STAND ELGLORIOUS :\n• Huiles & shampoings BIO certifiés\n• Soins capillaires "Boostez votre pousse"\n• Crèmes & masques visage / corps\n• Conseils personnalisés par Virginie\n• Diagnostic beauté sur place\n\n🗓 1er & 2 Mai 2026 · 12h — 22h\n📍 Espace MAS — 10 rue des Terres au Curé, 75013 Paris\n✉️ contact@elglorious.com\n📞 07 77 82 14 48\n\n🎟 Réservez vos billets :\n👉 ${EVENT_URL}\n\n#FoireAfrique2026 #ElGlorious #SoinNaturel #BeautéBIO #CosmétiqueAfricaine #SoinCapillaire #BoostezVotrePousse #CultureAfricaine #SaisonCulturelleAfricaine #MadeInAfrica #Paris2026 #EspaceMAS @el.glorious.7` },
+            { slug: "elglorious-boost", media: `${CDN}/elglorious-boostez-pousse.png`, type: "image", caption: `🌿 BOOSTEZ VOTRE POUSSE — la cure capillaire signée ElGlorious.\n\nHuiles, shampoings, masques & crèmes : une routine BIO complète pensée pour révéler la beauté naturelle de tes cheveux.\n\nVenez tester sur le stand ElGlorious à la Foire d'Afrique Paris.\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n✉️ contact@elglorious.com\n\n🎟 Lien en post épinglé ↑\n👉 ${EVENT_URL}\n\n#FoireAfrique2026 #ElGlorious #BoostezVotrePousse #SoinCapillaire #BeautéBIO #CheveuxAfricains #PousseCapillaire @el.glorious.7` },
+            { slug: "elglorious-virginie", media: `${CDN}/elglorious-model-products.png`, type: "image", caption: `✨ Beauté authentique, soin engagé.\n\nVirginie & ElGlorious vous accueillent pour vous faire découvrir une gamme BIO conçue avec écoute et exigence — le soin naturel comme expérience humaine.\n\nRendez-vous au stand ElGlorious pour un diagnostic personnalisé.\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n✉️ contact@elglorious.com\n\n🎟 Lien en post épinglé ↑\n👉 ${EVENT_URL}\n\n#FoireAfrique2026 #ElGlorious #SoinNaturel #BeautéBIO #CosmétiqueAfricaine #DiagnosticBeauté #Virginie @el.glorious.7` },
+
+            // --- ASILI ---
+            { slug: "asili-principal", media: `${CDN}/asili-produits.png`, type: "image", caption: `🌿 ASILI — LE SOIN À L'ORIGINE × FOIRE D'AFRIQUE PARIS 2026\n\n✨ La beauté naturelle, inspirée des rituels africains et comoriens.\n\nASILI est une marque de cosmétiques naturels inspirée des rituels de beauté africains et comoriens. Nos produits sont formulés à base d'ingrédients authentiques : karité, ylang-ylang, vanille, coco...\n\nASILI propose des soins nourrissants pour la peau et les cheveux, alliant tradition et élégance — une marque qui célèbre la beauté naturelle, l'authenticité et l'héritage des terres d'origine.\n\n🌴 AU STAND ASILI :\n• Chantilly de karité (soin peau & cheveux)\n• Huiles parfumées (coco, vanille, karité)\n• Brume coco-vanille hydratante\n• Gommage au sucre\n• 100% naturel & artisanal\n\n🗓 1er & 2 Mai 2026 · 12h — 22h\n📍 Espace MAS — 10 rue des Terres au Curé, 75013 Paris\n✉️ asiliinaya@gmail.com\n📞 07 60 18 47 68\n\n🎟 Réservez vos billets :\n👉 ${EVENT_URL}\n\n#FoireAfrique2026 #ASILI #LeSoinAlOrigine #CosmétiqueNaturelle #KaritéPur #YlangYlang #RituelsAfricains #BeautéComorienne #MadeInAfrica #SaisonCulturelleAfricaine #Paris2026 #EspaceMAS @asili_le_soin` },
+            { slug: "asili-naturel", media: `${CDN}/asili-produits.png`, type: "image", caption: `✨ 100% NATUREL & ARTISANAL — ASILI vous reconnecte à l'essentiel.\n\nKarité pur, huiles parfumées, brume coco-vanille, gommage au sucre... Une gamme pensée pour nourrir peau et cheveux avec authenticité.\n\nVenez découvrir ASILI à la Foire d'Afrique Paris.\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n✉️ asiliinaya@gmail.com\n\n🎟 Lien en post épinglé ↑\n👉 ${EVENT_URL}\n\n#FoireAfrique2026 #ASILI #CosmétiqueNaturelle #Karité #YlangYlang #BeautéAfricaine #RituelBeauté @asili_le_soin` },
+            { slug: "asili-origine", media: `${CDN}/asili-logo.png`, type: "image", caption: `🌴 ASILI — Le Soin à l'Origine.\n\nLà où la tradition rencontre l'élégance. Des soins qui célèbrent l'héritage africain et comorien, pour une beauté vraie, enracinée.\n\nRendez-vous au stand ASILI pour découvrir la gamme complète.\n\n🗓 1er & 2 Mai 2026 · 12h-22h\n📍 Espace MAS Paris 13e\n✉️ asiliinaya@gmail.com\n\n🎟 Lien en post épinglé ↑\n👉 ${EVENT_URL}\n\n#FoireAfrique2026 #ASILI #LeSoinAlOrigine #Héritage #BeautéAfricaine #BeautéComorienne #CosmétiqueNaturelle @asili_le_soin` },
+
+            // --- 13 Zoom Exposants ---
+            { slug: "conficulture", media: `${CDN}/exposants/conficulture.jpg`, type: "image", caption: zoomCaption("Conficulture", "Mirande Celio", "quizconficulture@gmail.com", "Jeux de cartes thématiques de quiz de culture générale sur les pays d'Afrique et sur la culture panafricaine. Pour tester ses connaissances et apprendre en s'amusant — en famille ou entre amis. Des jeux de transmission intergénérationnelle.", "#Conficulture #JeuxDeCartes #CulturePanafricaine #QuizAfrique #TransmissionCulturelle") },
+            { slug: "artisans-kinshasa", media: `${CDN}/exposants/artisans-kinshasa.jpg`, type: "image", caption: zoomCaption("Plateforme des Artisans de Kinshasa (A.A.D)", "Équipe A.A.D", "apertusmind@gmail.com", "Deux stands d'artisans venant de Kinshasa (RDC). Savoir-faire authentique, pièces uniques, créations artisanales traditionnelles et contemporaines.", "#ArtisansKinshasa #RDC #Congo #ArtisanatAfricain #MadeInCongo") },
+            { slug: "nelly-possi", media: `${CDN}/exposants/nelly-possi.jpg`, type: "image", caption: zoomCaption("Nelly Possi — Sacs à main africains", "Nelly Possi", "possinelly@gmail.com", "Collection de sacs à main africains : tissus wax, bogolan, cuir, créations uniques pour sublimer chaque tenue.", "#SacsAfricains #Wax #ModeAfricaine #AccessoiresAfricains") },
+            { slug: "avenir-togo-94", media: `${CDN}/exposants/avenir-togo-94.jpg`, type: "image", caption: zoomCaption("Avenir Togo 94", "Viviane Lechat (Présidente)", "avenirtogo94@gmail.com", "Association qui soutient le CAST (Centre d'Action Sociale au Togo), accompagnant plus de 530 enfants et jeunes au Togo. Vente d'artisanat togolais au profit du CAST.", "#AvenirTogo94 #Togo #ArtisanatSolidaire #Solidarité #CAST") },
+            { slug: "maison-nimba", media: `${CDN}/exposants/maison-nimba.jpg`, type: "image", caption: zoomCaption("Maison Nimba", "Aminata Hagbalamou-Kolie", "maisonnimba@gmail.com", "Marque inspirée des traditions d'Afrique de l'Ouest, dédiée aux soins naturels et trésors bruts du quotidien. Karité pur, savon noir, miel de Guinée, plantes traditionnelles (Nep Nep, Khamaré), bonnets satin et éponges djampé. Le bien-être à l'état brut.", "#MaisonNimba #KaritéPur #SavonNoir #MielDeGuinée #AfriqueDeLouest #BienÊtre") },
+            { slug: "rentavoyage", media: `${CDN}/exposants/rentavoyage.jpg`, type: "image", caption: zoomCaption("RentaVoyage", "Joshua Mouzika", "joshuab_mb@rentavoyage.com", "Plateforme innovante de mise en relation entre voyageurs et expéditeurs. Envoi sécurisé de colis via voyageurs en déplacement : KYC, paiement bloqué, messagerie, suivi. Économique, flexible, durable.", "#RentaVoyage #CovoitureColis #ÉconomieCollaborative #VoyageUtile") },
+            { slug: "cfc-sogore", media: `${CDN}/exposants/cfc-sogore.jpg`, type: "image", caption: zoomCaption("CFC Sogoré — Saidou Barry", "Mamadou Saidou Barry", "sogoregn@gmail.com", "Styliste-modéliste guinéen, fondateur du CFC Sogoré (Centre de Formation et de Création). Défilés internationaux (Guinée, Côte d'Ivoire, Bénin, Djibouti, Togo). Membre du Groupement des Stylistes de Guinée. Mode africaine contemporaine, élégante et innovante.", "#CFCSogore #ModeAfricaine #StylistGuinée #HauteCouture #Guinée") },
+            { slug: "gaelle-karite", media: `${CDN}/exposants/gaelle-karite.jpg`, type: "image", caption: zoomCaption("Gaelle Koumbou — Karité du Burkina", "Gaelle Koumbou", "babyson@hotmail.fr", "Large variété de beurres de karité artisanaux du Burkina Faso, faits par des femmes de coopérative : nature, aloès, cacao, miel, citron, carotte, curcuma, moringa, avocat… Huiles de massage et savons artisanaux au karité.", "#KaritéBurkina #CosmétiqueNaturelle #CoopérativeFemmes #BeurreDeKarité #SoinNaturel") },
+            { slug: "jeff-food", media: `${CDN}/exposants/jeff-food.jpg`, type: "image", caption: zoomCaption("Jeff Food — Spécialiste caribéen", "Félicite N'Diaye", "felicite_klock@hotmail.fr", "Restauration caribéenne : colombo, accras, bokit, poulet boucané, légumes tropicaux. La cuisine antillaise dans toute son authenticité.", "#JeffFood #CuisineCaribéenne #Colombo #Accras #Bokit #Antilles") },
+            { slug: "leila-caviar-piment", media: `${CDN}/exposants/leila-caviar-piment.jpg`, type: "image", caption: zoomCaption("Caviar de piment — Leila Lingoupou", "Leila Lingoupou", "llingoupou.contact@gmail.com", "Caviar de piment artisanal : l'incontournable des amateurs de saveurs piquantes. Parfait pour relever viandes, poissons, riz et accompagnements.", "#CaviarDePiment #Piment #SaveursAfricaines #CuisineÉpicée") },
+            { slug: "blakpenter", media: `${CDN}/exposants/blakpenter.jpg`, type: "image", caption: zoomCaption("Blakpenter — Sylvie Juminer", "Sylvie Juminer", "blakpenter@hotmail.fr", "Customisation de pièces uniques : vêtements, accessoires, objets personnalisés. L'art de réinventer avec une signature afro-caribéenne.", "#Blakpenter #Customisation #ModeCustom #PiècesUniques") },
+            { slug: "by-maria-couture", media: `${CDN}/exposants/by-maria-couture.jpg`, type: "image", caption: zoomCaption("By Maria Crea Couture", "Prescillia Maria", "bymaria.creacouture@gmail.com", "Créations couture sur mesure : élégance, féminité et savoir-faire artisanal. Tenues uniques pour occasions spéciales.", "#ByMariaCouture #CoutureSurMesure #ModeAfricaine #CréationUnique") },
+            { slug: "revenir-autrement", media: `${CDN}/exposants/revenir-autrement.jpg`, type: "image", caption: zoomCaption("Association Revenir Autrement", "Olivia De La Panneterie", "revenirautrement@gmail.com", "Association dédiée au Togo : artisanat, solidarité, développement local. Présente au côté des artisans togolais.", "#RevenirAutrement #Togo #Solidarité #ArtisanatSolidaire") },
+          ];
+
+          function zoomCaption(name, contact, email, pitch, hashtags) {
+            return `🌍 ZOOM EXPOSANT — ${name.toUpperCase()}\n\n${pitch}\n\n👤 ${contact}\n📧 ${email}\n\nRetrouvez ${name} parmi les +60 exposants de la Foire d'Afrique Paris — 6ème édition.\n\n🗓 1er & 2 Mai 2026 · 12h — 22h\n📍 Espace MAS — 10 rue des Terres au Curé, 75013 Paris\n\n🎟 Réservez vos billets :\n👉 ${EVENT_URL}\n\n#FoireAfrique2026 #FoiredAfriqueParis ${hashtags} #SaisonCulturelleAfricaine #CultureAfricaine #MadeInAfrica #Paris2026 #EspaceMAS`;
+          }
+
+          // Rotation by day-of-year
+          const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+          const idx = dayOfYear % CAMPAIGNS.length;
+          const c = CAMPAIGNS[idx];
+          console.log(`[${new Date().toISOString()}] Jour ${dayOfYear} → campagne #${idx + 1}/${CAMPAIGNS.length} : ${c.slug}`);
+
+          async function getPageToken(pageId) {
+            const res = await fetch(`https://graph.facebook.com/v23.0/me/accounts?limit=50&access_token=${USER_TOKEN}`);
+            const data = await res.json();
+            for (const p of data.data || []) if (p.id === pageId) return p.access_token;
+            return null;
+          }
+
+          (async () => {
+            const token = await getPageToken(FOIRE_FB);
+            if (!token) { console.error("no page token"); process.exit(1); }
+
+            // FB
+            let fbRes;
+            if (c.type === "video") {
+              fbRes = await (await fetch(`https://graph.facebook.com/v23.0/${FOIRE_FB}/videos`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+                body: new URLSearchParams({ file_url: c.media, description: c.caption }),
+              })).json();
+            } else {
+              fbRes = await (await fetch(`https://graph.facebook.com/v23.0/${FOIRE_FB}/photos`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+                body: new URLSearchParams({ url: c.media, caption: c.caption }),
+              })).json();
+            }
+            console.log(`FB: ${fbRes.id || fbRes.post_id ? "OK " + (fbRes.id || fbRes.post_id) : "FAIL " + JSON.stringify(fbRes).slice(0,150)}`);
+
+            // IG
+            let igRes;
+            if (c.type === "video") {
+              const cr = await (await fetch(`https://graph.facebook.com/v23.0/${FOIRE_IG}/media?${new URLSearchParams({ media_type: "REELS", video_url: c.media, caption: c.caption, share_to_feed: "true" })}`, { method: "POST", headers: { Authorization: `Bearer ${token}` } })).json();
+              if (cr.id) {
+                for (let i = 0; i < 30; i++) {
+                  await new Promise(r => setTimeout(r, 5000));
+                  const sj = await (await fetch(`https://graph.facebook.com/v23.0/${cr.id}?fields=status_code&access_token=${token}`)).json();
+                  if (sj.status_code === "FINISHED") break;
+                  if (sj.status_code === "ERROR") { igRes = { error: "Reel processing error" }; break; }
+                }
+                if (!igRes) igRes = await (await fetch(`https://graph.facebook.com/v23.0/${FOIRE_IG}/media_publish?creation_id=${cr.id}`, { method: "POST", headers: { Authorization: `Bearer ${token}` } })).json();
+              } else igRes = cr;
+            } else {
+              const cr = await (await fetch(`https://graph.facebook.com/v23.0/${FOIRE_IG}/media?${new URLSearchParams({ image_url: c.media, caption: c.caption })}`, { method: "POST", headers: { Authorization: `Bearer ${token}` } })).json();
+              if (cr.id) {
+                await new Promise(r => setTimeout(r, 2500));
+                igRes = await (await fetch(`https://graph.facebook.com/v23.0/${FOIRE_IG}/media_publish?creation_id=${cr.id}`, { method: "POST", headers: { Authorization: `Bearer ${token}` } })).json();
+              } else igRes = cr;
+            }
+            console.log(`IG: ${igRes.id ? "OK " + igRes.id : "FAIL " + JSON.stringify(igRes).slice(0,150)}`);
+          })();
+          SCRIPT

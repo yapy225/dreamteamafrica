@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         subject: campaign.subject,
         html: campaign.htmlContent,
         headers: {
-          "List-Unsubscribe": `<https://dreamteamafrica.com/unsubscribe?email=${encodeURIComponent(sub.email)}>`,
+          "List-Unsubscribe": `<https://dreamteamafrica.com/api/unsubscribe?email=${encodeURIComponent(sub.email)}>, <mailto:hello@dreamteamafrica.com?subject=unsubscribe>`,
           "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
         },
         tags: [

@@ -93,6 +93,13 @@ export default async function DashboardPage() {
       count: orderCount,
       color: "bg-green-100 text-green-600",
     },
+    {
+      href: "/nos-exposants",
+      icon: Store,
+      label: "Nos exposants",
+      count: null,
+      color: "bg-orange-100 text-orange-600",
+    },
     ...(session.user.role === "ARTISAN" || session.user.role === "ADMIN"
       ? [
           {

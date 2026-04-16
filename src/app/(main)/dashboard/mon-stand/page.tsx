@@ -85,7 +85,7 @@ export default async function MonStandPage() {
     booking.events.includes(e.id)
   );
 
-  // Payment calculations
+  // Payment calculations — use real sum of ExhibitorPayment
   const stands = booking.stands ?? 1;
   const deposit = Math.min(DEPOSIT_AMOUNT * stands, booking.totalPrice);
   const totalRemaining = booking.totalPrice - deposit;
@@ -94,9 +94,9 @@ export default async function MonStandPage() {
     totalMonths > 0
       ? Math.ceil((totalRemaining / totalMonths) * 100) / 100
       : 0;
-  const paidMonths = Math.max(0, booking.paidInstallments - 1);
-  const paidAmount = deposit + paidMonths * monthlyAmount;
+  const paidAmount = booking.payments.reduce((s, p) => s + Number(p.amount), 0);
   const remainingBalance = Math.max(0, booking.totalPrice - paidAmount);
+  const paidMonths = Math.max(0, booking.paidInstallments - 1);
   const remainingInstallments = totalMonths - paidMonths;
   const progressPercent = Math.round(
     (paidAmount / booking.totalPrice) * 100

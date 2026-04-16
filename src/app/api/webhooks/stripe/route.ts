@@ -781,6 +781,14 @@ async function handleExhibitorBooking(session: Stripe.Checkout.Session) {
     } catch (emailErr) {
       console.error("Thank you email failed:", emailErr);
     }
+
+    // Sync to L'Officiel d'Afrique directory (non-blocking)
+    try {
+      const { syncExhibitorToDirectory } = await import("@/lib/exhibitor-directory-sync");
+      await syncExhibitorToDirectory(bookingId);
+    } catch (dirErr) {
+      console.error("Directory sync failed:", dirErr);
+    }
   }
 }
 
@@ -979,6 +987,32 @@ async function handleExposantDeposit(session: Stripe.Checkout.Session) {
     },
   });
 
+  // Sync to L'Officiel d'Afrique directory (non-blocking)
+  try {
+    const existing = await prisma.directoryEntry.findFirst({
+      where: { OR: [{ email: lead.email }, { companyName: lead.brand }] },
+    });
+    const entryData = {
+      companyName: lead.brand,
+      contactName: `${lead.firstName} ${lead.lastName}`.trim(),
+      category: "Exposant",
+      city: "Paris",
+      country: "France",
+      phone: lead.phone || null,
+      email: lead.email || null,
+      description: `${lead.brand} — ${lead.sector || "Exposant Foire d'Afrique Paris 2026"}`,
+      event: "Foire d'Afrique Paris 2026",
+      published: true,
+    };
+    if (existing) {
+      await prisma.directoryEntry.update({ where: { id: existing.id }, data: entryData });
+    } else {
+      await prisma.directoryEntry.create({ data: entryData });
+    }
+  } catch (dirErr) {
+    console.error(`[exposant-deposit] Directory sync failed:`, dirErr);
+  }
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   // Send WhatsApp with credentials
@@ -1000,6 +1034,9 @@ async function handleExposantDeposit(session: Stripe.Checkout.Session) {
             `Connectez-vous avec votre compte existant : ${appUrl}/login`,
             ``,
           ]),
+      `✨ Bonne nouvelle : votre marque est désormais référencée dans L'Officiel d'Afrique — notre annuaire professionnel de la diaspora africaine à Paris !`,
+      `👉 ${appUrl}/lofficiel-dafrique/annuaire`,
+      ``,
       `Nous vous enverrons votre devis personnalisé très rapidement.`,
       ``,
       `L'équipe Dream Team Africa`,

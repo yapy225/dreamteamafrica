@@ -165,6 +165,18 @@ export async function sendThankYouEmail(opts: {
     </a>
   </div>
 
+  <div style="margin-top: 24px; padding: 20px; background: #f5f0eb; border-left: 4px solid #C4704B; border-radius: 6px;">
+    <h3 style="margin: 0 0 8px; font-size: 15px; color: #2C2C2C;">✨ Vous êtes référencé dans L'Officiel d'Afrique</h3>
+    <p style="margin: 0 0 12px; font-size: 13px; color: #4a4a4a; line-height: 1.5;">
+      Votre marque <strong>${esc(opts.companyName)}</strong> vient d'être ajoutée à notre annuaire
+      professionnel de la diaspora africaine à Paris — <strong>visibilité permanente offerte</strong>.
+    </p>
+    <a href="${process.env.NEXT_PUBLIC_APP_URL}/lofficiel-dafrique/annuaire"
+       style="display: inline-block; background: #C4704B; color: #fff; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px;">
+      Voir ma fiche dans l'annuaire
+    </a>
+  </div>
+
   <p style="margin-top: 20px;">Notre équipe vous contactera prochainement avec tous les détails pratiques pour votre installation.</p>
 
   <p>À très bientôt !</p>

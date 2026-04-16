@@ -623,6 +623,51 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                 <p className="mt-2 text-sm text-dta-char/70">{sectionSubtitle}</p>
               </div>
 
+              {!isFreeEvent && (
+                <div className="mx-auto mt-8 max-w-4xl overflow-hidden rounded-[var(--radius-card)] border-2 border-emerald-500 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 shadow-[var(--shadow-card)]">
+                  <div className="flex flex-col items-center gap-4 p-6 sm:flex-row sm:gap-6 sm:p-7">
+                    <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-emerald-600 text-3xl text-white shadow-lg">
+                      ✨
+                    </div>
+                    <div className="flex-1 text-center sm:text-left">
+                      <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                        <span className="inline-block rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+                          Culture pour Tous
+                        </span>
+                        <span className="text-sm font-semibold text-emerald-900">
+                          — L&apos;accès à la culture africaine pour tous les budgets
+                        </span>
+                      </div>
+                      <h3 className="mt-2 font-serif text-xl font-bold text-dta-dark sm:text-2xl">
+                        Payez votre billet à votre rythme — dès 5 € d&apos;acompte
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-dta-char">
+                        Vous n&apos;avez pas le budget aujourd&apos;hui ? Réservez votre place avec seulement{" "}
+                        <strong className="text-emerald-700">5 € d&apos;acompte</strong>, puis
+                        rechargez votre billet quand vous voulez, jusqu&apos;au jour de l&apos;événement.
+                        {" "}
+                        <strong>Même billet, même place garantie.</strong>
+                      </p>
+                      <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-emerald-800 sm:justify-start">
+                        <span className="flex items-center gap-1">
+                          <span className="text-emerald-600">✓</span> Paiement 100 % libre
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="text-emerald-600">✓</span> Aucun frais supplémentaire
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="text-emerald-600">✓</span> Solde payable jusqu&apos;au jour J
+                        </span>
+                      </div>
+                      <p className="mt-3 text-xs text-emerald-700">
+                        👇 Pour en bénéficier, cliquez sur le bouton{" "}
+                        <strong>« ✨ CPT dès 5 € »</strong> à côté du tarif qui vous intéresse.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {event.showCapacity && (
                 <div className="mx-auto mt-8 max-w-md">
                   <div className="flex items-center justify-between text-xs text-dta-taupe">
@@ -664,6 +709,25 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                     <SocialProofBanner sold={available.sold} quota={available.quota!} tierName={available.name} tierPrice={available.price} />
                   ) : null;
                 })()}
+                {/* Culture pour Tous — rappel juste avant les tarifs */}
+                {!soldOut && tiers.some((t) => t.isCulturePourTous) && (
+                  <div className="mx-auto mt-8 max-w-3xl rounded-[var(--radius-card)] border-2 border-emerald-500 bg-emerald-50 p-5">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xl text-white">
+                        ✨
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-serif text-lg font-bold text-emerald-900">
+                          Pas le budget maintenant ? Réservez dès 5 € avec Culture pour Tous
+                        </h3>
+                        <p className="mt-1 text-sm leading-relaxed text-emerald-800">
+                          Payez seulement <strong>5 € d&apos;acompte aujourd&apos;hui</strong>, rechargez votre billet à votre rythme jusqu&apos;au jour J.
+                          Même billet, même place. 👉 Cliquez sur <strong>« ✨ CPT dès 5 € »</strong> à côté du tarif de votre choix.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="mt-10">
                   {soldOut ? (
                     <div className="mx-auto max-w-md rounded-[var(--radius-card)] bg-white p-8 text-center shadow-[var(--shadow-card)]">

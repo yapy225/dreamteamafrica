@@ -187,6 +187,26 @@ export default function TicketSectionClient({
         ) : null;
       })()}
 
+      {/* Culture pour Tous — rappel juste avant les tarifs */}
+      {cptEnabled && !soldOut && (
+        <div className="mx-auto mt-8 max-w-3xl rounded-[var(--radius-card)] border-2 border-emerald-500 bg-emerald-50 p-5">
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xl text-white">
+              ✨
+            </div>
+            <div className="flex-1">
+              <h3 className="font-serif text-lg font-bold text-emerald-900">
+                Pas le budget maintenant ? Réservez dès 5 € avec Culture pour Tous
+              </h3>
+              <p className="mt-1 text-sm leading-relaxed text-emerald-800">
+                Payez seulement <strong>5 € d&apos;acompte aujourd&apos;hui</strong>, rechargez votre billet à votre rythme jusqu&apos;au jour J.
+                Même billet, même place. 👉 Cliquez sur <strong>« ✨ CPT dès 5 € »</strong> à côté du tarif de votre choix.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Ticket tiers */}
       <div className="mt-10">
         {soldOut ? (

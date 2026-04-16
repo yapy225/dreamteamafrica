@@ -1,9 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight, Phone, Mail, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, Phone, Mail, MapPin } from "lucide-react";
 import { prisma } from "@/lib/db";
 import type { Metadata } from "next";
+import type { Prisma } from "@prisma/client";
 import ProtectedContent from "./ProtectedContent";
+
+const PAGE_SIZE = 24;
 
 /** Mask email: jo***@gmail.com */
 function maskEmail(email: string): string {
@@ -55,16 +58,16 @@ export const metadata: Metadata = {
 export default async function AnnuairePage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; country?: string; q?: string }>;
+  searchParams: Promise<{ category?: string; country?: string; q?: string; page?: string }>;
 }) {
   const params = await searchParams;
   const category = params.category || "";
   const country = params.country || "";
   const q = params.q || "";
+  const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
 
   // Build filtered query
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const where: any = { published: true };
+  const where: Prisma.DirectoryEntryWhereInput = { published: true };
   if (category) where.category = category;
   if (country) where.country = country;
   if (q) {
@@ -75,44 +78,64 @@ export default async function AnnuairePage({
     ];
   }
 
-  // Fetch all published entries for counts + filtered entries
-  const allPublished = await prisma.directoryEntry.findMany({
-    where: { published: true },
-    orderBy: { createdAt: "desc" },
-  });
+  // Parallel: paginated entries + total count + sidebar aggregates
+  const [entries, totalFiltered, catGroups, countryGroups] = await Promise.all([
+    prisma.directoryEntry.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+      select: {
+        id: true,
+        companyName: true,
+        contactName: true,
+        category: true,
+        city: true,
+        country: true,
+        email: true,
+        phone: true,
+        description: true,
+        logoUrl: true,
+      },
+    }),
+    prisma.directoryEntry.count({ where }),
+    prisma.directoryEntry.groupBy({
+      by: ["category"],
+      where: { published: true },
+      _count: { _all: true },
+    }),
+    prisma.directoryEntry.groupBy({
+      by: ["country"],
+      where: { published: true, country: { not: null } },
+      _count: { _all: true },
+    }),
+  ]);
 
-  // Filter in JS for the current view
-  const entries = (category || country || q)
-    ? allPublished.filter((e) => {
-        if (category && e.category !== category) return false;
-        if (country && e.country !== country) return false;
-        if (q) {
-          const lower = q.toLowerCase();
-          if (
-            !e.contactName.toLowerCase().includes(lower) &&
-            !(e.companyName || "").toLowerCase().includes(lower) &&
-            !e.description.toLowerCase().includes(lower)
-          ) return false;
-        }
-        return true;
-      })
-    : allPublished;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
 
-  // Count by category & country from all published
-  const catMap = new Map<string, number>();
-  const countryMap = new Map<string, number>();
-  for (const e of allPublished) {
-    catMap.set(e.category, (catMap.get(e.category) || 0) + 1);
-    if (e.country) countryMap.set(e.country, (countryMap.get(e.country) || 0) + 1);
-  }
+  const categories = catGroups
+    .map((g) => ({ category: g.category, _count: g._count._all }))
+    .sort((a, b) => b._count - a._count);
 
-  const categories = [...catMap.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([cat, count]) => ({ category: cat, _count: count }));
+  const countries = countryGroups
+    .map((g) => ({ country: g.country!, _count: g._count._all }))
+    .sort((a, b) => b._count - a._count);
 
-  const countries = [...countryMap.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([c, count]) => ({ country: c, _count: count }));
+  // Build URL with filters preserved, optionally overriding page
+  const buildUrl = (overrides: { category?: string | null; country?: string | null; q?: string | null; page?: number | null } = {}) => {
+    const sp = new URLSearchParams();
+    const cat = overrides.category !== undefined ? overrides.category : category;
+    const cty = overrides.country !== undefined ? overrides.country : country;
+    const qq = overrides.q !== undefined ? overrides.q : q;
+    const pg = overrides.page !== undefined ? overrides.page : currentPage;
+    if (cat) sp.set("category", cat);
+    if (cty) sp.set("country", cty);
+    if (qq) sp.set("q", qq);
+    if (pg && pg > 1) sp.set("page", String(pg));
+    const s = sp.toString();
+    return `/lofficiel-dafrique/annuaire${s ? `?${s}` : ""}`;
+  };
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -153,7 +176,8 @@ export default async function AnnuairePage({
             Annuaire professionnel
           </h1>
           <p className="mt-2 text-sm text-[#6B6B6B]">
-            {entries.length} fiche{entries.length > 1 ? "s" : ""} dans l&apos;annuaire
+            {totalFiltered} fiche{totalFiltered > 1 ? "s" : ""} dans l&apos;annuaire
+            {totalPages > 1 ? ` — page ${currentPage} / ${totalPages}` : ""}
           </p>
         </div>
       </section>
@@ -182,7 +206,8 @@ export default async function AnnuairePage({
               </h3>
               <div className="mt-2 space-y-1">
                 <Link
-                  href={`/lofficiel-dafrique/annuaire${country ? `?country=${country}` : ""}${q ? `${country ? "&" : "?"}q=${q}` : ""}`}
+                  href={buildUrl({ category: null, page: 1 })}
+                  prefetch={false}
                   className={`block rounded-lg px-3 py-2 text-sm transition-colors ${!category ? "bg-[#C4704B] text-white" : "text-[#4a4a4a] hover:bg-[#F5F0EB]"}`}
                 >
                   Toutes ({categories.reduce((s, c) => s + c._count, 0)})
@@ -190,7 +215,8 @@ export default async function AnnuairePage({
                 {categories.map((c) => (
                     <Link
                       key={c.category}
-                      href={`/lofficiel-dafrique/annuaire?category=${encodeURIComponent(c.category)}${country ? `&country=${country}` : ""}${q ? `&q=${q}` : ""}`}
+                      href={buildUrl({ category: c.category, page: 1 })}
+                      prefetch={false}
                       className={`block rounded-lg px-3 py-2 text-sm transition-colors ${category === c.category ? "bg-[#C4704B] text-white" : "text-[#4a4a4a] hover:bg-[#F5F0EB]"}`}
                     >
                       {c.category} ({c._count})
@@ -206,7 +232,8 @@ export default async function AnnuairePage({
               </h3>
               <div className="mt-2 space-y-1">
                 <Link
-                  href={`/lofficiel-dafrique/annuaire${category ? `?category=${category}` : ""}${q ? `${category ? "&" : "?"}q=${q}` : ""}`}
+                  href={buildUrl({ country: null, page: 1 })}
+                  prefetch={false}
                   className={`block rounded-lg px-3 py-2 text-sm transition-colors ${!country ? "bg-[#2C2C2C] text-white" : "text-[#4a4a4a] hover:bg-[#F5F0EB]"}`}
                 >
                   Tous les pays
@@ -214,7 +241,8 @@ export default async function AnnuairePage({
                 {countries.map((c) => (
                   <Link
                     key={c.country}
-                    href={`/lofficiel-dafrique/annuaire?${category ? `category=${category}&` : ""}country=${encodeURIComponent(c.country!)}${q ? `&q=${q}` : ""}`}
+                    href={buildUrl({ country: c.country, page: 1 })}
+                    prefetch={false}
                     className={`block rounded-lg px-3 py-2 text-sm transition-colors ${country === c.country ? "bg-[#2C2C2C] text-white" : "text-[#4a4a4a] hover:bg-[#F5F0EB]"}`}
                   >
                     {c.country} ({c._count})
@@ -326,6 +354,86 @@ export default async function AnnuairePage({
                   );
                 })}
               </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <nav
+                className="mt-8 flex items-center justify-center gap-1"
+                aria-label="Pagination"
+              >
+                {currentPage > 1 && (
+                  <Link
+                    href={buildUrl({ page: currentPage - 1 })}
+                    prefetch={false}
+                    rel="prev"
+                    className="flex items-center gap-1 rounded-lg border border-[#E0E0E0] bg-white px-3 py-2 text-sm text-[#4a4a4a] hover:bg-[#F5F0EB]"
+                  >
+                    <ChevronLeft size={14} /> Précédent
+                  </Link>
+                )}
+                {(() => {
+                  const windowSize = 5;
+                  const start = Math.max(1, currentPage - Math.floor(windowSize / 2));
+                  const end = Math.min(totalPages, start + windowSize - 1);
+                  const realStart = Math.max(1, end - windowSize + 1);
+                  const pages = [];
+                  for (let p = realStart; p <= end; p++) pages.push(p);
+                  return (
+                    <>
+                      {realStart > 1 && (
+                        <>
+                          <Link
+                            href={buildUrl({ page: 1 })}
+                            prefetch={false}
+                            className="rounded-lg border border-[#E0E0E0] bg-white px-3 py-2 text-sm text-[#4a4a4a] hover:bg-[#F5F0EB]"
+                          >
+                            1
+                          </Link>
+                          {realStart > 2 && <span className="px-1 text-sm text-[#999]">…</span>}
+                        </>
+                      )}
+                      {pages.map((p) => (
+                        <Link
+                          key={p}
+                          href={buildUrl({ page: p })}
+                          prefetch={false}
+                          aria-current={p === currentPage ? "page" : undefined}
+                          className={`rounded-lg border px-3 py-2 text-sm ${
+                            p === currentPage
+                              ? "border-[#C4704B] bg-[#C4704B] text-white"
+                              : "border-[#E0E0E0] bg-white text-[#4a4a4a] hover:bg-[#F5F0EB]"
+                          }`}
+                        >
+                          {p}
+                        </Link>
+                      ))}
+                      {end < totalPages && (
+                        <>
+                          {end < totalPages - 1 && <span className="px-1 text-sm text-[#999]">…</span>}
+                          <Link
+                            href={buildUrl({ page: totalPages })}
+                            prefetch={false}
+                            className="rounded-lg border border-[#E0E0E0] bg-white px-3 py-2 text-sm text-[#4a4a4a] hover:bg-[#F5F0EB]"
+                          >
+                            {totalPages}
+                          </Link>
+                        </>
+                      )}
+                    </>
+                  );
+                })()}
+                {currentPage < totalPages && (
+                  <Link
+                    href={buildUrl({ page: currentPage + 1 })}
+                    prefetch={false}
+                    rel="next"
+                    className="flex items-center gap-1 rounded-lg border border-[#E0E0E0] bg-white px-3 py-2 text-sm text-[#4a4a4a] hover:bg-[#F5F0EB]"
+                  >
+                    Suivant <ChevronRight size={14} />
+                  </Link>
+                )}
+              </nav>
             )}
           </div>
         </div>

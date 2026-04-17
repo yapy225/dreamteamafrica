@@ -1,6 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
 
+const externalProjects = [
+  {
+    href: "https://www.sneakerslove.fr",
+    label: "Sneakers Love",
+    tagline: "Sneakers authentiques, réservation en 2 min",
+  },
+  {
+    href: "https://serviceathome.fr",
+    label: "Service at Home",
+    tagline: "Services à domicile en Île-de-France",
+  },
+];
+
 const footerSections = [
   {
     title: "Découvrir",
@@ -135,8 +148,30 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* Bottom bar */}
+        {/* Nos autres projets — cross-site linking */}
         <div className="mt-10 border-t border-dta-sand/50 pt-6">
+          <h3 className="font-serif text-sm font-semibold uppercase tracking-wider text-dta-dark">
+            Nos autres projets
+          </h3>
+          <ul className="mt-3 flex flex-wrap gap-4">
+            {externalProjects.map((p) => (
+              <li key={p.href}>
+                <a
+                  href={p.href}
+                  className="inline-flex flex-col rounded-lg border border-dta-sand/60 bg-white/60 px-4 py-2 transition-colors hover:border-dta-accent/40"
+                >
+                  <span className="text-sm font-semibold text-dta-dark">
+                    {p.label}
+                  </span>
+                  <span className="text-xs text-dta-char/60">{p.tagline}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="mt-8 border-t border-dta-sand/50 pt-6">
           <p className="text-center text-xs text-dta-taupe">
             &copy; {new Date().getFullYear()} Dream Team Africa. Tous droits
             réservés.

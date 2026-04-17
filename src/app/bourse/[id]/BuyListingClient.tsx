@@ -94,7 +94,7 @@ export default function BuyListingClient({ listingId }: { listingId: string }) {
         {loading ? "Redirection vers Stripe..." : "Payer et recevoir mon billet"}
       </button>
       <p className="text-[11px] text-slate-400 text-center">
-        Dès le paiement validé, l&apos;ancien QR code est invalidé et le vôtre est émis par email.
+        Carte bancaire ou PayPal. Dès le paiement validé, l&apos;ancien QR code est invalidé et le vôtre est émis par email.
       </p>
     </form>
   );

@@ -87,6 +87,13 @@ export default async function DashboardPage() {
       color: "bg-blue-100 text-blue-600",
     },
     {
+      href: "/bourse",
+      icon: Ticket,
+      label: "Bourse de billets",
+      count: null,
+      color: "bg-emerald-100 text-emerald-700",
+    },
+    {
       href: "/dashboard/orders",
       icon: ShoppingBag,
       label: "Mes commandes",
@@ -141,7 +148,7 @@ export default async function DashboardPage() {
           {
             href: "/dashboard/bourse",
             icon: Ticket,
-            label: "Bourse de billets",
+            label: "Bourse — Admin",
             count: null,
             color: "bg-emerald-100 text-emerald-700",
           },

@@ -4,7 +4,7 @@ import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "./db";
-import { rateLimitStrict } from "./rate-limit";
+import { rateLimitStrict, getClientIp } from "./rate-limit";
 
 /**
  * Rattache les ExhibitorBooking orphelins (créés par un admin ou un autre compte)
@@ -87,15 +87,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Mot de passe", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (!credentials?.email || !credentials?.password) return null;
 
         const emailKey = (credentials.email as string).toLowerCase();
+        const ip = request ? getClientIp(request) : "unknown";
 
-        // Account lockout DB-backed: 5 attempts per 15 min, distributed sur tous les lambdas.
-        // rateLimitStrict incrémente à chaque appel — on le fait UNE fois (success ou fail compte pareil).
-        const lockout = await rateLimitStrict(`login_fail:${emailKey}`, { limit: 5, windowSec: 15 * 60 });
-        if (!lockout.success) {
+        // Defense-in-depth — deux compteurs indépendants, le plus strict gagne:
+        //  - par email: 5 essais / 15 min (protège un compte ciblé)
+        //  - par IP: 30 essais / 15 min (protège contre credential stuffing distribué sur plusieurs comptes)
+        const [emailLockout, ipLockout] = await Promise.all([
+          rateLimitStrict(`login_fail:${emailKey}`, { limit: 5, windowSec: 15 * 60 }),
+          rateLimitStrict(`login_fail_ip:${ip}`, { limit: 30, windowSec: 15 * 60 }),
+        ]);
+        if (!emailLockout.success || !ipLockout.success) {
           throw new Error("ACCOUNT_LOCKED");
         }
 
@@ -114,7 +119,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        // Login réussi : reset le compteur pour laisser l'utilisateur à nouveau libre.
+        // Login réussi : reset le compteur email (IP reste — l'IP peut attaquer plusieurs comptes).
         try {
           await prisma.rateLimitEntry.delete({ where: { id: `login_fail:${emailKey}` } });
         } catch {

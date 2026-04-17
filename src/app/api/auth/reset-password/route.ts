@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { rateLimitStrict, getClientIp } from "@/lib/rate-limit";
+import { validatePasswordPolicy } from "@/lib/password-policy";
 
 export async function POST(request: Request) {
   try {
@@ -32,11 +33,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
-      return NextResponse.json(
-        { error: "Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre." },
-        { status: 400 },
-      );
+    const passwordError = validatePasswordPolicy(password);
+    if (passwordError) {
+      return NextResponse.json({ error: passwordError }, { status: 400 });
     }
 
     const trimmedEmail = email.trim().toLowerCase();

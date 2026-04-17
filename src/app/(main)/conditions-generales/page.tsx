@@ -15,7 +15,7 @@ export default function CGVPage() {
       </h1>
 
       <p className="mb-8 text-sm text-dta-char/60">
-        Dream Team Africa — www.dreamteamafrica.com — Dernière mise à jour : 12 avril 2026
+        Dream Team Africa — www.dreamteamafrica.com — Dernière mise à jour : 17 avril 2026
       </p>
 
       {/* Résumé */}
@@ -26,7 +26,9 @@ export default function CGVPage() {
           <li>• Paiement sur place : <strong>100 % cashless</strong> via votre wallet personnel</li>
           <li>• Commission exposants : <strong>4 %</strong> sur les paiements reçus</li>
           <li>• Parrainage : <strong>crédits bonus offerts</strong> (non retirables)</li>
-          <li>• Remboursement : <strong>non</strong>, sauf annulation par l&apos;organisateur</li>
+          <li>• <strong>Cession gratuite</strong> autorisée via la plateforme (cadeau à un proche)</li>
+          <li>• <strong>Revente</strong> autorisée sur la Bourse officielle — prix d&apos;achat garanti + <strong>5 % de frais acheteur</strong></li>
+          <li>• Remboursement : <strong>non</strong>, sauf annulation par l&apos;organisateur ou revente sur la Bourse</li>
         </ul>
       </div>
 
@@ -190,15 +192,106 @@ export default function CGVPage() {
             dans l&apos;espace personnel du visiteur.
           </p>
           <p className="mt-2">
-            Toute duplication, revente ou usage frauduleux entraînera
-            l&apos;annulation du billet sans remboursement.
+            La cession et la revente d&apos;un billet ne sont autorisées <strong>que via
+            la plateforme officielle dreamteamafrica.com</strong> (articles 9 et 10 ci-dessous).
+            Toute duplication, revente sur une plateforme tierce ou usage frauduleux
+            entraînera l&apos;annulation immédiate du billet sans remboursement.
+          </p>
+          <p className="mt-2">
+            Dream Team Africa étant l&apos;organisateur et producteur officiel de ses
+            événements, l&apos;article 313-6-2 du Code pénal n&apos;est pas applicable
+            aux cessions et reventes effectuées via la plateforme.
           </p>
         </section>
 
         {/* 9 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            9. Annulation et remboursement
+            9. Cession de billet (transfert gratuit)
+          </h2>
+          <p>
+            Tout détenteur d&apos;un billet intégralement payé peut <strong>céder son billet
+            à un proche à titre gratuit</strong> depuis son espace personnel, jusqu&apos;à
+            24 heures avant l&apos;événement.
+          </p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            <li>Le destinataire reçoit une invitation par email et dispose de <strong>72 heures</strong> pour accepter.</li>
+            <li>Dès l&apos;acceptation, le billet est transféré au nouveau détenteur, qui reçoit un nouveau QR code officiel.</li>
+            <li>L&apos;ancien QR code du cédant est <strong>invalidé automatiquement</strong>.</li>
+            <li>Un billet ne peut être cédé qu&apos;<strong>une seule fois</strong> (pas de chaîne de cessions).</li>
+            <li>Un billet déjà scanné ne peut plus être cédé.</li>
+            <li>La cession est <strong>gratuite</strong> et ne donne lieu à aucun remboursement ou paiement.</li>
+          </ul>
+          <p className="mt-2">
+            Le cédant peut retirer son invitation tant que le destinataire ne l&apos;a pas acceptée.
+          </p>
+        </section>
+
+        {/* 10 */}
+        <section>
+          <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
+            10. Bourse officielle (revente encadrée)
+          </h2>
+          <p>
+            Dream Team Africa propose une <strong>Bourse officielle</strong> permettant à
+            tout détenteur empêché de revendre son billet à un autre fan, dans un cadre
+            strictement encadré&nbsp;: <strong>zéro spéculation</strong>.
+          </p>
+          <h3 className="mt-4 font-semibold text-dta-dark">10.1 Principe — prix d&apos;achat garanti</h3>
+          <p className="mt-2">
+            Le prix de revente est <strong>figé au prix d&apos;achat initial</strong> du billet
+            (hors frais de gestion). Aucune plus-value n&apos;est possible. Le vendeur
+            récupère exactement ce qu&apos;il a payé.
+          </p>
+
+          <h3 className="mt-4 font-semibold text-dta-dark">10.2 Frais de service — 5 % à l&apos;acheteur</h3>
+          <p className="mt-2">
+            L&apos;acheteur s&apos;acquitte de <strong>5 % de frais de service</strong> en
+            supplément du prix du billet. Ces frais couvrent le traitement sécurisé
+            du paiement, le remboursement automatique du vendeur, la régénération
+            du QR code officiel et la maintenance de la plateforme.
+          </p>
+
+          <h3 className="mt-4 font-semibold text-dta-dark">10.3 Conditions d&apos;éligibilité (côté vendeur)</h3>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            <li>Le billet doit être <strong>intégralement payé</strong> et non scanné.</li>
+            <li>Le billet doit être acheté directement par le vendeur (pas de revente en chaîne).</li>
+            <li>L&apos;événement doit avoir lieu dans plus de <strong>24 heures</strong>.</li>
+            <li>L&apos;achat initial doit remonter à moins de <strong>150 jours</strong> (contrainte technique du remboursement automatique par Stripe).</li>
+            <li>Le billet doit avoir été acheté via carte bancaire (Stripe).</li>
+          </ul>
+          <p className="mt-2 text-xs text-dta-char/60">
+            Au-delà de 150 jours, contactez-nous pour une revente traitée manuellement.
+          </p>
+
+          <h3 className="mt-4 font-semibold text-dta-dark">10.4 Déroulement de la revente</h3>
+          <ol className="mt-2 list-decimal space-y-1 pl-5">
+            <li>Le vendeur met son billet en vente depuis son espace personnel (aucun prix à définir).</li>
+            <li>Le billet apparaît sur la page publique <a href="/bourse" className="text-dta-accent hover:underline">dreamteamafrica.com/bourse</a>.</li>
+            <li>Un acheteur règle en ligne par carte bancaire sécurisée (Stripe).</li>
+            <li>Le vendeur est <strong>remboursé intégralement</strong> sur sa carte d&apos;origine (5 à 10 jours ouvrés), son ancien QR code est invalidé, et l&apos;acheteur reçoit un nouveau QR code officiel par email.</li>
+          </ol>
+
+          <h3 className="mt-4 font-semibold text-dta-dark">10.5 Retrait et annulation</h3>
+          <p className="mt-2">
+            Le vendeur peut retirer son annonce à tout moment tant qu&apos;aucun acheteur
+            n&apos;a validé l&apos;achat. Une fois le paiement confirmé par Stripe, la
+            transaction est irréversible&nbsp;: le billet change de titulaire et l&apos;ancien
+            QR code est définitivement désactivé.
+          </p>
+
+          <h3 className="mt-4 font-semibold text-dta-dark">10.6 Refus par la plateforme</h3>
+          <p className="mt-2">
+            Dream Team Africa se réserve le droit de retirer toute annonce suspecte,
+            de suspendre un compte en cas de comportement frauduleux, et d&apos;annuler
+            un billet dont la cession ou la revente aurait été effectuée hors plateforme.
+          </p>
+        </section>
+
+        {/* 11 */}
+        <section>
+          <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
+            11. Annulation et remboursement
           </h2>
           <p>
             En cas d&apos;annulation par l&apos;organisateur : remboursement
@@ -208,17 +301,20 @@ export default function CGVPage() {
             En cas de report : les billets restent valables.
           </p>
           <p className="mt-2">
-            En cas de désistement du visiteur : aucun remboursement.
+            En cas de désistement du visiteur : aucun remboursement direct. Le visiteur
+            peut toutefois <strong>céder son billet</strong> (article 9) ou <strong>le
+            revendre sur la Bourse officielle</strong> (article 10) jusqu&apos;à 24 heures
+            avant l&apos;événement.
           </p>
           <p className="mt-2">
             Les crédits bonus ne sont en aucun cas remboursables.
           </p>
         </section>
 
-        {/* 10 */}
+        {/* 12 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            10. Exposants
+            12. Exposants
           </h2>
           <p>
             Les exposants réservent un stand via la plateforme selon les
@@ -254,10 +350,10 @@ export default function CGVPage() {
           </p>
         </section>
 
-        {/* 11 */}
+        {/* 13 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            11. Données personnelles
+            13. Données personnelles
           </h2>
           <p>
             Les données collectées servent à la gestion des commandes et
@@ -270,10 +366,10 @@ export default function CGVPage() {
           </p>
         </section>
 
-        {/* 12 */}
+        {/* 14 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            12. Droit applicable
+            14. Droit applicable
           </h2>
           <p>
             CGV régies par le droit français. En cas de litige, recherche
@@ -281,10 +377,10 @@ export default function CGVPage() {
           </p>
         </section>
 
-        {/* 13 */}
+        {/* 15 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            13. Contact
+            15. Contact
           </h2>
           <ul className="space-y-1">
             <li>E-mail : <a href="mailto:hello@dreamteamafrica.com" className="text-dta-accent hover:underline">hello@dreamteamafrica.com</a></li>

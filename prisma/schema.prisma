@@ -191,28 +191,64 @@ model Event {
 }
 
 model Ticket {
-  id              String          @id @default(cuid())
-  eventId         String
-  userId          String
-  price           Decimal         @db.Decimal(10, 2)
-  qrCode          String?
-  stripeSessionId String?
-  purchasedAt     DateTime        @default(now())
-  tier            String
-  checkedInAt     DateTime?
-  email           String?
-  firstName       String?
-  lastName        String?
-  phone           String?
-  visitDate       DateTime?
-  installments    Int             @default(1)
-  totalPaid       Decimal         @default(0) @db.Decimal(10, 2)
-  event           Event           @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user            User            @relation(fields: [userId], references: [id], onDelete: SetNull)
-  payments        TicketPayment[]
+  id                String           @id @default(cuid())
+  eventId           String
+  userId            String
+  price             Decimal          @db.Decimal(10, 2)
+  qrCode            String?
+  stripeSessionId   String?
+  purchasedAt       DateTime         @default(now())
+  tier              String
+  checkedInAt       DateTime?
+  email             String?
+  firstName         String?
+  lastName          String?
+  phone             String?
+  visitDate         DateTime?
+  installments      Int              @default(1)
+  totalPaid         Decimal          @default(0) @db.Decimal(10, 2)
+  qrNonce           String?
+  qrRevokedAt       DateTime?
+  transferCount     Int              @default(0)
+  lastTransferredAt DateTime?
+  event             Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user              User             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  payments          TicketPayment[]
+  transfers         TicketTransfer[]
 
   @@index([eventId])
   @@index([userId])
+}
+
+model TicketTransfer {
+  id              String         @id @default(cuid())
+  ticketId        String
+  ticket          Ticket         @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  fromUserId      String
+  fromEmail       String
+  fromFirstName   String?
+  fromLastName    String?
+  toEmail         String
+  toFirstName     String?
+  toLastName      String?
+  toUserId        String?
+  toPhone         String?
+  status          TransferStatus @default(PENDING)
+  mode            TransferMode
+  invitationHash  String         @unique
+  amount          Decimal?       @db.Decimal(10, 2)
+  stripeSessionId String?
+  stripeRefundId  String?
+  message         String?
+  createdAt       DateTime       @default(now())
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  cancelledAt     DateTime?
+
+  @@index([ticketId])
+  @@index([toEmail, status])
+  @@index([expiresAt])
+  @@index([status])
 }
 
 model TicketPayment {
@@ -1079,4 +1115,17 @@ enum NtbcTier {
   RACINE
   TRONC
   BAOBAB
+}
+
+enum TransferStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  CANCELLED
+  REFUSED
+}
+
+enum TransferMode {
+  FREE_GIFT
+  AT_COST
 }

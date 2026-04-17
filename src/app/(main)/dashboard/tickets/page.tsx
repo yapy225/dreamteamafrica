@@ -6,6 +6,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
 import RechargeButton from "./RechargeButton";
+import TransferButton from "./TransferButton";
+import { TRANSFER_CONFIG } from "@/lib/transfer-config";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +45,10 @@ export default async function TicketsPage() {
     include: {
       event: true,
       payments: { orderBy: { paidAt: "asc" } },
+      transfers: {
+        where: { status: "PENDING" },
+        orderBy: { createdAt: "desc" },
+      },
     },
     orderBy: { purchasedAt: "desc" },
   });
@@ -228,7 +234,10 @@ function TicketCard({
     lastName: string | null;
     qrCode: string | null;
     purchasedAt: Date;
+    checkedInAt: Date | null;
+    transferCount: number;
     payments: Array<{ id: string; amount: number; type: string; label: string; paidAt: Date }>;
+    transfers: Array<{ id: string; toEmail: string; toFirstName: string | null; expiresAt: Date; createdAt: Date }>;
     event: {
       title: string;
       slug: string;
@@ -237,6 +246,7 @@ function TicketCard({
       date: Date;
       coverImage: string | null;
       tiers: unknown;
+      published: boolean;
     };
   };
 }) {
@@ -246,6 +256,14 @@ function TicketCard({
   const eventDate = new Date(ticket.event.date);
   const tierLabel = resolveTierLabel(ticket.tier, ticket.event.tiers);
   const tierColor = tierColors[ticket.tier] || "bg-slate-50 text-slate-700 border-slate-200";
+
+  const transferDeadline = eventDate.getTime() - TRANSFER_CONFIG.DELAI_LIMITE_H * 3600 * 1000;
+  const canTransfer =
+    isPaid &&
+    !ticket.checkedInAt &&
+    ticket.transferCount < TRANSFER_CONFIG.MAX_TRANSFERS &&
+    ticket.event.published &&
+    Date.now() < transferDeadline;
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
@@ -362,6 +380,20 @@ function TicketCard({
 
         {!isPaid && (
           <RechargeButton ticketId={ticket.id} email={userEmail} remaining={remaining} />
+        )}
+
+        {isPaid && canTransfer && (
+          <TransferButton
+            ticketId={ticket.id}
+            eventTitle={ticket.event.title}
+            pendingTransfers={ticket.transfers.map((t) => ({
+              id: t.id,
+              toEmail: t.toEmail,
+              toFirstName: t.toFirstName,
+              expiresAt: t.expiresAt.toISOString(),
+              createdAt: t.createdAt.toISOString(),
+            }))}
+          />
         )}
       </div>
     </div>

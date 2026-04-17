@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { CheckCircle, AlertTriangle, XCircle, Calendar, MapPin, Clock, Users } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { formatDate, formatDateTime } from "@/lib/utils";
+import { verifyQrSig } from "@/lib/qr-sig";
 
 export const dynamic = "force-dynamic";
 
@@ -11,10 +12,13 @@ export const metadata = {
 
 export default async function CheckPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ sig?: string }>;
 }) {
   const { id } = await params;
+  const { sig } = await searchParams;
 
   // Try paid ticket first
   const ticket = await prisma.ticket.findUnique({
@@ -23,6 +27,27 @@ export default async function CheckPage({
   });
 
   if (ticket) {
+    const hasBeenTransferred = ticket.qrRevokedAt !== null || ticket.qrNonce !== null;
+    if (hasBeenTransferred) {
+      if (!sig || !verifyQrSig(ticket.id, sig, ticket.qrNonce)) {
+        return (
+          <div className="mx-auto max-w-md px-4 py-16 text-center">
+            <div className="rounded-2xl bg-white p-8 shadow-lg">
+              <div className="mx-auto mb-4 inline-flex rounded-full bg-red-100 p-3">
+                <XCircle size={32} className="text-red-600" />
+              </div>
+              <h1 className="font-serif text-2xl font-bold text-red-600">
+                QR invalide
+              </h1>
+              <p className="mt-2 text-sm text-dta-char/70">
+                Ce billet a été transféré : seul le nouveau QR code (envoyé au nouveau détenteur par email) donne accès à l&apos;événement.
+              </p>
+            </div>
+          </div>
+        );
+      }
+    }
+
     const isPaid = ticket.price === 0 || ticket.totalPaid >= ticket.price;
     const isCheckedIn = ticket.checkedInAt !== null;
     const remaining = ticket.price - ticket.totalPaid;

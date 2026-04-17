@@ -12,23 +12,29 @@ function getLegacyQrSecret(): string | null {
   return process.env.QR_SIG_LEGACY_SECRET || process.env.NEXTAUTH_SECRET || null;
 }
 
-/** Generate a 32-char hex HMAC signature (128-bit) for a ticket QR URL. */
-export function signQr(ticketId: string): string {
-  return crypto.createHmac("sha256", getQrSecret()).update(ticketId).digest("hex").slice(0, 32);
+/** Generate a 32-char hex HMAC signature (128-bit) for a ticket QR URL.
+ *  When a nonce is provided, it's bound into the signature — used after a transfer
+ *  to invalidate the previous holder's PDF/QR. */
+export function signQr(ticketId: string, nonce?: string | null): string {
+  const material = nonce ? `${ticketId}:${nonce}` : ticketId;
+  return crypto.createHmac("sha256", getQrSecret()).update(material).digest("hex").slice(0, 32);
 }
 
-/** Verify a QR signature against the current and legacy secrets, accepting 16-char legacy length. */
-export function verifyQrSig(ticketId: string, sig: string | null): boolean {
+/** Verify a QR signature against the current and legacy secrets, accepting 16-char legacy length.
+ *  If `nonce` is provided (tickets that went through at least one transfer), only the
+ *  nonce-bound signature is accepted — the pre-transfer QR is rejected. */
+export function verifyQrSig(ticketId: string, sig: string | null, nonce?: string | null): boolean {
   if (!sig) return false;
   const len = sig.length === 32 ? 32 : sig.length === 16 ? 16 : 0;
   if (!len) return false;
 
+  const material = nonce ? `${ticketId}:${nonce}` : ticketId;
   const candidates: string[] = [];
-  const current = crypto.createHmac("sha256", getQrSecret()).update(ticketId).digest("hex");
+  const current = crypto.createHmac("sha256", getQrSecret()).update(material).digest("hex");
   candidates.push(current.slice(0, len));
   const legacy = getLegacyQrSecret();
   if (legacy && legacy !== getQrSecret()) {
-    const legacyHex = crypto.createHmac("sha256", legacy).update(ticketId).digest("hex");
+    const legacyHex = crypto.createHmac("sha256", legacy).update(material).digest("hex");
     candidates.push(legacyHex.slice(0, len));
   }
   for (const expected of candidates) {

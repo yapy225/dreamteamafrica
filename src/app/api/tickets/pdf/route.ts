@@ -144,7 +144,7 @@ export async function GET(request: Request) {
   doc.moveTo(50, doc.y).lineTo(545, doc.y).strokeColor(COLORS.light).lineWidth(1).stroke();
   doc.moveDown(0.5);
   doc.fontSize(7).fillColor(COLORS.muted).text(
-    "Ce billet est strictement personnel, non cessible et non remboursable. Toute reproduction ou falsification est passible de poursuites.",
+    "Ce billet est personnel. La cession n'est autorisée que via la plateforme officielle dreamteamafrica.com/mon-espace. Toute revente hors plateforme entraîne l'invalidation.",
     { align: "center" }
   );
   doc.moveDown(0.3);

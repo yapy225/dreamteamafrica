@@ -1099,3 +1099,355 @@ export async function sendCptRelanceEmail(opts: {
     throw new Error(`Failed to send CPT relance: ${error.message}`);
   }
 }
+
+/* ────────────────────────────────────────────────────────────
+ * Transfert de billets
+ * ──────────────────────────────────────────────────────────── */
+
+function formatTransferDate(d: Date): string {
+  return new Intl.DateTimeFormat("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(d));
+}
+
+function transferHeader(subtitle: string): string {
+  return `<div style="border-bottom:3px solid #8B6F4E;padding-bottom:16px;margin-bottom:24px;">
+    <h1 style="margin:0;font-size:24px;color:#8B6F4E;">Dream Team Africa</h1>
+    <p style="margin:4px 0 0;font-size:12px;text-transform:uppercase;letter-spacing:2px;color:#999;">${esc(subtitle)}</p>
+  </div>`;
+}
+
+function transferFooter(): string {
+  return `<div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e5e5;font-size:12px;color:#999;">
+    <p style="margin:0;">Dream Team Africa — contact@dreamteamafrica.com</p>
+  </div>`;
+}
+
+export async function sendTransferInvitationEmail(opts: {
+  to: string;
+  fromFirstName: string;
+  toFirstName: string | null;
+  eventTitle: string;
+  eventDate: Date;
+  eventVenue: string;
+  tier: string;
+  message: string | null;
+  transferLink: string;
+  expiresAt: Date;
+}) {
+  const greeting = opts.toFirstName ? `Bonjour ${esc(opts.toFirstName)},` : "Bonjour,";
+  const personalBlock = opts.message
+    ? `<div style="background:#fdf8f0;border-left:4px solid #8B6F4E;padding:16px 20px;border-radius:6px;margin:24px 0;">
+         <p style="margin:0;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#8B6F4E;">Message de ${esc(opts.fromFirstName)}</p>
+         <p style="margin:8px 0 0;font-style:italic;color:#4a4a4a;white-space:pre-line;">${esc(opts.message)}</p>
+       </div>`
+    : "";
+
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"></head>
+<body style="font-family:Georgia,serif;color:#1a1a1a;background:#f5f0eb;margin:0;padding:0;">
+  <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
+    ${transferHeader("Cadeau — Un billet vous attend")}
+    <p>${greeting}</p>
+    <p><strong>${esc(opts.fromFirstName)}</strong> souhaite vous offrir un billet pour un événement Dream Team Africa.</p>
+    <div style="background:#fff;border:1px solid #e8dfd3;border-radius:10px;padding:20px;margin:24px 0;">
+      <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#8B6F4E;">Votre invitation</p>
+      <h2 style="margin:8px 0 16px;font-size:22px;color:#1a1a1a;">${esc(opts.eventTitle)}</h2>
+      <table style="width:100%;font-size:14px;">
+        <tr><td style="padding:4px 0;color:#666;width:80px;">Quand</td><td style="padding:4px 0;font-weight:600;">${formatTransferDate(opts.eventDate)}</td></tr>
+        <tr><td style="padding:4px 0;color:#666;">Où</td><td style="padding:4px 0;font-weight:600;">${esc(opts.eventVenue)}</td></tr>
+        <tr><td style="padding:4px 0;color:#666;">Catégorie</td><td style="padding:4px 0;font-weight:600;color:#8B6F4E;">${esc(opts.tier)}</td></tr>
+      </table>
+    </div>
+    ${personalBlock}
+    <div style="text-align:center;margin:32px 0;">
+      <a href="${opts.transferLink}" style="display:inline-block;background:#8B6F4E;color:#fff;padding:14px 32px;border-radius:6px;text-decoration:none;font-weight:bold;">Accepter le billet</a>
+    </div>
+    <p style="font-size:13px;color:#666;text-align:center;">Cette invitation expire le <strong>${formatTransferDate(opts.expiresAt)}</strong>.</p>
+    <p style="font-size:12px;color:#999;margin-top:24px;">Si vous ne connaissez pas ${esc(opts.fromFirstName)}, vous pouvez ignorer ce message — aucune action ne sera engagée.</p>
+    ${transferFooter()}
+  </div>
+</body></html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `${opts.fromFirstName} vous offre un billet — ${opts.eventTitle}`,
+    html,
+  });
+  if (error) {
+    console.error("Transfer invitation email error:", error);
+    throw new Error(`Failed to send transfer invitation: ${error.message}`);
+  }
+}
+
+export async function sendTransferCedantConfirmationEmail(opts: {
+  to: string;
+  fromFirstName: string;
+  toEmail: string;
+  eventTitle: string;
+  expiresAt: Date;
+  manageLink: string;
+}) {
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"></head>
+<body style="font-family:Georgia,serif;color:#1a1a1a;background:#f5f0eb;margin:0;padding:0;">
+  <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
+    ${transferHeader("Invitation de transfert envoyée")}
+    <p>Bonjour ${esc(opts.fromFirstName)},</p>
+    <p>Votre invitation de transfert pour <strong>${esc(opts.eventTitle)}</strong> a bien été envoyée à <strong>${esc(opts.toEmail)}</strong>.</p>
+    <div style="background:#fdf8f0;border-left:4px solid #8B6F4E;padding:14px 20px;border-radius:6px;margin:24px 0;">
+      <p style="margin:0;font-size:14px;color:#4a4a4a;">Le destinataire dispose jusqu'au <strong>${formatTransferDate(opts.expiresAt)}</strong> pour accepter. Vous pouvez annuler l'invitation tant qu'elle est en attente.</p>
+    </div>
+    <div style="text-align:center;margin:24px 0;">
+      <a href="${opts.manageLink}" style="display:inline-block;background:#1a1a1a;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;">Gérer mes billets</a>
+    </div>
+    <p style="font-size:13px;color:#666;">Votre billet actuel reste valide tant que l'invitation n'est pas acceptée.</p>
+    ${transferFooter()}
+  </div>
+</body></html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `Invitation de transfert envoyée — ${opts.eventTitle}`,
+    html,
+  });
+  if (error) {
+    console.error("Transfer cedant confirmation email error:", error);
+    throw new Error(`Failed to send transfer cedant confirmation: ${error.message}`);
+  }
+}
+
+export async function sendTransferAcceptedEmailToCedant(opts: {
+  to: string;
+  fromFirstName: string;
+  toEmail: string;
+  eventTitle: string;
+  refundAmount?: number;
+}) {
+  const refundBlock = opts.refundAmount && opts.refundAmount > 0
+    ? `<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px 20px;margin:20px 0;">
+         <p style="margin:0;font-size:14px;color:#166534;">Un remboursement de <strong>${opts.refundAmount.toFixed(2)} €</strong> est en cours sur votre carte d'origine (5 à 10 jours ouvrés).</p>
+       </div>`
+    : "";
+
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"></head>
+<body style="font-family:Georgia,serif;color:#1a1a1a;background:#f5f0eb;margin:0;padding:0;">
+  <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
+    ${transferHeader("Transfert finalisé")}
+    <p>Bonjour ${esc(opts.fromFirstName)},</p>
+    <p><strong>${esc(opts.toEmail)}</strong> a accepté votre billet pour <strong>${esc(opts.eventTitle)}</strong>. Le transfert est finalisé.</p>
+    ${refundBlock}
+    <p style="font-size:14px;color:#4a4a4a;">Votre ancien QR code a été invalidé : seul le nouveau détenteur peut désormais accéder à l'événement.</p>
+    ${transferFooter()}
+  </div>
+</body></html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `Transfert finalisé — ${opts.eventTitle}`,
+    html,
+  });
+  if (error) {
+    console.error("Transfer accepted email error:", error);
+    throw new Error(`Failed to send transfer accepted email: ${error.message}`);
+  }
+}
+
+export async function sendTransferredTicketEmail(opts: {
+  to: string;
+  guestName: string;
+  fromFirstName: string;
+  eventTitle: string;
+  eventVenue: string;
+  eventAddress: string;
+  eventDate: Date;
+  eventCoverImage: string | null;
+  tier: string;
+  ticket: { id: string; qrCode: string | null };
+}) {
+  const dateStr = formatTransferDate(opts.eventDate);
+  const refCode = opts.ticket.id.slice(0, 8).toUpperCase();
+
+  const coverSection = opts.eventCoverImage
+    ? `<div style="position:relative;border-radius:12px 12px 0 0;overflow:hidden;height:200px;background:#1A1A1A;">
+        <img src="${opts.eventCoverImage}" alt="${esc(opts.eventTitle)}" style="width:100%;height:100%;object-fit:cover;display:block;opacity:0.8;" />
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,#1A1A1A 0%,rgba(26,26,26,0.3) 50%,transparent 100%);"></div>
+        <div style="position:absolute;bottom:16px;left:20px;right:20px;">
+          <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#d4af37;font-family:Arial,sans-serif;">Billet reçu de ${esc(opts.fromFirstName)}</p>
+          <h2 style="margin:6px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${esc(opts.eventTitle)}</h2>
+        </div>
+      </div>`
+    : `<div style="border-radius:12px 12px 0 0;background:linear-gradient(135deg,#8B6F4E,#6F5A3E);padding:30px 20px;">
+        <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.7);font-family:Arial,sans-serif;">Billet reçu de ${esc(opts.fromFirstName)}</p>
+        <h2 style="margin:8px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${esc(opts.eventTitle)}</h2>
+      </div>`;
+
+  const qrSection = opts.ticket.qrCode
+    ? `<td style="vertical-align:top;text-align:center;width:200px;">
+          <div style="background:#fff;border-radius:10px;padding:8px;display:inline-block;">
+            <img src="${opts.ticket.qrCode}" alt="QR Code" width="180" height="180" style="width:180px;height:180px;display:block;" />
+          </div>
+        </td>`
+    : "";
+
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="font-family:Georgia,serif;color:#1a1a1a;background:#f5f0ea;margin:0;padding:0;">
+  <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
+    <div style="text-align:center;margin-bottom:24px;">
+      <h1 style="margin:0;font-size:20px;color:#8B6F4E;">Dream Team Africa</h1>
+      <p style="margin:4px 0 0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#999;">Votre billet — transféré par ${esc(opts.fromFirstName)}</p>
+    </div>
+    <p>Bonjour ${esc(opts.guestName)},</p>
+    <p>Vous venez de recevoir un billet pour <strong>${esc(opts.eventTitle)}</strong>. Voici votre QR code personnel — il a remplacé celui du cédant et sera le seul accepté à l'entrée.</p>
+    <div style="background:#1A1A1A;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+      ${coverSection}
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#1A1A1A;">
+        <tr>
+          <td width="12" style="background:#f5f0ea;border-radius:0 50% 50% 0;height:20px;"></td>
+          <td style="border-bottom:2px dashed rgba(255,255,255,0.15);"></td>
+          <td width="12" style="background:#f5f0ea;border-radius:50% 0 0 50%;height:20px;"></td>
+        </tr>
+      </table>
+      <div style="padding:20px;background:#1A1A1A;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="vertical-align:top;padding-right:16px;">
+              <p style="margin:0;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.35);font-family:Arial,sans-serif;">Titulaire</p>
+              <p style="margin:4px 0 0;font-size:18px;font-weight:bold;color:#fff;">${esc(opts.guestName)}</p>
+              <div style="margin-top:10px;">
+                <span style="display:inline-block;background:#d4af37;color:#fff;padding:4px 12px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">${esc(opts.tier)}</span>
+              </div>
+              <table style="margin-top:14px;" cellpadding="0" cellspacing="0">
+                <tr><td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Date</td><td style="padding:3px 0;font-size:12px;font-weight:600;color:#fff;">${dateStr}</td></tr>
+                <tr><td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Lieu</td><td style="padding:3px 0;font-size:12px;font-weight:600;color:#fff;">${esc(opts.eventVenue)}</td></tr>
+                <tr><td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Adresse</td><td style="padding:3px 0;font-size:12px;color:rgba(255,255,255,0.6);">${esc(opts.eventAddress)}</td></tr>
+                <tr><td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Réf.</td><td style="padding:3px 0;font-size:11px;font-family:monospace;color:rgba(255,255,255,0.5);">${refCode}</td></tr>
+              </table>
+            </td>
+            ${qrSection}
+          </tr>
+        </table>
+      </div>
+      <div style="padding:8px 20px;background:rgba(255,255,255,0.03);">
+        <table width="100%"><tr>
+          <td style="font-size:8px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.15);font-family:Arial,sans-serif;">Dream Team Africa — Saison 2026</td>
+          <td style="text-align:right;font-size:8px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.15);font-family:Arial,sans-serif;">Cession autorisée via la plateforme uniquement</td>
+        </tr></table>
+      </div>
+    </div>
+    ${transferFooter()}
+  </div>
+</body></html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `Votre billet — ${opts.eventTitle}`,
+    html,
+  });
+  if (error) {
+    console.error("Transferred ticket email error:", error);
+    throw new Error(`Failed to send transferred ticket email: ${error.message}`);
+  }
+}
+
+export async function sendTransferCancelledEmail(opts: {
+  to: string;
+  toFirstName: string | null;
+  fromFirstName: string;
+  eventTitle: string;
+}) {
+  const greeting = opts.toFirstName ? `Bonjour ${esc(opts.toFirstName)},` : "Bonjour,";
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"></head>
+<body style="font-family:Georgia,serif;color:#1a1a1a;background:#f5f0eb;margin:0;padding:0;">
+  <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
+    ${transferHeader("Invitation annulée")}
+    <p>${greeting}</p>
+    <p><strong>${esc(opts.fromFirstName)}</strong> a annulé l'invitation de transfert qu'il vous avait envoyée pour <strong>${esc(opts.eventTitle)}</strong>.</p>
+    <p style="font-size:14px;color:#4a4a4a;">Aucune action n'est nécessaire de votre part. Si vous pensez qu'il s'agit d'une erreur, contactez directement ${esc(opts.fromFirstName)}.</p>
+    ${transferFooter()}
+  </div>
+</body></html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `Invitation annulée — ${opts.eventTitle}`,
+    html,
+  });
+  if (error) {
+    console.error("Transfer cancelled email error:", error);
+    throw new Error(`Failed to send transfer cancelled email: ${error.message}`);
+  }
+}
+
+export async function sendTransferRefusedEmail(opts: {
+  to: string;
+  fromFirstName: string;
+  toEmail: string;
+  eventTitle: string;
+}) {
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"></head>
+<body style="font-family:Georgia,serif;color:#1a1a1a;background:#f5f0eb;margin:0;padding:0;">
+  <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
+    ${transferHeader("Transfert refusé")}
+    <p>Bonjour ${esc(opts.fromFirstName)},</p>
+    <p><strong>${esc(opts.toEmail)}</strong> a refusé l'invitation de transfert pour <strong>${esc(opts.eventTitle)}</strong>.</p>
+    <p style="font-size:14px;color:#4a4a4a;">Votre billet reste valide et à votre nom. Vous pouvez proposer le transfert à un autre destinataire depuis votre espace.</p>
+    ${transferFooter()}
+  </div>
+</body></html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `Transfert refusé — ${opts.eventTitle}`,
+    html,
+  });
+  if (error) {
+    console.error("Transfer refused email error:", error);
+    throw new Error(`Failed to send transfer refused email: ${error.message}`);
+  }
+}
+
+export async function sendTransferExpiredEmailToCedant(opts: {
+  to: string;
+  fromFirstName: string;
+  toEmail: string;
+  eventTitle: string;
+}) {
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"></head>
+<body style="font-family:Georgia,serif;color:#1a1a1a;background:#f5f0eb;margin:0;padding:0;">
+  <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
+    ${transferHeader("Invitation expirée")}
+    <p>Bonjour ${esc(opts.fromFirstName)},</p>
+    <p>L'invitation de transfert envoyée à <strong>${esc(opts.toEmail)}</strong> pour <strong>${esc(opts.eventTitle)}</strong> a expiré sans être acceptée.</p>
+    <p style="font-size:14px;color:#4a4a4a;">Votre billet reste valide et à votre nom. Vous pouvez renvoyer une invitation depuis votre espace.</p>
+    ${transferFooter()}
+  </div>
+</body></html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `Invitation expirée — ${opts.eventTitle}`,
+    html,
+  });
+  if (error) {
+    console.error("Transfer expired email error:", error);
+    throw new Error(`Failed to send transfer expired email: ${error.message}`);
+  }
+}

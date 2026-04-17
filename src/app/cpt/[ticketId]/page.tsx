@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { verifyTicketToken } from "@/lib/cpt-token";
+import { TRANSFER_CONFIG } from "@/lib/transfer-config";
 import CptRechargePanel from "./CptRechargePanel";
+import CptTransferPanel from "./CptTransferPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -25,8 +27,9 @@ export default async function CptTicketPage({
   const ticket = await prisma.ticket.findUnique({
     where: { id: ticketId },
     include: {
-      event: { select: { title: true, date: true, venue: true, address: true, slug: true } },
+      event: { select: { title: true, date: true, venue: true, address: true, slug: true, published: true } },
       payments: { orderBy: { paidAt: "desc" } },
+      transfers: { where: { status: "PENDING" }, orderBy: { createdAt: "desc" } },
     },
   });
   if (!ticket) notFound();
@@ -88,6 +91,21 @@ export default async function CptTicketPage({
             ticketId={ticketId}
             token={token}
             remaining={remaining}
+          />
+        )}
+
+        {isFullyPaid && !ticket.checkedInAt && ticket.transferCount < TRANSFER_CONFIG.MAX_TRANSFERS && ticket.event.published && Date.now() < new Date(ticket.event.date).getTime() - TRANSFER_CONFIG.DELAI_LIMITE_H * 3600 * 1000 && (
+          <CptTransferPanel
+            ticketId={ticketId}
+            token={token}
+            eventTitle={ticket.event.title}
+            pendingTransfers={ticket.transfers.map((t) => ({
+              id: t.id,
+              toEmail: t.toEmail,
+              toFirstName: t.toFirstName,
+              expiresAt: t.expiresAt.toISOString(),
+              createdAt: t.createdAt.toISOString(),
+            }))}
           />
         )}
 

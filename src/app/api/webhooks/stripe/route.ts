@@ -70,6 +70,8 @@ export async function POST(request: Request) {
       await handleExhibitorEarlyPayment(session);
     } else if (metadata?.type === "exposant_deposit") {
       await handleExposantDeposit(session);
+    } else if (metadata?.type === "ticket_transfer") {
+      await handleTicketTransferFinalize(session);
     } else {
       console.warn(`[webhook] Unknown metadata.type: "${metadata?.type}" for session ${session.id}`);
     }
@@ -932,6 +934,24 @@ async function generateInvoiceOnCompletion(bookingId: string) {
     }
   } catch (err) {
     console.error(`[INVOICE] Failed to generate for ${bookingId}:`, err);
+  }
+}
+
+/* ── Ticket transfer finalization (AT_COST mode) ─────────── */
+async function handleTicketTransferFinalize(session: Stripe.Checkout.Session) {
+  const transferId = session.metadata?.transferId;
+  if (!transferId) {
+    console.error("[webhook] ticket_transfer: missing transferId in metadata");
+    return;
+  }
+  try {
+    const { finalizeTransfer } = await import("@/lib/transfer-finalize");
+    const res = await finalizeTransfer(transferId);
+    if (!res.ok) {
+      console.error(`[webhook] ticket_transfer finalize failed: ${res.reason}`);
+    }
+  } catch (err) {
+    console.error(`[webhook] ticket_transfer finalize error for ${transferId}:`, err);
   }
 }
 

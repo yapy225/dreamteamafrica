@@ -113,7 +113,7 @@ export async function POST(
 
     try {
       await sendTransferInvitationEmail({
-        to: transfer.toEmail,
+        to: transfer.toEmail || toEmailRaw,
         fromFirstName: fromFirstName || "un membre Dream Team Africa",
         toFirstName,
         eventTitle: ticket.event.title,
@@ -134,7 +134,7 @@ export async function POST(
         await sendTransferCedantConfirmationEmail({
           to: fromEmail,
           fromFirstName: fromFirstName || "",
-          toEmail: transfer.toEmail,
+          toEmail: transfer.toEmail || toEmailRaw,
           eventTitle: ticket.event.title,
           expiresAt,
           manageLink: `${appUrl}/mon-espace`,

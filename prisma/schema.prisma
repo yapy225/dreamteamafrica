@@ -228,7 +228,7 @@ model TicketTransfer {
   fromEmail       String
   fromFirstName   String?
   fromLastName    String?
-  toEmail         String
+  toEmail         String?
   toFirstName     String?
   toLastName      String?
   toUserId        String?
@@ -237,6 +237,7 @@ model TicketTransfer {
   mode            TransferMode
   invitationHash  String         @unique
   amount          Decimal?       @db.Decimal(10, 2)
+  publicPrice     Decimal?       @db.Decimal(10, 2)
   stripeSessionId String?
   stripeRefundId  String?
   message         String?
@@ -244,11 +245,13 @@ model TicketTransfer {
   expiresAt       DateTime
   acceptedAt      DateTime?
   cancelledAt     DateTime?
+  listedAt        DateTime?
 
   @@index([ticketId])
   @@index([toEmail, status])
   @@index([expiresAt])
   @@index([status])
+  @@index([status, listedAt])
 }
 
 model TicketPayment {
@@ -1123,6 +1126,7 @@ enum TransferStatus {
   EXPIRED
   CANCELLED
   REFUSED
+  LISTED
 }
 
 enum TransferMode {

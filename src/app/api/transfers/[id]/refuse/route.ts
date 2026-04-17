@@ -41,7 +41,7 @@ export async function POST(
     });
 
     try {
-      if (transfer.fromEmail) {
+      if (transfer.fromEmail && transfer.toEmail) {
         await sendTransferRefusedEmail({
           to: transfer.fromEmail,
           fromFirstName: transfer.fromFirstName || "",

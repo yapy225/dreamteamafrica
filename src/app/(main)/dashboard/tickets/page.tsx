@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db";
 import { formatDate, formatPrice } from "@/lib/utils";
 import RechargeButton from "./RechargeButton";
 import TransferButton from "./TransferButton";
+import ListingButton from "./ListingButton";
 import { TRANSFER_CONFIG } from "@/lib/transfer-config";
 
 export const dynamic = "force-dynamic";
@@ -46,7 +47,7 @@ export default async function TicketsPage() {
       event: true,
       payments: { orderBy: { paidAt: "asc" } },
       transfers: {
-        where: { status: "PENDING" },
+        where: { status: { in: ["PENDING", "LISTED"] } },
         orderBy: { createdAt: "desc" },
       },
     },
@@ -236,8 +237,9 @@ function TicketCard({
     purchasedAt: Date;
     checkedInAt: Date | null;
     transferCount: number;
-    payments: Array<{ id: string; amount: number; type: string; label: string; paidAt: Date }>;
-    transfers: Array<{ id: string; toEmail: string; toFirstName: string | null; expiresAt: Date; createdAt: Date }>;
+    payments: Array<{ id: string; amount: number; type: string; label: string; paidAt: Date; stripeId: string | null }>;
+    transfers: Array<{ id: string; status: string; toEmail: string | null; toFirstName: string | null; expiresAt: Date; createdAt: Date; publicPrice: number | { toString(): string } | null; listedAt: Date | null }>;
+    stripeSessionId: string | null;
     event: {
       title: string;
       slug: string;
@@ -258,12 +260,35 @@ function TicketCard({
   const tierColor = tierColors[ticket.tier] || "bg-slate-50 text-slate-700 border-slate-200";
 
   const transferDeadline = eventDate.getTime() - TRANSFER_CONFIG.DELAI_LIMITE_H * 3600 * 1000;
+  const pendingTransfers = ticket.transfers.filter((t) => t.status === "PENDING");
+  const activeListingRaw = ticket.transfers.find((t) => t.status === "LISTED") ?? null;
+  const activeListing = activeListingRaw && activeListingRaw.listedAt
+    ? {
+        id: activeListingRaw.id,
+        price: activeListingRaw.publicPrice ? Number(activeListingRaw.publicPrice) : ticket.price,
+        listedAt: activeListingRaw.listedAt.toISOString(),
+      }
+    : null;
   const canTransfer =
     isPaid &&
     !ticket.checkedInAt &&
     ticket.transferCount < TRANSFER_CONFIG.MAX_TRANSFERS &&
     ticket.event.published &&
-    Date.now() < transferDeadline;
+    Date.now() < transferDeadline &&
+    !activeListing &&
+    pendingTransfers.length === 0;
+  const hasStripePayment = ticket.payments.some((p) => p.stripeId) || !!ticket.stripeSessionId;
+  const paymentRef = ticket.payments.find((p) => p.stripeId)?.paidAt || ticket.purchasedAt;
+  const paymentAgeDays = (Date.now() - new Date(paymentRef).getTime()) / (24 * 3600 * 1000);
+  const canList =
+    isPaid &&
+    !ticket.checkedInAt &&
+    ticket.transferCount === 0 &&
+    ticket.event.published &&
+    Date.now() < transferDeadline &&
+    pendingTransfers.length === 0 &&
+    hasStripePayment &&
+    paymentAgeDays < 150;
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
@@ -386,13 +411,22 @@ function TicketCard({
           <TransferButton
             ticketId={ticket.id}
             eventTitle={ticket.event.title}
-            pendingTransfers={ticket.transfers.map((t) => ({
+            pendingTransfers={pendingTransfers.map((t) => ({
               id: t.id,
-              toEmail: t.toEmail,
+              toEmail: t.toEmail || "",
               toFirstName: t.toFirstName,
               expiresAt: t.expiresAt.toISOString(),
               createdAt: t.createdAt.toISOString(),
             }))}
+          />
+        )}
+
+        {(canList || activeListing) && (
+          <ListingButton
+            ticketId={ticket.id}
+            price={ticket.price}
+            eventTitle={ticket.event.title}
+            activeListing={activeListing}
           />
         )}
       </div>

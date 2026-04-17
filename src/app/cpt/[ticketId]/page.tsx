@@ -101,7 +101,7 @@ export default async function CptTicketPage({
             eventTitle={ticket.event.title}
             pendingTransfers={ticket.transfers.map((t) => ({
               id: t.id,
-              toEmail: t.toEmail,
+              toEmail: t.toEmail || "",
               toFirstName: t.toFirstName,
               expiresAt: t.expiresAt.toISOString(),
               createdAt: t.createdAt.toISOString(),

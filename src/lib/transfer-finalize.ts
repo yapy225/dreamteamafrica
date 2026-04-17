@@ -38,6 +38,7 @@ export async function finalizeTransfer(transferId: string): Promise<FinalizeResu
     if (transfer.expiresAt < new Date()) throw new Error("Invitation expirée.");
     if (transfer.ticket.checkedInAt) throw new Error("Le billet a déjà été scanné à l'entrée.");
 
+    if (!transfer.toEmail) throw new Error("Destinataire manquant sur l'invitation.");
     let toUserId: string | null = transfer.toUserId ?? null;
     if (!toUserId) {
       const existingUser = await tx.user.findUnique({ where: { email: transfer.toEmail } });
@@ -99,6 +100,7 @@ export async function finalizeTransfer(transferId: string): Promise<FinalizeResu
   });
 
   try {
+    if (!result.transfer.toEmail) return { ok: true, ticketId: result.ticket.id };
     await sendTransferredTicketEmail({
       to: result.transfer.toEmail,
       guestName: [result.transfer.toFirstName, result.transfer.toLastName].filter(Boolean).join(" ") || result.transfer.toEmail,
@@ -116,13 +118,15 @@ export async function finalizeTransfer(transferId: string): Promise<FinalizeResu
   }
 
   try {
-    await sendTransferAcceptedEmailToCedant({
-      to: result.transfer.fromEmail,
-      fromFirstName: result.transfer.fromFirstName || "",
-      toEmail: result.transfer.toEmail,
-      eventTitle: result.event.title,
-      refundAmount: refundAmount > 0 ? refundAmount : undefined,
-    });
+    if (result.transfer.toEmail) {
+      await sendTransferAcceptedEmailToCedant({
+        to: result.transfer.fromEmail,
+        fromFirstName: result.transfer.fromFirstName || "",
+        toEmail: result.transfer.toEmail,
+        eventTitle: result.event.title,
+        refundAmount: refundAmount > 0 ? refundAmount : undefined,
+      });
+    }
   } catch (err) {
     console.error("[transfer-finalize] sendTransferAcceptedEmailToCedant failed:", err);
   }

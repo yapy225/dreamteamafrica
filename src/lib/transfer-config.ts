@@ -5,3 +5,9 @@ export const TRANSFER_CONFIG = {
   DELAI_LIMITE_H: 24,
   EXPIRATION_INVIT_H: 72,
 } as const;
+
+export const LISTING_CONFIG = {
+  COMMISSION_RATE: 0.05,
+  MAX_PAYMENT_AGE_DAYS: 150,
+  DELAI_LIMITE_H: 24,
+} as const;

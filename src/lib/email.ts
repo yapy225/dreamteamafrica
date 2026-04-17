@@ -1422,6 +1422,180 @@ export async function sendTransferRefusedEmail(opts: {
   }
 }
 
+export async function sendListingConfirmationToSeller(opts: {
+  to: string;
+  fromFirstName: string;
+  eventTitle: string;
+  eventDate: Date;
+  price: number;
+  manageLink: string;
+  bourseLink: string;
+}) {
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"></head>
+<body style="font-family:Georgia,serif;color:#1a1a1a;background:#f5f0eb;margin:0;padding:0;">
+  <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
+    ${transferHeader("Billet mis en vente sur la Bourse officielle DTA")}
+    <p>Bonjour ${esc(opts.fromFirstName)},</p>
+    <p>Votre billet pour <strong>${esc(opts.eventTitle)}</strong> (${formatTransferDate(opts.eventDate)}) est désormais visible sur la Bourse officielle Dream Team Africa.</p>
+    <div style="background:#fdf8f0;border-left:4px solid #8B6F4E;padding:14px 20px;border-radius:6px;margin:24px 0;">
+      <p style="margin:0;font-size:14px;color:#4a4a4a;">
+        Prix fixé : <strong>${opts.price.toFixed(2)} €</strong> (prix d'achat, zéro spéculation).<br/>
+        Dès qu'un acheteur règle, vous êtes remboursé&nbsp;intégralement sur votre carte d'origine (5–10 jours ouvrés). Votre ancien QR code sera invalidé automatiquement.
+      </p>
+    </div>
+    <div style="text-align:center;margin:24px 0;">
+      <a href="${opts.bourseLink}" style="display:inline-block;background:#8B6F4E;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;margin-right:8px;">Voir sur la Bourse</a>
+      <a href="${opts.manageLink}" style="display:inline-block;background:#1a1a1a;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;">Gérer mes billets</a>
+    </div>
+    <p style="font-size:13px;color:#666;">Tant que personne n'a acheté, vous pouvez retirer l'annonce depuis votre espace.</p>
+    ${transferFooter()}
+  </div>
+</body></html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `Mise en vente confirmée — ${opts.eventTitle}`,
+    html,
+  });
+  if (error) {
+    console.error("Listing confirmation email error:", error);
+    throw new Error(`Failed to send listing confirmation: ${error.message}`);
+  }
+}
+
+export async function sendListingSoldEmailToSeller(opts: {
+  to: string;
+  fromFirstName: string;
+  eventTitle: string;
+  refundAmount: number;
+}) {
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"></head>
+<body style="font-family:Georgia,serif;color:#1a1a1a;background:#f5f0eb;margin:0;padding:0;">
+  <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
+    ${transferHeader("Votre billet a trouvé preneur")}
+    <p>Bonjour ${esc(opts.fromFirstName)},</p>
+    <p>Votre billet pour <strong>${esc(opts.eventTitle)}</strong> a été acheté sur la Bourse officielle Dream Team Africa. Merci d'avoir permis à un autre fan d'y aller à votre place.</p>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px 20px;margin:20px 0;">
+      <p style="margin:0;font-size:14px;color:#166534;">Un remboursement de <strong>${opts.refundAmount.toFixed(2)} €</strong> est en cours sur votre carte d'origine (5 à 10 jours ouvrés).</p>
+    </div>
+    <p style="font-size:14px;color:#4a4a4a;">Votre ancien QR code a été invalidé : seul le nouveau détenteur peut désormais accéder à l'événement.</p>
+    ${transferFooter()}
+  </div>
+</body></html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `Votre billet a été acheté — ${opts.eventTitle}`,
+    html,
+  });
+  if (error) {
+    console.error("Listing sold email error:", error);
+    throw new Error(`Failed to send listing sold email: ${error.message}`);
+  }
+}
+
+export async function sendListingPurchasedEmailToBuyer(opts: {
+  to: string;
+  guestName: string;
+  eventTitle: string;
+  eventVenue: string;
+  eventAddress: string;
+  eventDate: Date;
+  eventCoverImage: string | null;
+  tier: string;
+  ticket: { id: string; qrCode: string | null };
+}) {
+  const dateStr = formatTransferDate(opts.eventDate);
+  const refCode = opts.ticket.id.slice(0, 8).toUpperCase();
+
+  const coverSection = opts.eventCoverImage
+    ? `<div style="position:relative;border-radius:12px 12px 0 0;overflow:hidden;height:200px;background:#1A1A1A;">
+        <img src="${opts.eventCoverImage}" alt="${esc(opts.eventTitle)}" style="width:100%;height:100%;object-fit:cover;display:block;opacity:0.8;" />
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,#1A1A1A 0%,rgba(26,26,26,0.3) 50%,transparent 100%);"></div>
+        <div style="position:absolute;bottom:16px;left:20px;right:20px;">
+          <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#d4af37;font-family:Arial,sans-serif;">Acheté sur la Bourse officielle DTA</p>
+          <h2 style="margin:6px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${esc(opts.eventTitle)}</h2>
+        </div>
+      </div>`
+    : `<div style="border-radius:12px 12px 0 0;background:linear-gradient(135deg,#8B6F4E,#6F5A3E);padding:30px 20px;">
+        <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.7);font-family:Arial,sans-serif;">Acheté sur la Bourse officielle DTA</p>
+        <h2 style="margin:8px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${esc(opts.eventTitle)}</h2>
+      </div>`;
+
+  const qrSection = opts.ticket.qrCode
+    ? `<td style="vertical-align:top;text-align:center;width:200px;">
+          <div style="background:#fff;border-radius:10px;padding:8px;display:inline-block;">
+            <img src="${opts.ticket.qrCode}" alt="QR Code" width="180" height="180" style="width:180px;height:180px;display:block;" />
+          </div>
+        </td>`
+    : "";
+
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="font-family:Georgia,serif;color:#1a1a1a;background:#f5f0ea;margin:0;padding:0;">
+  <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
+    <div style="text-align:center;margin-bottom:24px;">
+      <h1 style="margin:0;font-size:20px;color:#8B6F4E;">Dream Team Africa</h1>
+      <p style="margin:4px 0 0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#999;">Bourse officielle — votre billet</p>
+    </div>
+    <p>Bonjour ${esc(opts.guestName)},</p>
+    <p>Merci pour votre achat sur la Bourse officielle Dream Team Africa. Voici votre QR code personnel — c'est le seul qui sera accepté à l'entrée.</p>
+    <div style="background:#1A1A1A;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+      ${coverSection}
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#1A1A1A;">
+        <tr>
+          <td width="12" style="background:#f5f0ea;border-radius:0 50% 50% 0;height:20px;"></td>
+          <td style="border-bottom:2px dashed rgba(255,255,255,0.15);"></td>
+          <td width="12" style="background:#f5f0ea;border-radius:50% 0 0 50%;height:20px;"></td>
+        </tr>
+      </table>
+      <div style="padding:20px;background:#1A1A1A;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="vertical-align:top;padding-right:16px;">
+              <p style="margin:0;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.35);font-family:Arial,sans-serif;">Titulaire</p>
+              <p style="margin:4px 0 0;font-size:18px;font-weight:bold;color:#fff;">${esc(opts.guestName)}</p>
+              <div style="margin-top:10px;">
+                <span style="display:inline-block;background:#d4af37;color:#fff;padding:4px 12px;border-radius:4px;font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">${esc(opts.tier)}</span>
+              </div>
+              <table style="margin-top:14px;" cellpadding="0" cellspacing="0">
+                <tr><td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Date</td><td style="padding:3px 0;font-size:12px;font-weight:600;color:#fff;">${dateStr}</td></tr>
+                <tr><td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Lieu</td><td style="padding:3px 0;font-size:12px;font-weight:600;color:#fff;">${esc(opts.eventVenue)}</td></tr>
+                <tr><td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Adresse</td><td style="padding:3px 0;font-size:12px;color:rgba(255,255,255,0.6);">${esc(opts.eventAddress)}</td></tr>
+                <tr><td style="padding:3px 16px 3px 0;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.3);font-family:Arial,sans-serif;">Réf.</td><td style="padding:3px 0;font-size:11px;font-family:monospace;color:rgba(255,255,255,0.5);">${refCode}</td></tr>
+              </table>
+            </td>
+            ${qrSection}
+          </tr>
+        </table>
+      </div>
+      <div style="padding:8px 20px;background:rgba(255,255,255,0.03);">
+        <table width="100%"><tr>
+          <td style="font-size:8px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.15);font-family:Arial,sans-serif;">Dream Team Africa — Saison 2026</td>
+          <td style="text-align:right;font-size:8px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.15);font-family:Arial,sans-serif;">Bourse officielle</td>
+        </tr></table>
+      </div>
+    </div>
+    ${transferFooter()}
+  </div>
+</body></html>`;
+
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: opts.to,
+    subject: `Votre billet — ${opts.eventTitle}`,
+    html,
+  });
+  if (error) {
+    console.error("Listing purchased email error:", error);
+    throw new Error(`Failed to send listing purchased email: ${error.message}`);
+  }
+}
+
 export async function sendTransferExpiredEmailToCedant(opts: {
   to: string;
   fromFirstName: string;

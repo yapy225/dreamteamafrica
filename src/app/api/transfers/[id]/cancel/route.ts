@@ -48,6 +48,9 @@ export async function POST(
     });
 
     try {
+      if (!transfer.toEmail) {
+        return NextResponse.json({ ok: true });
+      }
       await sendTransferCancelledEmail({
         to: transfer.toEmail,
         toFirstName: transfer.toFirstName,

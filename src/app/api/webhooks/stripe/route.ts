@@ -72,6 +72,8 @@ export async function POST(request: Request) {
       await handleExposantDeposit(session);
     } else if (metadata?.type === "ticket_transfer") {
       await handleTicketTransferFinalize(session);
+    } else if (metadata?.type === "ticket_listing_purchase") {
+      await handleTicketListingPurchase(session);
     } else {
       console.warn(`[webhook] Unknown metadata.type: "${metadata?.type}" for session ${session.id}`);
     }
@@ -934,6 +936,33 @@ async function generateInvoiceOnCompletion(bookingId: string) {
     }
   } catch (err) {
     console.error(`[INVOICE] Failed to generate for ${bookingId}:`, err);
+  }
+}
+
+/* ── Ticket listing purchase (bourse publique) ─────────────── */
+async function handleTicketListingPurchase(session: Stripe.Checkout.Session) {
+  const metadata = session.metadata || {};
+  const transferId = metadata.transferId;
+  const buyerEmail = metadata.buyerEmail;
+  if (!transferId || !buyerEmail) {
+    console.error("[webhook] ticket_listing_purchase: missing metadata");
+    return;
+  }
+  try {
+    const { finalizeListing } = await import("@/lib/listing-finalize");
+    const res = await finalizeListing({
+      transferId,
+      buyerEmail,
+      buyerFirstName: metadata.buyerFirstName || null,
+      buyerLastName: metadata.buyerLastName || null,
+      buyerPhone: metadata.buyerPhone || null,
+      stripeSessionId: session.id,
+    });
+    if (!res.ok) {
+      console.error(`[webhook] ticket_listing_purchase finalize failed: ${res.reason}`);
+    }
+  } catch (err) {
+    console.error(`[webhook] ticket_listing_purchase error for ${transferId}:`, err);
   }
 }
 

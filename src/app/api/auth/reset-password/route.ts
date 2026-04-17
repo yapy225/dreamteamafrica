@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { rateLimitStrict, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
-    // Rate limit: 5 requests per 15 minutes per IP
+    // Rate limit: 5 requests per 15 minutes per IP (DB-backed strict — anti brute-force)
     const ip = getClientIp(request);
-    const rl = rateLimit(`reset-pwd:${ip}`, { limit: 5, windowSec: 15 * 60 });
+    const rl = await rateLimitStrict(`reset-pwd:${ip}`, { limit: 5, windowSec: 15 * 60 });
     if (!rl.success) {
       return NextResponse.json(
         { error: "Trop de tentatives. Réessayez dans quelques minutes." },

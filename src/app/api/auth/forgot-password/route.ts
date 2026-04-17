@@ -2,16 +2,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import crypto from "crypto";
 import { Resend } from "resend";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { rateLimitStrict, getClientIp } from "@/lib/rate-limit";
 
 const FROM_EMAIL =
   process.env.EMAIL_FROM ?? "Dream Team Africa <onboarding@resend.dev>";
 
 export async function POST(request: Request) {
   try {
-    // Rate limit: 3 requests per 15 minutes per IP
+    // Rate limit: 3 requests per 15 minutes per IP (DB-backed strict)
     const ip = getClientIp(request);
-    const rl = rateLimit(`forgot-pwd:${ip}`, { limit: 3, windowSec: 15 * 60 });
+    const rl = await rateLimitStrict(`forgot-pwd:${ip}`, { limit: 3, windowSec: 15 * 60 });
     if (!rl.success) {
       return NextResponse.json(
         { error: "Trop de tentatives. Réessayez dans quelques minutes." },

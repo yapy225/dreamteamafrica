@@ -37,16 +37,16 @@ export default async function BoursePage() {
     <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-wider text-dta-accent">Bourse officielle de billets DTA</p>
-        <h1 className="mt-2 font-serif text-3xl font-bold text-dta-dark sm:text-4xl">Un fan empêché ? Un autre prend sa place.</h1>
+        <h1 className="mt-2 font-serif text-3xl font-bold text-dta-dark sm:text-4xl">Un empêchement ? Votre billet peut trouver preneur.</h1>
         <p className="mt-3 max-w-2xl text-sm text-dta-char/70">
-          Des vrais billets, vendus au <strong>prix d&apos;achat</strong> par d&apos;anciens acheteurs empêchés d&apos;y aller. Zéro spéculation. {Math.round(LISTING_CONFIG.COMMISSION_RATE * 100)} % de frais de service à l&apos;acheteur.
+          Des billets officiels, mis en vente au <strong>prix d&apos;achat</strong> par d&apos;anciens acheteurs empêchés d&apos;y aller. Le vendeur est remboursé <strong>uniquement lorsqu&apos;un visiteur achète</strong> son billet. Zéro spéculation. {Math.round(LISTING_CONFIG.COMMISSION_RATE * 100)} % de frais de service à l&apos;acheteur.
         </p>
       </div>
 
       {listings.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
           <h2 className="font-serif text-xl font-bold text-slate-900">Aucun billet en vente actuellement</h2>
-          <p className="mt-2 text-sm text-slate-500">Revenez dans quelques jours — les billets arrivent au fil du temps.</p>
+          <p className="mt-2 text-sm text-slate-500">Revenez régulièrement — les annonces apparaissent ici dès qu&apos;un visiteur remet son billet en vente.</p>
           <Link href="/saison-culturelle-africaine" className="mt-6 inline-flex rounded-xl bg-dta-accent px-6 py-3 text-sm font-semibold text-white hover:bg-dta-accent-dark">
             Voir les événements
           </Link>
@@ -88,18 +88,22 @@ export default async function BoursePage() {
 
       <div className="mt-12 rounded-2xl border border-slate-200 bg-dta-beige/40 p-6">
         <h2 className="font-serif text-lg font-bold text-dta-dark">Comment ça marche ?</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+        <div className="mt-4 grid gap-4 sm:grid-cols-4">
           <div>
-            <p className="text-xs font-semibold text-dta-accent">1. Prix d&apos;achat garanti</p>
-            <p className="mt-1 text-sm text-slate-600">Chaque billet est revendu au prix payé par l&apos;ancien détenteur. Zéro spéculation.</p>
+            <p className="text-xs font-semibold text-dta-accent">1. Le vendeur met son billet en vente</p>
+            <p className="mt-1 text-sm text-slate-600">Depuis son espace personnel, au prix d&apos;achat exact. Il peut retirer l&apos;annonce à tout moment.</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-dta-accent">2. QR officiel régénéré</p>
-            <p className="mt-1 text-sm text-slate-600">Après achat, un nouveau QR vous est envoyé par email. L&apos;ancien est invalidé.</p>
+            <p className="text-xs font-semibold text-dta-accent">2. Un acheteur paie via la plateforme</p>
+            <p className="mt-1 text-sm text-slate-600">Tant que personne n&apos;achète, aucun remboursement n&apos;est engagé. Paiement sécurisé Stripe.</p>
           </div>
           <div>
-            <p className="text-xs font-semibold text-dta-accent">3. 100 % officiel</p>
-            <p className="mt-1 text-sm text-slate-600">DTA est l&apos;organisateur. Vous achetez directement auprès de la billetterie.</p>
+            <p className="text-xs font-semibold text-dta-accent">3. QR officiel régénéré</p>
+            <p className="mt-1 text-sm text-slate-600">Un nouveau QR est envoyé à l&apos;acheteur par email. L&apos;ancien est invalidé automatiquement.</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-dta-accent">4. Remboursement du vendeur</p>
+            <p className="mt-1 text-sm text-slate-600">Le montant du billet est reversé au vendeur sur sa carte d&apos;origine (5 à 10 jours ouvrés).</p>
           </div>
         </div>
       </div>

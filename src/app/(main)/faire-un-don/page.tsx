@@ -7,6 +7,7 @@ export const metadata = {
   description:
     "Soutenez Dream Team Africa dans sa mission de promotion de la culture africaine à Paris. Don, bénévolat, partenariat.",
   alternates: { canonical: "https://dreamteamafrica.com/faire-un-don" },
+  robots: { index: false, follow: true },
 };
 
 const impacts = [

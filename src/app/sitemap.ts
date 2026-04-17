@@ -15,13 +15,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: baseUrl, lastModified: now, changeFrequency: "daily", priority: 1.0 },
     { url: `${baseUrl}/saison-culturelle-africaine`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${baseUrl}/lafropeen`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: `${baseUrl}/lafropeen/archives`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
     { url: `${baseUrl}/exposants`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${baseUrl}/nous-contacter`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${baseUrl}/faire-un-don`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
     { url: `${baseUrl}/lofficiel-dafrique`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/lofficiel-dafrique/annuaire`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/artistes`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${baseUrl}/activites-culturelles-paris`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${baseUrl}/que-faire-paris-ce-weekend`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${baseUrl}/marche-africain-paris`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
@@ -40,12 +37,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/weekend-paris-pas-cher`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${baseUrl}/sejour-culturel-africain-paris`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
     { url: `${baseUrl}/danse-zaouli-paris`, lastModified: now, changeFrequency: "weekly", priority: 0.85 },
-    { url: `${baseUrl}/mentions-legales`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${baseUrl}/conditions-generales`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${baseUrl}/politique-de-confidentialite`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${baseUrl}/politique-cookies`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
-    { url: `${baseUrl}/conditions-utilisation`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${baseUrl}/politique-annulation`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
 
   // ── Journal category pages ────────────────────────────────

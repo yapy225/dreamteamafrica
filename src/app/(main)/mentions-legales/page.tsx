@@ -4,6 +4,7 @@ export const metadata: Metadata = {
   title: "Mentions légales — Dream Team Africa",
   description: "Mentions légales du site dreamteamafrica.com — éditeur, hébergement, propriété intellectuelle, RGPD.",
   alternates: { canonical: "https://dreamteamafrica.com/mentions-legales" },
+  robots: { index: false, follow: true },
 };
 
 export default function MentionsLegalesPage() {

@@ -4,6 +4,7 @@ export const metadata: Metadata = {
   title: "Conditions Générales d'Utilisation — Dream Team Africa",
   description: "Conditions générales d'utilisation du site dreamteamafrica.com — accès, propriété intellectuelle, données personnelles, responsabilité.",
   alternates: { canonical: "https://dreamteamafrica.com/conditions-utilisation" },
+  robots: { index: false, follow: true },
 };
 
 export default function CGUPage() {

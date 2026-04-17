@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  const ip = getClientIp(request);
+  const rl = rateLimit(`listing-detail:${ip}`, { limit: 60, windowSec: 60 });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Trop de requêtes." }, { status: 429 });
+  }
 
   const listing = await prisma.ticketTransfer.findUnique({
     where: { id },

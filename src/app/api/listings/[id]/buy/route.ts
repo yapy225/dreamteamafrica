@@ -58,6 +58,10 @@ export async function POST(
     if (Date.now() > new Date(listing.ticket.event.date).getTime() - 24 * 3600 * 1000) {
       return NextResponse.json({ error: "Les reventes sont clôturées 24 h avant l'événement." }, { status: 400 });
     }
+    // Anti-wash-trading : empêcher le vendeur de racheter son propre billet pour récupérer sa commission
+    if (buyerEmail === listing.fromEmail.toLowerCase()) {
+      return NextResponse.json({ error: "Vous ne pouvez pas acheter votre propre billet." }, { status: 400 });
+    }
 
     const price = listing.publicPrice ? Number(listing.publicPrice) : Number(listing.ticket.price);
     const commission = Math.round(price * LISTING_CONFIG.COMMISSION_RATE * 100) / 100;

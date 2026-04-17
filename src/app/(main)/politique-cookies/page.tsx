@@ -4,6 +4,7 @@ export const metadata: Metadata = {
   title: "Politique de Cookies — Dream Team Africa",
   description: "Politique de cookies du site dreamteamafrica.com — types de cookies, finalités, gestion des préférences, RGPD.",
   alternates: { canonical: "https://dreamteamafrica.com/politique-cookies" },
+  robots: { index: false, follow: true },
 };
 
 export default function PolitiqueCookiesPage() {
@@ -212,7 +213,7 @@ export default function PolitiqueCookiesPage() {
             cookies à tout moment. Toute modification sera publiée sur cette page avec
             la date de mise à jour.
           </p>
-          <p className="mt-2">Dernière mise à jour : mars 2025</p>
+          <p className="mt-2">Dernière mise à jour : avril 2026</p>
         </section>
 
         {/* 9 */}

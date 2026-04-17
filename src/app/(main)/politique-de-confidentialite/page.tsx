@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   description:
     "Politique de confidentialité du site dreamteamafrica.com — collecte, utilisation et protection de vos données personnelles.",
   alternates: { canonical: "https://dreamteamafrica.com/politique-de-confidentialite" },
+  robots: { index: false, follow: true },
 };
 
 export default function PolitiqueConfidentialitePage() {
@@ -52,9 +53,11 @@ export default function PolitiqueConfidentialitePage() {
             <li>Nom, prénom</li>
             <li>Adresse e-mail</li>
             <li>Numéro de téléphone / WhatsApp</li>
+            <li>Messages échangés via WhatsApp Business (conservés pour le suivi de votre demande)</li>
             <li>Informations de profil (visiteur, exposant, artiste, partenaire, etc.)</li>
             <li>Données de navigation (cookies, adresse IP)</li>
             <li>Données de paiement (traitées par Stripe, non stockées sur nos serveurs)</li>
+            <li>Données d&apos;inscription newsletter (adresse e-mail, avec consentement explicite — désinscription possible à tout moment via le lien en bas de chaque email)</li>
           </ul>
         </section>
 

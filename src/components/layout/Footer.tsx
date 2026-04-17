@@ -23,6 +23,7 @@ const footerSections = [
       { href: "/conditions-generales", label: "CGV" },
       { href: "/conditions-utilisation", label: "CGU" },
       { href: "/politique-cookies", label: "Cookies" },
+      { href: "/politique-de-confidentialite", label: "Confidentialité" },
       { href: "/politique-annulation", label: "Annulation & remboursement" },
     ],
   },

@@ -4,6 +4,7 @@ export const metadata: Metadata = {
   title: "Conditions Générales de Vente — Dream Team Africa",
   description: "Conditions générales de vente du site dreamteamafrica.com — billets, paiement cashless, frais, remboursement.",
   alternates: { canonical: "https://dreamteamafrica.com/conditions-generales" },
+  robots: { index: false, follow: true },
 };
 
 export default function CGVPage() {
@@ -41,8 +42,8 @@ export default function CGVPage() {
             Saison Culturelle Africaine.
           </p>
           <ul className="mt-3 space-y-1">
-            <li>Siège social : Draveil, Île-de-France</li>
-            <li>SIREN : 852 965 201</li>
+            <li>Siège social : 16 rue Révérend Père Lucien Aubry, 94120 Fontenay-sous-Bois</li>
+            <li>N° RNA : W942006772</li>
             <li>E-mail : <a href="mailto:hello@dreamteamafrica.com" className="text-dta-accent hover:underline">hello@dreamteamafrica.com</a></li>
             <li>Téléphone : <a href="tel:+33782801852" className="text-dta-accent hover:underline">+33 7 82 80 18 52</a></li>
           </ul>
@@ -220,12 +221,31 @@ export default function CGVPage() {
             10. Exposants
           </h2>
           <p>
-            Les exposants réservent un stand via la plateforme. Le paiement
-            peut être échelonné selon la formule choisie.
+            Les exposants réservent un stand via la plateforme selon les
+            formules disponibles :
           </p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            <li><strong>Pack Entrepreneur 1 jour</strong> : 190 € — stand 2 m², 1 table, 2 chaises, 2 badges</li>
+            <li><strong>Pack Entrepreneur 2 jours</strong> : 320 € (160 €/jour) — stand 2 m², 1 table, 2 chaises, 2 badges</li>
+            <li><strong>Pack Restauration 2 jours</strong> : 1 000 € (500 €/jour) — espace restauration, 2 tables, 4 chaises, 4 badges</li>
+          </ul>
+          <p className="mt-3 font-semibold">Modalités de paiement exposant :</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            <li>Un <strong>acompte de 50 €</strong> est exigé pour confirmer la réservation du stand.</li>
+            <li>L&apos;acompte est <strong>non remboursable</strong>, sauf en cas d&apos;annulation de l&apos;événement par l&apos;organisateur.</li>
+            <li>Le solde est payable en mensualités automatiques (jusqu&apos;à 10 fois), avec des <strong>frais de gestion partenaire de 3 %</strong> appliqués sur les paiements échelonnés.</li>
+            <li>Le solde doit être <strong>entièrement réglé avant le jour de l&apos;événement</strong>.</li>
+            <li>En cas de report sur un autre événement de la Saison Culturelle, l&apos;acompte versé est transférable.</li>
+          </ul>
+          <p className="mt-3 font-semibold">Avantages inclus :</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            <li>Capsule vidéo promotionnelle personnalisée diffusée sur les réseaux sociaux Dream Team Africa</li>
+            <li>Référencement dans L&apos;Officiel d&apos;Afrique (annuaire professionnel permanent)</li>
+          </ul>
+          <p className="mt-3 font-semibold">Commission sur les ventes sur site :</p>
           <p className="mt-2">
             Lors de l&apos;événement, les exposants reçoivent les paiements
-            cashless des visiteurs. Une commission de 4 % est prélevée
+            cashless des visiteurs. Une commission de <strong>4 %</strong> est prélevée
             sur chaque transaction.
           </p>
           <p className="mt-2">

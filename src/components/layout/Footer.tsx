@@ -1,19 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 
-const externalProjects = [
-  {
-    href: "https://www.sneakerslove.fr",
-    label: "Sneakers Love",
-    tagline: "Sneakers authentiques, réservation en 2 min",
-  },
-  {
-    href: "https://serviceathome.fr",
-    label: "Service at Home",
-    tagline: "Services à domicile en Île-de-France",
-  },
-];
-
 const footerSections = [
   {
     title: "Découvrir",

@@ -150,6 +150,16 @@ export async function POST(request: Request) {
       pendingLockIdForRelease = lock.id;
     } catch (lockErr) {
       if (lockErr instanceof DuplicateCheckoutError) {
+        if (lockErr.existingStripeSessionId) {
+          try {
+            const existingSession = await getStripe().checkout.sessions.retrieve(lockErr.existingStripeSessionId);
+            if (existingSession.status === "open" && existingSession.url) {
+              return NextResponse.json({ url: existingSession.url });
+            }
+          } catch (e) {
+            console.warn("Resume existing Stripe session failed:", e);
+          }
+        }
         return NextResponse.json({ error: lockErr.message }, { status: 409 });
       }
       throw lockErr;

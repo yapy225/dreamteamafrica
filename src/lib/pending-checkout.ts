@@ -7,12 +7,16 @@ import { prisma } from "@/lib/db";
  * from opening two Stripe sessions for the same triplet.
  */
 
-const LOCK_TTL_MS = 3 * 60 * 1000; // 3 min — couvre un checkout Stripe normal sans pénaliser les abandons
+const LOCK_TTL_MS = 90 * 1000; // 90 s — laisse le temps à Stripe.sessions.create sans bloquer longtemps les reprises légitimes
 
 export class DuplicateCheckoutError extends Error {
-  constructor(message: string) {
+  /** Existing Stripe session id if the prior lock already reached Stripe — used to resume checkout */
+  existingStripeSessionId: string | null;
+
+  constructor(message: string, existingStripeSessionId: string | null = null) {
     super(message);
     this.name = "DuplicateCheckoutError";
+    this.existingStripeSessionId = existingStripeSessionId;
   }
 }
 
@@ -37,8 +41,12 @@ export async function acquireCheckoutLock(params: {
   } catch (e: unknown) {
     const err = e as { code?: string };
     if (err.code === "P2002") {
+      const existing = await prisma.pendingCheckout.findUnique({
+        where: { email_eventId_tier: { email, eventId, tier } },
+      });
       throw new DuplicateCheckoutError(
-        "Un paiement est déjà en cours pour ce billet. Patientez quelques minutes ou vérifiez votre email.",
+        "Un paiement est déjà en cours pour ce billet. Patientez quelques instants ou vérifiez votre email.",
+        existing?.stripeSessionId ?? null,
       );
     }
     throw e;

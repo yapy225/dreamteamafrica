@@ -56,7 +56,7 @@ export default function Navbar() {
             </Link>
             <Link
               href="/bourse"
-              className="inline-flex items-center gap-1.5 rounded-[var(--radius-button)] border border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-600 hover:text-white"
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius-button)] border border-indigo-600 px-4 py-2 text-sm font-semibold text-indigo-700 transition-colors hover:bg-indigo-600 hover:text-white"
             >
               <Ticket size={14} />
               Bourse de billets
@@ -151,7 +151,7 @@ export default function Navbar() {
           <Link
             href="/bourse"
             onClick={() => setMobileOpen(false)}
-            className="mt-2 flex items-center gap-2 rounded-[var(--radius-button)] border border-emerald-600 px-3 py-3 text-sm font-semibold text-emerald-700"
+            className="mt-2 flex items-center gap-2 rounded-[var(--radius-button)] border border-indigo-600 px-3 py-3 text-sm font-semibold text-indigo-700"
           >
             <Ticket size={14} />
             Bourse officielle de billets DTA

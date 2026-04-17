@@ -29,7 +29,7 @@ const shortDate = (d: string) =>
   new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "2-digit" });
 
 const statusBadge: Record<string, string> = {
-  LISTED: "bg-emerald-100 text-emerald-800 border-emerald-200",
+  LISTED: "bg-indigo-100 text-indigo-800 border-indigo-200",
   ACCEPTED: "bg-blue-100 text-blue-800 border-blue-200",
   CANCELLED: "bg-slate-100 text-slate-600 border-slate-200",
   EXPIRED: "bg-amber-100 text-amber-800 border-amber-200",
@@ -141,7 +141,7 @@ export default function BourseAdminTable({ rows }: { rows: Row[] }) {
                   </td>
                   <td className="whitespace-nowrap px-3 py-2">
                     {r.stripeRefundId ? (
-                      <a href={`https://dashboard.stripe.com/refunds/${r.stripeRefundId}`} target="_blank" rel="noreferrer" className="font-mono text-[10px] text-emerald-700 hover:underline">
+                      <a href={`https://dashboard.stripe.com/refunds/${r.stripeRefundId}`} target="_blank" rel="noreferrer" className="font-mono text-[10px] text-indigo-700 hover:underline">
                         {r.stripeRefundId.slice(0, 12)}...
                       </a>
                     ) : r.status === "ACCEPTED" ? (

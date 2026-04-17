@@ -70,11 +70,11 @@ export default function ListingButton({
   if (listing) {
     return (
       <div className="flex flex-col items-end gap-1">
-        <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[11px] font-semibold text-emerald-700">
+        <span className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-[11px] font-semibold text-indigo-700">
           En vente — {listing.price.toFixed(2)} €
         </span>
         <div className="flex gap-2">
-          <a href={`/bourse/${listing.id}`} target="_blank" rel="noreferrer" className="text-[10px] text-emerald-700 hover:underline">Voir l&apos;annonce</a>
+          <a href={`/bourse/${listing.id}`} target="_blank" rel="noreferrer" className="text-[10px] text-indigo-700 hover:underline">Voir l&apos;annonce</a>
           <button onClick={handleDelist} className="text-[10px] text-red-600 hover:underline">Retirer</button>
         </div>
       </div>
@@ -85,7 +85,7 @@ export default function ListingButton({
     return (
       <button
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }}
-        className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700 transition-colors hover:border-emerald-500 hover:bg-emerald-500 hover:text-white"
+        className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2 text-xs font-semibold text-indigo-700 transition-colors hover:border-indigo-500 hover:bg-indigo-500 hover:text-white"
       >
         Mettre en vente
       </button>
@@ -109,12 +109,12 @@ export default function ListingButton({
       <button
         onClick={handleList}
         disabled={loading}
-        className="mt-3 w-full rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+        className="mt-3 w-full rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
       >
         {loading ? "Mise en vente..." : `Mettre en vente — ${eventTitle}`}
       </button>
       {error && <p className="mt-2 text-[11px] text-red-600">{error}</p>}
-      {success && <p className="mt-2 text-[11px] text-emerald-700">{success}</p>}
+      {success && <p className="mt-2 text-[11px] text-indigo-700">{success}</p>}
     </div>
   );
 }

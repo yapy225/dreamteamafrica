@@ -91,7 +91,7 @@ export default async function DashboardPage() {
       icon: Ticket,
       label: "Bourse de billets",
       count: null,
-      color: "bg-emerald-100 text-emerald-700",
+      color: "bg-indigo-100 text-indigo-700",
     },
     {
       href: "/dashboard/orders",
@@ -150,7 +150,7 @@ export default async function DashboardPage() {
             icon: Ticket,
             label: "Bourse — Admin",
             count: null,
-            color: "bg-emerald-100 text-emerald-700",
+            color: "bg-indigo-100 text-indigo-700",
           },
           {
             href: "/dashboard/events",

@@ -81,10 +81,10 @@ export default async function BourseAdminPage() {
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-          <p className="text-xs font-medium text-emerald-700">En vente</p>
-          <p className="mt-1 font-serif text-2xl font-bold text-emerald-700">{listed.length}</p>
-          <p className="mt-0.5 text-[11px] text-emerald-600">{fmt(pendingValue)} exposé</p>
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+          <p className="text-xs font-medium text-indigo-700">En vente</p>
+          <p className="mt-1 font-serif text-2xl font-bold text-indigo-700">{listed.length}</p>
+          <p className="mt-0.5 text-[11px] text-indigo-600">{fmt(pendingValue)} exposé</p>
         </div>
         <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
           <p className="text-xs font-medium text-blue-700">Vendus</p>

@@ -92,6 +92,9 @@ export default function TicketSectionClient({
   /* Hide CPT tiers themselves — CPT is shown as a 2nd button on every paid parent tier */
   const parentTiers = tiers.filter((t) => !t.isCulturePourTous && !t.cptVariantOf);
 
+  /* CPT n'a de sens que pour des billets > 5€ (le dépôt vaut déjà 5€ sinon) */
+  const hasCptEligibleTier = parentTiers.some((t) => !t.onSiteOnly && t.price > 5);
+
   /* When sessions and tiers match 1:1, show only the tier for the selected session */
   const oneToOne = sessions.length > 0 && sessions.length === parentTiers.length;
   const visibleTiers = oneToOne ? [parentTiers[selectedIdx]] : parentTiers;
@@ -188,7 +191,7 @@ export default function TicketSectionClient({
       })()}
 
       {/* Culture pour Tous — rappel juste avant les tarifs */}
-      {cptEnabled && !soldOut && (
+      {cptEnabled && hasCptEligibleTier && !soldOut && (
         <div className="mx-auto mt-8 max-w-3xl rounded-[var(--radius-card)] border-2 border-emerald-500 bg-emerald-50 p-5">
           <div className="flex items-start gap-4">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xl text-white">
@@ -296,7 +299,7 @@ export default function TicketSectionClient({
                     fixedVisitDate={selected?.date ? `${selected.date}T12:00:00Z` : undefined}
                     maxQuantity={tierRemaining != null ? Math.min(10, tierRemaining) : 10}
                     isCulturePourTous={tier.isCulturePourTous}
-                    cptVariant={cptEnabled && !tierSoldOut && !tier.onSiteOnly && tier.price > 0 ? {
+                    cptVariant={cptEnabled && !tierSoldOut && !tier.onSiteOnly && tier.price > 5 ? {
                       id: tier.id,
                       name: tier.name,
                       price: tier.price,

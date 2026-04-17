@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
 import QRCode from "qrcode";
@@ -279,17 +280,19 @@ export async function POST(request: Request) {
       throw lockErr;
     }
 
-    /* ── BEHAVIORAL FRICTION CHECK ──────────────────────────── */
+    /* ── BEHAVIORAL FRICTION CHECK (bypass for ADMIN sessions) ──── */
+    const session = await auth();
+    const isAdmin = session?.user?.role === "ADMIN";
     const clientFp = request.headers.get("x-behavior-fp") || "";
     const fingerprint = `${clientFp}:${ip}`;
-    const behaviorRecord = await prisma.behaviorScore.findUnique({
-      where: { fingerprint },
-    });
+    const behaviorRecord = isAdmin
+      ? null
+      : await prisma.behaviorScore.findUnique({ where: { fingerprint } });
 
     // Ignore expired scores (older than 24h)
     const scoreAge = behaviorRecord ? Date.now() - behaviorRecord.updatedAt.getTime() : 0;
     const effectiveScore = behaviorRecord && scoreAge < SCORE_TTL_MS ? behaviorRecord.score : 0;
-    const friction = getFrictionLevel(effectiveScore);
+    const friction = isAdmin ? "none" : getFrictionLevel(effectiveScore);
 
     if (friction === "block") {
       return NextResponse.json(

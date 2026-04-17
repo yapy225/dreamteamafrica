@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,11 @@ export async function GET(request: Request) {
   const session = await auth();
   if (!session || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const rl = rateLimit(`whatsapp-msgs:${session.user.id}`, { limit: 60, windowSec: 60 });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Trop de requêtes." }, { status: 429 });
   }
 
   const url = new URL(request.url);

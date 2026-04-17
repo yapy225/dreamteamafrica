@@ -4,6 +4,7 @@ import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "./db";
+import { rateLimitStrict } from "./rate-limit";
 
 /**
  * Rattache les ExhibitorBooking orphelins (créés par un admin ou un autre compte)
@@ -91,14 +92,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const emailKey = (credentials.email as string).toLowerCase();
 
-        // Account lockout: max 5 failed attempts per 15 min
-        const lockoutKey = `login_fail:${emailKey}`;
-        const now = Date.now();
-        const g = globalThis as unknown as { _loginAttempts?: Map<string, { count: number; firstAt: number }> };
-        if (!g._loginAttempts) g._loginAttempts = new Map();
-        const attempts = g._loginAttempts;
-        const entry = attempts.get(lockoutKey);
-        if (entry && now - entry.firstAt < 15 * 60 * 1000 && entry.count >= 5) {
+        // Account lockout DB-backed: 5 attempts per 15 min, distributed sur tous les lambdas.
+        // rateLimitStrict incrémente à chaque appel — on le fait UNE fois (success ou fail compte pareil).
+        const lockout = await rateLimitStrict(`login_fail:${emailKey}`, { limit: 5, windowSec: 15 * 60 });
+        if (!lockout.success) {
           throw new Error("ACCOUNT_LOCKED");
         }
 
@@ -114,17 +111,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
 
         if (!isValid) {
-          // Track failed attempt
-          if (entry && now - entry.firstAt < 15 * 60 * 1000) {
-            entry.count++;
-          } else {
-            attempts.set(lockoutKey, { count: 1, firstAt: now });
-          }
           return null;
         }
 
-        // Reset on success
-        attempts.delete(lockoutKey);
+        // Login réussi : reset le compteur pour laisser l'utilisateur à nouveau libre.
+        try {
+          await prisma.rateLimitEntry.delete({ where: { id: `login_fail:${emailKey}` } });
+        } catch {
+          // ok si la clé n'existait pas encore
+        }
 
         // 2FA check: if enabled, verify TOTP code
         if (user.totpEnabled && user.totpSecret) {

@@ -16,9 +16,16 @@ export async function POST(request: NextRequest) {
     const { amount } = await request.json();
     const cents = Math.round(Number(amount) * 100);
 
-    if (!cents || cents < 100) {
+    if (!Number.isFinite(cents) || cents < 100) {
       return NextResponse.json(
         { error: "Le montant minimum est de 1 €." },
+        { status: 400 },
+      );
+    }
+    // Plafond anti-erreur de saisie : 10 000 € par don (contactez-nous pour plus)
+    if (cents > 1_000_000) {
+      return NextResponse.json(
+        { error: "Montant maximum par don : 10 000 €. Pour un don plus important, contactez-nous directement." },
         { status: 400 },
       );
     }

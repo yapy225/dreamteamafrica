@@ -139,6 +139,13 @@ export default async function DashboardPage() {
             color: "bg-emerald-100 text-emerald-600",
           },
           {
+            href: "/dashboard/bourse",
+            icon: Ticket,
+            label: "Bourse de billets",
+            count: null,
+            color: "bg-emerald-100 text-emerald-700",
+          },
+          {
             href: "/dashboard/events",
             icon: CalendarDays,
             label: "Gestion événements",

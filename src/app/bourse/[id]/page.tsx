@@ -7,7 +7,7 @@ import BuyListingClient from "./BuyListingClient";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Acheter un billet — Bourse officielle DTA",
+  title: "Acheter un billet — Bourse officielle de billets DTA",
 };
 
 export default async function ListingPage({
@@ -94,13 +94,13 @@ export default async function ListingPage({
             <img src={listing.ticket.event.coverImage} alt={listing.ticket.event.title} className="h-full w-full object-cover opacity-85" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
             <div className="absolute bottom-4 left-5 right-5">
-              <p className="text-[11px] uppercase tracking-wider text-amber-300">Bourse officielle DTA — cédé par {fromLabel}</p>
+              <p className="text-[11px] uppercase tracking-wider text-amber-300">Bourse officielle de billets DTA — cédé par {fromLabel}</p>
               <h1 className="mt-1 font-serif text-2xl font-bold text-white">{listing.ticket.event.title}</h1>
             </div>
           </div>
         ) : (
           <div className="bg-gradient-to-br from-dta-accent to-dta-accent-dark p-8">
-            <p className="text-[11px] uppercase tracking-wider text-white/70">Bourse officielle DTA</p>
+            <p className="text-[11px] uppercase tracking-wider text-white/70">Bourse officielle de billets DTA</p>
             <h1 className="mt-1 font-serif text-2xl font-bold text-white">{listing.ticket.event.title}</h1>
           </div>
         )}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { Menu, X, User, ShoppingBag, Heart, Mail, Phone, Sparkles } from "lucide-react";
+import { Menu, X, User, ShoppingBag, Heart, Mail, Phone, Sparkles, Ticket } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { useCartStore } from "@/stores/cart";
 
@@ -53,6 +53,13 @@ export default function Navbar() {
             >
               <Sparkles size={14} />
               Dès 5€
+            </Link>
+            <Link
+              href="/bourse"
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius-button)] border border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-600 hover:text-white"
+            >
+              <Ticket size={14} />
+              Bourse de billets
             </Link>
             <Link
               href="/faire-un-don"
@@ -140,6 +147,14 @@ export default function Navbar() {
           >
             <Sparkles size={14} />
             Culture pour Tous — Dès 5€
+          </Link>
+          <Link
+            href="/bourse"
+            onClick={() => setMobileOpen(false)}
+            className="mt-2 flex items-center gap-2 rounded-[var(--radius-button)] border border-emerald-600 px-3 py-3 text-sm font-semibold text-emerald-700"
+          >
+            <Ticket size={14} />
+            Bourse officielle de billets DTA
           </Link>
           <Link
             href="/faire-un-don"

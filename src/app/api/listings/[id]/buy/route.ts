@@ -77,7 +77,7 @@ export async function POST(
             unit_amount: Math.round(price * 100),
             product_data: {
               name: `Billet — ${listing.ticket.event.title}`,
-              description: `${listing.ticket.tier} · Bourse officielle DTA`,
+              description: `${listing.ticket.tier} · Bourse officielle de billets DTA`,
             },
           },
           quantity: 1,

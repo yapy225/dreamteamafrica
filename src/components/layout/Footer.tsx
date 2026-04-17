@@ -7,6 +7,7 @@ const footerSections = [
     links: [
       { href: "/saison-culturelle-africaine", label: "Saison Culturelle" },
       { href: "/culture-pour-tous", label: "Culture pour Tous — dès 5€" },
+      { href: "/bourse", label: "Bourse officielle de billets DTA" },
       { href: "/danse-zaouli-paris", label: "Danse Zaouli" },
       { href: "/lafropeen", label: "L'Afropéen" },
       { href: "/lofficiel-dafrique", label: "L'Officiel d'Afrique" },

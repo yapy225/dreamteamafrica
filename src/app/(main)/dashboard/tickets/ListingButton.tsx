@@ -98,7 +98,7 @@ export default function ListingButton({
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
     >
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-xs font-semibold text-slate-900">Bourse officielle DTA</p>
+        <p className="text-xs font-semibold text-slate-900">Bourse officielle de billets DTA</p>
         <button onClick={() => { setOpen(false); setError(""); setSuccess(""); }} className="text-[11px] text-slate-400 hover:text-slate-600">Fermer</button>
       </div>
       <div className="space-y-1 text-[11px] text-slate-600">

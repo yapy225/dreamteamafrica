@@ -1435,9 +1435,9 @@ export async function sendListingConfirmationToSeller(opts: {
 <html lang="fr"><head><meta charset="utf-8"></head>
 <body style="font-family:Georgia,serif;color:#1a1a1a;background:#f5f0eb;margin:0;padding:0;">
   <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
-    ${transferHeader("Billet mis en vente sur la Bourse officielle DTA")}
+    ${transferHeader("Billet mis en vente sur la Bourse officielle de billets DTA")}
     <p>Bonjour ${esc(opts.fromFirstName)},</p>
-    <p>Votre billet pour <strong>${esc(opts.eventTitle)}</strong> (${formatTransferDate(opts.eventDate)}) est désormais visible sur la Bourse officielle Dream Team Africa.</p>
+    <p>Votre billet pour <strong>${esc(opts.eventTitle)}</strong> (${formatTransferDate(opts.eventDate)}) est désormais visible sur la Bourse officielle de billets DTA.</p>
     <div style="background:#fdf8f0;border-left:4px solid #8B6F4E;padding:14px 20px;border-radius:6px;margin:24px 0;">
       <p style="margin:0;font-size:14px;color:#4a4a4a;">
         Prix fixé : <strong>${opts.price.toFixed(2)} €</strong> (prix d'achat, zéro spéculation).<br/>
@@ -1477,7 +1477,7 @@ export async function sendListingSoldEmailToSeller(opts: {
   <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
     ${transferHeader("Votre billet a trouvé preneur")}
     <p>Bonjour ${esc(opts.fromFirstName)},</p>
-    <p>Votre billet pour <strong>${esc(opts.eventTitle)}</strong> a été acheté sur la Bourse officielle Dream Team Africa. Merci d'avoir permis à un autre fan d'y aller à votre place.</p>
+    <p>Votre billet pour <strong>${esc(opts.eventTitle)}</strong> a été acheté sur la Bourse officielle de billets DTA. Merci d'avoir permis à un autre fan d'y aller à votre place.</p>
     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px 20px;margin:20px 0;">
       <p style="margin:0;font-size:14px;color:#166534;">Un remboursement de <strong>${opts.refundAmount.toFixed(2)} €</strong> est en cours sur votre carte d'origine (5 à 10 jours ouvrés).</p>
     </div>
@@ -1517,12 +1517,12 @@ export async function sendListingPurchasedEmailToBuyer(opts: {
         <img src="${opts.eventCoverImage}" alt="${esc(opts.eventTitle)}" style="width:100%;height:100%;object-fit:cover;display:block;opacity:0.8;" />
         <div style="position:absolute;inset:0;background:linear-gradient(to top,#1A1A1A 0%,rgba(26,26,26,0.3) 50%,transparent 100%);"></div>
         <div style="position:absolute;bottom:16px;left:20px;right:20px;">
-          <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#d4af37;font-family:Arial,sans-serif;">Acheté sur la Bourse officielle DTA</p>
+          <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#d4af37;font-family:Arial,sans-serif;">Acheté sur la Bourse officielle de billets DTA</p>
           <h2 style="margin:6px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${esc(opts.eventTitle)}</h2>
         </div>
       </div>`
     : `<div style="border-radius:12px 12px 0 0;background:linear-gradient(135deg,#8B6F4E,#6F5A3E);padding:30px 20px;">
-        <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.7);font-family:Arial,sans-serif;">Acheté sur la Bourse officielle DTA</p>
+        <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.7);font-family:Arial,sans-serif;">Acheté sur la Bourse officielle de billets DTA</p>
         <h2 style="margin:8px 0 0;font-size:22px;font-weight:bold;color:#fff;line-height:1.2;">${esc(opts.eventTitle)}</h2>
       </div>`;
 
@@ -1540,10 +1540,10 @@ export async function sendListingPurchasedEmailToBuyer(opts: {
   <div style="max-width:560px;margin:0 auto;padding:24px 16px;">
     <div style="text-align:center;margin-bottom:24px;">
       <h1 style="margin:0;font-size:20px;color:#8B6F4E;">Dream Team Africa</h1>
-      <p style="margin:4px 0 0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#999;">Bourse officielle — votre billet</p>
+      <p style="margin:4px 0 0;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#999;">Bourse officielle de billets — votre billet</p>
     </div>
     <p>Bonjour ${esc(opts.guestName)},</p>
-    <p>Merci pour votre achat sur la Bourse officielle Dream Team Africa. Voici votre QR code personnel — c'est le seul qui sera accepté à l'entrée.</p>
+    <p>Merci pour votre achat sur la Bourse officielle de billets DTA. Voici votre QR code personnel — c'est le seul qui sera accepté à l'entrée.</p>
     <div style="background:#1A1A1A;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
       ${coverSection}
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#1A1A1A;">

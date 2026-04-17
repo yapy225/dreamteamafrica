@@ -27,7 +27,7 @@ export default function CGVPage() {
           <li>• Commission exposants : <strong>4 %</strong> sur les paiements reçus</li>
           <li>• Parrainage : <strong>crédits bonus offerts</strong> (non retirables)</li>
           <li>• <strong>Cession gratuite</strong> autorisée via la plateforme (cadeau à un proche)</li>
-          <li>• <strong>Revente</strong> autorisée sur la Bourse officielle — prix d&apos;achat garanti + <strong>5 % de frais acheteur</strong></li>
+          <li>• <strong>Revente</strong> autorisée sur la <strong>Bourse officielle de billets DTA</strong> — prix d&apos;achat garanti + <strong>5 % de frais acheteur</strong></li>
           <li>• Remboursement : <strong>non</strong>, sauf annulation par l&apos;organisateur ou revente sur la Bourse</li>
         </ul>
       </div>
@@ -230,12 +230,12 @@ export default function CGVPage() {
         {/* 10 */}
         <section>
           <h2 className="mb-3 font-serif text-xl font-bold text-dta-dark">
-            10. Bourse officielle (revente encadrée)
+            10. Bourse officielle de billets DTA (revente encadrée)
           </h2>
           <p>
-            Dream Team Africa propose une <strong>Bourse officielle</strong> permettant à
-            tout détenteur empêché de revendre son billet à un autre fan, dans un cadre
-            strictement encadré&nbsp;: <strong>zéro spéculation</strong>.
+            Dream Team Africa propose une <strong>Bourse officielle de billets DTA</strong>
+            permettant à tout détenteur empêché de revendre son billet à un autre fan,
+            dans un cadre strictement encadré&nbsp;: <strong>zéro spéculation</strong>.
           </p>
           <h3 className="mt-4 font-semibold text-dta-dark">10.1 Principe — prix d&apos;achat garanti</h3>
           <p className="mt-2">

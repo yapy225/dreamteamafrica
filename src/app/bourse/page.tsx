@@ -6,8 +6,8 @@ import { LISTING_CONFIG } from "@/lib/transfer-config";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Bourse officielle — Dream Team Africa",
-  description: "Achetez un billet d'un fan empêché au prix d'achat. Zéro spéculation, billetterie officielle DTA.",
+  title: "Bourse officielle de billets DTA — Dream Team Africa",
+  description: "Bourse officielle de billets DTA : achetez un billet d'un fan empêché au prix d'achat. Zéro spéculation, billetterie officielle.",
 };
 
 export default async function BoursePage() {
@@ -36,7 +36,7 @@ export default async function BoursePage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-wider text-dta-accent">Bourse officielle DTA</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-dta-accent">Bourse officielle de billets DTA</p>
         <h1 className="mt-2 font-serif text-3xl font-bold text-dta-dark sm:text-4xl">Un fan empêché ? Un autre prend sa place.</h1>
         <p className="mt-3 max-w-2xl text-sm text-dta-char/70">
           Des vrais billets, vendus au <strong>prix d&apos;achat</strong> par d&apos;anciens acheteurs empêchés d&apos;y aller. Zéro spéculation. {Math.round(LISTING_CONFIG.COMMISSION_RATE * 100)} % de frais de service à l&apos;acheteur.

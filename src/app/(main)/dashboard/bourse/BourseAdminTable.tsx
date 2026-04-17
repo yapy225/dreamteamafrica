@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Row = {
   id: string;
@@ -43,8 +44,29 @@ const statusLabel: Record<string, string> = {
 };
 
 export default function BourseAdminTable({ rows }: { rows: Row[] }) {
+  const router = useRouter();
   const [filter, setFilter] = useState<"ALL" | "LISTED" | "ACCEPTED" | "CANCELLED">("ALL");
   const [search, setSearch] = useState("");
+  const [retryingId, setRetryingId] = useState<string | null>(null);
+
+  const retryRefund = async (transferId: string) => {
+    if (!confirm("Rattraper le refund vendeur pour cette vente ?")) return;
+    setRetryingId(transferId);
+    try {
+      const res = await fetch(`/api/admin/listings/${transferId}/retry-refund`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Erreur inconnue");
+      } else {
+        alert(`Refund OK — ${data.amount?.toFixed(2)} € remboursés (${data.stripeRefundId})`);
+        router.refresh();
+      }
+    } catch {
+      alert("Erreur réseau");
+    } finally {
+      setRetryingId(null);
+    }
+  };
 
   const filtered = useMemo(() => {
     let out = rows;
@@ -145,7 +167,16 @@ export default function BourseAdminTable({ rows }: { rows: Row[] }) {
                         {r.stripeRefundId.slice(0, 12)}...
                       </a>
                     ) : r.status === "ACCEPTED" ? (
-                      <span className="text-[10px] font-semibold text-red-600">Échec refund</span>
+                      <div className="flex flex-col items-start gap-1">
+                        <span className="text-[10px] font-semibold text-red-600">Échec refund</span>
+                        <button
+                          onClick={() => retryRefund(r.id)}
+                          disabled={retryingId === r.id}
+                          className="rounded-md border border-red-300 bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-700 transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50"
+                        >
+                          {retryingId === r.id ? "..." : "Rattraper"}
+                        </button>
+                      </div>
                     ) : "—"}
                   </td>
                 </tr>

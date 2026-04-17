@@ -201,6 +201,32 @@ export async function POST(request: Request) {
           console.error("WhatsApp message save error:", dbErr);
         }
 
+        // Notification email instantanée au gérant
+        try {
+          const { Resend } = await import("resend");
+          const resend = new Resend(process.env.RESEND_API_KEY);
+          const dashUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://dreamteamafrica.com") + "/dashboard/whatsapp";
+          const phoneFormatted = from.replace(/^33/, "0").replace(/(\d{2})(?=\d)/g, "$1 ");
+          await resend.emails.send({
+            from: process.env.EMAIL_FROM ?? "Dream Team Africa <hello@dreamteamafrica.com>",
+            to: "yapy.mambo@gmail.com",
+            subject: `📱 Nouveau WhatsApp — ${contactName || phoneFormatted}`,
+            html: `<div style="font-family:Georgia,serif;max-width:500px;margin:0 auto;padding:20px;">
+              <div style="border-bottom:3px solid #8B6F4E;padding-bottom:12px;margin-bottom:16px;">
+                <h2 style="margin:0;color:#8B6F4E;">📱 Nouveau message WhatsApp</h2>
+              </div>
+              <p><strong>Contact :</strong> ${contactName || "Inconnu"} (${phoneFormatted})</p>
+              <p><strong>Type :</strong> ${type}</p>
+              <div style="background:#f5f0eb;border-radius:8px;padding:16px;margin:16px 0;">
+                <p style="margin:0;white-space:pre-line;">${messageBody || "[média]"}</p>
+              </div>
+              <a href="${dashUrl}" style="display:inline-block;background:#8B6F4E;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:13px;">Voir dans le dashboard →</a>
+            </div>`,
+          });
+        } catch (notifErr) {
+          console.error("WhatsApp notification email failed (non-blocking):", notifErr);
+        }
+
         // Survey button reply routing (exposant / visiteur)
         if (type === "interactive") {
           const interactive = msg.interactive as { button_reply?: { id?: string } } | undefined;

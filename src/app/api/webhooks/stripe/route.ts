@@ -841,30 +841,38 @@ async function handleExhibitorBooking(session: Stripe.Checkout.Session) {
 }
 
 async function handleExhibitorEarlyPayment(session: Stripe.Checkout.Session) {
-  const { bookingId, nbInstallments } = session.metadata!;
+  const { bookingId, nbInstallments, amount: metaAmount, isFullPayment } = session.metadata!;
   if (!bookingId) return;
 
   const nbPaid = parseInt(nbInstallments || "1");
 
   const booking = await prisma.exhibitorBooking.findUnique({
     where: { id: bookingId },
+    include: { payments: true },
   });
   if (!booking) return;
 
-  const newPaid = booking.paidInstallments + nbPaid;
-  const isComplete = newPaid >= booking.installments;
+  // Determine amount: prefer explicit metadata amount (captures customAmount flow); fall back to formula.
+  const metaAmountNum = Number(metaAmount);
+  const hasMetaAmount = Number.isFinite(metaAmountNum) && metaAmountNum > 0;
 
-  // Calculate amount paid
   const stands = booking.stands ?? 1;
-  const dep = Math.min(DEPOSIT_AMOUNT * stands, booking.totalPrice);
-  const totalRemaining = booking.totalPrice - dep;
+  const dep = Math.min(DEPOSIT_AMOUNT * stands, Number(booking.totalPrice));
+  const totalRemaining = Number(booking.totalPrice) - dep;
   const totalMonths = booking.installments - 1;
   const monthly = totalMonths > 0 ? Math.ceil((totalRemaining / totalMonths) * 100) / 100 : 0;
   const paidMonths = Math.max(0, booking.paidInstallments - 1);
   const remainingInst = totalMonths - paidMonths;
-  const amount = nbPaid === remainingInst
+  const formulaAmount = nbPaid === remainingInst
     ? Math.max(0, totalRemaining - paidMonths * monthly)
     : nbPaid * monthly;
+  const amount = hasMetaAmount ? metaAmountNum : formulaAmount;
+
+  // Status: use real paid sum to decide CONFIRMED, not installment counter.
+  const alreadyPaid = booking.payments.reduce((s, p) => s + Number(p.amount), 0);
+  const newPaidAmount = alreadyPaid + amount;
+  const isComplete = isFullPayment === "1" || newPaidAmount + 0.005 >= Number(booking.totalPrice);
+  const newPaid = Math.min(booking.paidInstallments + nbPaid, booking.installments);
 
   await prisma.exhibitorBooking.update({
     where: { id: bookingId },
@@ -880,8 +888,8 @@ async function handleExhibitorEarlyPayment(session: Stripe.Checkout.Session) {
       bookingId,
       amount,
       type: "early_payment",
-      label: nbPaid === remainingInst
-        ? `Solde intégral (${nbPaid} mensualité${nbPaid > 1 ? "s" : ""})`
+      label: isComplete
+        ? "Solde intégral"
         : `Paiement anticipé (${nbPaid} mensualité${nbPaid > 1 ? "s" : ""})`,
       stripeId: session.id,
     },

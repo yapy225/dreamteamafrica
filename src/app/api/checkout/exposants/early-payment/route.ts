@@ -18,13 +18,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
     }
 
-    const { bookingId, nbInstallments: rawNb } = await request.json();
+    const { bookingId, nbInstallments: rawNb, customAmount } = await request.json();
     if (!bookingId) {
       return NextResponse.json({ error: "bookingId requis." }, { status: 400 });
     }
 
     const booking = await prisma.exhibitorBooking.findUnique({
       where: { id: bookingId },
+      include: { payments: true },
     });
 
     if (!booking || booking.userId !== session.user.id) {
@@ -35,28 +36,37 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Réservation déjà entièrement payée." }, { status: 400 });
     }
 
-    // Calculate remaining balance
+    // Real remaining balance = totalPrice − sum(ExhibitorPayment)
+    // Works even if deposit amount or installments differ from the standard formula.
+    const paidAmount = booking.payments.reduce((s, p) => s + Number(p.amount), 0);
+    const remainingBalance = Math.max(0, Number(booking.totalPrice) - paidAmount);
+
+    // Keep the installment-based formula for default pricing (when no customAmount provided)
     const stands = booking.stands ?? 1;
-    const deposit = Math.min(DEPOSIT_AMOUNT * stands, booking.totalPrice);
-    const totalRemaining = booking.totalPrice - deposit;
-    const alreadyPaidInstallments = Math.max(0, booking.paidInstallments - 1); // minus the deposit
+    const deposit = Math.min(DEPOSIT_AMOUNT * stands, Number(booking.totalPrice));
+    const totalRemaining = Number(booking.totalPrice) - deposit;
     const totalMonths = booking.installments - 1;
     const monthlyAmount = totalMonths > 0
       ? Math.ceil((totalRemaining / totalMonths) * 100) / 100
       : 0;
-    const alreadyPaidAmount = alreadyPaidInstallments * monthlyAmount;
-    const remainingBalance = Math.max(0, totalRemaining - alreadyPaidAmount);
+    const alreadyPaidInstallments = Math.max(0, booking.paidInstallments - 1);
+    const remainingInstallments = Math.max(1, totalMonths - alreadyPaidInstallments);
 
     if (remainingBalance <= 0) {
       return NextResponse.json({ error: "Aucun solde restant." }, { status: 400 });
     }
 
-    // How many installments to pay early (default: 1, max: remaining)
-    const remainingInstallments = totalMonths - alreadyPaidInstallments;
+    // Resolve amountToPay: prefer client-provided customAmount (capped to remainingBalance),
+    // otherwise fall back to nbInstallments × monthly.
+    const customAmountNum = Number(customAmount);
+    const hasCustomAmount = Number.isFinite(customAmountNum) && customAmountNum > 0;
     const nbToPay = Math.max(1, Math.min(Number(rawNb) || 1, remainingInstallments));
-    const amountToPay = nbToPay === remainingInstallments
-      ? remainingBalance // pay exact remaining to avoid rounding issues
+    const formulaAmount = nbToPay === remainingInstallments
+      ? remainingBalance
       : nbToPay * monthlyAmount;
+    const amountToPay = hasCustomAmount
+      ? Math.min(customAmountNum, remainingBalance)
+      : formulaAmount;
 
     const stripe = getStripe();
 
@@ -84,6 +94,8 @@ export async function POST(request: Request) {
         bookingId: booking.id,
         userId: session.user.id,
         nbInstallments: String(nbToPay),
+        amount: amountToPay.toFixed(2),
+        isFullPayment: amountToPay >= remainingBalance ? "1" : "0",
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/exposants/confirmation/${booking.id}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/exposants/confirmation/${booking.id}`,

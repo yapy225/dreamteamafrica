@@ -12,6 +12,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { signQr } from "@/lib/qr-sig";
 import { releaseLockBySession } from "@/lib/pending-checkout";
+import { sendMetaPurchaseEvent } from "@/lib/meta-capi";
 
 export async function POST(request: Request) {
   const body = await request.text();
@@ -215,6 +216,28 @@ async function handleTicketPurchase(session: Stripe.Checkout.Session) {
   }
 
   // WhatsApp confirmation disabled — coût Meta trop élevé, email suffit
+
+  // Meta Conversions API — bypass cookie consent, signal direct au pixel
+  // eventId = ticketId pour dédupliquer avec l'event browser fbq('track','Purchase',...,{eventID})
+  try {
+    const firstTicketId = createdTickets[0]?.id;
+    if (firstTicketId) {
+      await sendMetaPurchaseEvent({
+        eventId: firstTicketId,
+        value: unitPriceNum * qty,
+        contentName: event.title,
+        contentIds: createdTickets.map((t) => t.id),
+        numItems: qty,
+        email: email || user?.email || null,
+        phone: phone || user?.phone || null,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        sourceUrl: `https://dreamteamafrica.com/saison-culturelle-africaine/confirmation/${firstTicketId}`,
+      });
+    }
+  } catch (capiErr) {
+    console.error("[meta-capi] ticket purchase failed:", capiErr);
+  }
 }
 
 /**
@@ -557,6 +580,27 @@ async function handleCulturePourTousPurchase(session: Stripe.Checkout.Session) {
     });
   } catch (emailErr) {
     console.error("CPT welcome email failed:", emailErr);
+  }
+
+  // Meta Conversions API — Purchase (CPT acompte = achat confirmé)
+  try {
+    const firstTicketId = created[0]?.id;
+    if (firstTicketId) {
+      await sendMetaPurchaseEvent({
+        eventId: firstTicketId,
+        value: depositPerTicket * qty,
+        contentName: event.title,
+        contentIds: created.map((t) => t.id),
+        numItems: qty,
+        email: email || null,
+        phone: phone || null,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        sourceUrl: `https://dreamteamafrica.com/saison-culturelle-africaine/confirmation/${firstTicketId}`,
+      });
+    }
+  } catch (capiErr) {
+    console.error("[meta-capi] CPT purchase failed:", capiErr);
   }
 }
 

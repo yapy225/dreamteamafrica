@@ -175,7 +175,7 @@ export default async function ConfirmationPage({
           }
         });
         if(typeof fbq==='function'){
-          fbq('track','Purchase',{value:${Number(totalAmount) || 0},currency:'EUR',content_name:${JSON.stringify(event.title)},content_type:'product'});
+          fbq('track','Purchase',{value:${Number(totalAmount) || 0},currency:'EUR',content_name:${JSON.stringify(event.title)},content_type:'product',content_ids:[${JSON.stringify(ticketId)}]}, {eventID: ${JSON.stringify(ticketId)}});
         }
       `}</Script>
 

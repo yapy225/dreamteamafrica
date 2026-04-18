@@ -119,7 +119,7 @@ export default function RootLayout({
           fbq('consent', 'revoke');
           fbq('init', '${FB_PIXEL_ID}');
           fbq('track', 'PageView');
-          fbq('set', 'autoConfig', true, '${FB_PIXEL_ID}');
+          fbq('set', 'autoConfig', false, '${FB_PIXEL_ID}');
         `}</Script>
         <noscript>
           <img height="1" width="1" style={{display: "none"}} alt=""

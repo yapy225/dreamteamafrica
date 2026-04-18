@@ -63,7 +63,7 @@ export async function sendMetaPurchaseEvent(input: PurchaseInput): Promise<void>
         event_id: input.eventId,
         action_source: "website",
         event_source_url:
-          input.sourceUrl || "https://dreamteamafrica.com/billetterie/foire-dafrique-paris",
+          input.sourceUrl || "https://dreamteamafrica.com/saison-culturelle-africaine/foire-dafrique-paris",
         user_data: userData,
         custom_data: {
           currency: input.currency || "EUR",
